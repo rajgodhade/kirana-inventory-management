@@ -1,0 +1,11 @@
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\bin\Debug\net10.0\Kirana.Domain.deps.json
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\bin\Debug\net10.0\Kirana.Domain.dll
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\bin\Debug\net10.0\Kirana.Domain.pdb
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.GeneratedMSBuildEditorConfig.editorconfig
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.AssemblyInfoInputs.cache
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.AssemblyInfo.cs
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.csproj.CoreCompileInputs.cache
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.dll
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\refint\Kirana.Domain.dll
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.pdb
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\ref\Kirana.Domain.dll

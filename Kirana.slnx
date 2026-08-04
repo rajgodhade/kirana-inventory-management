@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Kirana.App/Kirana.App.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/Kirana.Application/Kirana.Application.csproj" />
+    <Project Path="src/Kirana.Domain/Kirana.Domain.csproj" />
+    <Project Path="src/Kirana.Infrastructure/Kirana.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Kirana.Tests/Kirana.Tests.csproj" />
+  </Folder>
+</Solution>

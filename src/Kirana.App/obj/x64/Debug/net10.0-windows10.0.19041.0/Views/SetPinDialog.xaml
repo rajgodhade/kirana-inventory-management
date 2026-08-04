@@ -1,0 +1,16 @@
+﻿<ContentDialog
+    x:Class="Kirana.App.Views.SetPinDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Set / Change PIN"
+    PrimaryButtonText="Save"
+    SecondaryButtonText="Clear PIN"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="10" MinWidth="320">
+        <PasswordBox x:ConnectionId='2' x:Name="PinBox" Header="New PIN (4-6 digits)" />
+        <InfoBar x:ConnectionId='3' x:Name="ErrorBar" IsOpen="False" Severity="Error" />
+    </StackPanel>
+</ContentDialog>
+

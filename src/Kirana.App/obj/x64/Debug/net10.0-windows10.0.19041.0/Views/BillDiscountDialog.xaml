@@ -1,0 +1,15 @@
+﻿<ContentDialog
+    x:Class="Kirana.App.Views.BillDiscountDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Bill Discount"
+    PrimaryButtonText="Apply"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="12" MinWidth="280">
+        <TextBox x:ConnectionId='2' x:Name="PercentBox" Header="Discount % on whole bill" PlaceholderText="0" />
+        <InfoBar x:ConnectionId='3' x:Name="ErrorBar" IsOpen="False" Severity="Error" />
+    </StackPanel>
+</ContentDialog>
+

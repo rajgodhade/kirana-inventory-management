@@ -1,0 +1,43 @@
+﻿<Page x:ConnectionId='1'
+    x:Class="Kirana.App.Views.ManagementPlaceholderPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Padding="20,16" Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Management" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button x:ConnectionId='11' Grid.Column="1" Content="Lock &amp; Return to Billing"                     />
+        </Grid>
+
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12">
+            <TextBlock Text="You're signed in to management mode." FontSize="20" HorizontalAlignment="Center" />
+            <Button x:ConnectionId='2' Content="Products"                         HorizontalAlignment="Center" Style="{StaticResource AccentButtonStyle}" />
+            <Button x:ConnectionId='3' Content="Barcode Scan"                            HorizontalAlignment="Center" />
+            <Button x:ConnectionId='4' Content="Reprint Invoice"                               HorizontalAlignment="Center" />
+            <Button x:ConnectionId='5' Content="Suppliers"                          HorizontalAlignment="Center"
+                                                                                                                   />
+            <Button x:ConnectionId='6' Content="Purchases"                          HorizontalAlignment="Center"
+                                                                                                                   />
+            <Button x:ConnectionId='7' Content="Users"                      HorizontalAlignment="Center"
+                                                                                                               />
+            <Button x:ConnectionId='8' Content="Audit Log"                         HorizontalAlignment="Center"
+                                                                                                                />
+            <Button x:ConnectionId='9' Content="Settings"                         HorizontalAlignment="Center"
+                                                                                                                  />
+            <Button x:ConnectionId='10' Content="Reports"                        HorizontalAlignment="Center"
+                                                                                                               />
+            <TextBlock Text="Customer Udhaar, returns, full Reports etc. arrive in later phases."
+                       Opacity="0.7" HorizontalAlignment="Center" />
+        </StackPanel>
+    </Grid>
+</Page>
+

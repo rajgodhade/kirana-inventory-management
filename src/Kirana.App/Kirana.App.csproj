@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    NOTE: Building this project requires the Windows App SDK / WinUI 3 tooling
+    (Visual Studio "Windows application development" workload, or the standalone
+    Windows App SDK + Windows 10 SDK 10.0.19041+). It was not available on the
+    machine this project was scaffolded on — see the Phase 1 build notes.
+    Kirana.Domain / Kirana.Application / Kirana.Infrastructure / Kirana.Tests do
+    not depend on this tooling and build/test independently of it.
+  -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Kirana.App</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <WindowsPackageType>None</WindowsPackageType>
+    <SelfContained>false</SelfContained>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!--
+      MVVMTK0045: CommunityToolkit.Mvvm's field-backed [ObservableProperty] pattern used
+      throughout this project's ViewModels isn't Native-AOT/trimming friendly; the suggested
+      fix (partial auto-properties) breaks this environment's WinUI 3 XamlCompiler (see Phase 2
+      build notes) with an unrelated "must have an implementation part" generator failure. Kirana
+      isn't published Native-AOT, so the advisory doesn't apply to this app's deployment model —
+      suppressed deliberately rather than left as unexplained noise.
+    -->
+    <NoWarn>$(NoWarn);MVVMTK0045</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kirana.Domain\Kirana.Domain.csproj" />
+    <ProjectReference Include="..\Kirana.Application\Kirana.Application.csproj" />
+    <ProjectReference Include="..\Kirana.Infrastructure\Kirana.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

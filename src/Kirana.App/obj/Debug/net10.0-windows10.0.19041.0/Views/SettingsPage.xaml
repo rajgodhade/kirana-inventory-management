@@ -1,0 +1,47 @@
+﻿<Page x:ConnectionId='1'
+    x:Class="Kirana.App.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Padding="20,16" Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button x:ConnectionId='7' Grid.Column="0" Content="◀ Management"                     Margin="0,0,12,0" />
+            <TextBlock Grid.Column="1" Text="Settings" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button x:ConnectionId='8' Grid.Column="2" Content="Lock &amp; Return to Billing"                     />
+        </Grid>
+
+        <StackPanel Grid.Row="1" Padding="20" Spacing="12" MaxWidth="420" HorizontalAlignment="Left">
+            <TextBlock Text="Dashboard Security" FontSize="16" FontWeight="SemiBold" />
+            <TextBlock Text="Automatically lock the Dashboard and return to Billing after a period of inactivity."
+                       Opacity="0.7" TextWrapping="Wrap" />
+
+            <ComboBox x:ConnectionId='2' Header="Inactivity auto-lock"                                                 
+                                                                                           
+                                                                       />
+
+            <TextBox x:ConnectionId='3' Header="Custom duration (minutes)"                                                         
+                                                                                                                                        
+                                                                      />
+
+            <Button x:ConnectionId='4' Content="Save" Style="{StaticResource AccentButtonStyle}"                                         
+                                                                     HorizontalAlignment="Left" />
+
+            <InfoBar x:ConnectionId='5'                                                                                                        
+                     Severity="Error"                                                        />
+            <InfoBar x:ConnectionId='6'                                                                                                         
+                     Severity="Success"                                                         />
+        </StackPanel>
+    </Grid>
+</Page>
+

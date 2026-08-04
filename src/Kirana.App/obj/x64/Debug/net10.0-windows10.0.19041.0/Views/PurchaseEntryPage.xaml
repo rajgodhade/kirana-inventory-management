@@ -1,0 +1,171 @@
+﻿<Page x:ConnectionId='1'
+    x:Class="Kirana.App.Views.PurchaseEntryPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kirana.App.ViewModels">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Padding="20,16" Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button x:ConnectionId='31' Grid.Column="0" Content="◀ Purchases"                     Margin="0,0,12,0" />
+            <TextBlock Grid.Column="1" Text="New Purchase" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </Grid>
+
+        <!-- Supplier + scan/search + invoice fields -->
+        <Grid Grid.Row="1" Margin="20,12,20,0" ColumnSpacing="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="180" />
+            </Grid.ColumnDefinitions>
+
+            <Button x:ConnectionId='26' Grid.Column="0"                        >
+                <TextBlock x:ConnectionId='30'                                                            />
+            </Button>
+
+            <TextBox x:ConnectionId='27' x:Name="ScanSearchBox" Grid.Column="1" PlaceholderText="Scan Barcode / Product ID / SKU / Name"
+                                                                                           />
+
+            <!-- Scanners and typists submit with Enter; this gives mouse/touch users and pasted
+                 codes the same affordance, matching the Search buttons elsewhere in the app. -->
+            <Button x:ConnectionId='28' Grid.Column="2" Content="Add Item"                        Margin="4,0,0,0" />
+
+            <TextBox x:ConnectionId='29' Grid.Column="3" PlaceholderText="Supplier Invoice #"                                                              />
+        </Grid>
+
+        <InfoBar x:ConnectionId='2' Grid.Row="1" Margin="20,0,20,0" VerticalAlignment="Bottom"
+                                                                                                                        
+                 Severity="Error"                                                        />
+
+        <!-- Lines -->
+        <Grid Grid.Row="2" Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="260" />
+            </Grid.ColumnDefinitions>
+
+            <ListView x:ConnectionId='4' Grid.Column="0"                                        SelectionMode="None">
+                <ListView.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid ColumnSpacing="6" Padding="8,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="90" />
+                                <ColumnDefinition Width="70" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="110" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Product" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="1" Text="Qty" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="2" Text="Price" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="3" Text="Disc %" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="4" Text="Batch #" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="5" Text="Expiry" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="6" Text="Line Total" FontWeight="SemiBold" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.HeaderTemplate>
+                <ListView.ItemTemplate>
+                    <DataTemplate                                      >
+                        <Grid x:ConnectionId='16' ColumnSpacing="6" Padding="8,6" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="90" />
+                                <ColumnDefinition Width="70" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="110" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock x:ConnectionId='24'                             TextWrapping="Wrap" />
+                                <TextBlock x:ConnectionId='25'                             Opacity="0.6" FontSize="11" />
+                            </StackPanel>
+
+                            <TextBox x:ConnectionId='17' Grid.Column="1"                                                                                           />
+                            <TextBox x:ConnectionId='18' Grid.Column="2"                                                                                            />
+                            <TextBox x:ConnectionId='19' Grid.Column="3"                                                                                                  />
+                            <TextBox x:ConnectionId='20' Grid.Column="4"                                             
+                                                                                                                               />
+                            <TextBox x:ConnectionId='21' Grid.Column="5" PlaceholderText="yyyy-mm-dd"                                            
+                                                                                                                               />
+                            <TextBlock x:ConnectionId='22' Grid.Column="6"                                        VerticalAlignment="Center" FontWeight="SemiBold" />
+                            <Button x:ConnectionId='23' Grid.Column="7" Content="✕"                                          />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <!-- Totals -->
+            <StackPanel Grid.Column="1" Margin="16,0,0,0" Spacing="6" VerticalAlignment="Top">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Subtotal" />
+                    <TextBlock x:ConnectionId='13' Grid.Column="1"                                                 />
+                </Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Discount" />
+                    <TextBlock x:ConnectionId='12' Grid.Column="1"                                                      />
+                </Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="GST" />
+                    <TextBlock x:ConnectionId='11' Grid.Column="1"                                                 />
+                </Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Round Off" />
+                    <TextBlock x:ConnectionId='10' Grid.Column="1"                                                       />
+                </Grid>
+
+                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,8,0,8" />
+
+                <TextBlock FontSize="28" FontWeight="Bold" HorizontalAlignment="Right">
+                    <Run Text="₹" /><Run x:ConnectionId='9'                                                   />
+                </TextBlock>
+
+                <TextBox x:ConnectionId='5' Header="Amount Paid Now"                                                       Margin="0,12,0,0" />
+                <ComboBox x:ConnectionId='6' Header="Payment Method"                                                
+                                                                                               />
+                <TextBox x:ConnectionId='7' Header="Payment Reference #"                                                               />
+                <TextBox x:ConnectionId='8' Header="Notes"                                              />
+            </StackPanel>
+        </Grid>
+
+        <!-- Action bar -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8" Padding="20,0,20,16" HorizontalAlignment="Right">
+            <Button x:ConnectionId='3' Content="Complete Purchase" Style="{StaticResource AccentButtonStyle}"                                 />
+        </StackPanel>
+    </Grid>
+</Page>
+
