@@ -1,0 +1,122 @@
+﻿<Page x:ConnectionId='1'
+    x:Class="Kirana.App.Views.ManagementHomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kirana.App.ViewModels">
+
+    <ScrollViewer Background="{ThemeResource PageBackgroundBrush}">
+        <StackPanel Padding="{StaticResource PagePadding}" Spacing="20">
+
+            <StackPanel Spacing="2">
+                <TextBlock x:ConnectionId='18'                                                 Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Here's how the store is doing." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
+
+            <!-- KPI cards. Each is permission-scoped; a user who can't see the figure doesn't
+                 get an empty card, they get no card. -->
+            <ItemsControl>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="16" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <Border Style="{StaticResource CardBorderStyle}" Width="220">
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE7BF;" FontSize="14" Foreground="{ThemeResource BrandPrimaryBrush}" />
+                            <TextBlock Text="Today's Sales" Style="{StaticResource MetricLabelTextStyle}" />
+                        </StackPanel>
+                        <TextBlock x:ConnectionId='16'                                                       Style="{StaticResource MetricTextStyle}" />
+                        <TextBlock x:ConnectionId='17'                                                            Style="{StaticResource CaptionTextStyle}" />
+                    </StackPanel>
+                </Border>
+
+                <Border x:ConnectionId='10' Style="{StaticResource CardBorderStyle}" Width="220"
+                                                                                                                             >
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE7BA;" FontSize="14" Foreground="{ThemeResource WarningBrush}" />
+                            <TextBlock Text="Low Stock Items" Style="{StaticResource MetricLabelTextStyle}" />
+                        </StackPanel>
+                        <TextBlock x:ConnectionId='15'                                                          Style="{StaticResource MetricTextStyle}" />
+                        <TextBlock Text="at or below minimum" Style="{StaticResource CaptionTextStyle}" />
+                    </StackPanel>
+                </Border>
+
+                <Border x:ConnectionId='11' Style="{StaticResource CardBorderStyle}" Width="220"
+                                                                                                                                      >
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE77B;" FontSize="14" Foreground="{ThemeResource DangerBrush}" />
+                            <TextBlock Text="Outstanding Udhaar" Style="{StaticResource MetricLabelTextStyle}" />
+                        </StackPanel>
+                        <TextBlock x:ConnectionId='14'                                                             
+                                   Style="{StaticResource MetricTextStyle}" Foreground="{ThemeResource DangerBrush}" />
+                        <TextBlock Text="owed by customers" Style="{StaticResource CaptionTextStyle}" />
+                    </StackPanel>
+                </Border>
+
+                <Border x:ConnectionId='12' Style="{StaticResource CardBorderStyle}" Width="220"
+                                                                                                                                      >
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE7B8;" FontSize="14" Foreground="{ThemeResource WarningBrush}" />
+                            <TextBlock Text="Payable to Suppliers" Style="{StaticResource MetricLabelTextStyle}" />
+                        </StackPanel>
+                        <TextBlock x:ConnectionId='13'                                                        Style="{StaticResource MetricTextStyle}" />
+                        <TextBlock Text="outstanding balance" Style="{StaticResource CaptionTextStyle}" />
+                    </StackPanel>
+                </Border>
+            </ItemsControl>
+
+            <!-- Quick actions: things that are dialogs rather than destinations, so they have
+                 no place in the nav pane. -->
+            <StackPanel Spacing="10">
+                <TextBlock Text="Quick actions" Style="{StaticResource SectionTitleTextStyle}" />
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Button x:ConnectionId='8'                              >
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE749;" FontSize="14" />
+                            <TextBlock Text="Reprint Invoice" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:ConnectionId='9'                             >
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE7BF;" FontSize="14" />
+                            <TextBlock Text="Back to Billing" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="10">
+                <TextBlock Text="Recent invoices" Style="{StaticResource SectionTitleTextStyle}" />
+                <Border Style="{StaticResource CardBorderStyle}" Padding="4">
+                    <ItemsControl x:ConnectionId='2'                                                >
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate                                           >
+                                <Grid x:ConnectionId='4' Padding="12,10" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Spacing="1">
+                                        <TextBlock x:ConnectionId='6'                       Style="{StaticResource CardTitleTextStyle}" />
+                                        <TextBlock x:ConnectionId='7'                          Style="{StaticResource CaptionTextStyle}" />
+                                    </StackPanel>
+                                    <TextBlock x:ConnectionId='5' Grid.Column="1"                        Style="{StaticResource AmountTextStyle}"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </StackPanel>
+
+            <TextBlock Text="Returns, refunds, expenses and the full reports suite arrive in later phases."
+                       Style="{StaticResource CaptionTextStyle}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>
+

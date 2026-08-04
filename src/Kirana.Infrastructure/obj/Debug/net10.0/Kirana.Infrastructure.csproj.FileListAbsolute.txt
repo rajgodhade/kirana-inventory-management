@@ -17,3 +17,4 @@ F:\Raj\My Project\Inventory-management\app\src\Kirana.Infrastructure\obj\Debug\n
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Infrastructure\obj\Debug\net10.0\Kirana.Infrastructure.pdb
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Infrastructure\obj\Debug\net10.0\Kirana.Infrastructure.genruntimeconfig.cache
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Infrastructure\obj\Debug\net10.0\ref\Kirana.Infrastructure.dll
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Infrastructure\obj\Debug\net10.0\Kirana.Infrastructure.sourcelink.json

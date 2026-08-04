@@ -3,10 +3,23 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:entities="using:Kirana.Domain.Entities"
-    Title="Select Supplier"
     PrimaryButtonText="Select"
     CloseButtonText="Cancel"
     DefaultButton="Primary">
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Select Supplier" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button x:ConnectionId='2' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                                             AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
 
     <StackPanel Spacing="10" MinWidth="380" MaxHeight="480">
 
@@ -15,24 +28,24 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox x:ConnectionId='8' Grid.Column="0" PlaceholderText="Search by name or Supplier ID"
+            <TextBox x:ConnectionId='9' Grid.Column="0" PlaceholderText="Search by name or Supplier ID"
                                                                                                     />
-            <Button x:ConnectionId='9' Grid.Column="1" Content="Search"                       />
+            <Button x:ConnectionId='10' Grid.Column="1" Content="Search"                       />
         </Grid>
 
-        <ListView x:ConnectionId='2'                                          MaxHeight="320"
+        <ListView x:ConnectionId='3'                                          MaxHeight="320"
                   SelectionMode="Single"                                      >
             <ListView.ItemTemplate>
                 <DataTemplate                               >
-                    <StackPanel x:ConnectionId='5' Orientation="Horizontal" Spacing="10">
-                        <TextBlock x:ConnectionId='6'                      FontWeight="SemiBold" />
-                        <TextBlock x:ConnectionId='7'                              Opacity="0.7" />
+                    <StackPanel x:ConnectionId='6' Orientation="Horizontal" Spacing="10">
+                        <TextBlock x:ConnectionId='7'                      FontWeight="SemiBold" />
+                        <TextBlock x:ConnectionId='8'                              Opacity="0.7" />
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
 
-        <InfoBar x:ConnectionId='3'                                                                                                        
+        <InfoBar x:ConnectionId='4'                                                                                                        
                  Severity="Error"                                                        />
     </StackPanel>
 </ContentDialog>

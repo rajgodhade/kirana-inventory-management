@@ -1,3 +1,4 @@
+using Kirana.App.Theming;
 using Kirana.App.ViewModels;
 using Kirana.Application.Authentication;
 using Kirana.Application.Purchasing;
@@ -33,14 +34,6 @@ public sealed partial class SupplierLedgerPage : Page
         _ = ViewModel.InitializeAsync();
     }
 
-    private void OnBackClick(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(SuppliersPage));
-
-    private void OnLockClick(object sender, RoutedEventArgs e)
-    {
-        App.Services.GetRequiredService<IAuthenticationService>().LockAndReturnToBilling();
-        Frame.Navigate(typeof(PosShellPage));
-    }
-
     private async void OnRecordPaymentClick(object sender, RoutedEventArgs e)
     {
         if (!ViewModel.CanManagePurchases)
@@ -48,7 +41,7 @@ public sealed partial class SupplierLedgerPage : Page
             return;
         }
 
-        var dialog = new SupplierPaymentDialog(ViewModel) { XamlRoot = XamlRoot };
+        var dialog = new SupplierPaymentDialog(ViewModel).Themed(XamlRoot);
         await dialog.ShowAsync();
     }
 }

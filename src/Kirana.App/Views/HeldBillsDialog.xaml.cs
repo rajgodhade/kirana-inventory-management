@@ -25,4 +25,6 @@ public sealed partial class HeldBillsDialog : ContentDialog
             Hide();
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

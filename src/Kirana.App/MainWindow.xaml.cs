@@ -2,6 +2,7 @@ using Kirana.App.Views;
 using Kirana.Application.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 
 namespace Kirana.App;
@@ -9,6 +10,13 @@ namespace Kirana.App;
 public sealed partial class MainWindow : Window
 {
     private static readonly TimeSpan IdleCheckInterval = TimeSpan.FromSeconds(15);
+
+    /// <summary>The element the theme is applied to — see <see cref="Theming.ThemeService"/>.</summary>
+    public FrameworkElement RootElement => ThemeRoot;
+
+    /// <summary>The window-level navigation frame, exposed for pages hosted inside the
+    /// management shell that need to navigate the window rather than the shell's inner frame.</summary>
+    public Frame NavigationFrame => RootFrame;
 
     private readonly ManagementSession _session;
     private readonly DispatcherTimer _idleCheckTimer;

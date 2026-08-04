@@ -11,16 +11,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0" Padding="20,16" Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="◀ Management" Click="OnBackClick" Margin="0,0,12,0" />
-            <TextBlock Grid.Column="1" Text="Purchases" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
-            <Button Grid.Column="2" Content="Lock &amp; Return to Billing" Click="OnLockClick" />
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Purchases" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Goods received from suppliers, with GST and batch detail." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
         </Grid>
 
         <!-- Toolbar -->
@@ -32,8 +27,9 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0" PlaceholderText="Search purchase # / supplier invoice #…"
-                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" KeyDown="OnSearchBoxKeyDown" />
+            <TextBox Grid.Column="0" PlaceholderText="Search purchase # / supplier invoice # / supplier name…"
+                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" KeyDown="OnSearchBoxKeyDown"
+                     TextChanged="OnSearchTextChanged" />
 
             <CheckBox Grid.Column="1" Content="Outstanding only" VerticalAlignment="Center" Margin="8,0,0,0"
                       IsChecked="{x:Bind ViewModel.OutstandingOnly, Mode=TwoWay}" Checked="OnFilterChanged" Unchecked="OnFilterChanged" />
@@ -65,10 +61,10 @@
                             <TextBlock Grid.Column="1" Text="{x:Bind SupplierName}" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="2" Text="{x:Bind DateText}" FontSize="12" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="3" FontWeight="SemiBold" VerticalAlignment="Center">
-                                <Run Text="₹" /><Run Text="{x:Bind GrandTotal}" />
+                                <Run Text="{x:Bind GrandTotal, Converter={StaticResource CurrencyConverter}}" />
                             </TextBlock>
                             <TextBlock Grid.Column="4" VerticalAlignment="Center">
-                                <Run Text="₹" /><Run Text="{x:Bind OutstandingAmount}" />
+                                <Run Text="{x:Bind OutstandingAmount, Converter={StaticResource CurrencyConverter}}" />
                             </TextBlock>
 
                             <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">

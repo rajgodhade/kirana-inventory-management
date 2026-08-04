@@ -11,16 +11,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0" Padding="20,16" Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Button x:ConnectionId='19' Grid.Column="0" Content="◀ Management"                     Margin="0,0,12,0" />
-            <TextBlock Grid.Column="1" Text="Suppliers" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
-            <Button x:ConnectionId='20' Grid.Column="2" Content="Lock &amp; Return to Billing"                     />
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Suppliers" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Supplier records, outstanding balances and ledgers." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
         </Grid>
 
         <!-- Toolbar -->
@@ -33,7 +28,8 @@
             </Grid.ColumnDefinitions>
 
             <TextBox x:ConnectionId='16' Grid.Column="0" PlaceholderText="Search name / ID / phone…"
-                                                                                                    />
+                                                                                                   
+                                                       />
 
             <CheckBox x:ConnectionId='17' Grid.Column="1" Content="Show inactive" VerticalAlignment="Center" Margin="8,0,0,0"
                                                                                                                                                  />
@@ -71,7 +67,7 @@
                             </StackPanel>
 
                             <TextBlock Grid.Column="2" FontWeight="SemiBold" VerticalAlignment="Center">
-                                <Run Text="₹" /><Run x:ConnectionId='11'                                    />
+                                <Run x:ConnectionId='11'                                                                                  />
                             </TextBlock>
 
                             <TextBlock x:ConnectionId='6' Grid.Column="3" Text="Active" Foreground="Green" FontSize="11" VerticalAlignment="Center"

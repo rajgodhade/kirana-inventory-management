@@ -301,7 +301,11 @@ public sealed class PurchaseService(
         var text = query.SearchText?.Trim();
         if (!string.IsNullOrEmpty(text))
         {
-            purchases = purchases.Where(p => p.PurchaseNumber == text || p.SupplierInvoiceNumber == text);
+            var likeText = $"%{text}%";
+            purchases = purchases.Where(p =>
+                EF.Functions.Like(p.PurchaseNumber, likeText) ||
+                (p.SupplierInvoiceNumber != null && EF.Functions.Like(p.SupplierInvoiceNumber, likeText)) ||
+                EF.Functions.Like(p.Supplier.Name, likeText));
         }
 
         if (query.FromUtc is { } fromUtc)

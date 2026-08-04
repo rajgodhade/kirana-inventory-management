@@ -9,3 +9,4 @@ F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\K
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\refint\Kirana.Domain.dll
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.pdb
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\ref\Kirana.Domain.dll
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.sourcelink.json

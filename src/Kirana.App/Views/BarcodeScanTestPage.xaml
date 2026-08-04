@@ -10,16 +10,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0" Padding="20,16" Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="◀ Management" Click="OnBackClick" Margin="0,0,12,0" />
-            <TextBlock Grid.Column="1" Text="Barcode Scan" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
-            <Button Grid.Column="2" Content="Lock &amp; Return to Billing" Click="OnLockClick" />
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Barcode Scan" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Test a scanner and check which product a barcode resolves to." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
         </Grid>
 
         <!-- Scan input -->
@@ -49,10 +44,10 @@
                         <Run Text="Barcode: " /><Run Text="{x:Bind ViewModel.FoundProduct.Barcode, Mode=OneWay}" />
                     </TextBlock>
                     <TextBlock FontSize="16" FontWeight="SemiBold">
-                        <Run Text="Selling price: ₹" /><Run Text="{x:Bind ViewModel.FoundProduct.SellingPrice, Mode=OneWay}" />
+                        <Run Text="Selling price: " /><Run Text="{x:Bind ViewModel.FoundProduct.SellingPrice, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
                     </TextBlock>
                     <TextBlock FontSize="13">
-                        <Run Text="MRP: ₹" /><Run Text="{x:Bind ViewModel.FoundProduct.Mrp, Mode=OneWay}" />
+                        <Run Text="MRP: " /><Run Text="{x:Bind ViewModel.FoundProduct.Mrp, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
                     </TextBlock>
                     <TextBlock FontSize="13">
                         <Run Text="Current stock: " /><Run Text="{x:Bind ViewModel.FoundProduct.Inventory.QuantityOnHand, Mode=OneWay}" />

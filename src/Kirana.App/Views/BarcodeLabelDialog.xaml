@@ -3,9 +3,22 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:Kirana.App.ViewModels"
-    Title="Barcode Labels"
     CloseButtonText="Close"
     DefaultButton="Close">
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Barcode Labels" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                    Click="OnCloseIconClick" AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
 
     <StackPanel Spacing="10" MinWidth="580" MaxHeight="620">
 

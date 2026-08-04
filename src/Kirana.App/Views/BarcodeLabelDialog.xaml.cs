@@ -28,4 +28,6 @@ public sealed partial class BarcodeLabelDialog : ContentDialog
             ViewModel.RemoveItem(item);
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

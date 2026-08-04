@@ -37,6 +37,11 @@ public sealed class SaleConfiguration : IEntityTypeConfiguration<Sale>
             .WithMany()
             .HasForeignKey(s => s.DiscountAuthorizedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(s => s.PriceOverrideAuthorizedByUser)
+            .WithMany()
+            .HasForeignKey(s => s.PriceOverrideAuthorizedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 

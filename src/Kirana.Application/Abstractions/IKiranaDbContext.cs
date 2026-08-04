@@ -34,10 +34,21 @@ public interface IKiranaDbContext
     DbSet<HeldBill> HeldBills { get; }
     DbSet<HeldBillItem> HeldBillItems { get; }
 
+    DbSet<CreditPayment> CreditPayments { get; }
+    DbSet<CreditPaymentAllocation> CreditPaymentAllocations { get; }
+
     DbSet<Supplier> Suppliers { get; }
     DbSet<Purchase> Purchases { get; }
     DbSet<PurchaseItem> PurchaseItems { get; }
     DbSet<SupplierPayment> SupplierPayments { get; }
+
+    DbSet<SalesReturn> SalesReturns { get; }
+    DbSet<SalesReturnItem> SalesReturnItems { get; }
+    DbSet<PurchaseReturn> PurchaseReturns { get; }
+    DbSet<PurchaseReturnItem> PurchaseReturnItems { get; }
+
+    DbSet<ExpenseCategory> ExpenseCategories { get; }
+    DbSet<Expense> Expenses { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -11,7 +11,9 @@ public sealed partial class StockAdjustmentDialog : ContentDialog
     {
         ViewModel = viewModel;
         InitializeComponent();
-        Title = $"Adjust Stock — {viewModel.ProductName}";
+        DialogTitleText.Text = $"Adjust Stock — {viewModel.ProductName}";
         Loaded += async (_, _) => await ViewModel.LoadHistoryAsync();
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

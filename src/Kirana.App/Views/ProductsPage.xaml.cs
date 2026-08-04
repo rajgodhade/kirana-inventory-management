@@ -1,3 +1,4 @@
+using Kirana.App.Theming;
 using Kirana.App.ViewModels;
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
@@ -29,14 +30,6 @@ public sealed partial class ProductsPage : Page
         Loaded += async (_, _) => await ViewModel.InitializeAsync();
     }
 
-    private void OnBackClick(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(ManagementPlaceholderPage));
-
-    private void OnLockClick(object sender, RoutedEventArgs e)
-    {
-        App.Services.GetRequiredService<IAuthenticationService>().LockAndReturnToBilling();
-        Frame.Navigate(typeof(PosShellPage));
-    }
-
     private async void OnSearchBoxKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == Windows.System.VirtualKey.Enter)
@@ -51,7 +44,7 @@ public sealed partial class ProductsPage : Page
 
     private async void OnManageCategoriesClick(object sender, RoutedEventArgs e)
     {
-        var dialog = new CategoryManagementDialog(ViewModel.CurrentUserId) { XamlRoot = XamlRoot };
+        var dialog = new CategoryManagementDialog(ViewModel.CurrentUserId).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.ReloadFilterOptionsAsync();
         await ViewModel.SearchAsync();
@@ -59,7 +52,7 @@ public sealed partial class ProductsPage : Page
 
     private async void OnManageBrandsClick(object sender, RoutedEventArgs e)
     {
-        var dialog = new BrandManagementDialog(ViewModel.CurrentUserId) { XamlRoot = XamlRoot };
+        var dialog = new BrandManagementDialog(ViewModel.CurrentUserId).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.ReloadFilterOptionsAsync();
         await ViewModel.SearchAsync();
@@ -73,8 +66,7 @@ public sealed partial class ProductsPage : Page
         }
 
         var dialog = new ProductEditDialog(new ProductEditViewModel(
-            ViewModel, App.Services.GetRequiredService<IBarcodeService>(), App.Services.GetRequiredService<IBarcodeRenderer>()))
-        { XamlRoot = XamlRoot };
+            ViewModel, App.Services.GetRequiredService<IBarcodeService>(), App.Services.GetRequiredService<IBarcodeRenderer>())).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.SearchAsync();
     }
@@ -93,8 +85,7 @@ public sealed partial class ProductsPage : Page
         }
 
         var dialog = new ProductEditDialog(new ProductEditViewModel(
-            ViewModel, App.Services.GetRequiredService<IBarcodeService>(), App.Services.GetRequiredService<IBarcodeRenderer>(), product))
-        { XamlRoot = XamlRoot };
+            ViewModel, App.Services.GetRequiredService<IBarcodeService>(), App.Services.GetRequiredService<IBarcodeRenderer>(), product)).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.SearchAsync();
     }
@@ -112,7 +103,7 @@ public sealed partial class ProductsPage : Page
             return;
         }
 
-        var dialog = new StockAdjustmentDialog(new StockAdjustmentViewModel(ViewModel, product)) { XamlRoot = XamlRoot };
+        var dialog = new StockAdjustmentDialog(new StockAdjustmentViewModel(ViewModel, product)).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.SearchAsync();
     }
@@ -130,7 +121,7 @@ public sealed partial class ProductsPage : Page
             return;
         }
 
-        var dialog = new BatchManagementDialog(new BatchManagementViewModel(ViewModel, product)) { XamlRoot = XamlRoot };
+        var dialog = new BatchManagementDialog(new BatchManagementViewModel(ViewModel, product)).Themed(XamlRoot);
         await dialog.ShowAsync();
     }
 
@@ -158,7 +149,7 @@ public sealed partial class ProductsPage : Page
             App.Services.GetRequiredService<IBarcodeRenderer>(),
             [row]);
 
-        var dialog = new BarcodeLabelDialog(labelViewModel) { XamlRoot = XamlRoot };
+        var dialog = new BarcodeLabelDialog(labelViewModel).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.SearchAsync();
     }
@@ -176,7 +167,7 @@ public sealed partial class ProductsPage : Page
             App.Services.GetRequiredService<IBarcodeRenderer>(),
             ViewModel.Products);
 
-        var dialog = new BarcodeLabelDialog(labelViewModel) { XamlRoot = XamlRoot };
+        var dialog = new BarcodeLabelDialog(labelViewModel).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.SearchAsync();
     }

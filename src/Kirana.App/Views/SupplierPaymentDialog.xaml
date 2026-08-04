@@ -2,10 +2,23 @@
     x:Class="Kirana.App.Views.SupplierPaymentDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Record Supplier Payment"
     PrimaryButtonText="Save"
     CloseButtonText="Cancel"
     DefaultButton="Primary">
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Record Supplier Payment" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                    Click="OnCloseIconClick" AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
 
     <StackPanel Spacing="10" MinWidth="360">
         <TextBox x:Name="AmountBox" Header="Amount" PlaceholderText="0.00" />

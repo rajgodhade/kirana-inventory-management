@@ -1,3 +1,4 @@
+using Kirana.App.Theming;
 using Kirana.App.ViewModels;
 using Kirana.Application.Authentication;
 using Kirana.Application.Barcodes;
@@ -13,6 +14,8 @@ namespace Kirana.App.Views;
 
 public sealed partial class PurchaseEntryPage : Page
 {
+    private readonly DispatcherTimer _suggestionDebounce = new() { Interval = TimeSpan.FromMilliseconds(180) };
+
     public PurchaseEntryViewModel ViewModel { get; }
 
     public PurchaseEntryPage()
@@ -31,19 +34,39 @@ public sealed partial class PurchaseEntryPage : Page
             ViewModel.Initialize();
             ScanSearchBox.Focus(FocusState.Programmatic);
         };
-    }
 
-    private void OnBackClick(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(PurchasesPage));
+        _suggestionDebounce.Tick += async (_, _) =>
+        {
+            _suggestionDebounce.Stop();
+            await ViewModel.UpdateSuggestionsAsync(ScanSearchBox.Text);
+        };
+    }
 
     private void OnCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args) =>
         ViewModel.ScannerBuffer.OnCharacter(args.Character, DateTimeOffset.UtcNow);
 
+    private void OnScanSearchTextChanged(object sender, TextChangedEventArgs e)
+    {
+        _suggestionDebounce.Stop();
+        _suggestionDebounce.Start();
+    }
+
     private async void OnScanSearchKeyDown(object sender, KeyRoutedEventArgs e)
     {
+        if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            _suggestionDebounce.Stop();
+            ViewModel.ClearSuggestions();
+            return;
+        }
+
         if (e.Key != Windows.System.VirtualKey.Enter)
         {
             return;
         }
+
+        _suggestionDebounce.Stop();
+        ViewModel.ClearSuggestions();
 
         // A recognized scan has already been added via the buffer's BarcodeScanned event — falling
         // through to the manual search here would receive the same product twice.
@@ -62,6 +85,9 @@ public sealed partial class PurchaseEntryPage : Page
 
     private async Task AddCurrentSearchTextAsync()
     {
+        _suggestionDebounce.Stop();
+        ViewModel.ClearSuggestions();
+
         var text = ScanSearchBox.Text;
         ScanSearchBox.Text = string.Empty;
 
@@ -73,9 +99,24 @@ public sealed partial class PurchaseEntryPage : Page
         ScanSearchBox.Focus(FocusState.Programmatic);
     }
 
+    private void OnSuggestionItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is not Product product)
+        {
+            return;
+        }
+
+        _suggestionDebounce.Stop();
+        ViewModel.ClearSuggestions();
+        ViewModel.AddOrIncrement(product);
+
+        ScanSearchBox.Text = string.Empty;
+        ScanSearchBox.Focus(FocusState.Programmatic);
+    }
+
     private async void OnSupplierClick(object sender, RoutedEventArgs e)
     {
-        var dialog = new SupplierPickerDialog(ViewModel) { XamlRoot = XamlRoot };
+        var dialog = new SupplierPickerDialog(ViewModel).Themed(XamlRoot);
         var result = await dialog.ShowAsync();
 
         if (result == ContentDialogResult.Primary && dialog.Confirmed && dialog.SelectedSupplier is { } supplier)
@@ -125,11 +166,11 @@ public sealed partial class PurchaseEntryPage : Page
         {
             var dialog = new ContentDialog
             {
-                XamlRoot = XamlRoot,
                 Title = "Purchase Completed",
                 Content = $"Purchase {purchase.PurchaseNumber}\nTotal: ₹{purchase.GrandTotal:0.00}\nOutstanding: ₹{purchase.OutstandingAmount:0.00}",
                 CloseButtonText = "OK",
             };
+            dialog.Themed(XamlRoot);
             await dialog.ShowAsync();
 
             Frame.Navigate(typeof(PurchasesPage));

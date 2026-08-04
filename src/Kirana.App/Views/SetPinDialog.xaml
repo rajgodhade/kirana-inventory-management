@@ -2,11 +2,24 @@
     x:Class="Kirana.App.Views.SetPinDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Set / Change PIN"
     PrimaryButtonText="Save"
     SecondaryButtonText="Clear PIN"
     CloseButtonText="Cancel"
     DefaultButton="Primary">
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Set / Change PIN" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                    Click="OnCloseIconClick" AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
 
     <StackPanel Spacing="10" MinWidth="320">
         <PasswordBox x:Name="PinBox" Header="New PIN (4-6 digits)" />

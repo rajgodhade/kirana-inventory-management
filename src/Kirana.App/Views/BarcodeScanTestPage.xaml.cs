@@ -18,14 +18,6 @@ public sealed partial class BarcodeScanTestPage : Page
         InitializeComponent();
     }
 
-    private void OnBackClick(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(ManagementPlaceholderPage));
-
-    private void OnLockClick(object sender, RoutedEventArgs e)
-    {
-        App.Services.GetRequiredService<IAuthenticationService>().LockAndReturnToBilling();
-        Frame.Navigate(typeof(PosShellPage));
-    }
-
     private void OnCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args) =>
         ViewModel.ScannerBuffer.OnCharacter(args.Character, DateTimeOffset.UtcNow);
 

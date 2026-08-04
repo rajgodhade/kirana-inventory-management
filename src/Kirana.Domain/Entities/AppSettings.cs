@@ -8,6 +8,10 @@ namespace Kirana.Domain.Entities;
 public class AppSettings : Entity
 {
     public int AutoLockMinutes { get; set; } = 10;
+
+    /// <summary>UI theme: "Light" (the default), "Dark", or "System" to follow Windows.</summary>
+    public string ThemeMode { get; set; } = "Light";
+
     public bool AutomaticBackupEnabled { get; set; } = true;
     public string AutomaticBackupFrequency { get; set; } = "Daily";
     public string? BackupDirectory { get; set; }

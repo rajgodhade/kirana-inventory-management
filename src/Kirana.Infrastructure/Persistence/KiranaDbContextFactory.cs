@@ -11,11 +11,22 @@ namespace Kirana.Infrastructure.Persistence;
 /// </summary>
 public sealed class KiranaDbContextFactory : IDesignTimeDbContextFactory<KiranaDbContext>
 {
+    /// <summary>
+    /// Set to a .db path to point design-time migration commands at a scratch database instead of
+    /// the developer's real one — used to rehearse a migration against a copy of a production
+    /// database before applying it for real.
+    /// </summary>
+    public const string DatabasePathOverrideVariable = "KIRANA_MIGRATION_DB";
+
     public KiranaDbContext CreateDbContext(string[] args)
     {
-        var paths = new AppPaths();
+        var overridePath = Environment.GetEnvironmentVariable(DatabasePathOverrideVariable);
+        var databasePath = string.IsNullOrWhiteSpace(overridePath)
+            ? new AppPaths().DatabaseFilePath
+            : overridePath;
+
         var options = new DbContextOptionsBuilder<KiranaDbContext>()
-            .UseSqlite($"Data Source={paths.DatabaseFilePath}")
+            .UseSqlite($"Data Source={databasePath}")
             .Options;
 
         return new KiranaDbContext(options);

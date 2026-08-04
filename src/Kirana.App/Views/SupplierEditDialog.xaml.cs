@@ -11,7 +11,7 @@ public sealed partial class SupplierEditDialog : ContentDialog
     {
         ViewModel = viewModel;
         InitializeComponent();
-        Title = viewModel.DialogTitle;
+        DialogTitleText.Text = viewModel.DialogTitle;
         PrimaryButtonClick += OnPrimaryButtonClick;
     }
 
@@ -31,4 +31,6 @@ public sealed partial class SupplierEditDialog : ContentDialog
             deferral.Complete();
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

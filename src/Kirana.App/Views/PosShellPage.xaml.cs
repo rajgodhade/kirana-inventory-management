@@ -1,3 +1,4 @@
+using Kirana.App.Theming;
 using Kirana.App.ViewModels;
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
@@ -18,6 +19,11 @@ public sealed partial class PosShellPage : Page
 {
     public PosShellViewModel ViewModel { get; }
 
+    // Suggestions query fires ~180ms after the user stops typing rather than on every keystroke —
+    // long enough that a real barcode scanner's whole burst-plus-Enter (a few ms per PRD §18) has
+    // already been consumed by ScannerBuffer and the box cleared before this ever ticks.
+    private readonly DispatcherTimer _suggestionDebounce = new() { Interval = TimeSpan.FromMilliseconds(180) };
+
     public PosShellPage()
     {
         var services = App.Services;
@@ -32,8 +38,15 @@ public sealed partial class PosShellPage : Page
         InitializeComponent();
         Loaded += async (_, _) =>
         {
+            UpdateThemeIcon();
             await ViewModel.InitializeAsync();
             ScanSearchBox.Focus(FocusState.Programmatic);
+        };
+
+        _suggestionDebounce.Tick += async (_, _) =>
+        {
+            _suggestionDebounce.Stop();
+            await ViewModel.UpdateSuggestionsAsync(ScanSearchBox.Text);
         };
 
         AddShortcut(Windows.System.VirtualKey.F2, () => ScanSearchBox.Focus(FocusState.Programmatic));
@@ -55,16 +68,33 @@ public sealed partial class PosShellPage : Page
         KeyboardAccelerators.Add(accelerator);
     }
 
+    /// <summary>Theme toggle is available on the billing screen too — a cashier who never opens
+    /// the Dashboard should still be able to switch to dark in a dim shop.</summary>
+    private async void OnThemeToggleClick(object sender, RoutedEventArgs e)
+    {
+        var themeService = App.Services.GetRequiredService<ThemeService>();
+        await themeService.ToggleAsync();
+        UpdateThemeIcon();
+    }
+
+    private void UpdateThemeIcon()
+    {
+        var themeService = App.Services.GetRequiredService<ThemeService>();
+        //  = Brightness (sun),  = Quiet Hours (moon) in Segoe MDL2 Assets.
+        ThemeIcon.Glyph = themeService.IsEffectivelyDark ? "" : "";
+        ToolTipService.SetToolTip(ThemeIcon, themeService.IsEffectivelyDark ? "Switch to light" : "Switch to dark");
+    }
+
     private async void OnDashboardClick(object sender, RoutedEventArgs e)
     {
         var authService = App.Services.GetRequiredService<IAuthenticationService>();
-        var dialog = new ManagementLoginDialog(authService) { XamlRoot = XamlRoot };
+        var dialog = new ManagementLoginDialog(authService).Themed(XamlRoot);
 
         await dialog.ShowAsync();
 
         if (dialog.Unlocked)
         {
-            Frame.Navigate(typeof(ManagementPlaceholderPage));
+            Frame.Navigate(typeof(ManagementShellPage));
         }
     }
 
@@ -73,10 +103,20 @@ public sealed partial class PosShellPage : Page
 
     private async void OnScanSearchKeyDown(object sender, KeyRoutedEventArgs e)
     {
+        if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            _suggestionDebounce.Stop();
+            ViewModel.ClearSuggestions();
+            return;
+        }
+
         if (e.Key != Windows.System.VirtualKey.Enter)
         {
             return;
         }
+
+        _suggestionDebounce.Stop();
+        ViewModel.ClearSuggestions();
 
         // A recognized scan has already been added to the cart via the buffer's BarcodeScanned
         // event — falling through to the manual search here would add the same product twice.
@@ -91,11 +131,32 @@ public sealed partial class PosShellPage : Page
         }
     }
 
+    private void OnScanSearchTextChanged(object sender, TextChangedEventArgs e)
+    {
+        _suggestionDebounce.Stop();
+        _suggestionDebounce.Start();
+    }
+
+    private void OnSuggestionItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is not Product product)
+        {
+            return;
+        }
+
+        _suggestionDebounce.Stop();
+        ViewModel.ClearSuggestions();
+        ViewModel.AddOrIncrement(product);
+
+        ScanSearchBox.Text = string.Empty;
+        ScanSearchBox.Focus(FocusState.Programmatic);
+    }
+
     private async void OnCustomerClick(object sender, RoutedEventArgs e) => await OpenCustomerPickerAsync();
 
     private async Task OpenCustomerPickerAsync()
     {
-        var dialog = new CustomerPickerDialog(ViewModel) { XamlRoot = XamlRoot };
+        var dialog = new CustomerPickerDialog(ViewModel).Themed(XamlRoot);
         await dialog.ShowAsync();
 
         if (dialog.Confirmed)
@@ -111,6 +172,25 @@ public sealed partial class PosShellPage : Page
         if ((sender as Button)?.Tag is CartLineViewModel line)
         {
             ViewModel.RemoveLine(line);
+        }
+    }
+
+    // Live pricing feedback as the cashier types — no waiting for Tab/click-away. LostFocus still
+    // owns clamping invalid values and prompting for manager authorization on a large discount, so
+    // those checks don't fire mid-keystroke on a still-incomplete number.
+    private void OnQuantityTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if ((sender as TextBox)?.Tag is CartLineViewModel)
+        {
+            ViewModel.RecalculateCart();
+        }
+    }
+
+    private void OnDiscountTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if ((sender as TextBox)?.Tag is CartLineViewModel)
+        {
+            ViewModel.RecalculateCart();
         }
     }
 
@@ -150,6 +230,36 @@ public sealed partial class PosShellPage : Page
         ViewModel.RecalculateCart();
     }
 
+    private void OnPriceTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if ((sender as TextBox)?.Tag is CartLineViewModel)
+        {
+            ViewModel.RecalculateCart();
+        }
+    }
+
+    private async void OnPriceLostFocus(object sender, RoutedEventArgs e)
+    {
+        if ((sender as TextBox)?.Tag is not CartLineViewModel line)
+        {
+            return;
+        }
+
+        if (!decimal.TryParse(line.UnitPriceText, out var price) || price < 0)
+        {
+            line.UnitPriceText = line.OriginalUnitPrice.ToString("0.##");
+            ViewModel.RecalculateCart();
+            return;
+        }
+
+        if (ViewModel.NeedsPriceOverrideAuthorization(line) && !await TryAuthorizePriceOverrideAsync())
+        {
+            line.UnitPriceText = line.OriginalUnitPrice.ToString("0.##");
+        }
+
+        ViewModel.RecalculateCart();
+    }
+
     private async void OnHoldClick(object sender, RoutedEventArgs e) => await HoldCurrentBillAsync();
 
     private async Task HoldCurrentBillAsync()
@@ -167,7 +277,7 @@ public sealed partial class PosShellPage : Page
 
     private async Task OpenHeldBillsAsync()
     {
-        var dialog = new HeldBillsDialog(ViewModel) { XamlRoot = XamlRoot };
+        var dialog = new HeldBillsDialog(ViewModel).Themed(XamlRoot);
         await dialog.ShowAsync();
 
         if (dialog.ResumedHeldBillId is { } heldBillId)
@@ -182,7 +292,7 @@ public sealed partial class PosShellPage : Page
 
     private async Task OpenBillDiscountAsync()
     {
-        var dialog = new BillDiscountDialog(ViewModel.BillDiscountPercent) { XamlRoot = XamlRoot };
+        var dialog = new BillDiscountDialog(ViewModel.BillDiscountPercent).Themed(XamlRoot);
         var result = await dialog.ShowAsync();
 
         if (result != ContentDialogResult.Primary)
@@ -203,12 +313,27 @@ public sealed partial class PosShellPage : Page
     private async Task<bool> TryAuthorizeAsync()
     {
         var authService = App.Services.GetRequiredService<IAuthenticationService>();
-        var dialog = new ManagerAuthorizationDialog(authService, PermissionKeys.BillingApproveLargeDiscount) { XamlRoot = XamlRoot };
+        var dialog = new ManagerAuthorizationDialog(authService, PermissionKeys.BillingApproveLargeDiscount).Themed(XamlRoot);
         var result = await dialog.ShowAsync();
 
         if (result == ContentDialogResult.Primary && dialog.AuthorizedUserId is { } userId)
         {
             ViewModel.SetDiscountAuthorization(userId);
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task<bool> TryAuthorizePriceOverrideAsync()
+    {
+        var authService = App.Services.GetRequiredService<IAuthenticationService>();
+        var dialog = new ManagerAuthorizationDialog(authService, PermissionKeys.PricingChangeSellingPrice).Themed(XamlRoot);
+        var result = await dialog.ShowAsync();
+
+        if (result == ContentDialogResult.Primary && dialog.AuthorizedUserId is { } userId)
+        {
+            ViewModel.SetPriceOverrideAuthorization(userId);
             return true;
         }
 
@@ -225,7 +350,7 @@ public sealed partial class PosShellPage : Page
         }
 
         var paymentViewModel = new PaymentViewModel(ViewModel, App.Services.GetRequiredService<ISaleService>());
-        var dialog = new PaymentDialog(paymentViewModel) { XamlRoot = XamlRoot };
+        var dialog = new PaymentDialog(paymentViewModel).Themed(XamlRoot);
         await dialog.ShowAsync();
 
         if (paymentViewModel.CompletedSale is { } sale)
@@ -247,7 +372,7 @@ public sealed partial class PosShellPage : Page
             var previewViewModel = new InvoicePreviewViewModel(
                 document, ViewModel.DefaultInvoiceFormat, ViewModel.CashierUserId, isReprint: false, invoicePrintService);
 
-            var dialog = new InvoicePreviewDialog(previewViewModel) { XamlRoot = XamlRoot };
+            var dialog = new InvoicePreviewDialog(previewViewModel).Themed(XamlRoot);
             dialog.Title = $"Sale Completed — Invoice {sale.InvoiceNumber} — ₹{sale.GrandTotal:0.00}";
             await dialog.ShowAsync();
         }
@@ -257,12 +382,12 @@ public sealed partial class PosShellPage : Page
             // previewed/printed — surface the problem but never block "next customer".
             var errorDialog = new ContentDialog
             {
-                XamlRoot = XamlRoot,
                 Title = "Sale Completed",
                 Content = $"Invoice {sale.InvoiceNumber}\nTotal: ₹{sale.GrandTotal:0.00}\n\nCouldn't prepare the invoice for printing: {ex.Message}",
                 CloseButtonText = "Next Customer",
                 DefaultButton = ContentDialogButton.Close,
             };
+            errorDialog.Themed(XamlRoot);
             await errorDialog.ShowAsync();
         }
     }

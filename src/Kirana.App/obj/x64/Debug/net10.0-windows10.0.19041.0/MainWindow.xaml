@@ -3,6 +3,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Frame x:ConnectionId='2' x:Name="RootFrame" />
+    <!--
+        ThemeRoot exists so the theme can be switched at runtime: RequestedTheme is set on this
+        element, because a Window has no RequestedTheme of its own and Application.RequestedTheme
+        can only be set during startup. Everything themed must live inside it.
+    -->
+    <Grid x:ConnectionId='2' x:Name="ThemeRoot" Background="{ThemeResource PageBackgroundBrush}">
+        <Frame x:ConnectionId='3' x:Name="RootFrame" />
+    </Grid>
 </Window>
 

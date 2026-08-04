@@ -54,4 +54,6 @@ public sealed partial class SetPinDialog : ContentDialog
             deferral.Complete();
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

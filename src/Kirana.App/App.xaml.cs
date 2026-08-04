@@ -1,8 +1,10 @@
 using Kirana.Application;
 using Kirana.Application.Authentication;
+using Kirana.Application.Expenses;
 using Kirana.Application.Printing;
 using Kirana.Application.Setup;
 using Kirana.App.Printing;
+using Kirana.App.Theming;
 using Kirana.Infrastructure;
 using Kirana.Infrastructure.Persistence;
 using Kirana.Infrastructure.Storage;
@@ -10,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Serilog;
 
 namespace Kirana.App;
@@ -27,6 +30,11 @@ public partial class App : Microsoft.UI.Xaml.Application
     /// a window handle — see <see cref="Kirana.App.Printing.BarcodeLabelPrintHelper"/>.</summary>
     public static Window MainWindow => _mainWindow ?? throw new InvalidOperationException("Window not yet created.");
 
+    /// <summary>The window's top-level navigation frame. Pages hosted inside the management shell
+    /// need this to navigate the whole window (e.g. back to Billing) rather than the shell's inner
+    /// content frame, which is what their own <c>Frame</c> property refers to.</summary>
+    public static Frame? RootFrame => _mainWindow?.NavigationFrame;
+
     private static MainWindow? _mainWindow;
 
     public App()
@@ -43,6 +51,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddApplication();
                 services.AddInfrastructure();
                 services.AddSingleton<IPrinterDiscoveryService, WindowsPrinterDiscoveryService>();
+                services.AddSingleton<ThemeService>();
             })
             .UseSerilog()
             .Build();
@@ -74,6 +83,11 @@ public partial class App : Microsoft.UI.Xaml.Application
             var permissionSeeding = scope.ServiceProvider.GetRequiredService<IPermissionSeedingService>();
             await permissionSeeding.SyncPermissionsAsync();
 
+            // Same idempotent-upgrade idea as permissions: a store set up before Phase 9 picks up
+            // the default expense headings here rather than only on a fresh install.
+            var expenseCategories = scope.ServiceProvider.GetRequiredService<IExpenseCategoryService>();
+            await expenseCategories.SeedDefaultsAsync();
+
             var db = scope.ServiceProvider.GetRequiredService<KiranaDbContext>();
             var appSettings = await db.AppSettings.FirstOrDefaultAsync();
             if (appSettings is not null)
@@ -83,6 +97,20 @@ public partial class App : Microsoft.UI.Xaml.Application
         }
 
         _mainWindow = new MainWindow();
+
+        // Applied before the window is shown so the app never flashes the wrong theme on launch.
+        // Appearance is never worth failing a launch over: OnLaunched is async void, so an escaping
+        // exception here would kill the process before the window is ever shown, leaving a running
+        // app with no UI. Fall back to the default theme instead.
+        try
+        {
+            await Services.GetRequiredService<ThemeService>().InitializeAsync(_mainWindow.RootElement, _mainWindow);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Could not apply the saved theme; continuing with the default appearance.");
+        }
+
         _mainWindow.NavigateToInitialPage(setupCompleted);
         _mainWindow.Activate();
     }

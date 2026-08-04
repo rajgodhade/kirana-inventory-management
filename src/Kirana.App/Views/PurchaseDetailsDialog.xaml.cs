@@ -11,7 +11,7 @@ public sealed partial class PurchaseDetailsDialog : ContentDialog
     public PurchaseDetailsDialog(Purchase purchase)
     {
         InitializeComponent();
-        Title = $"Purchase {purchase.PurchaseNumber}";
+        DialogTitleText.Text = $"Purchase {purchase.PurchaseNumber}";
 
         HeaderText.Text =
             $"Supplier: {purchase.Supplier.Name} ({purchase.Supplier.SupplierCode})\n" +
@@ -53,4 +53,6 @@ public sealed partial class PurchaseDetailsDialog : ContentDialog
             $"Amount Paid: ₹{purchase.AmountPaid:0.00}\n" +
             $"Outstanding: ₹{purchase.OutstandingAmount:0.00}";
     }
+
+    private void OnCloseIconClick(object sender, RoutedEventArgs e) => Hide();
 }

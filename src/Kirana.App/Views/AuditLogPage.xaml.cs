@@ -24,14 +24,6 @@ public sealed partial class AuditLogPage : Page
         Loaded += async (_, _) => await ViewModel.InitializeAsync();
     }
 
-    private void OnBackClick(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(ManagementPlaceholderPage));
-
-    private void OnLockClick(object sender, RoutedEventArgs e)
-    {
-        App.Services.GetRequiredService<IAuthenticationService>().LockAndReturnToBilling();
-        Frame.Navigate(typeof(PosShellPage));
-    }
-
     private async void OnClearClick(object sender, RoutedEventArgs e)
     {
         ViewModel.ClearFilters();

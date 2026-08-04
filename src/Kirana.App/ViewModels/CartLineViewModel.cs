@@ -14,7 +14,12 @@ public sealed partial class CartLineViewModel : ObservableObject
     public string? Sku { get; init; }
     public required string Unit { get; init; }
     public required bool SupportsDecimalQuantity { get; init; }
-    public required decimal UnitPrice { get; init; }
+
+    /// <summary>The product's actual selling price, captured when the line was added — the
+    /// baseline <see cref="UnitPriceText"/> is compared against to detect an override. Never
+    /// mutated by editing the price; that only ever changes <see cref="UnitPriceText"/>.</summary>
+    public required decimal OriginalUnitPrice { get; init; }
+
     public decimal GstRatePercent { get; init; }
     public bool IsTaxInclusive { get; init; }
 
@@ -23,6 +28,15 @@ public sealed partial class CartLineViewModel : ObservableObject
 
     [ObservableProperty]
     private string _discountPercentText = "0";
+
+    /// <summary>Editable per-bill price — defaults to <see cref="OriginalUnitPrice"/> but the
+    /// cashier can override it for just this sale; the product's own selling price is never
+    /// touched. Manager authorization for a changed value is enforced by the code-behind before
+    /// the sale is completed, mirroring how a large discount is authorized.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UnitPrice))]
+    [NotifyPropertyChangedFor(nameof(IsPriceOverridden))]
+    private string _unitPriceText = "0";
 
     [ObservableProperty]
     private decimal _taxableAmount;
@@ -36,4 +50,8 @@ public sealed partial class CartLineViewModel : ObservableObject
     public decimal Quantity => decimal.TryParse(QuantityText, out var v) ? v : 0;
 
     public decimal DiscountPercent => decimal.TryParse(DiscountPercentText, out var v) ? v : 0;
+
+    public decimal UnitPrice => decimal.TryParse(UnitPriceText, out var v) ? v : 0;
+
+    public bool IsPriceOverridden => UnitPrice != OriginalUnitPrice;
 }

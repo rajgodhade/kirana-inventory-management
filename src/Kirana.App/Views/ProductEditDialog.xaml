@@ -6,6 +6,20 @@
     CloseButtonText="Cancel"
     DefaultButton="Primary">
 
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="DialogTitleText" Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                    Click="OnCloseIconClick" AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
+
     <ScrollViewer MaxHeight="520" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="10" MinWidth="440" MaxWidth="480">
 
@@ -101,9 +115,9 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Header="Minimum stock" Text="{x:Bind ViewModel.MinimumStockText, Mode=TwoWay}" />
-                <TextBox Grid.Column="1" Header="Reorder quantity" Text="{x:Bind ViewModel.ReorderQuantityText, Mode=TwoWay}" />
-                <TextBox Grid.Column="2" Header="Opening stock" Text="{x:Bind ViewModel.OpeningStockText, Mode=TwoWay}"
+                <TextBox Grid.Column="0" Header="{x:Bind ViewModel.MinimumStockHeader, Mode=OneWay}" Text="{x:Bind ViewModel.MinimumStockText, Mode=TwoWay}" />
+                <TextBox Grid.Column="1" Header="{x:Bind ViewModel.ReorderQuantityHeader, Mode=OneWay}" Text="{x:Bind ViewModel.ReorderQuantityText, Mode=TwoWay}" />
+                <TextBox Grid.Column="2" Header="{x:Bind ViewModel.OpeningStockHeader, Mode=OneWay}" Text="{x:Bind ViewModel.OpeningStockText, Mode=TwoWay}"
                          IsEnabled="{x:Bind ViewModel.IsEditMode, Converter={StaticResource InverseBoolConverter}}" />
             </Grid>
 

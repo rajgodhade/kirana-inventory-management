@@ -5,11 +5,25 @@
     CloseButtonText="Close"
     DefaultButton="Close">
 
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:ConnectionId='2' x:Name="DialogTitleText" Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button x:ConnectionId='3' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                                             AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
+
     <ScrollViewer MaxHeight="560">
         <StackPanel Spacing="10" MinWidth="480">
-            <TextBlock x:ConnectionId='2' x:Name="HeaderText" FontSize="14" TextWrapping="Wrap" />
+            <TextBlock x:ConnectionId='4' x:Name="HeaderText" FontSize="14" TextWrapping="Wrap" />
 
-            <ListView x:ConnectionId='3' x:Name="ItemsList" MaxHeight="300" SelectionMode="None">
+            <ListView x:ConnectionId='5' x:Name="ItemsList" MaxHeight="300" SelectionMode="None">
                 <ListView.HeaderTemplate>
                     <DataTemplate>
                         <Grid ColumnSpacing="8" Padding="4">
@@ -28,7 +42,7 @@
                 </ListView.HeaderTemplate>
             </ListView>
 
-            <TextBlock x:ConnectionId='4' x:Name="TotalsText" FontSize="14" TextWrapping="Wrap" />
+            <TextBlock x:ConnectionId='6' x:Name="TotalsText" FontSize="14" TextWrapping="Wrap" />
         </StackPanel>
     </ScrollViewer>
 </ContentDialog>

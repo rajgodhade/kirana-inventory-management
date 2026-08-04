@@ -6,18 +6,32 @@
     CloseButtonText="Close"
     DefaultButton="Close">
 
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:ConnectionId='2' x:Name="DialogTitleText" Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button x:ConnectionId='3' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                                             AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
+
     <StackPanel Spacing="10" MinWidth="440" MaxHeight="580">
-        <TextBlock x:ConnectionId='2'                                       FontSize="18" FontWeight="SemiBold" />
+        <TextBlock x:ConnectionId='4'                                       FontSize="18" FontWeight="SemiBold" />
 
-        <TextBox x:ConnectionId='3' Header="Batch number"                                                    />
+        <TextBox x:ConnectionId='5' Header="Batch number"                                                    />
 
         <Grid ColumnSpacing="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <CalendarDatePicker x:ConnectionId='15' Grid.Column="0" Header="Manufacturing date"                                                          />
-            <CalendarDatePicker x:ConnectionId='16' Grid.Column="1" Header="Expiry date"                                                   />
+            <CalendarDatePicker x:ConnectionId='17' Grid.Column="0" Header="Manufacturing date"                                                          />
+            <CalendarDatePicker x:ConnectionId='18' Grid.Column="1" Header="Expiry date"                                                   />
         </Grid>
 
         <Grid ColumnSpacing="8">
@@ -26,31 +40,31 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <TextBox x:ConnectionId='12' Grid.Column="0" Header="Quantity"                                                     />
-            <TextBox x:ConnectionId='13' Grid.Column="1" Header="Purchase price"                                                          />
-            <TextBox x:ConnectionId='14' Grid.Column="2" Header="Selling price"                                                         />
+            <TextBox x:ConnectionId='14' Grid.Column="0" Header="Quantity"                                                     />
+            <TextBox x:ConnectionId='15' Grid.Column="1" Header="Purchase price"                                                          />
+            <TextBox x:ConnectionId='16' Grid.Column="2" Header="Selling price"                                                         />
         </Grid>
 
-        <Button x:ConnectionId='4' Content="Add Batch" Style="{StaticResource AccentButtonStyle}"
+        <Button x:ConnectionId='6' Content="Add Batch" Style="{StaticResource AccentButtonStyle}"
                                                              HorizontalAlignment="Left" />
 
-        <InfoBar x:ConnectionId='5'                                                                                                        
+        <InfoBar x:ConnectionId='7'                                                                                                        
                  Severity="Error"                                                        />
 
         <TextBlock Text="Existing batches" FontWeight="SemiBold" Margin="0,8,0,0" />
-        <ListView x:ConnectionId='6'                                          MaxHeight="200">
+        <ListView x:ConnectionId='8'                                          MaxHeight="200">
             <ListView.ItemTemplate>
                 <DataTemplate                                   >
-                    <Grid x:ConnectionId='8' ColumnSpacing="8">
+                    <Grid x:ConnectionId='10' ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120" />
                             <ColumnDefinition Width="100" />
                             <ColumnDefinition Width="100" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:ConnectionId='9' Grid.Column="0"                             FontSize="12" />
-                        <TextBlock x:ConnectionId='10' Grid.Column="1"                            FontSize="12" />
-                        <TextBlock x:ConnectionId='11' Grid.Column="2"                          FontSize="12" />
+                        <TextBlock x:ConnectionId='11' Grid.Column="0"                             FontSize="12" />
+                        <TextBlock x:ConnectionId='12' Grid.Column="1"                            FontSize="12" />
+                        <TextBlock x:ConnectionId='13' Grid.Column="2"                          FontSize="12" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

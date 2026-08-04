@@ -39,4 +39,6 @@ public sealed partial class PaymentDialog : ContentDialog
             ViewModel.RemovePaymentLine(line);
         }
     }
+
+    private void OnCloseIconClick(object sender, RoutedEventArgs e) => Hide();
 }

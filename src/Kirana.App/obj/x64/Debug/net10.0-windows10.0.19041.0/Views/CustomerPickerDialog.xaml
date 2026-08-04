@@ -3,11 +3,24 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:entities="using:Kirana.Domain.Entities"
-    Title="Select Customer"
     PrimaryButtonText="Select"
     SecondaryButtonText="Walk-in Customer"
     CloseButtonText="Cancel"
     DefaultButton="Primary">
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Select Customer" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button x:ConnectionId='2' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                                             AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
 
     <StackPanel Spacing="10" MinWidth="380" MaxHeight="520">
 
@@ -16,29 +29,43 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox x:ConnectionId='11' Grid.Column="0" PlaceholderText="Search by name or phone"
+            <TextBox x:ConnectionId='14' Grid.Column="0" PlaceholderText="Search by Customer ID, phone or name"
                                                                                                     />
-            <Button x:ConnectionId='12' Grid.Column="1" Content="Search"                       />
+            <Button x:ConnectionId='15' Grid.Column="1" Content="Search"                       />
         </Grid>
 
-        <ListView x:ConnectionId='2' x:Name="ResultsList"                                          MaxHeight="200"
+        <ListView x:ConnectionId='3' x:Name="ResultsList"                                          MaxHeight="200"
                   SelectionMode="None" IsItemClickEnabled="True"                            >
             <ListView.ItemTemplate>
                 <DataTemplate                               >
-                    <StackPanel x:ConnectionId='8' Orientation="Horizontal" Spacing="10">
-                        <TextBlock x:ConnectionId='9'                      FontWeight="SemiBold" />
-                        <TextBlock x:ConnectionId='10'                       Opacity="0.7" />
-                    </StackPanel>
+                    <Grid x:ConnectionId='9' ColumnSpacing="10" Padding="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Spacing="1">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock x:ConnectionId='12'                      FontWeight="SemiBold" />
+                                <TextBlock x:ConnectionId='13'                       Opacity="0.7" />
+                            </StackPanel>
+                            <TextBlock x:ConnectionId='11'                              FontSize="11" Opacity="0.6" />
+                        </StackPanel>
+                        <!-- Existing Udhaar shown at the till so a cashier sees the debt before
+                             extending more credit. -->
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="11" Foreground="OrangeRed">
+                            <Run Text="Due " /><Run x:ConnectionId='10'                                                                             />
+                        </TextBlock>
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
 
         <TextBlock Text="Add new customer" FontWeight="SemiBold" Margin="0,8,0,0" />
-        <TextBox x:ConnectionId='3' PlaceholderText="Name"                                                        />
-        <TextBox x:ConnectionId='4' PlaceholderText="Phone"                                                         />
-        <Button x:ConnectionId='5' Content="Create &amp; Select"                                                    HorizontalAlignment="Left" />
+        <TextBox x:ConnectionId='4' PlaceholderText="Name"                                                        />
+        <TextBox x:ConnectionId='5' PlaceholderText="Phone"                                                         />
+        <Button x:ConnectionId='6' Content="Create &amp; Select"                                                    HorizontalAlignment="Left" />
 
-        <InfoBar x:ConnectionId='6'                                                                                                        
+        <InfoBar x:ConnectionId='7'                                                                                                        
                  Severity="Error"                                                        />
     </StackPanel>
 </ContentDialog>

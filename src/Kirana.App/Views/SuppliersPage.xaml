@@ -11,16 +11,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0" Padding="20,16" Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="◀ Management" Click="OnBackClick" Margin="0,0,12,0" />
-            <TextBlock Grid.Column="1" Text="Suppliers" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
-            <Button Grid.Column="2" Content="Lock &amp; Return to Billing" Click="OnLockClick" />
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Suppliers" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Supplier records, outstanding balances and ledgers." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
         </Grid>
 
         <!-- Toolbar -->
@@ -33,7 +28,8 @@
             </Grid.ColumnDefinitions>
 
             <TextBox Grid.Column="0" PlaceholderText="Search name / ID / phone…"
-                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" KeyDown="OnSearchBoxKeyDown" />
+                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" KeyDown="OnSearchBoxKeyDown"
+                     TextChanged="OnSearchTextChanged" />
 
             <CheckBox Grid.Column="1" Content="Show inactive" VerticalAlignment="Center" Margin="8,0,0,0"
                       IsChecked="{x:Bind ViewModel.ShowInactive, Mode=TwoWay}" Checked="OnShowInactiveChanged" Unchecked="OnShowInactiveChanged" />
@@ -71,7 +67,7 @@
                             </StackPanel>
 
                             <TextBlock Grid.Column="2" FontWeight="SemiBold" VerticalAlignment="Center">
-                                <Run Text="₹" /><Run Text="{x:Bind OutstandingBalance}" />
+                                <Run Text="{x:Bind OutstandingBalance, Converter={StaticResource CurrencyConverter}}" />
                             </TextBlock>
 
                             <TextBlock Grid.Column="3" Text="Active" Foreground="Green" FontSize="11" VerticalAlignment="Center"

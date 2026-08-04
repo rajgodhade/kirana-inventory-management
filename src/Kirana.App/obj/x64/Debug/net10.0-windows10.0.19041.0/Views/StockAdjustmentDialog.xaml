@@ -6,10 +6,24 @@
     CloseButtonText="Close"
     DefaultButton="Close">
 
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:ConnectionId='2' x:Name="DialogTitleText" Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button x:ConnectionId='3' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                                             AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
+
     <StackPanel Spacing="10" MinWidth="420" MaxHeight="560">
-        <TextBlock x:ConnectionId='2'                                       FontSize="18" FontWeight="SemiBold" />
+        <TextBlock x:ConnectionId='4'                                       FontSize="18" FontWeight="SemiBold" />
         <TextBlock>
-            <Run Text="Current stock: " /><Run x:ConnectionId='15'                                                     />
+            <Run Text="Current stock: " /><Run x:ConnectionId='17'                                                     />
         </TextBlock>
 
         <Grid ColumnSpacing="8">
@@ -17,35 +31,35 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <ComboBox x:ConnectionId='13' Grid.Column="0" Header="Type"
+            <ComboBox x:ConnectionId='15' Grid.Column="0" Header="Type"
                                                                       
                                                                                           HorizontalAlignment="Stretch" />
-            <TextBox x:ConnectionId='14' Grid.Column="1" Header="Quantity"                                                     />
+            <TextBox x:ConnectionId='16' Grid.Column="1" Header="Quantity"                                                     />
         </Grid>
 
-        <TextBox x:ConnectionId='3' Header="Reason"                                               />
+        <TextBox x:ConnectionId='5' Header="Reason"                                               />
 
-        <Button x:ConnectionId='4' Content="Apply Adjustment" Style="{StaticResource AccentButtonStyle}"
+        <Button x:ConnectionId='6' Content="Apply Adjustment" Style="{StaticResource AccentButtonStyle}"
                                                           HorizontalAlignment="Left" />
 
-        <InfoBar x:ConnectionId='5'                                                                                                        
+        <InfoBar x:ConnectionId='7'                                                                                                        
                  Severity="Error"                                                        />
 
         <TextBlock Text="Recent movements" FontWeight="SemiBold" Margin="0,8,0,0" />
-        <ListView x:ConnectionId='6'                                          MaxHeight="220">
+        <ListView x:ConnectionId='8'                                          MaxHeight="220">
             <ListView.ItemTemplate>
                 <DataTemplate                                    >
-                    <Grid x:ConnectionId='8' ColumnSpacing="8">
+                    <Grid x:ConnectionId='10' ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="140" />
                             <ColumnDefinition Width="130" />
                             <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:ConnectionId='9' Grid.Column="0"                              FontSize="12" />
-                        <TextBlock x:ConnectionId='10' Grid.Column="1"                              FontSize="12" />
-                        <TextBlock x:ConnectionId='11' Grid.Column="2"                                FontSize="12" />
-                        <TextBlock x:ConnectionId='12' Grid.Column="3"                        FontSize="12" Opacity="0.7" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:ConnectionId='11' Grid.Column="0"                              FontSize="12" />
+                        <TextBlock x:ConnectionId='12' Grid.Column="1"                              FontSize="12" />
+                        <TextBlock x:ConnectionId='13' Grid.Column="2"                                FontSize="12" />
+                        <TextBlock x:ConnectionId='14' Grid.Column="3"                        FontSize="12" Opacity="0.7" TextTrimming="CharacterEllipsis" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

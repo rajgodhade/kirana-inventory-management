@@ -11,16 +11,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0" Padding="20,16" Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Button x:ConnectionId='34' Grid.Column="0" Content="◀ Management"                     Margin="0,0,12,0" />
-            <TextBlock Grid.Column="1" Text="Products" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
-            <Button x:ConnectionId='35' Grid.Column="2" Content="Lock &amp; Return to Billing"                     />
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Products" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Catalogue, pricing, stock levels and batches." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
         </Grid>
 
         <!-- Toolbar -->
@@ -95,11 +90,11 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="2" Spacing="2">
-                                <TextBlock FontSize="12"><Run Text="MRP ₹" /><Run x:ConnectionId='18'                     /></TextBlock>
-                                <TextBlock FontWeight="SemiBold"><Run Text="Sell ₹" /><Run x:ConnectionId='17'                              /></TextBlock>
+                                <TextBlock FontSize="12"><Run Text="MRP " /><Run x:ConnectionId='18'                                                                   /></TextBlock>
+                                <TextBlock FontWeight="SemiBold"><Run Text="Sell " /><Run x:ConnectionId='17'                                                                            /></TextBlock>
                                 <TextBlock x:ConnectionId='15' FontSize="12" Opacity="0.7"
                                                                                                                                         >
-                                    <Run Text="Cost ₹" /><Run x:ConnectionId='16'                               />
+                                    <Run Text="Cost " /><Run x:ConnectionId='16'                                                                             />
                                 </TextBlock>
                             </StackPanel>
 

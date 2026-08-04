@@ -2,7 +2,8 @@
     x:Class="Kirana.App.Views.PurchaseEntryPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:vm="using:Kirana.App.ViewModels">
+    xmlns:vm="using:Kirana.App.ViewModels"
+    xmlns:dom="using:Kirana.Domain.Entities">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -12,14 +13,11 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0" Padding="20,16" Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="◀ Purchases" Click="OnBackClick" Margin="0,0,12,0" />
-            <TextBlock Grid.Column="1" Text="New Purchase" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
+                <TextBlock Text="New Purchase" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Record goods received. Stock increases when the purchase is finalised." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
         </Grid>
 
         <!-- Supplier + scan/search + invoice fields -->
@@ -36,7 +34,35 @@
             </Button>
 
             <TextBox x:Name="ScanSearchBox" Grid.Column="1" PlaceholderText="Scan Barcode / Product ID / SKU / Name"
-                     CharacterReceived="OnCharacterReceived" KeyDown="OnScanSearchKeyDown" />
+                     CharacterReceived="OnCharacterReceived" KeyDown="OnScanSearchKeyDown"
+                     TextChanged="OnScanSearchTextChanged" />
+
+            <Popup x:Name="SuggestionsPopup" Grid.Column="1" HorizontalOffset="0" VerticalOffset="46"
+                   IsLightDismissEnabled="False" IsOpen="{x:Bind ViewModel.HasSuggestions, Mode=OneWay}">
+                <Border Style="{StaticResource CardBorderStyle}" Width="520" MaxHeight="360" Padding="4">
+                    <ListView x:Name="SuggestionsList" ItemsSource="{x:Bind ViewModel.SearchSuggestions}"
+                              SelectionMode="Single" IsItemClickEnabled="True" ItemClick="OnSuggestionItemClick">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="dom:Product">
+                                <Grid ColumnSpacing="12" Padding="8,6" AutomationProperties.Name="{x:Bind Name}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Spacing="1">
+                                        <TextBlock Text="{x:Bind Name}" Style="{StaticResource BodyTextStyle}" />
+                                        <TextBlock Style="{StaticResource CaptionTextStyle}">
+                                            <Run Text="{x:Bind ProductCode}" /><Run Text="  ·  " /><Run Text="{x:Bind Sku}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{x:Bind PurchasePrice, Converter={StaticResource CurrencyConverter}}"
+                                               Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Border>
+            </Popup>
 
             <!-- Scanners and typists submit with Enter; this gives mouse/touch users and pasted
                  codes the same affordance, matching the Search buttons elsewhere in the app. -->
@@ -151,7 +177,7 @@
                 <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,8,0,8" />
 
                 <TextBlock FontSize="28" FontWeight="Bold" HorizontalAlignment="Right">
-                    <Run Text="₹" /><Run Text="{x:Bind ViewModel.GrandTotal, Mode=OneWay}" />
+                    <Run Text="{x:Bind ViewModel.GrandTotal, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
                 </TextBlock>
 
                 <TextBox Header="Amount Paid Now" Text="{x:Bind ViewModel.AmountPaidText, Mode=TwoWay}" Margin="0,12,0,0" />

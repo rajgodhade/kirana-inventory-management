@@ -8,6 +8,8 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="ms-appx:///Themes/DesignTokens.xaml" />
+                <ResourceDictionary Source="ms-appx:///Themes/ChartTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
@@ -17,6 +19,8 @@
             <conv:StockStatusToBrushConverter x:Key="StockStatusToBrushConverter" />
             <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+            <conv:CurrencyConverter x:Key="CurrencyConverter" />
+            <conv:QuantityConverter x:Key="QuantityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

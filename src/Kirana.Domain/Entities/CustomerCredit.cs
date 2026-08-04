@@ -4,9 +4,10 @@ namespace Kirana.Domain.Entities;
 
 /// <summary>
 /// One Udhaar entry created when a sale is paid (in full or part) via
-/// <see cref="PaymentMethod.CustomerCredit"/> (PRD §31). Repayment tracking
-/// (<c>CreditPayment</c>, partial/full settlement UI) is Phase 8 — this phase only creates the
-/// entry and rolls the amount into <see cref="Customer.CreditBalance"/>.
+/// <see cref="PaymentMethod.CustomerCredit"/> (PRD §31). <see cref="Amount"/> is immutable — it is
+/// what the originating invoice put on credit — while <see cref="RemainingAmount"/> is drawn down
+/// by <see cref="CreditPaymentAllocation"/> rows as the customer repays. The invoice itself is
+/// never altered by repayment.
 /// </summary>
 public class CustomerCredit : Entity
 {

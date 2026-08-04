@@ -11,7 +11,7 @@ namespace Kirana.App.Views;
 /// nest another <see cref="ContentDialog"/> inside its own button handler (WinUI 3 only supports
 /// one open <see cref="ContentDialog"/> per <c>XamlRoot</c> at a time; showing a second one while
 /// this one is still open crashes the app). Once <see cref="ShowAsync"/> returns with a result,
-/// the caller (<see cref="ManagementPlaceholderPage"/>) drives the manager-authorization step and
+/// the caller (<see cref="ManagementHomePage"/>) drives the manager-authorization step and
 /// the invoice preview/print dialog sequentially.</summary>
 public sealed partial class ReprintInvoiceDialog : ContentDialog
 {
@@ -49,4 +49,6 @@ public sealed partial class ReprintInvoiceDialog : ContentDialog
         // authorization + preview dialogs only after this one has fully closed.
         FoundDocument = document;
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

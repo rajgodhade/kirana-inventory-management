@@ -54,6 +54,11 @@ public sealed class SaleService(
                 throw new ArgumentException($"Discount for '{product.Name}' must be between 0 and 100 percent.");
             }
 
+            if (line.UnitPriceOverride is { } overridePrice && overridePrice < 0)
+            {
+                throw new ArgumentException($"Overridden price for '{product.Name}' cannot be negative.");
+            }
+
             var availableStock = product.Inventory?.QuantityOnHand ?? 0;
             if (availableStock < line.Quantity)
             {
@@ -71,6 +76,14 @@ public sealed class SaleService(
             await EnsureDiscountAuthorizedAsync(request.DiscountAuthorizedByUserId, cancellationToken);
         }
 
+        var hasPriceOverride = request.Lines.Any(l =>
+            l.UnitPriceOverride is { } overridePrice && overridePrice != products[l.ProductId].SellingPrice);
+
+        if (hasPriceOverride)
+        {
+            await EnsurePriceOverrideAuthorizedAsync(request.PriceOverrideAuthorizedByUserId, cancellationToken);
+        }
+
         var store = await db.Stores.FirstOrDefaultAsync(cancellationToken);
         var isGstEnabled = store?.IsGstEnabled ?? false;
 
@@ -81,7 +94,7 @@ public sealed class SaleService(
             {
                 ProductId = line.ProductId,
                 Quantity = line.Quantity,
-                UnitPrice = product.SellingPrice,
+                UnitPrice = line.UnitPriceOverride ?? product.SellingPrice,
                 IsTaxInclusive = product.IsTaxInclusive,
                 GstRatePercent = product.GstRatePercent ?? 0,
                 DiscountPercent = line.DiscountPercent,
@@ -135,6 +148,7 @@ public sealed class SaleService(
             GrandTotal = totals.GrandTotal,
             Status = SaleStatus.Completed,
             DiscountAuthorizedByUserId = maxDiscountRequested > MaxUnauthorizedDiscountPercent ? request.DiscountAuthorizedByUserId : null,
+            PriceOverrideAuthorizedByUserId = hasPriceOverride ? request.PriceOverrideAuthorizedByUserId : null,
         };
 
         foreach (var lineResult in totals.Lines)
@@ -223,6 +237,13 @@ public sealed class SaleService(
                 reason: $"Discount of {maxDiscountRequested:0.##}% on invoice {invoiceNumber}", cancellationToken: cancellationToken);
         }
 
+        if (sale.PriceOverrideAuthorizedByUserId is { } priceAuthorizerId)
+        {
+            await auditLogger.RecordAsync(
+                priceAuthorizerId, "PriceOverrideAuthorized", nameof(Sale), sale.Id.ToString(),
+                reason: $"Selling price overridden on invoice {invoiceNumber}", cancellationToken: cancellationToken);
+        }
+
         return sale;
     }
 
@@ -253,6 +274,19 @@ public sealed class SaleService(
         if (!await permissionEnforcer.HasPermissionAsync(authorizedByUserId, PermissionKeys.BillingApproveLargeDiscount, cancellationToken))
         {
             throw new InvalidOperationException("The authorizing user is not permitted to approve large discounts.");
+        }
+    }
+
+    private async Task EnsurePriceOverrideAuthorizedAsync(int? authorizedByUserId, CancellationToken cancellationToken)
+    {
+        if (authorizedByUserId is null)
+        {
+            throw new InvalidOperationException("Overriding the selling price requires manager authorization.");
+        }
+
+        if (!await permissionEnforcer.HasPermissionAsync(authorizedByUserId, PermissionKeys.PricingChangeSellingPrice, cancellationToken))
+        {
+            throw new InvalidOperationException("The authorizing user is not permitted to change selling prices.");
         }
     }
 }

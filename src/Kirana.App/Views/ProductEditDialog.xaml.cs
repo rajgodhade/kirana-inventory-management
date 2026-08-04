@@ -11,7 +11,7 @@ public sealed partial class ProductEditDialog : ContentDialog
     {
         ViewModel = viewModel;
         InitializeComponent();
-        Title = viewModel.IsEditMode ? "Edit Product" : "Add Product";
+        DialogTitleText.Text = viewModel.IsEditMode ? "Edit Product" : "Add Product";
         PrimaryButtonClick += OnPrimaryButtonClick;
     }
 
@@ -31,4 +31,6 @@ public sealed partial class ProductEditDialog : ContentDialog
             deferral.Complete();
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

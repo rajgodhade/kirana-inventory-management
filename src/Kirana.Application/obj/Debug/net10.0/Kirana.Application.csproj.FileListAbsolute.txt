@@ -13,3 +13,4 @@ F:\Raj\My Project\Inventory-management\app\src\Kirana.Application\obj\Debug\net1
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Application\obj\Debug\net10.0\refint\Kirana.Application.dll
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Application\obj\Debug\net10.0\Kirana.Application.pdb
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Application\obj\Debug\net10.0\ref\Kirana.Application.dll
+F:\Raj\My Project\Inventory-management\app\src\Kirana.Application\obj\Debug\net10.0\Kirana.Application.sourcelink.json

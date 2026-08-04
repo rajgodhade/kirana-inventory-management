@@ -1,0 +1,239 @@
+<UserControl
+    x:Class="Kirana.App.Views.Reports.SalesReportView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:rpt="using:Kirana.Application.Reports">
+
+    <ScrollViewer>
+        <StackPanel Padding="{StaticResource PagePadding}" Spacing="20">
+
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <ComboBox Grid.Column="0" ItemsSource="{x:Bind ViewModel.DateFilter.PresetNames}"
+                          SelectedItem="{x:Bind ViewModel.DateFilter.SelectedPresetName, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch" SelectionChanged="OnDateFilterChanged" />
+
+                <CalendarDatePicker Grid.Column="1" Header="From" Date="{x:Bind ViewModel.DateFilter.CustomFrom, Mode=TwoWay}"
+                                    Visibility="{x:Bind ViewModel.DateFilter.IsCustomSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    DateChanged="OnDateFilterChanged" />
+
+                <CalendarDatePicker Grid.Column="2" Header="To" Date="{x:Bind ViewModel.DateFilter.CustomTo, Mode=TwoWay}"
+                                    Visibility="{x:Bind ViewModel.DateFilter.IsCustomSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    DateChanged="OnDateFilterChanged" />
+
+                <Button Grid.Column="4" Click="OnRefreshClick" VerticalAlignment="Bottom">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                        <TextBlock Text="Refresh" />
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="5" VerticalAlignment="Bottom">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE74E;" FontSize="14" />
+                        <TextBlock Text="Export" />
+                    </StackPanel>
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutSubItem Text="Sales Summary">
+                                <MenuFlyoutItem Text="CSV" Click="OnExportSalesCsvClick" />
+                                <MenuFlyoutItem Text="Excel" Click="OnExportSalesExcelClick" />
+                                <MenuFlyoutItem Text="PDF" Click="OnExportSalesPdfClick" />
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="GST Report">
+                                <MenuFlyoutItem Text="CSV" Click="OnExportGstCsvClick" />
+                                <MenuFlyoutItem Text="Excel" Click="OnExportGstExcelClick" />
+                                <MenuFlyoutItem Text="PDF" Click="OnExportGstPdfClick" />
+                            </MenuFlyoutSubItem>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </Grid>
+
+            <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                     Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+
+            <TextBlock Text="Sales Summary" Style="{StaticResource SectionTitleTextStyle}" />
+            <Grid ColumnSpacing="12" RowSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Gross Sales" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.GrossSalesText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Returns" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.ReturnsText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20"
+                                   Foreground="{ThemeResource DangerBrush}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Net Sales" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.NetSalesText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="GST Collected" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.GstCollectedText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Item Discounts" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.ItemDiscountsText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Bill Discounts" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.BillDiscountsText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Total Discounts" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.TotalDiscountsText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Items Sold" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.ItemsSoldText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Number of Bills" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.BillCountText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Average Bill Value" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.AverageBillValueText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <TextBlock Text="Payment Method Breakdown" Style="{StaticResource SectionTitleTextStyle}" />
+            <Border Style="{StaticResource CardBorderStyle}">
+                <ItemsControl ItemsSource="{x:Bind ViewModel.PaymentMethods}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="rpt:PaymentMethodAmount">
+                            <Grid Margin="0,0,0,8" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{x:Bind Method}" Style="{StaticResource BodyTextStyle}" />
+                                <TextBlock Grid.Column="1" Text="{x:Bind Amount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource BodyTextStyle}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+            <TextBlock Text="GST Report" Style="{StaticResource SectionTitleTextStyle}" />
+            <TextBlock Text="CGST/SGST split assumes intra-state transactions; state-wise tax capture is not tracked."
+                       Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" />
+            <Grid ColumnSpacing="12" RowSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Sales GST" Style="{StaticResource CardTitleTextStyle}" />
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Taxable Amount" Style="{StaticResource MetricLabelTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.SalesTaxableText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="16" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Text="GST Collected" Style="{StaticResource MetricLabelTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.SalesGstText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="16" />
+                            </StackPanel>
+                        </Grid>
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.SalesGstByRate}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="rpt:GstRateBreakdown">
+                                    <Grid Margin="0,4,0,0" ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="60" /><ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource CaptionTextStyle}"><Run Text="{x:Bind RatePercent}" /><Run Text="%" /></TextBlock>
+                                        <TextBlock Grid.Column="1" Text="{x:Bind TaxableAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="2" Text="{x:Bind Cgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="3" Text="{x:Bind Sgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="4" Text="{x:Bind TaxAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Purchase GST" Style="{StaticResource CardTitleTextStyle}" />
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Taxable Amount" Style="{StaticResource MetricLabelTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.PurchaseTaxableText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="16" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Text="GST Paid" Style="{StaticResource MetricLabelTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.PurchaseGstText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="16" />
+                            </StackPanel>
+                        </Grid>
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.PurchaseGstByRate}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="rpt:GstRateBreakdown">
+                                    <Grid Margin="0,4,0,0" ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="60" /><ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource CaptionTextStyle}"><Run Text="{x:Bind RatePercent}" /><Run Text="%" /></TextBlock>
+                                        <TextBlock Grid.Column="1" Text="{x:Bind TaxableAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="2" Text="{x:Bind Cgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="3" Text="{x:Bind Sgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="4" Text="{x:Bind TaxAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

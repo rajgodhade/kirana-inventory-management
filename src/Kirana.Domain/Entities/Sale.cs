@@ -34,6 +34,11 @@ public class Sale : Entity
     public int? DiscountAuthorizedByUserId { get; set; }
     public User? DiscountAuthorizedByUser { get; set; }
 
+    /// <summary>Who authorized overriding one or more line's selling price away from the product's
+    /// current price, if any.</summary>
+    public int? PriceOverrideAuthorizedByUserId { get; set; }
+    public User? PriceOverrideAuthorizedByUser { get; set; }
+
     public ICollection<SaleItem> Items { get; set; } = new List<SaleItem>();
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 }

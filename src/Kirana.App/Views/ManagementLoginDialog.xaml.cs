@@ -47,4 +47,6 @@ public sealed partial class ManagementLoginDialog : ContentDialog
             deferral.Complete();
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

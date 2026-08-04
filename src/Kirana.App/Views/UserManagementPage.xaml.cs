@@ -1,3 +1,4 @@
+using Kirana.App.Theming;
 using Kirana.App.ViewModels;
 using Kirana.Application.Authentication;
 using Kirana.Application.Users;
@@ -22,14 +23,6 @@ public sealed partial class UserManagementPage : Page
         Loaded += async (_, _) => await ViewModel.InitializeAsync();
     }
 
-    private void OnBackClick(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(ManagementPlaceholderPage));
-
-    private void OnLockClick(object sender, RoutedEventArgs e)
-    {
-        App.Services.GetRequiredService<IAuthenticationService>().LockAndReturnToBilling();
-        Frame.Navigate(typeof(PosShellPage));
-    }
-
     private async void OnAddUserClick(object sender, RoutedEventArgs e)
     {
         if (!ViewModel.CanManageUsers)
@@ -38,7 +31,7 @@ public sealed partial class UserManagementPage : Page
         }
 
         var editViewModel = new UserEditViewModel(ViewModel, App.Services.GetRequiredService<IUserManagementService>(), existingUser: null);
-        var dialog = new UserEditDialog(editViewModel) { XamlRoot = XamlRoot };
+        var dialog = new UserEditDialog(editViewModel).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.LoadUsersAsync();
     }
@@ -51,7 +44,7 @@ public sealed partial class UserManagementPage : Page
         }
 
         var editViewModel = new UserEditViewModel(ViewModel, App.Services.GetRequiredService<IUserManagementService>(), row);
-        var dialog = new UserEditDialog(editViewModel) { XamlRoot = XamlRoot };
+        var dialog = new UserEditDialog(editViewModel).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.LoadUsersAsync();
     }
@@ -63,7 +56,7 @@ public sealed partial class UserManagementPage : Page
             return;
         }
 
-        var dialog = new ResetPasswordDialog(ViewModel, row.Id) { XamlRoot = XamlRoot };
+        var dialog = new ResetPasswordDialog(ViewModel, row.Id).Themed(XamlRoot);
         await dialog.ShowAsync();
     }
 
@@ -74,7 +67,7 @@ public sealed partial class UserManagementPage : Page
             return;
         }
 
-        var dialog = new SetPinDialog(ViewModel, row.Id) { XamlRoot = XamlRoot };
+        var dialog = new SetPinDialog(ViewModel, row.Id).Themed(XamlRoot);
         await dialog.ShowAsync();
     }
 

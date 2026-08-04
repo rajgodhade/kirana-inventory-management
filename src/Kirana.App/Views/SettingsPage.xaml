@@ -9,38 +9,60 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0" Padding="20,16" Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="◀ Management" Click="OnBackClick" Margin="0,0,12,0" />
-            <TextBlock Grid.Column="1" Text="Settings" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
-            <Button Grid.Column="2" Content="Lock &amp; Return to Billing" Click="OnLockClick" />
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Settings" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Appearance, security and store preferences." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="1" Padding="20" Spacing="12" MaxWidth="420" HorizontalAlignment="Left">
-            <TextBlock Text="Dashboard Security" FontSize="16" FontWeight="SemiBold" />
-            <TextBlock Text="Automatically lock the Dashboard and return to Billing after a period of inactivity."
-                       Opacity="0.7" TextWrapping="Wrap" />
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Padding="24,0,24,24" Spacing="16" MaxWidth="560" HorizontalAlignment="Left">
 
-            <ComboBox Header="Inactivity auto-lock" ItemsSource="{x:Bind ViewModel.DurationOptions}"
-                      SelectedItem="{x:Bind ViewModel.SelectedDurationOption, Mode=TwoWay}"
-                      IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                <!-- Appearance. Unlike the other settings this is a per-install display preference,
+                     so it is deliberately not gated behind the settings permission. -->
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Appearance" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="Choose how Kirana looks. Light is the default; dark is easier on the eyes in a dim shop."
+                                       Style="{StaticResource PageSubtitleTextStyle}" />
+                        </StackPanel>
 
-            <TextBox Header="Custom duration (minutes)" Text="{x:Bind ViewModel.CustomMinutesText, Mode=TwoWay}"
-                     Visibility="{x:Bind ViewModel.IsCustomSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                     IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                        <RadioButtons x:Name="ThemeChoice" SelectedIndex="0" SelectionChanged="OnThemeChoiceChanged">
+                            <x:String>Light</x:String>
+                            <x:String>Dark</x:String>
+                            <x:String>Use Windows setting</x:String>
+                        </RadioButtons>
+                    </StackPanel>
+                </Border>
 
-            <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.SaveCommand}"
-                    IsEnabled="{x:Bind ViewModel.CanChangeSettings}" HorizontalAlignment="Left" />
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Dashboard Security" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="Automatically lock the Dashboard and return to Billing after a period of inactivity."
+                                       Style="{StaticResource PageSubtitleTextStyle}" />
+                        </StackPanel>
 
-            <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
-                     Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
-            <InfoBar IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
-                     Severity="Success" Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
-        </StackPanel>
+                        <ComboBox Header="Inactivity auto-lock" ItemsSource="{x:Bind ViewModel.DurationOptions}"
+                                  SelectedItem="{x:Bind ViewModel.SelectedDurationOption, Mode=TwoWay}"
+                                  IsEnabled="{x:Bind ViewModel.CanChangeSettings}" HorizontalAlignment="Stretch" />
+
+                        <TextBox Header="Custom duration (minutes)" Text="{x:Bind ViewModel.CustomMinutesText, Mode=TwoWay}"
+                                 Visibility="{x:Bind ViewModel.IsCustomSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                 IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+
+                        <Button Content="Save" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.SaveCommand}"
+                                IsEnabled="{x:Bind ViewModel.CanChangeSettings}" HorizontalAlignment="Left" />
+
+                        <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                                 Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                        <InfoBar IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                                 Severity="Success" Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

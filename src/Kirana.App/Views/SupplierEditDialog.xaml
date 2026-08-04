@@ -6,6 +6,20 @@
     CloseButtonText="Cancel"
     DefaultButton="Primary">
 
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="DialogTitleText" Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                    Click="OnCloseIconClick" AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
+
     <ScrollViewer MaxHeight="480">
         <StackPanel Spacing="10" MinWidth="380">
             <TextBox Header="Business / Name" Text="{x:Bind ViewModel.Name, Mode=TwoWay}" />

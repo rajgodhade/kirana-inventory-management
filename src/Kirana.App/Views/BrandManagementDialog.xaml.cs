@@ -24,4 +24,6 @@ public sealed partial class BrandManagementDialog : ContentDialog
             await ViewModel.ToggleActiveAsync(brand);
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

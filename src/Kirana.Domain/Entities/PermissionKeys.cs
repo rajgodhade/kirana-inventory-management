@@ -17,6 +17,11 @@ public static class PermissionKeys
     public const string SalesReprintInvoice = "sales.reprintInvoice";
     public const string InventoryManage = "inventory.manage";
     public const string PurchasesManage = "purchases.manage";
+
+    /// <summary>Gates customer <em>financial</em> surfaces — ledger, outstanding balances, and
+    /// Udhaar repayments. Deliberately NOT required to pick or create a customer at the POS, since
+    /// normal billing runs logged-out (PRD §4).</summary>
+    public const string CustomersManage = "customers.manage";
     public const string ReportsView = "reports.view";
     public const string ReportsViewProfit = "reports.viewProfit";
     public const string ExpensesManage = "expenses.manage";
@@ -38,6 +43,7 @@ public static class PermissionKeys
         (SalesReprintInvoice, "Reprint a completed invoice"),
         (InventoryManage, "Manage inventory and stock adjustments"),
         (PurchasesManage, "Manage purchases and suppliers"),
+        (CustomersManage, "Manage customers, Udhaar balances and repayments"),
         (ReportsView, "View reports and dashboard"),
         (ReportsViewProfit, "View profit figures"),
         (ExpensesManage, "Manage expenses"),
@@ -58,8 +64,9 @@ public static class PermissionKeys
     public static readonly IReadOnlyList<string> Manager = new[]
     {
         ProductsView, ProductsEdit,
+        PricingChangeSellingPrice,
         BillingApplyDiscount, BillingApproveLargeDiscount, SalesProcessRefund, SalesCancelInvoice, SalesReprintInvoice,
-        InventoryManage, PurchasesManage,
+        InventoryManage, PurchasesManage, CustomersManage,
         ReportsView,
         ExpensesManage,
     };

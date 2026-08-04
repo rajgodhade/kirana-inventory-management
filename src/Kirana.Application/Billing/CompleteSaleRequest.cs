@@ -13,4 +13,11 @@ public sealed class CompleteSaleRequest
     /// whenever any item or bill discount exceeds <see cref="SaleService.MaxUnauthorizedDiscountPercent"/> —
     /// <see cref="SaleService"/> re-verifies the user actually holds that permission.</summary>
     public int? DiscountAuthorizedByUserId { get; init; }
+
+    /// <summary>Set only after a successful <c>IAuthenticationService.AuthorizeAsync</c> call for
+    /// <see cref="Domain.Entities.PermissionKeys.PricingChangeSellingPrice"/>. Required whenever any
+    /// line's <see cref="SaleLineInput.UnitPriceOverride"/> differs from that product's current
+    /// selling price — <see cref="SaleService"/> re-verifies the user actually holds that
+    /// permission.</summary>
+    public int? PriceOverrideAuthorizedByUserId { get; init; }
 }

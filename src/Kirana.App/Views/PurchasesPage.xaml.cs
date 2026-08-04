@@ -1,3 +1,4 @@
+using Kirana.App.Theming;
 using Kirana.App.ViewModels;
 using Kirana.Application.Authentication;
 using Kirana.Application.Purchasing;
@@ -10,6 +11,8 @@ namespace Kirana.App.Views;
 
 public sealed partial class PurchasesPage : Page
 {
+    private readonly DispatcherTimer _searchDebounce = new() { Interval = TimeSpan.FromMilliseconds(300) };
+
     public PurchasesViewModel ViewModel { get; }
 
     public PurchasesPage()
@@ -19,20 +22,25 @@ public sealed partial class PurchasesPage : Page
 
         InitializeComponent();
         Loaded += async (_, _) => await ViewModel.InitializeAsync();
+
+        _searchDebounce.Tick += async (_, _) =>
+        {
+            _searchDebounce.Stop();
+            await ViewModel.SearchAsync();
+        };
     }
 
-    private void OnBackClick(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(ManagementPlaceholderPage));
-
-    private void OnLockClick(object sender, RoutedEventArgs e)
+    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
     {
-        App.Services.GetRequiredService<IAuthenticationService>().LockAndReturnToBilling();
-        Frame.Navigate(typeof(PosShellPage));
+        _searchDebounce.Stop();
+        _searchDebounce.Start();
     }
 
     private async void OnSearchBoxKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == Windows.System.VirtualKey.Enter)
         {
+            _searchDebounce.Stop();
             await ViewModel.SearchAsync();
         }
     }
@@ -62,7 +70,7 @@ public sealed partial class PurchasesPage : Page
             return;
         }
 
-        var dialog = new PurchaseDetailsDialog(purchase) { XamlRoot = XamlRoot };
+        var dialog = new PurchaseDetailsDialog(purchase).Themed(XamlRoot);
         await dialog.ShowAsync();
     }
 
@@ -79,7 +87,7 @@ public sealed partial class PurchasesPage : Page
             return;
         }
 
-        var dialog = new PurchasePaymentDialog(ViewModel, purchase.Id, purchase.SupplierId) { XamlRoot = XamlRoot };
+        var dialog = new PurchasePaymentDialog(ViewModel, purchase.Id, purchase.SupplierId).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.SearchAsync();
     }

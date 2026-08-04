@@ -67,6 +67,13 @@ public sealed partial class PurchaseEntryViewModel(
 
     public ObservableCollection<PurchaseLineViewModel> Lines { get; } = [];
 
+    [ObservableProperty]
+    private bool _hasSuggestions;
+
+    public ObservableCollection<Product> SearchSuggestions { get; } = [];
+
+    private int _suggestionQueryToken;
+
     public Purchase? CompletedPurchase { get; private set; }
 
     /// <summary>Same keyboard-wedge scanner pipeline the POS uses (PRD §17) — receiving goods by
@@ -119,7 +126,45 @@ public sealed partial class PurchaseEntryViewModel(
         AddOrIncrement(product);
     }
 
-    private void AddOrIncrement(Product product)
+    /// <summary>Live "as you type" suggestions for the search box, same behavior as the POS billing
+    /// screen — reuses the same prioritized <see cref="IProductService.SearchAsync"/> the Enter-to-add
+    /// path already uses.</summary>
+    public async Task UpdateSuggestionsAsync(string text)
+    {
+        var token = ++_suggestionQueryToken;
+        var trimmed = text.Trim();
+
+        if (trimmed.Length == 0)
+        {
+            SearchSuggestions.Clear();
+            HasSuggestions = false;
+            return;
+        }
+
+        var results = await productService.SearchAsync(new ProductSearchQuery { SearchText = trimmed, MaxResults = 8 });
+
+        if (token != _suggestionQueryToken)
+        {
+            return;
+        }
+
+        SearchSuggestions.Clear();
+        foreach (var product in results)
+        {
+            SearchSuggestions.Add(product);
+        }
+
+        HasSuggestions = SearchSuggestions.Count > 0;
+    }
+
+    public void ClearSuggestions()
+    {
+        _suggestionQueryToken++;
+        SearchSuggestions.Clear();
+        HasSuggestions = false;
+    }
+
+    public void AddOrIncrement(Product product)
     {
         var existing = Lines.FirstOrDefault(l => l.ProductId == product.Id);
         if (existing is not null)

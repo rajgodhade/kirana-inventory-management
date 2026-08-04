@@ -6,16 +6,30 @@
     CloseButtonText="Cancel"
     DefaultButton="Primary">
 
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:ConnectionId='2' x:Name="DialogTitleText" Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button x:ConnectionId='3' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                                             AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
+
     <ScrollViewer MaxHeight="480">
         <StackPanel Spacing="10" MinWidth="380">
-            <TextBox x:ConnectionId='2' Header="Business / Name"                                             />
-            <TextBox x:ConnectionId='3' Header="GSTIN"                                              />
-            <TextBox x:ConnectionId='4' Header="Contact Person"                                                      />
-            <TextBox x:ConnectionId='5' Header="Phone"                                              />
-            <TextBox x:ConnectionId='6' Header="Email"                                              />
-            <TextBox x:ConnectionId='7' Header="Address"                                                AcceptsReturn="True" TextWrapping="Wrap" Height="60" />
+            <TextBox x:ConnectionId='4' Header="Business / Name"                                             />
+            <TextBox x:ConnectionId='5' Header="GSTIN"                                              />
+            <TextBox x:ConnectionId='6' Header="Contact Person"                                                      />
+            <TextBox x:ConnectionId='7' Header="Phone"                                              />
+            <TextBox x:ConnectionId='8' Header="Email"                                              />
+            <TextBox x:ConnectionId='9' Header="Address"                                                AcceptsReturn="True" TextWrapping="Wrap" Height="60" />
 
-            <InfoBar x:ConnectionId='8'                                                                                                        
+            <InfoBar x:ConnectionId='10'                                                                                                        
                      Severity="Error"                                                        />
         </StackPanel>
     </ScrollViewer>

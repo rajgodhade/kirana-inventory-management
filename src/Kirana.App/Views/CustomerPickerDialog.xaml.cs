@@ -51,4 +51,6 @@ public sealed partial class CustomerPickerDialog : ContentDialog
             ViewModel.Pick(customer);
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

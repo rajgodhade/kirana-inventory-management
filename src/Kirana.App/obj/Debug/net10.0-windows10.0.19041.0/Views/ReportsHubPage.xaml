@@ -1,0 +1,48 @@
+﻿<Page
+    x:Class="Kirana.App.Views.ReportsHubPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:reports="using:Kirana.App.Views.Reports">
+
+    <Grid Background="{ThemeResource PageBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Dashboard &amp; Reports" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Business KPIs, charts and the full report suite." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
+        </Grid>
+
+        <Pivot x:ConnectionId='2' x:Name="Tabs" Grid.Row="1" Padding="24,0,24,0"                                 >
+            <PivotItem Header="Dashboard">
+                <reports:DashboardView x:ConnectionId='11' x:Name="DashboardTab" />
+            </PivotItem>
+            <PivotItem Header="Sales &amp; GST">
+                <reports:SalesReportView x:ConnectionId='10' x:Name="SalesTab" />
+            </PivotItem>
+            <PivotItem Header="Products">
+                <reports:ProductReportView x:ConnectionId='9' x:Name="ProductsTab" />
+            </PivotItem>
+            <PivotItem Header="Inventory">
+                <reports:InventoryReportView x:ConnectionId='8' x:Name="InventoryTab" />
+            </PivotItem>
+            <PivotItem Header="Customers">
+                <reports:CustomerReportView x:ConnectionId='7' x:Name="CustomersTab" />
+            </PivotItem>
+            <PivotItem Header="Suppliers">
+                <reports:SupplierReportView x:ConnectionId='6' x:Name="SuppliersTab" />
+            </PivotItem>
+            <PivotItem Header="Expenses">
+                <reports:ExpenseReportView x:ConnectionId='5' x:Name="ExpensesTab" />
+            </PivotItem>
+            <PivotItem x:ConnectionId='3' x:Name="ProfitPivotItem" Header="Profit">
+                <reports:ProfitReportView x:ConnectionId='4' x:Name="ProfitTab" />
+            </PivotItem>
+        </Pivot>
+    </Grid>
+</Page>
+

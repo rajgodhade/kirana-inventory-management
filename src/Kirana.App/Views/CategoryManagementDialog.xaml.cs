@@ -24,4 +24,6 @@ public sealed partial class CategoryManagementDialog : ContentDialog
             await ViewModel.ToggleActiveAsync(category);
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

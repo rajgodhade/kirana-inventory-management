@@ -55,4 +55,6 @@ public sealed partial class SupplierPickerDialog : ContentDialog
             ViewModel.Pick(supplier);
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

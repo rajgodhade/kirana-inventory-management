@@ -31,10 +31,21 @@ public sealed class KiranaDbContext(DbContextOptions<KiranaDbContext> options)
     public DbSet<HeldBill> HeldBills => Set<HeldBill>();
     public DbSet<HeldBillItem> HeldBillItems => Set<HeldBillItem>();
 
+    public DbSet<CreditPayment> CreditPayments => Set<CreditPayment>();
+    public DbSet<CreditPaymentAllocation> CreditPaymentAllocations => Set<CreditPaymentAllocation>();
+
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<Purchase> Purchases => Set<Purchase>();
     public DbSet<PurchaseItem> PurchaseItems => Set<PurchaseItem>();
     public DbSet<SupplierPayment> SupplierPayments => Set<SupplierPayment>();
+
+    public DbSet<SalesReturn> SalesReturns => Set<SalesReturn>();
+    public DbSet<SalesReturnItem> SalesReturnItems => Set<SalesReturnItem>();
+    public DbSet<PurchaseReturn> PurchaseReturns => Set<PurchaseReturn>();
+    public DbSet<PurchaseReturnItem> PurchaseReturnItems => Set<PurchaseReturnItem>();
+
+    public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
+    public DbSet<Expense> Expenses => Set<Expense>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

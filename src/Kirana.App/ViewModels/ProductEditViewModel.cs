@@ -46,7 +46,17 @@ public sealed partial class ProductEditViewModel : ObservableObject
     private Brand? _selectedBrand;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MinimumStockHeader))]
+    [NotifyPropertyChangedFor(nameof(ReorderQuantityHeader))]
+    [NotifyPropertyChangedFor(nameof(OpeningStockHeader))]
     private UnitOfMeasure _selectedUnit = UnitOfMeasure.Piece;
+
+    /// <summary>Inventory quantity fields show the selected unit right in the header (e.g.
+    /// "Minimum stock (Kilogram)") so it is obvious what "5" in the box actually means — the same
+    /// unit the product's own stock ledger and POS billing already use.</summary>
+    public string MinimumStockHeader => $"Minimum stock ({SelectedUnit})";
+    public string ReorderQuantityHeader => $"Reorder quantity ({SelectedUnit})";
+    public string OpeningStockHeader => $"Opening stock ({SelectedUnit})";
 
     [ObservableProperty]
     private string _purchasePriceText = "0";
@@ -234,6 +244,24 @@ public sealed partial class ProductEditViewModel : ObservableObject
         {
             ErrorMessage = "Minimum stock and reorder quantity must be valid numbers.";
             return;
+        }
+
+        // Mirrors the same whole-unit rule SaleService enforces at billing time — a product sold
+        // in whole Pieces/Boxes/etc. shouldn't be able to have a fractional minimum/reorder/opening
+        // stock either, since no sale could ever land the stock level on that exact fraction.
+        if (!SelectedUnit.SupportsDecimalQuantity())
+        {
+            if (minimumStock != Math.Floor(minimumStock) || reorderQuantity != Math.Floor(reorderQuantity))
+            {
+                ErrorMessage = $"'{SelectedUnit}' is a whole-unit measure — minimum stock and reorder quantity must be whole numbers.";
+                return;
+            }
+
+            if (!IsEditMode && decimal.TryParse(OpeningStockText, out var wholeCheck) && wholeCheck != Math.Floor(wholeCheck))
+            {
+                ErrorMessage = $"'{SelectedUnit}' is a whole-unit measure — opening stock must be a whole number.";
+                return;
+            }
         }
 
         IsSaving = true;

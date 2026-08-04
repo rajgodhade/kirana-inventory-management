@@ -364,6 +364,111 @@ public class SaleServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CompleteSaleAsync_UsesOverriddenPrice_WhenAuthorized()
+    {
+        var manager = await SeedAuthorizedUserAsync();
+        var product = await SeedProductAsync(price: 100);
+
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1, UnitPriceOverride = 70 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 70, AmountTendered = 70 }],
+            PriceOverrideAuthorizedByUserId = manager.Id,
+        };
+
+        var sale = await _sut.CompleteSaleAsync(request);
+
+        Assert.Equal(70m, sale.GrandTotal);
+        Assert.Equal(70m, sale.Items.Single().UnitPriceSnapshot);
+        Assert.Equal(manager.Id, sale.PriceOverrideAuthorizedByUserId);
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_NeverMutatesTheProductsOwnSellingPrice_WhenOverridden()
+    {
+        var manager = await SeedAuthorizedUserAsync();
+        var product = await SeedProductAsync(price: 100);
+
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1, UnitPriceOverride = 70 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 70, AmountTendered = 70 }],
+            PriceOverrideAuthorizedByUserId = manager.Id,
+        };
+
+        await _sut.CompleteSaleAsync(request);
+
+        var reloaded = await _fixture.Context.Products.SingleAsync(p => p.Id == product.Id);
+        Assert.Equal(100m, reloaded.SellingPrice);
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_Throws_WhenPriceOverrideNotAuthorized()
+    {
+        var product = await SeedProductAsync(price: 100);
+
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1, UnitPriceOverride = 70 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 70, AmountTendered = 70 }],
+        };
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.CompleteSaleAsync(request));
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_Throws_WhenPriceOverrideAuthorizingUserLacksPermission()
+    {
+        var product = await SeedProductAsync(price: 100);
+
+        // Same "id exists but was never granted the permission" shape as the discount-authorization
+        // rejection test above — no user with id 999 was ever seeded.
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1, UnitPriceOverride = 70 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 70, AmountTendered = 70 }],
+            PriceOverrideAuthorizedByUserId = 999,
+        };
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.CompleteSaleAsync(request));
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_Throws_WhenOverriddenPriceIsNegative()
+    {
+        var manager = await SeedAuthorizedUserAsync();
+        var product = await SeedProductAsync(price: 100);
+
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1, UnitPriceOverride = -1 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 0, AmountTendered = 0 }],
+            PriceOverrideAuthorizedByUserId = manager.Id,
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.CompleteSaleAsync(request));
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_DoesNotRequireAuthorization_WhenOverridePriceMatchesCurrentPrice()
+    {
+        var product = await SeedProductAsync(price: 100);
+
+        // UnitPriceOverride is set but happens to equal the product's current price — this is not
+        // really an override in effect, so it must not demand manager authorization.
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1, UnitPriceOverride = 100 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 100, AmountTendered = 100 }],
+        };
+
+        var sale = await _sut.CompleteSaleAsync(request);
+
+        Assert.Equal(100m, sale.GrandTotal);
+        Assert.Null(sale.PriceOverrideAuthorizedByUserId);
+    }
+
+    [Fact]
     public async Task CompleteSaleAsync_AppliesGst_WhenStoreGstEnabled()
     {
         await EnableStoreGstAsync(true);

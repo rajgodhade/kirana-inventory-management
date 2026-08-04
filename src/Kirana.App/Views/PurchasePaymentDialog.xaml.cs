@@ -55,4 +55,6 @@ public sealed partial class PurchasePaymentDialog : ContentDialog
             deferral.Complete();
         }
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }

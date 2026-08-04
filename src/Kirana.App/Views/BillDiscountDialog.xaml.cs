@@ -28,4 +28,6 @@ public sealed partial class BillDiscountDialog : ContentDialog
 
         Percent = value;
     }
+
+    private void OnCloseIconClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Hide();
 }
