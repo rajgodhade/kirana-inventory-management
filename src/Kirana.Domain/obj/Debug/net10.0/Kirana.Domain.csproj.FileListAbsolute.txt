@@ -10,3 +10,15 @@ F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\r
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.pdb
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\ref\Kirana.Domain.dll
 F:\Raj\My Project\Inventory-management\app\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.sourcelink.json
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\bin\Debug\net10.0\Kirana.Domain.deps.json
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\bin\Debug\net10.0\Kirana.Domain.dll
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\bin\Debug\net10.0\Kirana.Domain.pdb
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.AssemblyInfoInputs.cache
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.AssemblyInfo.cs
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.csproj.CoreCompileInputs.cache
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.sourcelink.json
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.dll
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\Debug\net10.0\refint\Kirana.Domain.dll
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\Debug\net10.0\Kirana.Domain.pdb
+D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\Debug\net10.0\ref\Kirana.Domain.dll

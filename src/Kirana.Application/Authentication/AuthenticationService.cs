@@ -19,6 +19,17 @@ public sealed class AuthenticationService(
         return await AuthenticateAsync(user, password, isPin: false, cancellationToken);
     }
 
+    public async Task<AuthResult> LoginWithUsernameAndPinAsync(string username, string pin, CancellationToken cancellationToken = default)
+    {
+        if (TryGetPinLockoutMessage(out var lockedMessage))
+        {
+            return AuthResult.Fail(lockedMessage);
+        }
+
+        var user = await FindUserAsync(u => u.Username == username, cancellationToken);
+        return await AuthenticateAsync(user, pin, isPin: true, cancellationToken);
+    }
+
     public async Task<AuthResult> LoginWithPinAsync(string pin, CancellationToken cancellationToken = default)
     {
         if (TryGetPinLockoutMessage(out var lockedMessage))

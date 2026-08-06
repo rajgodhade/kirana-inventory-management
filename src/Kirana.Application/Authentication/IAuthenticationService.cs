@@ -9,6 +9,11 @@ public interface IAuthenticationService
 {
     Task<AuthResult> LoginWithPasswordAsync(string username, string password, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Unlocks management for the named user using that user's PIN.
+    /// </summary>
+    Task<AuthResult> LoginWithUsernameAndPinAsync(string username, string pin, CancellationToken cancellationToken = default);
+
     Task<AuthResult> LoginWithPinAsync(string pin, CancellationToken cancellationToken = default);
 
     /// <summary>

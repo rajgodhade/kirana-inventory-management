@@ -89,6 +89,8 @@ public sealed partial class PurchasesPage : Page
     // hover tint is applied directly to this Grid instead, restoring the affordance explicitly.
 
     private static readonly SolidColorBrush TransparentBrush = new(Microsoft.UI.Colors.Transparent);
+    // Keep purchase rows calm in both themes: this is a hover affordance, not a selection state.
+    private static readonly SolidColorBrush HoverBrush = new(Windows.UI.Color.FromArgb(255, 240, 253, 250));
 
     private void OnRowPointerEntered(object sender, PointerRoutedEventArgs e)
     {
@@ -97,10 +99,7 @@ public sealed partial class PurchasesPage : Page
             return;
         }
 
-        if (Microsoft.UI.Xaml.Application.Current.Resources.TryGetValue("BrandSubtleBrush", out var brush))
-        {
-            grid.Background = (Microsoft.UI.Xaml.Media.Brush)brush;
-        }
+        grid.Background = HoverBrush;
     }
 
     private void OnRowPointerExited(object sender, PointerRoutedEventArgs e)

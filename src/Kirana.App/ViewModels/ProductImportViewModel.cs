@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Kirana.Application.Products;
 
@@ -12,7 +13,14 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasFile))]
+    [NotifyPropertyChangedFor(nameof(ImportReadinessText))]
     private string _fileName = string.Empty;
+
+    [ObservableProperty]
+    private string _fileSizeText = string.Empty;
+
+    [ObservableProperty]
+    private int _rowCount;
 
     [ObservableProperty]
     private string? _errorMessage;
@@ -21,10 +29,13 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
     private string? _successMessage;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanCommit))]
+    [NotifyPropertyChangedFor(nameof(ImportReadinessText))]
     private bool _isBusy;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCommit))]
+    [NotifyPropertyChangedFor(nameof(ImportReadinessText))]
     private bool _hasPreview;
 
     [ObservableProperty]
@@ -39,7 +50,55 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCommit))]
+    [NotifyPropertyChangedFor(nameof(ImportReadinessText))]
+    [NotifyPropertyChangedFor(nameof(HasResults))]
+    [NotifyPropertyChangedFor(nameof(PrimaryButtonText))]
     private bool _isCommitted;
+
+    [ObservableProperty]
+    private int _createdCount;
+
+    [ObservableProperty]
+    private int _updatedCount;
+
+    [ObservableProperty]
+    private int _skippedCount;
+
+    [ObservableProperty]
+    private int _categoriesCreated;
+
+    [ObservableProperty]
+    private int _brandsCreated;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ImportedAtText))]
+    private DateTimeOffset? _importedAt;
+
+    [ObservableProperty]
+    private string _elapsedText = string.Empty;
+
+    public bool HasResults => IsCommitted;
+    public bool HasSkippedRows => SkippedCount > 0;
+    public int RowsProcessed => CreatedCount + UpdatedCount + SkippedCount;
+    public string PrimaryButtonText => IsCommitted ? "✓ Import Complete" : "Import";
+    public string ImportedAtText => ImportedAt?.ToString("dd MMM yyyy h:mm tt") ?? string.Empty;
+    public int NewCount => _preview?.NewCount ?? 0;
+    public int UpdateCount => _preview?.UpdateCount ?? 0;
+    public int ErrorCount => _preview?.ErrorCount ?? 0;
+    public string ImportReadinessText =>
+        !HasFile ? "Choose a CSV or XLSX file to begin."
+        : IsBusy ? "Checking your file…"
+        : !HasPreview ? "File needs attention before it can be imported."
+        : CanCommit ? "Ready to import valid rows. Rows with errors will be skipped."
+        : CommitDisabledReason;
+
+    public string CommitDisabledReason =>
+        !HasFile ? "Choose a file before importing."
+        : IsBusy ? "Please wait for validation to finish."
+        : IsCommitted ? "Successfully imported. Choose another file to start a new import."
+        : _preview?.HasFatalError == true ? "Fix the file-level validation error before importing."
+        : _preview is null ? "Preview the file before importing."
+        : "There are no valid rows to import. Fix or remove invalid rows first.";
 
     public ObservableCollection<ProductImportRowViewModel> Rows { get; } = [];
 
@@ -49,7 +108,7 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
     /// <summary>Import is only offered once the preview has at least one non-removed, non-error row,
     /// and only once — committing twice would double-create every row.</summary>
     public bool CanCommit =>
-        HasPreview && !IsCommitted && _preview is { HasFatalError: false }
+        HasPreview && !IsBusy && !IsCommitted && _preview is { HasFatalError: false }
         && _preview.Rows.Any(r => r.Status != ProductImportRowStatus.Error && !_removedRowNumbers.Contains(r.RowNumber));
 
     private ProductImportPreview? _preview;
@@ -65,7 +124,9 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
 
     public string BuildTemplate() => importService.BuildCsvTemplate();
 
-    public async Task LoadPreviewAsync(Stream stream, string fileName)
+    public void ShowFileTypeError() => ErrorMessage = "Choose a CSV or XLSX product file.";
+
+    public async Task LoadPreviewAsync(Stream stream, string fileName, long? fileSizeBytes = null)
     {
         ErrorMessage = null;
         SuccessMessage = null;
@@ -73,14 +134,23 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
         try
         {
             FileName = fileName;
+            FileSizeText = fileSizeBytes is { } size ? FormatFileSize(size) : string.Empty;
             _removedRowNumbers.Clear();
             ApplyPreview(await importService.BuildPreviewAsync(stream, fileName, currentUserId));
             IsCommitted = false;
+            CreatedCount = 0;
+            UpdatedCount = 0;
+            SkippedCount = 0;
+            CategoriesCreated = 0;
+            BrandsCreated = 0;
+            ImportedAt = null;
+            ElapsedText = string.Empty;
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
             HasPreview = false;
+            RowCount = 0;
         }
         finally
         {
@@ -189,6 +259,7 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
             SummaryText = string.Empty;
             ShowNewReferenceData = false;
             HasPreview = false;
+            RowCount = 0;
             return;
         }
 
@@ -208,6 +279,10 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
         NewReferenceDataText = string.Join("   •   ", parts);
         ShowNewReferenceData = parts.Count > 0;
         HasPreview = true;
+        RowCount = preview.Rows.Count;
+        OnPropertyChanged(nameof(NewCount));
+        OnPropertyChanged(nameof(UpdateCount));
+        OnPropertyChanged(nameof(ErrorCount));
     }
 
     private void RefreshSummaryText()
@@ -234,6 +309,7 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
 
         ErrorMessage = null;
         IsBusy = true;
+        var stopwatch = Stopwatch.StartNew();
         try
         {
             // "Remove" is a UI-only exclusion the service never sees — build a preview covering
@@ -250,6 +326,14 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
 
             var result = await importService.CommitAsync(commitPreview, currentUserId);
             IsCommitted = true;
+            CreatedCount = result.CreatedCount;
+            UpdatedCount = result.UpdatedCount;
+            SkippedCount = result.SkippedErrorCount;
+            CategoriesCreated = result.CategoriesCreated;
+            BrandsCreated = result.BrandsCreated;
+            ImportedAt = DateTimeOffset.Now;
+            stopwatch.Stop();
+            ElapsedText = $"{stopwatch.Elapsed.TotalSeconds:0.0} seconds";
             SuccessMessage =
                 $"Imported successfully — {result.CreatedCount} created, {result.UpdatedCount} updated"
                 + (result.SkippedErrorCount > 0 ? $", {result.SkippedErrorCount} skipped" : "")
@@ -263,8 +347,54 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
         {
             IsBusy = false;
             OnPropertyChanged(nameof(CanCommit));
+            OnPropertyChanged(nameof(ImportReadinessText));
+            OnPropertyChanged(nameof(HasResults));
+            OnPropertyChanged(nameof(HasSkippedRows));
+            OnPropertyChanged(nameof(RowsProcessed));
         }
     }
+
+    /// <summary>Clears presentation/session state only. The importer and stored data are untouched.</summary>
+    public void ResetForAnotherFile()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        _preview = null;
+        _removedRowNumbers.Clear();
+        Rows.Clear();
+        FileName = string.Empty;
+        FileSizeText = string.Empty;
+        RowCount = 0;
+        ErrorMessage = null;
+        SuccessMessage = null;
+        SummaryText = string.Empty;
+        NewReferenceDataText = string.Empty;
+        ShowNewReferenceData = false;
+        HasPreview = false;
+        IsCommitted = false;
+        CreatedCount = 0;
+        UpdatedCount = 0;
+        SkippedCount = 0;
+        CategoriesCreated = 0;
+        BrandsCreated = 0;
+        ImportedAt = null;
+        ElapsedText = string.Empty;
+        OnPropertyChanged(nameof(NewCount));
+        OnPropertyChanged(nameof(UpdateCount));
+        OnPropertyChanged(nameof(ErrorCount));
+        OnPropertyChanged(nameof(HasSkippedRows));
+        OnPropertyChanged(nameof(RowsProcessed));
+    }
+
+    private static string FormatFileSize(long bytes) => bytes switch
+    {
+        < 1024 => $"{bytes} B",
+        < 1024 * 1024 => $"{bytes / 1024d:0.#} KB",
+        _ => $"{bytes / (1024d * 1024d):0.#} MB",
+    };
 }
 
 /// <summary>
@@ -297,6 +427,10 @@ public sealed partial class ProductImportRowViewModel(ProductImportRow row, IRea
     public string RemoveButtonAutomationName => $"Remove row {row.RowNumber}";
     public string UndoRemoveButtonAutomationName => $"Undo remove for row {row.RowNumber}";
     public string Name => row.Name.Length > 0 ? row.Name : "(no name)";
+    public string ProductCode => row.Sku ?? "—";
+    public string Barcode => row.Barcode ?? "—";
+    public string SellingPrice => row.SellingPrice.ToString("N2");
+    public string ValidationStatus => IsError ? "Needs attention" : IsUpdate ? "Will update" : "Ready";
     public string Details => string.Join("  ·  ", new[]
         {
             row.Sku is null ? null : $"SKU {row.Sku}",
@@ -308,6 +442,8 @@ public sealed partial class ProductImportRowViewModel(ProductImportRow row, IRea
     public bool IsError => row.Status == ProductImportRowStatus.Error;
     public bool IsNew => row.Status == ProductImportRowStatus.New;
     public bool IsUpdate => row.Status == ProductImportRowStatus.Update;
+    /// <summary>Presentation-only table state; it does not influence import validation or commit behavior.</summary>
+    public string TableSurface => IsError ? "Error" : RowNumber % 2 == 0 ? "White" : "Stripe";
     public string ErrorSummary => row.ErrorSummary;
 
     /// <summary>An Update row means this CSV line matched an existing product by SKU or Barcode —

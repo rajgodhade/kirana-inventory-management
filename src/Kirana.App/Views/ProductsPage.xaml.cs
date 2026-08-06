@@ -112,7 +112,23 @@ public sealed partial class ProductsPage : Page
 
     private async void OnEditClick(object sender, RoutedEventArgs e)
     {
-        if (!ViewModel.CanEditProducts || (sender as Button)?.Tag is not ProductRowViewModel row)
+        if ((sender as Button)?.Tag is ProductRowViewModel row)
+        {
+            await EditProductAsync(row);
+        }
+    }
+
+    private async void OnProductDoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        if ((e.OriginalSource as FrameworkElement)?.DataContext is ProductRowViewModel row)
+        {
+            await EditProductAsync(row);
+        }
+    }
+
+    private async Task EditProductAsync(ProductRowViewModel row)
+    {
+        if (!ViewModel.CanEditProducts)
         {
             return;
         }
