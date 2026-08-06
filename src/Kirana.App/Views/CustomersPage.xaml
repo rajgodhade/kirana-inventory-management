@@ -50,7 +50,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBox Grid.Column="0" PlaceholderText="Search Customer ID / phone / name…"
-                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" KeyDown="OnSearchBoxKeyDown"
+                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnSearchBoxKeyDown"
                      TextChanged="OnSearchTextChanged">
                 <TextBox.Resources>
                     <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>

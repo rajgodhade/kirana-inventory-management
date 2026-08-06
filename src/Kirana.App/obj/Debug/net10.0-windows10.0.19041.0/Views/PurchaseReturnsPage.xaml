@@ -38,7 +38,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBox x:ConnectionId='12' Grid.Column="0" PlaceholderText="Search return / purchase / supplier…"
-                                                                                                
+                                                                                                                                     
                                                        />
             <Button x:ConnectionId='13' Grid.Column="1"                       AutomationProperties.Name="Search purchase returns">
                 <FontIcon Glyph="&#xE721;" FontSize="14" />

@@ -28,6 +28,11 @@ public class SaleItem : Entity
     // --- Quantities and computed amounts ---
     public decimal Quantity { get; set; }
     public decimal UnitPriceSnapshot { get; set; }
+
+    /// <summary>The product's MRP at sale time — snapshotted for the same reason as everything
+    /// else here: a later change to the product's MRP must never alter what a past invoice's
+    /// "You Saved" figure was computed from.</summary>
+    public decimal MrpSnapshot { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal DiscountAmount { get; set; }
     public decimal TaxableAmount { get; set; }

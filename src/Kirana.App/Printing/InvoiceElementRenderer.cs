@@ -29,7 +29,7 @@ public static class InvoiceElementRenderer
         stack.Children.Add(BuildDivider());
         stack.Children.Add(BuildTotalsSection(document, isCompact));
         stack.Children.Add(BuildDivider());
-        stack.Children.Add(BuildPaymentsSection(document.Payments, isCompact));
+        stack.Children.Add(BuildPaymentsSection(document.PaymentSummaryLines, isCompact));
 
         if (!string.IsNullOrWhiteSpace(document.FooterText))
         {
@@ -76,7 +76,7 @@ public static class InvoiceElementRenderer
             stack.Children.Add(BuildDivider());
             stack.Children.Add(BuildTotalsSection(document, isCompact));
             stack.Children.Add(BuildDivider());
-            stack.Children.Add(BuildPaymentsSection(document.Payments, isCompact));
+            stack.Children.Add(BuildPaymentsSection(document.PaymentSummaryLines, isCompact));
 
             if (!string.IsNullOrWhiteSpace(document.FooterText))
             {
@@ -202,6 +202,11 @@ public static class InvoiceElementRenderer
         grid.Children.Add(total);
 
         var detailParts = new List<string> { $"{line.Quantity:0.###} {line.Unit} x ₹{line.UnitPrice:0.##}" };
+        if (line.Mrp > 0)
+        {
+            detailParts.Add($"MRP ₹{line.Mrp:0.##}");
+        }
+
         if (line.DiscountPercent > 0)
         {
             detailParts.Add($"Disc {line.DiscountPercent:0.##}%");
@@ -221,7 +226,7 @@ public static class InvoiceElementRenderer
 
     private static readonly (string Header, double Width)[] A4Columns =
     [
-        ("Item", 0), ("HSN", 90), ("Qty", 60), ("Rate", 80), ("Disc%", 60), ("GST%", 60), ("Amount", 90),
+        ("Item", 0), ("HSN", 90), ("Qty", 60), ("MRP", 70), ("Rate", 80), ("Disc%", 60), ("GST%", 60), ("Amount", 90),
     ];
 
     private static FrameworkElement BuildA4HeaderRow()
@@ -245,6 +250,7 @@ public static class InvoiceElementRenderer
             line.ProductName,
             line.HsnCode ?? "-",
             $"{line.Quantity:0.###} {line.Unit}",
+            line.Mrp > 0 ? $"₹{line.Mrp:0.##}" : "-",
             $"₹{line.UnitPrice:0.##}",
             line.DiscountPercent > 0 ? $"{line.DiscountPercent:0.##}%" : "-",
             line.GstRatePercent > 0 ? $"{line.GstRatePercent:0.##}%" : "-",
@@ -276,6 +282,9 @@ public static class InvoiceElementRenderer
     {
         var panel = new StackPanel { Spacing = 1 };
 
+        // Line count, not a sum of quantities — quantities carry mixed units (Kilogram, Piece), so
+        // adding them together would print a meaningless number.
+        panel.Children.Add(BuildTextRow("Total Items", document.Lines.Count.ToString(), isCompact));
         panel.Children.Add(BuildAmountRow("Subtotal", document.SubTotal, isCompact));
 
         if (document.ItemDiscountTotal > 0)
@@ -301,34 +310,57 @@ public static class InvoiceElementRenderer
         panel.Children.Add(BuildDivider());
         panel.Children.Add(BuildAmountRow("Grand Total", document.GrandTotal, isCompact, emphasize: true));
 
-        return panel;
-    }
-
-    private static FrameworkElement BuildPaymentsSection(IReadOnlyList<InvoicePaymentLine> payments, bool isCompact)
-    {
-        var panel = new StackPanel { Spacing = 1 };
-
-        foreach (var payment in payments)
+        if (document.HasSavings)
         {
-            var label = payment.Method.ToString();
-            if (!string.IsNullOrWhiteSpace(payment.ReferenceNumber))
-            {
-                label += $" (Ref: {payment.ReferenceNumber})";
-            }
-
-            panel.Children.Add(BuildAmountRow(label, payment.Amount, isCompact));
-
-            if (payment.AmountTendered is { } tendered)
-            {
-                panel.Children.Add(BuildAmountRow("  Cash Received", tendered, isCompact));
-                panel.Children.Add(BuildAmountRow("  Change Returned", payment.ChangeGiven ?? 0, isCompact));
-            }
+            panel.Children.Add(BuildAmountRow("You Saved", document.TotalSavings, isCompact, emphasize: true, brush: SavingsBrush));
         }
 
         return panel;
     }
 
-    private static FrameworkElement BuildAmountRow(string label, decimal amount, bool isCompact, bool emphasize = false)
+    /// <summary>Hard-coded rather than a `{ThemeResource}` brush: this renderer deliberately does
+    /// not follow the app's light/dark theme (printed receipts are always on a plain background),
+    /// matching the existing hard-coded divider color below.</summary>
+    private static readonly SolidColorBrush SavingsBrush = new(Colors.SeaGreen);
+
+    /// <summary>
+    /// Purely a display step: every decision about which rows belong on this receipt (Cash Received
+    /// only when it differs from what was paid, Change Returned only when actually positive, no
+    /// Customer Credit row on a cash-only sale, etc.) was already made by
+    /// <see cref="PaymentSummaryBuilder"/> when <paramref name="rows"/> was built — this just draws
+    /// whatever it was handed, indenting a detail row under its parent.
+    /// </summary>
+    private static FrameworkElement BuildPaymentsSection(IReadOnlyList<InvoicePaymentSummaryLine> rows, bool isCompact)
+    {
+        var panel = new StackPanel { Spacing = 1 };
+
+        if (rows.Count == 0)
+        {
+            return panel;
+        }
+
+        panel.Children.Add(new TextBlock
+        {
+            Text = "Payment Summary",
+            FontSize = isCompact ? 11 : 13,
+            FontWeight = FontWeights.SemiBold,
+            Margin = new Thickness(0, 0, 0, 2),
+        });
+
+        foreach (var row in rows)
+        {
+            panel.Children.Add(BuildAmountRow(row.IsDetail ? "  " + row.Label : row.Label, row.Amount, isCompact));
+        }
+
+        return panel;
+    }
+
+    private static FrameworkElement BuildAmountRow(string label, decimal amount, bool isCompact, bool emphasize = false, Brush? brush = null) =>
+        BuildTextRow(label, $"₹{amount:0.00}", isCompact, emphasize, brush);
+
+    /// <summary>A totals-section row: label on the left, value right-aligned.
+    /// <see cref="BuildAmountRow"/> is the currency-formatted flavour of this.</summary>
+    private static FrameworkElement BuildTextRow(string label, string value, bool isCompact, bool emphasize = false, Brush? brush = null)
     {
         var grid = new Grid { ColumnSpacing = 4 };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -338,13 +370,21 @@ public static class InvoiceElementRenderer
         var weight = emphasize ? FontWeights.Bold : FontWeights.Normal;
 
         var labelBlock = new TextBlock { Text = label, FontSize = fontSize, FontWeight = weight };
-        Grid.SetColumn(labelBlock, 0);
+        var valueBlock = new TextBlock { Text = value, FontSize = fontSize, FontWeight = weight, HorizontalAlignment = HorizontalAlignment.Right };
 
-        var amountBlock = new TextBlock { Text = $"₹{amount:0.00}", FontSize = fontSize, FontWeight = weight, HorizontalAlignment = HorizontalAlignment.Right };
-        Grid.SetColumn(amountBlock, 1);
+        // Only override Foreground when a brush was actually supplied — assigning null here would
+        // clear the TextBlock's own default instead of leaving it alone.
+        if (brush is not null)
+        {
+            labelBlock.Foreground = brush;
+            valueBlock.Foreground = brush;
+        }
+
+        Grid.SetColumn(labelBlock, 0);
+        Grid.SetColumn(valueBlock, 1);
 
         grid.Children.Add(labelBlock);
-        grid.Children.Add(amountBlock);
+        grid.Children.Add(valueBlock);
         return grid;
     }
 

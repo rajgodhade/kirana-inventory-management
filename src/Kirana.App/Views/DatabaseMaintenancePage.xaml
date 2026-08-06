@@ -1,0 +1,125 @@
+<Page
+    x:Class="Kirana.App.Views.DatabaseMaintenancePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:maint="using:Kirana.Application.Maintenance">
+
+    <Grid Background="{ThemeResource PageBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Padding="{StaticResource PageHeaderPadding}" Spacing="2">
+            <TextBlock Text="Database Maintenance" Style="{StaticResource PageTitleTextStyle}" />
+            <TextBlock Text="Health checks and housekeeping. None of these tools add, change or delete your business records."
+                       Style="{StaticResource PageSubtitleTextStyle}" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="24,0,24,24" Spacing="16" MaxWidth="880" HorizontalAlignment="Left">
+
+                <ProgressBar IsIndeterminate="True"
+                             Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                         Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" IsClosable="False" />
+                <InfoBar IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                         Severity="Success" Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" IsClosable="False" />
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Database" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="{x:Bind ViewModel.DatabaseLocation, Mode=OneWay}"
+                                       Style="{StaticResource CodeTextStyle}" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+                            <TextBlock Text="{x:Bind ViewModel.SizeSummary, Mode=OneWay}"
+                                       Style="{StaticResource SecondaryTextStyle}" TextWrapping="Wrap" />
+                            <TextBlock Text="{x:Bind ViewModel.MaintenanceSummary, Mode=OneWay}"
+                                       Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <Button Content="Refresh statistics" Command="{x:Bind ViewModel.RefreshStatisticsCommand}"
+                                IsEnabled="{x:Bind ViewModel.CanRunMaintenance}" HorizontalAlignment="Left" />
+
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.TableStatistics}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <muxc:ItemsWrapGrid Orientation="Horizontal" ItemWidth="200" ItemHeight="24" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{x:Bind}" Style="{StaticResource SecondaryTextStyle}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Health &amp; housekeeping" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Style="{StaticResource PageSubtitleTextStyle}"
+                                       Text="Integrity check reads the file and reports problems. Vacuum rebuilds it to reclaim unused space. Analyze refreshes the statistics SQLite uses to plan queries." />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Run integrity check" Style="{StaticResource AccentButtonStyle}"
+                                    Command="{x:Bind ViewModel.RunIntegrityCheckCommand}"
+                                    IsEnabled="{x:Bind ViewModel.CanRunMaintenance}" />
+                            <Button Content="Vacuum" Click="OnVacuumClick" IsEnabled="{x:Bind ViewModel.CanRunMaintenance}" />
+                            <Button Content="Analyze" Command="{x:Bind ViewModel.AnalyzeCommand}"
+                                    IsEnabled="{x:Bind ViewModel.CanRunMaintenance}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Dangling records" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Style="{StaticResource PageSubtitleTextStyle}"
+                                       Text="Looks for rows whose parent record is missing. This is a read-only report — Kirana never deletes business records automatically." />
+                        </StackPanel>
+
+                        <Button Content="Check for dangling records" Command="{x:Bind ViewModel.FindOrphansCommand}"
+                                IsEnabled="{x:Bind ViewModel.CanRunMaintenance}" HorizontalAlignment="Left" />
+
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.OrphanGroups}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="maint:OrphanRecordGroup">
+                                    <Grid ColumnSpacing="16" Padding="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="80" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{x:Bind Description}"
+                                                   Style="{StaticResource SecondaryTextStyle}" TextWrapping="Wrap" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind Count}"
+                                                   Style="{StaticResource AmountTextStyle}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Verify a backup file" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Style="{StaticResource PageSubtitleTextStyle}"
+                                       Text="Runs the same checks a restore would: bundle structure, checksum, and an integrity check of the database inside it." />
+                        </StackPanel>
+
+                        <Button Content="Choose a backup file…" Click="OnVerifyBackupClick"
+                                IsEnabled="{x:Bind ViewModel.CanRunMaintenance}" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

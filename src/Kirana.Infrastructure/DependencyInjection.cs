@@ -1,5 +1,10 @@
 using Kirana.Application.Abstractions;
+using Kirana.Application.Backup;
+using Kirana.Application.Maintenance;
+using Kirana.Application.Restore;
+using Kirana.Infrastructure.Backup;
 using Kirana.Infrastructure.Barcodes;
+using Kirana.Infrastructure.Maintenance;
 using Kirana.Infrastructure.Persistence;
 using Kirana.Infrastructure.Security;
 using Kirana.Infrastructure.Storage;
@@ -26,6 +31,12 @@ public static class DependencyInjection
         services.AddScoped<IAuditLogger, EfAuditLogger>();
         services.AddScoped<ISequenceGenerator, EfSequenceGenerator>();
         services.AddSingleton<IBarcodeRenderer, ZXingBarcodeRenderer>();
+
+        // Backup/restore/maintenance need Microsoft.Data.Sqlite directly, so they live here rather
+        // than in the Application layer alongside their interfaces.
+        services.AddScoped<IBackupService, SqliteBackupService>();
+        services.AddScoped<IRestoreService, SqliteRestoreService>();
+        services.AddScoped<IDatabaseMaintenanceService, SqliteDatabaseMaintenanceService>();
 
         return services;
     }

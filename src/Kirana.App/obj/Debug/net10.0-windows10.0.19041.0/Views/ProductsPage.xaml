@@ -30,10 +30,12 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBox x:ConnectionId='26' Grid.Column="0" PlaceholderText="Search name / SKU / barcode…"
-                                                                                                    />
+                                                                                                                                        
+                                                       />
 
             <ComboBox x:ConnectionId='27' Grid.Column="1" PlaceholderText="Category"
                                                                   DisplayMemberPath="Name"
@@ -52,76 +54,132 @@
             <Button x:ConnectionId='31' Grid.Column="6" Content="Brands"                             Margin="8,0,0,0" />
             <Button x:ConnectionId='32' Grid.Column="7" Content="Bulk Labels"                           Margin="8,0,0,0"
                                                                       />
-            <Button x:ConnectionId='33' Grid.Column="8" Content="Add Product" Style="{StaticResource AccentButtonStyle}"
+            <Button x:ConnectionId='33' Grid.Column="8" Content="Import"                               Margin="8,0,0,0"
+                                                                  
+                    ToolTipService.ToolTip="Bulk-import products from a CSV or Excel file" />
+            <Button x:ConnectionId='34' Grid.Column="9" Content="Add Product" Style="{StaticResource AccentButtonStyle}"
                                                                                              Margin="8,0,0,0" />
         </Grid>
 
         <!-- Results -->
-        <Grid Grid.Row="2">
-            <InfoBar x:ConnectionId='2'                                                                                                        
-                     Severity="Error"                                                       
-                     Margin="20,0,20,8" VerticalAlignment="Top" />
+        <Grid Grid.Row="2" Margin="20,0,20,20">
+            <Border Style="{StaticResource CardBorderStyle}" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-            <ListView x:ConnectionId='3'                                           Padding="20,0,20,20" SelectionMode="None">
-                <ListView.ItemTemplate>
-                    <DataTemplate                                    >
-                        <Grid x:ConnectionId='5' Padding="12" ColumnSpacing="16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" MinWidth="220" />
-                                <ColumnDefinition Width="150" />
-                                <ColumnDefinition Width="130" />
-                                <ColumnDefinition Width="90" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+                    <Grid Grid.Row="0" Padding="12,10" ColumnSpacing="16"
+                          Background="{ThemeResource SurfaceAltBrush}"
+                          BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MinWidth="220" />
+                            <ColumnDefinition Width="190" />
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="90" />
+                            <!-- Fixed, not Auto: rows differ in button count (only batch-tracked
+                                 products get a "Batches" button), and an Auto column would size to
+                                 each row's own buttons, stealing different amounts of width from the
+                                 star-sized PRODUCT column and shifting every middle column out of
+                                 line row-to-row. A fixed width keeps all rows on the same grid. -->
+                            <ColumnDefinition Width="440" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="PRODUCT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="1" Text="CATEGORY / BRAND / UNIT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="2" Text="PRICING" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="3" Text="STOCK" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Grid.Column="4" Text="ACTIONS" Style="{StaticResource ColumnHeaderTextStyle}" />
+                    </Grid>
 
-                            <StackPanel Grid.Column="0" Spacing="2">
-                                <TextBlock x:ConnectionId='22'                      FontWeight="SemiBold" TextWrapping="Wrap" />
-                                <TextBlock Opacity="0.6" FontSize="12">
-                                    <Run x:ConnectionId='23'                             />
-                                    <Run Text=" · SKU: " /><Run x:ConnectionId='24'                     />
-                                    <Run Text=" · Barcode: " /><Run x:ConnectionId='25'                         />
-                                </TextBlock>
-                            </StackPanel>
+                    <InfoBar x:ConnectionId='2' Grid.Row="1"                                                                                                        
+                             Severity="Error"                                                       
+                             Margin="12,8,12,0" VerticalAlignment="Top" />
 
-                            <StackPanel Grid.Column="1" Spacing="2">
-                                <TextBlock x:ConnectionId='19'                              FontSize="12" />
-                                <TextBlock x:ConnectionId='20'                           FontSize="12" Opacity="0.7" />
-                                <TextBlock x:ConnectionId='21'                      FontSize="12" Opacity="0.7" />
-                            </StackPanel>
+                    <ListView x:ConnectionId='3' Grid.Row="1"                                           SelectionMode="None">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="MinHeight" Value="0" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate                                    >
+                                <Grid x:ConnectionId='5' Padding="12,10" ColumnSpacing="16" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+                                    <!-- Must stay byte-for-byte identical to the header row's columns
+                                         above, or the headers stop lining up with their data. -->
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" MinWidth="220" />
+                                        <ColumnDefinition Width="190" />
+                                        <ColumnDefinition Width="130" />
+                                        <ColumnDefinition Width="90" />
+                                        <ColumnDefinition Width="440" />
+                                    </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="2" Spacing="2">
-                                <TextBlock FontSize="12"><Run Text="MRP " /><Run x:ConnectionId='18'                                                                   /></TextBlock>
-                                <TextBlock FontWeight="SemiBold"><Run Text="Sell " /><Run x:ConnectionId='17'                                                                            /></TextBlock>
-                                <TextBlock x:ConnectionId='15' FontSize="12" Opacity="0.7"
-                                                                                                                                        >
-                                    <Run Text="Cost " /><Run x:ConnectionId='16'                                                                             />
-                                </TextBlock>
-                            </StackPanel>
+                                    <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                        <TextBlock x:ConnectionId='22'                      FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <!-- Ellipsis rather than a hard clip: the code/SKU/barcode line
+                                             can outrun the column on long names, and a trailing "…" reads
+                                             as "there's more" instead of looking like a truncated value. -->
+                                        <TextBlock Opacity="0.6" FontSize="12" TextTrimming="CharacterEllipsis">
+                                            <Run x:ConnectionId='23'                             />
+                                            <Run Text=" · SKU: " /><Run x:ConnectionId='24'                     />
+                                            <Run Text=" · Barcode: " /><Run x:ConnectionId='25'                         />
+                                        </TextBlock>
+                                    </StackPanel>
 
-                            <StackPanel Grid.Column="3" Spacing="4" HorizontalAlignment="Center">
-                                <TextBlock x:ConnectionId='12'                       FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                <Border x:ConnectionId='13'                                                                                          
-                                                                                                                                 
-                                        CornerRadius="3" Padding="6,2">
-                                    <TextBlock x:ConnectionId='14'                             FontSize="10" Foreground="White" />
-                                </Border>
-                            </StackPanel>
+                                    <!-- Category and Brand are optional, so their TextBlocks are collapsed
+                                         when empty rather than left as blank lines — otherwise a product
+                                         with no category/brand pushed its Unit to the bottom of the cell
+                                         and the column read as ragged and misaligned across rows. -->
+                                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                        <TextBlock x:ConnectionId='19'                              FontSize="12"
+                                                                                                                                              />
+                                        <TextBlock x:ConnectionId='20'                           FontSize="12" Opacity="0.7"
+                                                                                                                                           />
+                                        <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource SurfaceAltBrush}"
+                                                HorizontalAlignment="Left">
+                                            <TextBlock x:ConnectionId='21'                      Style="{StaticResource BadgeTextStyle}"
+                                                       Foreground="{ThemeResource TextSecondaryBrush}" />
+                                        </Border>
+                                    </StackPanel>
 
-                            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                <Button x:ConnectionId='6' Content="Edit"                                    />
-                                <Button x:ConnectionId='7' Content="Stock"                                           />
-                                <Button x:ConnectionId='8' Content="Labels"                                      />
-                                <Button x:ConnectionId='9' Content="Batches"                                      
-                                                                                                                                  />
-                                <Button x:ConnectionId='10' Content="Deactivate"                                           
-                                                                                                                             />
-                                <Button x:ConnectionId='11' Content="Reactivate"                                           
-                                                                                                                                    />
-                            </StackPanel>
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                                    <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
+                                        <TextBlock FontSize="12"><Run Text="MRP " /><Run x:ConnectionId='18'                                                                   /></TextBlock>
+                                        <TextBlock FontWeight="SemiBold"><Run Text="Sell " /><Run x:ConnectionId='17'                                                                            /></TextBlock>
+                                        <TextBlock x:ConnectionId='15' FontSize="12" Opacity="0.7"
+                                                                                                                                                >
+                                            <Run Text="Cost " /><Run x:ConnectionId='16'                                                                             />
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="3" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock x:ConnectionId='12'                       FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <Border x:ConnectionId='13'                                                                                          
+                                                                                                                                         
+                                                CornerRadius="3" Padding="6,2">
+                                            <TextBlock x:ConnectionId='14'                             FontSize="10" Foreground="White" />
+                                        </Border>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                        <Button x:ConnectionId='6' Content="Edit"                                    />
+                                        <Button x:ConnectionId='7' Content="Stock"                                           />
+                                        <Button x:ConnectionId='8' Content="Labels"                                      />
+                                        <Button x:ConnectionId='9' Content="Batches"                                      
+                                                                                                                                          />
+                                        <Button x:ConnectionId='10' Content="Deactivate"                                           
+                                                                                                                                     />
+                                        <Button x:ConnectionId='11' Content="Reactivate"                                           
+                                                                                                                                            />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </Page>

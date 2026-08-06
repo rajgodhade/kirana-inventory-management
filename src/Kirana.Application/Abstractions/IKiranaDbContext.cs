@@ -50,5 +50,7 @@ public interface IKiranaDbContext
     DbSet<ExpenseCategory> ExpenseCategories { get; }
     DbSet<Expense> Expenses { get; }
 
+    DbSet<BackupRecord> BackupRecords { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

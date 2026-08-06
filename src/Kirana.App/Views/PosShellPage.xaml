@@ -7,6 +7,56 @@
 
     <Page.Resources>
         <MenuFlyout x:Key="SearchFlyout" />
+
+        <!-- One billing tab chip. Selected state uses the same pastel-fill + teal-underline
+             language as the Reports tab bar, so both tab strips in the app read as one idea. -->
+        <DataTemplate x:Key="BillTabTemplate" x:DataType="vm:BillSessionViewModel">
+            <Grid>
+                <!-- Pastel fill for the selected tab. A ThemeResource-bound Border rather than a
+                     converter, so it re-resolves on light/dark switch with no code involved. -->
+                <Border CornerRadius="8,8,0,0" Background="{ThemeResource BrandSubtleBrush}"
+                        Visibility="{x:Bind IsActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                <Button Click="OnBillTabClick" Tag="{x:Bind}" Padding="12,6,6,6" MinWidth="0"
+                        CornerRadius="8,8,0,0" BorderThickness="0" Background="Transparent"
+                        HorizontalContentAlignment="Left"
+                        AutomationProperties.Name="{x:Bind Title, Mode=OneWay}">
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Dot marks a tab that still holds scanned goods. -->
+                        <Ellipse Grid.Column="0" Width="7" Height="7" VerticalAlignment="Center"
+                                 Fill="{ThemeResource BrandPrimaryBrush}"
+                                 Visibility="{x:Bind HasItems, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                        <StackPanel Grid.Column="1" Spacing="0" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Bind Title, Mode=OneWay}" FontSize="13"
+                                       FontWeight="{x:Bind IsActive, Mode=OneWay, Converter={StaticResource BillTabFontWeightConverter}}"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{x:Bind CustomerSummary, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+
+                        <Button Grid.Column="2" Click="OnCloseBillClick" Tag="{x:Bind}"
+                                Padding="4" MinWidth="0" Width="22" Height="22"
+                                Background="Transparent" BorderThickness="0" CornerRadius="11"
+                                ToolTipService.ToolTip="Close this bill"
+                                AutomationProperties.Name="Close bill">
+                            <FontIcon Glyph="&#xE711;" FontSize="10" />
+                        </Button>
+                    </Grid>
+                </Button>
+
+                <!-- 3px active underline, matching the Reports tab bar. -->
+                <Border Height="3" CornerRadius="1.5" VerticalAlignment="Bottom" Margin="4,0,4,0"
+                        Background="{ThemeResource BrandPrimaryBrush}"
+                        Visibility="{x:Bind IsActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </Grid>
+        </DataTemplate>
     </Page.Resources>
 
     <!--
@@ -15,6 +65,7 @@
     -->
     <Grid Background="{ThemeResource PageBackgroundBrush}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -57,8 +108,47 @@
             </Button>
         </Grid>
 
+        <!-- Billing tabs: several customers can be part-way through a bill at once. -->
+        <Grid Grid.Row="1" Padding="20,10,20,0" Background="{ThemeResource NavigationBackgroundBrush}"
+              BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1"
+              ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled"
+                          VerticalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{x:Bind ViewModel.Bills}" ItemTemplate="{StaticResource BillTabTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="2" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <TextBox Grid.Column="1" Width="190" Height="34" VerticalAlignment="Center" Margin="0,0,0,6"
+                     CornerRadius="{StaticResource RadiusMedium}"
+                     PlaceholderText="Note for this bill"
+                     Text="{x:Bind ViewModel.ActiveBillNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     AutomationProperties.Name="Note for this bill" />
+
+            <Button Grid.Column="2" Click="OnNewBillClick" VerticalAlignment="Center" Margin="0,0,0,6"
+                    Padding="12,7" CornerRadius="{StaticResource RadiusMedium}"
+                    IsEnabled="{x:Bind ViewModel.CanAddBill, Mode=OneWay}"
+                    ToolTipService.ToolTip="Start another bill (up to 10)"
+                    AutomationProperties.Name="New Bill">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE710;" FontSize="12" />
+                    <TextBlock Text="New Bill" FontSize="13" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
         <!-- Scan / search bar + customer -->
-        <Grid Grid.Row="1" Margin="20,16,20,0" ColumnSpacing="10">
+        <Grid Grid.Row="2" Margin="20,16,20,0" ColumnSpacing="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -98,18 +188,32 @@
 
             <!-- The button's content is icon + bound text, which leaves it without an accessible
                  name; set one explicitly so screen readers announce it. -->
-            <Button Grid.Column="1" Click="OnCustomerClick" Padding="14,11"
+            <Button Grid.Column="1" Click="OnCustomerClick" Padding="14,9"
+                    CornerRadius="{StaticResource RadiusMedium}"
                     AutomationProperties.Name="Select Customer (F4)">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Glyph="&#xE77B;" FontSize="15" />
-                    <TextBlock Text="{x:Bind ViewModel.CustomerDisplayText, Mode=OneWay}" />
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <FontIcon Glyph="&#xE77B;" FontSize="15" VerticalAlignment="Center" />
+                    <StackPanel Spacing="0" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind ViewModel.CustomerDisplayText, Mode=OneWay}" FontWeight="SemiBold" />
+                        <!-- Outstanding udhaar surfaces here so the cashier sees it before adding
+                             more credit, without opening the customer's ledger. -->
+                        <StackPanel Orientation="Horizontal" Spacing="4"
+                                    Visibility="{x:Bind ViewModel.HasCustomerOutstanding, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock Text="Owes" Style="{StaticResource CaptionTextStyle}" />
+                            <TextBlock Text="{x:Bind ViewModel.CustomerOutstandingText, Mode=OneWay}"
+                                       Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold"
+                                       Foreground="{ThemeResource WarningBrush}" />
+                        </StackPanel>
+                        <TextBlock Text="Press F4 to change" Style="{StaticResource CaptionTextStyle}"
+                                   Visibility="{x:Bind ViewModel.HasCustomerOutstanding, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                    </StackPanel>
                     <TextBlock Text="F4" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
         </Grid>
 
         <!-- Cart + totals -->
-        <Grid Grid.Row="2" Margin="20,16,20,0" ColumnSpacing="16">
+        <Grid Grid.Row="3" Margin="20,16,20,0" ColumnSpacing="16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="320" />
@@ -127,18 +231,64 @@
                           BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" MinWidth="160" />
-                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="96" />
+                            <ColumnDefinition Width="90" />
                             <ColumnDefinition Width="110" />
                             <ColumnDefinition Width="80" />
                             <ColumnDefinition Width="110" />
                             <ColumnDefinition Width="44" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="PRODUCT" Style="{StaticResource ColumnHeaderTextStyle}" />
-                        <TextBlock Grid.Column="1" Text="QTY" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
-                        <TextBlock Grid.Column="2" Text="PRICE" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
-                        <TextBlock Grid.Column="3" Text="DISC %" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
-                        <TextBlock Grid.Column="4" Text="TOTAL" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="1" Text="QTY / UNIT" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="MRP" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Grid.Column="3" Text="PRICE" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Grid.Column="4" Text="DISC %" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Grid.Column="5" Text="TOTAL" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
                     </Grid>
+
+                    <!-- Empty state doubles as the keyboard cheat-sheet: this is the screen a new
+                         cashier stares at most, so the shortcuts are taught here rather than hidden
+                         in a manual. -->
+                    <StackPanel Grid.Row="1" Spacing="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{x:Bind ViewModel.HasCartLines, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                        <FontIcon Glyph="&#xE7BF;" FontSize="34" Foreground="{ThemeResource TextTertiaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="Cart is empty" Style="{StaticResource SectionTitleTextStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Text="Scan a barcode, or search by name / SKU to add the first item."
+                                   Style="{StaticResource SecondaryTextStyle}" HorizontalAlignment="Center" />
+
+                        <Border Background="{ThemeResource SurfaceAltBrush}" CornerRadius="{StaticResource RadiusLarge}"
+                                BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="1"
+                                Padding="18,14" HorizontalAlignment="Center" Margin="0,4,0,0">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="KEYBOARD SHORTCUTS" Style="{StaticResource ColumnHeaderTextStyle}"
+                                           HorizontalAlignment="Center" />
+                                <Grid ColumnSpacing="22" RowSpacing="6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="F2" Style="{StaticResource CodeTextStyle}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Search / scan" Style="{StaticResource CaptionTextStyle}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="F4" Style="{StaticResource CodeTextStyle}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Select customer" Style="{StaticResource CaptionTextStyle}" />
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="F6" Style="{StaticResource CodeTextStyle}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="Hold bill" Style="{StaticResource CaptionTextStyle}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="F7" Style="{StaticResource CodeTextStyle}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="3" Text="Resume held bill" Style="{StaticResource CaptionTextStyle}" />
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="F8" Style="{StaticResource CodeTextStyle}" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="Bill discount" Style="{StaticResource CaptionTextStyle}" />
+                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="F9" Style="{StaticResource CodeTextStyle}" />
+                                    <TextBlock Grid.Row="2" Grid.Column="3" Text="Payment / complete" Style="{StaticResource CaptionTextStyle}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
 
                     <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.CartLines}" SelectionMode="None">
                         <ListView.ItemContainerStyle>
@@ -154,7 +304,8 @@
                                       BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" MinWidth="160" />
-                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="96" />
+                                        <ColumnDefinition Width="90" />
                                         <ColumnDefinition Width="110" />
                                         <ColumnDefinition Width="80" />
                                         <ColumnDefinition Width="110" />
@@ -166,11 +317,25 @@
                                         <TextBlock Text="{x:Bind ProductCode}" Style="{StaticResource CodeTextStyle}" />
                                     </StackPanel>
 
-                                    <TextBox Grid.Column="1" Text="{x:Bind QuantityText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
-                                             TextChanged="OnQuantityTextChanged" LostFocus="OnQuantityLostFocus"
-                                             VerticalAlignment="Center" TextAlignment="Center" />
+                                    <!-- Unit sits under the quantity box because it qualifies that number
+                                         ("1.5 Kilogram"), and it is the same unit printed on the invoice. -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                        <TextBox Text="{x:Bind QuantityText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
+                                                 TextChanged="OnQuantityTextChanged" LostFocus="OnQuantityLostFocus"
+                                                 TextAlignment="Center" />
+                                        <TextBlock Text="{x:Bind Unit}" Style="{StaticResource CaptionTextStyle}"
+                                                   HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
 
-                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="1">
+                                    <!-- Read-only: MRP is a product attribute shown for comparison, never
+                                         something a cashier edits mid-bill (unlike the Price cell). Hidden
+                                         rather than shown as "₹0.00" for a product with no MRP set. -->
+                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource BodyTextStyle}"
+                                               HorizontalAlignment="Center" Opacity="0.75"
+                                               Text="{x:Bind Mrp, Converter={StaticResource CurrencyConverter}}"
+                                               Visibility="{x:Bind HasMrp, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                                    <StackPanel Grid.Column="3" VerticalAlignment="Center" Spacing="1">
                                         <TextBox Text="{x:Bind UnitPriceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
                                                  TextChanged="OnPriceTextChanged" LostFocus="OnPriceLostFocus"
                                                  TextAlignment="Center"
@@ -181,15 +346,15 @@
                                                    Visibility="{x:Bind IsPriceOverridden, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                                     </StackPanel>
 
-                                    <TextBox Grid.Column="3" Text="{x:Bind DiscountPercentText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
+                                    <TextBox Grid.Column="4" Text="{x:Bind DiscountPercentText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
                                              TextChanged="OnDiscountTextChanged" LostFocus="OnDiscountLostFocus"
                                              VerticalAlignment="Center" TextAlignment="Center" />
 
-                                    <TextBlock Grid.Column="4" VerticalAlignment="Center" Style="{StaticResource AmountTextStyle}"
+                                    <TextBlock Grid.Column="5" VerticalAlignment="Center" Style="{StaticResource AmountTextStyle}"
                                                HorizontalAlignment="Right"
                                                Text="{x:Bind LineTotal, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
 
-                                    <Button Grid.Column="5" Click="OnRemoveLineClick" Tag="{x:Bind}"
+                                    <Button Grid.Column="6" Click="OnRemoveLineClick" Tag="{x:Bind}"
                                             VerticalAlignment="Center" Padding="8,4"
                                             AutomationProperties.Name="Remove line">
                                         <FontIcon Glyph="&#xE711;" FontSize="13" Foreground="{ThemeResource DangerBrush}" />
@@ -202,9 +367,33 @@
             </Border>
 
             <!-- Totals -->
+            <!-- Stretches rather than sitting Top, and scrolls internally: the tab strip costs the
+                 billing area ~55px of height, which was enough to clip the Amount Payable panel off
+                 the bottom on a short window. HorizontalScrollMode MUST stay Disabled — a
+                 ScrollViewer measures its content at infinite size in any direction it can scroll,
+                 which would let the card ignore this column's width. -->
             <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}"
-                    VerticalAlignment="Top">
+                    VerticalAlignment="Stretch">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                <!-- Only the breakdown scrolls; Amount Payable is pinned to the bottom row so the
+                     number the customer is about to pay is never the thing that scrolls away. -->
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto"
+                              HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="9">
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Total items" Style="{StaticResource SecondaryTextStyle}" />
+                        <TextBlock Grid.Column="1" Style="{StaticResource BodyTextStyle}"
+                                   Text="{x:Bind ViewModel.TotalItemCount, Mode=OneWay}" />
+                    </Grid>
                     <Grid ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -227,10 +416,21 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Bill discount" Style="{StaticResource SecondaryTextStyle}" />
-                        <TextBlock Grid.Column="1" Style="{StaticResource BodyTextStyle}"
+                        <TextBlock Grid.Column="0" Text="Bill discount" Style="{StaticResource SecondaryTextStyle}"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center"
                                    Text="{x:Bind ViewModel.BillDiscountAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
+                        <!-- Only way to undo a bill discount used to be reopening the dialog and
+                             typing 0, which reads as "change it", not "remove it". -->
+                        <Button Grid.Column="2" Click="OnClearBillDiscountClick" Padding="5,2" MinWidth="0"
+                                Background="Transparent" BorderThickness="0" VerticalAlignment="Center"
+                                AutomationProperties.Name="Remove bill discount"
+                                ToolTipService.ToolTip="Remove bill discount"
+                                Visibility="{x:Bind ViewModel.HasBillDiscount, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <FontIcon Glyph="&#xE711;" FontSize="11" Foreground="{ThemeResource DangerBrush}" />
+                        </Button>
                     </Grid>
                     <Grid ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
@@ -250,25 +450,58 @@
                         <TextBlock Grid.Column="1" Style="{StaticResource BodyTextStyle}"
                                    Text="{x:Bind ViewModel.RoundOffAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
                     </Grid>
+                </StackPanel>
+                </ScrollViewer>
 
+                <StackPanel Grid.Row="1" Spacing="9">
                     <Border BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,1,0,0" Margin="0,4,0,4" />
 
-                    <StackPanel Spacing="0">
-                        <TextBlock Text="AMOUNT PAYABLE" Style="{StaticResource ColumnHeaderTextStyle}" />
-                        <TextBlock Style="{StaticResource MetricTextStyle}" FontSize="34"
-                                   Foreground="{ThemeResource BrandPrimaryBrush}"
-                                   Text="{x:Bind ViewModel.GrandTotal, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
-                    </StackPanel>
+                    <!-- The one number the customer is about to hand over money for: given its own
+                         filled panel so it can't be confused with the breakdown rows above it. -->
+                    <Border Background="{ThemeResource PastelTealBrush}" CornerRadius="{StaticResource RadiusLarge}"
+                            Padding="16,12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="AMOUNT PAYABLE" Style="{StaticResource ColumnHeaderTextStyle}"
+                                       Foreground="{ThemeResource PastelTealOnBrush}" />
+                            <TextBlock Style="{StaticResource MetricTextStyle}" FontSize="38"
+                                       Foreground="{ThemeResource PastelTealOnBrush}"
+                                       Text="{x:Bind ViewModel.GrandTotal, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
+                            <TextBlock Style="{StaticResource CaptionTextStyle}"
+                                       Foreground="{ThemeResource PastelTealOnBrush}" Opacity="0.85">
+                                <Run Text="{x:Bind ViewModel.TotalItemCount, Mode=OneWay}" /><Run Text=" item(s) · press F9 to take payment" />
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- MRP vs. what's actually being charged, floored at zero — a product with no
+                         MRP set or a manually-raised price contributes nothing, never a negative
+                         "saving". Hidden entirely rather than shown as ₹0.00 when there's nothing
+                         to report. -->
+                    <Border Background="{ThemeResource SuccessSubtleBrush}" CornerRadius="6" Padding="10,6" Margin="0,8,0,0"
+                            Visibility="{x:Bind ViewModel.HasSavings, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="You Saved" FontWeight="SemiBold" VerticalAlignment="Center"
+                                       Foreground="{ThemeResource SuccessBrush}" />
+                            <TextBlock Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center"
+                                       Foreground="{ThemeResource SuccessBrush}"
+                                       Text="{x:Bind ViewModel.TotalSavings, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
+                        </Grid>
+                    </Border>
                 </StackPanel>
+                </Grid>
             </Border>
         </Grid>
 
-        <InfoBar Grid.Row="2" Margin="20,0,356,12" VerticalAlignment="Bottom"
+        <InfoBar Grid.Row="3" Margin="20,0,356,12" VerticalAlignment="Bottom"
                  IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
                  Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
 
         <!-- Action bar -->
-        <Grid Grid.Row="3" Padding="20,14" ColumnSpacing="8"
+        <Grid Grid.Row="4" Padding="20,14" ColumnSpacing="8"
               Background="{ThemeResource NavigationBackgroundBrush}"
               BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,1,0,0">
             <Grid.ColumnDefinitions>
@@ -280,11 +513,28 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                <FontIcon Glyph="&#xE7BA;" FontSize="12" Foreground="{ThemeResource TextTertiaryBrush}"
-                          Visibility="{x:Bind ViewModel.HasHeldBills, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <TextBlock Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center"
-                           Text="{x:Bind ViewModel.HeldBillsSummary, Mode=OneWay}" />
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE7BA;" FontSize="12" Foreground="{ThemeResource TextTertiaryBrush}"
+                              Visibility="{x:Bind ViewModel.HasHeldBills, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <TextBlock Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center"
+                               Text="{x:Bind ViewModel.HeldBillsSummary, Mode=OneWay}" />
+                </StackPanel>
+
+                <!-- Hardware status placeholders (Phase 12). These are deliberately static and
+                     labelled "not monitored" rather than showing a green tick: the app has no
+                     printer/scanner health check yet, and a fake "OK" would be worse than none. -->
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
+                            ToolTipService.ToolTip="Printer status monitoring arrives in Phase 12">
+                    <FontIcon Glyph="&#xE749;" FontSize="12" Foreground="{ThemeResource TextTertiaryBrush}" />
+                    <TextBlock Text="Printer — not monitored" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
+                            ToolTipService.ToolTip="Scanner status monitoring arrives in Phase 12">
+                    <FontIcon Glyph="&#xE8BD;" FontSize="12" Foreground="{ThemeResource TextTertiaryBrush}" />
+                    <TextBlock Text="Scanner — not monitored" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                </StackPanel>
             </StackPanel>
 
             <Button Grid.Column="2" Content="Hold (F6)" Click="OnHoldClick" Padding="14,9" />

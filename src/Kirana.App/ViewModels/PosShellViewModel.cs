@@ -34,6 +34,9 @@ public sealed partial class PosShellViewModel(
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CustomerDisplayText))]
+    [NotifyPropertyChangedFor(nameof(HasSelectedCustomer))]
+    [NotifyPropertyChangedFor(nameof(CustomerOutstandingText))]
+    [NotifyPropertyChangedFor(nameof(HasCustomerOutstanding))]
     private Customer? _selectedCustomer;
 
     [ObservableProperty]
@@ -46,6 +49,7 @@ public sealed partial class PosShellViewModel(
     private decimal _itemDiscountTotal;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasBillDiscount))]
     private decimal _billDiscountAmount;
 
     [ObservableProperty]
@@ -56,6 +60,16 @@ public sealed partial class PosShellViewModel(
 
     [ObservableProperty]
     private decimal _grandTotal;
+
+    /// <summary>Total of (MRP − actual price) across the cart, floored at zero — how much the
+    /// screen tells the customer they're saving versus buying everything at sticker price.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSavings))]
+    private decimal _totalSavings;
+
+    /// <summary>Drives hiding the "You Saved" panel entirely rather than showing "₹0.00" when
+    /// nothing in the cart has an MRP above its selling price.</summary>
+    public bool HasSavings => TotalSavings > 0;
 
     [ObservableProperty]
     private string? _errorMessage;
@@ -78,6 +92,18 @@ public sealed partial class PosShellViewModel(
 
     public string CustomerDisplayText => SelectedCustomer?.Name ?? "Walk-in Customer";
 
+    public bool HasSelectedCustomer => SelectedCustomer is not null;
+
+    /// <summary>What this customer already owes, shown next to their name at billing time so the
+    /// cashier can ask for repayment before adding more udhaar. Read straight off the customer
+    /// record — no new query, no change to how the balance is maintained.</summary>
+    public string CustomerOutstandingText =>
+        SelectedCustomer is { CreditBalance: var balance } && balance > 0
+            ? "₹" + balance.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))
+            : string.Empty;
+
+    public bool HasCustomerOutstanding => SelectedCustomer is { CreditBalance: > 0 };
+
     public bool HasHeldBills => HeldBillsCount > 0;
 
     public string HeldBillsSummary => HeldBillsCount switch
@@ -91,6 +117,22 @@ public sealed partial class PosShellViewModel(
 
     public ObservableCollection<CartLineViewModel> CartLines { get; } = [];
 
+    /// <summary>Drives the "cart is empty" placeholder — kept in sync via <see cref="CartLines"/>'s
+    /// own change notification rather than recomputed on every keystroke, since it only changes on
+    /// add/remove/clear.</summary>
+    [ObservableProperty]
+    private bool _hasCartLines;
+
+    /// <summary>Number of distinct product lines on the bill. Deliberately a line count rather than
+    /// a sum of quantities: quantities carry mixed units (1 Kilogram + 1 Piece), so adding them
+    /// together would produce a meaningless "2".</summary>
+    [ObservableProperty]
+    private int _totalItemCount;
+
+    /// <summary>Whether a bill-level discount is currently applied — drives the inline "remove
+    /// discount" affordance, which is hidden when there is nothing to remove.</summary>
+    public bool HasBillDiscount => BillDiscountAmount > 0;
+
     [ObservableProperty]
     private bool _hasSuggestions;
 
@@ -101,13 +143,183 @@ public sealed partial class PosShellViewModel(
     private bool _scannerWired;
     private int _suggestionQueryToken;
 
+    // ==============================  BILLING TABS  ==============================
+    // Several customers can be part-way through a bill at once. Only the active tab's state lives
+    // in the properties above; the rest is snapshotted into its BillSessionViewModel. See that
+    // class for why it is done this way rather than by making every binding tab-aware.
+
+    /// <summary>Hard ceiling on simultaneous bills. Ten is already far past what one counter can
+    /// track, and an unbounded strip would just become unreadable.</summary>
+    public const int MaxBills = 10;
+
+    public ObservableCollection<BillSessionViewModel> Bills { get; } = [];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ActiveBillNote))]
+    private BillSessionViewModel? _activeBill;
+
+    private int _nextBillId = 1;
+
+    public bool CanAddBill => Bills.Count < MaxBills;
+
+    /// <summary>Closing the last remaining tab would leave nothing to bill into.</summary>
+    public bool CanCloseActiveBill => Bills.Count > 1;
+
+    /// <summary>Per-bill note, surfaced as a normal two-way bound field on the active tab.</summary>
+    public string ActiveBillNote
+    {
+        get => ActiveBill?.Note ?? string.Empty;
+        set
+        {
+            if (ActiveBill is not { } bill || bill.Note == value)
+            {
+                return;
+            }
+
+            bill.Note = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>Creates the first tab. Called once from <see cref="InitializeAsync"/>.</summary>
+    private void EnsureInitialBill()
+    {
+        if (Bills.Count == 0)
+        {
+            AddBill();
+        }
+    }
+
+    /// <summary>Opens a new empty bill and switches to it. No-op at <see cref="MaxBills"/>.</summary>
+    public BillSessionViewModel? AddBill()
+    {
+        if (!CanAddBill)
+        {
+            ErrorMessage = $"You can have at most {MaxBills} bills open at once.";
+            return null;
+        }
+
+        var bill = new BillSessionViewModel { Id = _nextBillId, Title = $"Bill {_nextBillId}" };
+        _nextBillId++;
+        Bills.Add(bill);
+        SwitchToBill(bill);
+        NotifyTabCommandsChanged();
+        return bill;
+    }
+
+    /// <summary>
+    /// Snapshots the live cart into the outgoing tab and loads the incoming one. Nothing is
+    /// recalculated from scratch beyond the usual <see cref="RecalculateCart"/>, so a restored tab
+    /// shows exactly the totals it had when the cashier left it.
+    /// </summary>
+    public void SwitchToBill(BillSessionViewModel bill)
+    {
+        if (!Bills.Contains(bill) || ReferenceEquals(bill, ActiveBill))
+        {
+            return;
+        }
+
+        CaptureActiveBill();
+
+        ActiveBill = bill;
+        foreach (var tab in Bills)
+        {
+            tab.IsActive = ReferenceEquals(tab, bill);
+        }
+
+        // Restore. CartLines is the bound collection, so it is refilled in place rather than
+        // replaced — swapping the instance would break the ListView's binding.
+        CartLines.Clear();
+        foreach (var line in bill.Lines)
+        {
+            CartLines.Add(line);
+        }
+
+        SelectedCustomer = bill.Customer;
+        BillDiscountPercent = bill.BillDiscountPercent;
+        DiscountAuthorizedByUserId = bill.DiscountAuthorizedByUserId;
+        PriceOverrideAuthorizedByUserId = bill.PriceOverrideAuthorizedByUserId;
+
+        OnPropertyChanged(nameof(ActiveBillNote));
+        RecalculateCart();
+        UpdateActiveBillSummary();
+    }
+
+    /// <summary>Copies the live bill state back into whichever tab is currently active.</summary>
+    private void CaptureActiveBill()
+    {
+        if (ActiveBill is not { } current)
+        {
+            return;
+        }
+
+        current.Lines = [.. CartLines];
+        current.Customer = SelectedCustomer;
+        current.BillDiscountPercent = BillDiscountPercent;
+        current.DiscountAuthorizedByUserId = DiscountAuthorizedByUserId;
+        current.PriceOverrideAuthorizedByUserId = PriceOverrideAuthorizedByUserId;
+    }
+
+    /// <summary>True when closing this tab would discard goods the cashier already scanned — the
+    /// page uses it to decide whether to ask for confirmation first.</summary>
+    public bool BillHasItems(BillSessionViewModel bill) =>
+        ReferenceEquals(bill, ActiveBill) ? CartLines.Count > 0 : bill.Lines.Count > 0;
+
+    public void CloseBill(BillSessionViewModel bill)
+    {
+        if (!Bills.Contains(bill) || !CanCloseActiveBill)
+        {
+            return;
+        }
+
+        var wasActive = ReferenceEquals(bill, ActiveBill);
+        var index = Bills.IndexOf(bill);
+        Bills.Remove(bill);
+
+        if (wasActive)
+        {
+            // Land on the neighbour the cashier would expect — the tab that shifted into this slot,
+            // or the last one if we just closed the rightmost.
+            ActiveBill = null;
+            SwitchToBill(Bills[Math.Min(index, Bills.Count - 1)]);
+        }
+
+        NotifyTabCommandsChanged();
+    }
+
+    /// <summary>Keeps the tab chip's subtitle and "has goods" dot in step with the live cart.</summary>
+    public void UpdateActiveBillSummary()
+    {
+        if (ActiveBill is not { } bill)
+        {
+            return;
+        }
+
+        bill.HasItems = CartLines.Count > 0;
+        bill.CustomerSummary = SelectedCustomer?.Name ?? "Walk-in";
+    }
+
+    private void NotifyTabCommandsChanged()
+    {
+        OnPropertyChanged(nameof(CanAddBill));
+        OnPropertyChanged(nameof(CanCloseActiveBill));
+    }
+
     public async Task InitializeAsync()
     {
         if (!_scannerWired)
         {
             _scannerWired = true;
             ScannerBuffer.BarcodeScanned += barcode => _ = HandleBarcodeScannedAsync(barcode);
+            CartLines.CollectionChanged += (_, _) =>
+            {
+                HasCartLines = CartLines.Count > 0;
+                TotalItemCount = CartLines.Count;
+                UpdateActiveBillSummary();
+            };
         }
+
+        EnsureInitialBill();
 
         var store = await db.Stores.FirstOrDefaultAsync();
         if (store is not null)
@@ -219,6 +431,7 @@ public sealed partial class PosShellViewModel(
                 Unit = product.Unit.ToString(),
                 SupportsDecimalQuantity = product.Unit.SupportsDecimalQuantity(),
                 OriginalUnitPrice = product.SellingPrice,
+                Mrp = product.Mrp,
                 UnitPriceText = product.SellingPrice.ToString("0.##"),
                 GstRatePercent = product.GstRatePercent ?? 0,
                 IsTaxInclusive = product.IsTaxInclusive,
@@ -237,6 +450,16 @@ public sealed partial class PosShellViewModel(
 
     public void RecalculateCart()
     {
+        // Totals now refresh on every keystroke, so a half-typed quantity is a normal, expected
+        // state: clearing the box to retype "2" passes through empty (quantity 0) first. Hold the
+        // last good totals instead of flashing "quantity must be positive" as the cashier types —
+        // OnQuantityLostFocus clamps the value when focus leaves, and SaleService re-validates
+        // everything at completion, so nothing invalid can actually be sold.
+        if (CartLines.Any(l => l.Quantity <= 0))
+        {
+            return;
+        }
+
         var cartLines = CartLines.Select(l => new CartLine
         {
             ProductId = l.ProductId,
@@ -249,7 +472,7 @@ public sealed partial class PosShellViewModel(
 
         if (cartLines.Count == 0)
         {
-            SubTotal = ItemDiscountTotal = BillDiscountAmount = TaxTotal = RoundOffAmount = GrandTotal = 0;
+            SubTotal = ItemDiscountTotal = BillDiscountAmount = TaxTotal = RoundOffAmount = GrandTotal = TotalSavings = 0;
             return;
         }
 
@@ -278,15 +501,24 @@ public sealed partial class PosShellViewModel(
         TaxTotal = totals.GstTotal;
         RoundOffAmount = totals.RoundOffAmount;
         GrandTotal = totals.GrandTotal;
+
+        // Compared against GrandTotal (what's actually being paid, after every discount/tax), not
+        // summed per-line before those — MRP is inherently tax-inclusive, so this is the correct
+        // like-for-like figure, mirroring how InvoiceDocumentBuilder computes the same thing for
+        // the printed bill.
+        var mrpTotal = CartLines.Sum(l => l.Mrp * l.Quantity);
+        TotalSavings = Math.Max(0, mrpTotal - GrandTotal);
     }
 
     public bool NeedsDiscountAuthorization(decimal percent) =>
-        percent > SaleService.MaxUnauthorizedDiscountPercent && DiscountAuthorizedByUserId is null;
+        session.RequirePinForLargeDiscount
+        && percent > SaleService.MaxUnauthorizedDiscountPercent && DiscountAuthorizedByUserId is null;
 
     public void SetDiscountAuthorization(int userId) => DiscountAuthorizedByUserId = userId;
 
     public bool NeedsPriceOverrideAuthorization(CartLineViewModel line) =>
-        line.IsPriceOverridden && PriceOverrideAuthorizedByUserId is null;
+        session.RequirePinForPriceOverride
+        && line.IsPriceOverridden && PriceOverrideAuthorizedByUserId is null;
 
     public void SetPriceOverrideAuthorization(int userId) => PriceOverrideAuthorizedByUserId = userId;
 
@@ -296,10 +528,32 @@ public sealed partial class PosShellViewModel(
         RecalculateCart();
     }
 
+    /// <summary>Removes the bill-level discount without touching item-level ones.</summary>
+    public void ClearBillDiscount()
+    {
+        BillDiscountPercent = 0;
+
+        // Also give back the manager authorization so a later large discount on this same bill has
+        // to be approved again — but only when no item line still carries a discount that needs it,
+        // otherwise SaleService would refuse the sale at completion for a missing authorization.
+        var largestRemainingDiscount = CartLines.Count == 0 ? 0 : CartLines.Max(l => l.DiscountPercent);
+        if (largestRemainingDiscount <= SaleService.MaxUnauthorizedDiscountPercent)
+        {
+            DiscountAuthorizedByUserId = null;
+        }
+
+        RecalculateCart();
+    }
+
     public async Task<HeldBill> HoldCurrentBillAsync()
     {
         var lines = BuildSaleLineInputs();
-        var held = await heldBillService.HoldAsync(lines, BillDiscountPercent, SelectedCustomer?.Id, CashierUserId, note: null);
+
+        // The tab's note rides along on HoldAsync's existing note parameter, so a parked bill keeps
+        // the cashier's reminder ("waiting for cash") instead of losing it with the tab state.
+        var note = string.IsNullOrWhiteSpace(ActiveBillNote) ? null : ActiveBillNote.Trim();
+
+        var held = await heldBillService.HoldAsync(lines, BillDiscountPercent, SelectedCustomer?.Id, CashierUserId, note);
         ClearCart();
         await RefreshHeldBillsCountAsync();
         return held;
@@ -310,6 +564,16 @@ public sealed partial class PosShellViewModel(
     public async Task ResumeHeldBillAsync(int heldBillId)
     {
         var held = await heldBillService.ResumeAsync(heldBillId);
+
+        // Resuming must never silently discard whatever is already on the counter. If the current
+        // tab is mid-bill, the held bill comes back in its own tab instead — and if all ten are in
+        // use we fall back to the old in-place behaviour rather than dropping the resume entirely
+        // (the bill is already un-held by this point, so refusing would strand it).
+        if (CartLines.Count > 0 && CanAddBill)
+        {
+            AddBill();
+        }
+
         ClearCart();
 
         SelectedCustomer = held.Customer;
@@ -327,6 +591,7 @@ public sealed partial class PosShellViewModel(
                 Unit = product.Unit.ToString(),
                 SupportsDecimalQuantity = product.Unit.SupportsDecimalQuantity(),
                 OriginalUnitPrice = product.SellingPrice,
+                Mrp = product.Mrp,
                 UnitPriceText = product.SellingPrice.ToString("0.##"),
                 GstRatePercent = product.GstRatePercent ?? 0,
                 IsTaxInclusive = product.IsTaxInclusive,
@@ -335,7 +600,13 @@ public sealed partial class PosShellViewModel(
             });
         }
 
+        if (!string.IsNullOrWhiteSpace(held.Note))
+        {
+            ActiveBillNote = held.Note;
+        }
+
         RecalculateCart();
+        UpdateActiveBillSummary();
         await RefreshHeldBillsCountAsync();
     }
 
@@ -346,7 +617,15 @@ public sealed partial class PosShellViewModel(
         BillDiscountPercent = 0;
         DiscountAuthorizedByUserId = null;
         PriceOverrideAuthorizedByUserId = null;
+
+        if (ActiveBill is { } bill)
+        {
+            bill.Note = string.Empty;
+            OnPropertyChanged(nameof(ActiveBillNote));
+        }
+
         RecalculateCart();
+        UpdateActiveBillSummary();
     }
 
     public List<SaleLineInput> BuildSaleLineInputs() =>

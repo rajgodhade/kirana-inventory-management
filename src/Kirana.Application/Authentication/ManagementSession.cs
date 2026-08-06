@@ -25,6 +25,16 @@ public sealed class ManagementSession
     /// changes it, so the auto-lock monitor never needs its own DB round-trip on every tick.</summary>
     public int AutoLockMinutes { get; set; } = 10;
 
+    /// <summary>Mirrors <c>AppSettings.RequirePinForPriceOverride</c>/<c>RequirePinForLargeDiscount</c>/
+    /// <c>RequirePinForReprint</c> — loaded at startup and kept in sync by the Settings screen, same
+    /// pattern as <see cref="AutoLockMinutes"/>. Read from POS/Management Home, which run without an
+    /// unlocked session, so these can't be permission-gated the normal way.</summary>
+    public bool RequirePinForPriceOverride { get; set; } = true;
+
+    public bool RequirePinForLargeDiscount { get; set; } = true;
+
+    public bool RequirePinForReprint { get; set; } = true;
+
     private int _failedPinAttempts;
     private DateTime? _pinLockedUntilUtc;
 

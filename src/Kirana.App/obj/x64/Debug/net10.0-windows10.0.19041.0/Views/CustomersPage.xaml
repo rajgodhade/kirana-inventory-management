@@ -50,7 +50,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBox x:ConnectionId='18' Grid.Column="0" PlaceholderText="Search Customer ID / phone / name…"
-                                                                                                   
+                                                                                                                                        
                                                       >
                 <TextBox.Resources>
                     <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>

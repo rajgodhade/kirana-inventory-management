@@ -21,6 +21,15 @@ public sealed partial class PurchaseEntryViewModel(
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SupplierDisplayText))]
+    [NotifyPropertyChangedFor(nameof(HasSupplier))]
+    [NotifyPropertyChangedFor(nameof(SupplierButtonLabel))]
+    [NotifyPropertyChangedFor(nameof(SupplierCodeText))]
+    [NotifyPropertyChangedFor(nameof(HasSupplierGstin))]
+    [NotifyPropertyChangedFor(nameof(SupplierGstin))]
+    [NotifyPropertyChangedFor(nameof(HasSupplierPhone))]
+    [NotifyPropertyChangedFor(nameof(SupplierPhone))]
+    [NotifyPropertyChangedFor(nameof(CurrentOutstanding))]
+    [NotifyPropertyChangedFor(nameof(OutstandingAfterPurchase))]
     private Supplier? _selectedSupplier;
 
     [ObservableProperty]
@@ -30,6 +39,9 @@ public sealed partial class PurchaseEntryViewModel(
     private string _notes = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AmountPaid))]
+    [NotifyPropertyChangedFor(nameof(OutstandingAfterPurchase))]
+    [NotifyPropertyChangedFor(nameof(RemainingBalance))]
     private string _amountPaidText = "0";
 
     public IReadOnlyList<PaymentMethod> PaymentMethods { get; } = [PaymentMethod.Cash, PaymentMethod.Upi, PaymentMethod.Card];
@@ -53,6 +65,8 @@ public sealed partial class PurchaseEntryViewModel(
     private decimal _roundOffAmount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(OutstandingAfterPurchase))]
+    [NotifyPropertyChangedFor(nameof(RemainingBalance))]
     private decimal _grandTotal;
 
     [ObservableProperty]
@@ -65,7 +79,35 @@ public sealed partial class PurchaseEntryViewModel(
 
     public string SupplierDisplayText => SelectedSupplier?.Name ?? "Select supplier…";
 
+    public bool HasSupplier => SelectedSupplier is not null;
+
+    public string SupplierButtonLabel => HasSupplier ? "Change" : "Select Supplier";
+
+    public string SupplierCodeText => SelectedSupplier?.SupplierCode ?? string.Empty;
+
+    public string? SupplierGstin => SelectedSupplier?.Gstin;
+
+    public bool HasSupplierGstin => !string.IsNullOrWhiteSpace(SelectedSupplier?.Gstin);
+
+    public string? SupplierPhone => SelectedSupplier?.Phone;
+
+    public bool HasSupplierPhone => !string.IsNullOrWhiteSpace(SelectedSupplier?.Phone);
+
+    /// <summary>Live "what happens to this supplier's balance" preview shown on the supplier card —
+    /// purely a UI projection of the same figures already on screen, not a separate calculation the
+    /// server relies on (<see cref="IPurchaseService"/> derives the real <c>OutstandingAmount</c>
+    /// itself when the purchase is finalized).</summary>
+    public decimal CurrentOutstanding => SelectedSupplier?.OutstandingBalance ?? 0;
+
+    public decimal AmountPaid => decimal.TryParse(AmountPaidText, out var v) ? v : 0;
+
+    public decimal OutstandingAfterPurchase => CurrentOutstanding + GrandTotal - AmountPaid;
+
+    public decimal RemainingBalance => GrandTotal - AmountPaid;
+
     public ObservableCollection<PurchaseLineViewModel> Lines { get; } = [];
+
+    public bool HasLines => Lines.Count > 0;
 
     [ObservableProperty]
     private bool _hasSuggestions;
@@ -200,6 +242,19 @@ public sealed partial class PurchaseEntryViewModel(
 
     public void RecalculateTotals()
     {
+        OnPropertyChanged(nameof(HasLines));
+
+        // Totals refresh on every keystroke, so a half-typed quantity is a normal, expected state:
+        // clearing the box to retype "10" passes through empty (quantity 0) first. Hold the last
+        // good totals instead of flashing "quantity must be positive" as the user types —
+        // OnLineFieldLostFocus clamps the value when focus leaves, and PurchaseService re-validates
+        // everything at finalisation, so nothing invalid can actually be recorded. Mirrors
+        // PosShellViewModel.RecalculateCart.
+        if (Lines.Any(l => l.Quantity <= 0))
+        {
+            return;
+        }
+
         var purchaseLines = Lines.Select(l => new PurchaseLine
         {
             ProductId = l.ProductId,

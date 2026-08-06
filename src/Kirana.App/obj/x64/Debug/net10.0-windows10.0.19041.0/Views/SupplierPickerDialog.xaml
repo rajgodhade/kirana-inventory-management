@@ -29,7 +29,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox x:ConnectionId='9' Grid.Column="0" PlaceholderText="Search by name or Supplier ID"
-                                                                                                    />
+                                                                                                                                        
+                                                       />
             <Button x:ConnectionId='10' Grid.Column="1" Content="Search"                       />
         </Grid>
 

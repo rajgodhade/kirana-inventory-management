@@ -14,6 +14,12 @@ namespace Kirana.App.Views;
 
 public sealed partial class ProductsPage : Page
 {
+    // Same live-as-you-type search this app uses everywhere else — fires ~300ms after the user
+    // stops typing so the list doesn't re-query on every keystroke, and Enter still works
+    // immediately for anyone who prefers it. This page had been left on Enter-only search, which
+    // reads as "typing doesn't do anything" since nothing happens until the key is pressed.
+    private readonly DispatcherTimer _searchDebounce = new() { Interval = TimeSpan.FromMilliseconds(300) };
+
     public ProductsViewModel ViewModel { get; }
 
     public ProductsPage()
@@ -28,12 +34,25 @@ public sealed partial class ProductsPage : Page
 
         InitializeComponent();
         Loaded += async (_, _) => await ViewModel.InitializeAsync();
+
+        _searchDebounce.Tick += async (_, _) =>
+        {
+            _searchDebounce.Stop();
+            await ViewModel.SearchAsync();
+        };
+    }
+
+    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+    {
+        _searchDebounce.Stop();
+        _searchDebounce.Start();
     }
 
     private async void OnSearchBoxKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == Windows.System.VirtualKey.Enter)
         {
+            _searchDebounce.Stop();
             await ViewModel.SearchAsync();
         }
     }
@@ -69,6 +88,26 @@ public sealed partial class ProductsPage : Page
             ViewModel, App.Services.GetRequiredService<IBarcodeService>(), App.Services.GetRequiredService<IBarcodeRenderer>())).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.SearchAsync();
+    }
+
+    private async void OnImportProductsClick(object sender, RoutedEventArgs e)
+    {
+        if (!ViewModel.CanEditProducts)
+        {
+            return;
+        }
+
+        var dialog = new ProductImportDialog(new ProductImportViewModel(
+            App.Services.GetRequiredService<IProductImportService>(), ViewModel.CurrentUserId)).Themed(XamlRoot);
+        await dialog.ShowAsync();
+
+        if (dialog.ImportedAnything)
+        {
+            // An import can add categories/brands too, so refresh the filter dropdowns as well as
+            // the product list.
+            await ViewModel.ReloadFilterOptionsAsync();
+            await ViewModel.SearchAsync();
+        }
     }
 
     private async void OnEditClick(object sender, RoutedEventArgs e)

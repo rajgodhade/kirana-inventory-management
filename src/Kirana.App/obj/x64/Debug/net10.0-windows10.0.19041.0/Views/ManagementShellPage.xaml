@@ -30,26 +30,26 @@
             </Border>
 
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0">
-                <TextBlock x:ConnectionId='24' x:Name="StoreNameText" FontSize="14" FontWeight="SemiBold"
+                <TextBlock x:ConnectionId='29' x:Name="StoreNameText" FontSize="14" FontWeight="SemiBold"
                            Foreground="{ThemeResource TextPrimaryBrush}" />
                 <TextBlock Text="Management" Style="{StaticResource CaptionTextStyle}" />
             </StackPanel>
 
             <!-- Signed-in user, so it's never ambiguous whose actions are being audited. -->
             <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,4,0">
-                <TextBlock x:ConnectionId='22' x:Name="UserNameText" Style="{StaticResource SecondaryTextStyle}"
+                <TextBlock x:ConnectionId='27' x:Name="UserNameText" Style="{StaticResource SecondaryTextStyle}"
                            HorizontalAlignment="Right" />
-                <TextBlock x:ConnectionId='23' x:Name="UserRoleText" Style="{StaticResource CaptionTextStyle}"
+                <TextBlock x:ConnectionId='28' x:Name="UserRoleText" Style="{StaticResource CaptionTextStyle}"
                            HorizontalAlignment="Right" />
             </StackPanel>
 
-            <Button x:ConnectionId='19' Grid.Column="3"                            VerticalAlignment="Center"
+            <Button x:ConnectionId='24' Grid.Column="3"                            VerticalAlignment="Center"
                     AutomationProperties.Name="Toggle light and dark theme"
                     ToolTipService.ToolTip="Switch between light and dark">
-                <FontIcon x:ConnectionId='21' x:Name="ThemeIcon" Glyph="&#xE706;" FontSize="15" />
+                <FontIcon x:ConnectionId='26' x:Name="ThemeIcon" Glyph="&#xE706;" FontSize="15" />
             </Button>
 
-            <Button x:ConnectionId='20' Grid.Column="4"                     VerticalAlignment="Center"
+            <Button x:ConnectionId='25' Grid.Column="4"                     VerticalAlignment="Center"
                     AutomationProperties.Name="Lock and return to billing">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE72E;" FontSize="14" />
@@ -156,9 +156,35 @@
                         <FontIcon Glyph="&#xE713;" />
                     </muxc:NavigationViewItem.Icon>
                 </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItemHeader x:ConnectionId='18' x:Name="NavDataHeader" Content="Data" />
+
+                <muxc:NavigationViewItem x:ConnectionId='19' x:Name="NavBackupManager" Content="Backup Manager" Tag="BackupManager">
+                    <muxc:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE896;" />
+                    </muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:ConnectionId='20' x:Name="NavRestore" Content="Restore" Tag="Restore">
+                    <muxc:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE777;" />
+                    </muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:ConnectionId='21' x:Name="NavExportCenter" Content="Export Center" Tag="ExportCenter">
+                    <muxc:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEDE1;" />
+                    </muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:ConnectionId='22' x:Name="NavDatabaseMaintenance" Content="Database Maintenance" Tag="DatabaseMaintenance">
+                    <muxc:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9F5;" />
+                    </muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
             </muxc:NavigationView.MenuItems>
 
-            <Frame x:ConnectionId='18' x:Name="ContentFrame" />
+            <Frame x:ConnectionId='23' x:Name="ContentFrame" />
         </muxc:NavigationView>
     </Grid>
 </Page>

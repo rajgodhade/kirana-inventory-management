@@ -30,7 +30,7 @@ public sealed partial class PurchaseLineViewModel : ObservableObject
     private string _batchNumberText = string.Empty;
 
     [ObservableProperty]
-    private string _expiryDateText = string.Empty;
+    private DateTimeOffset? _expiryDateOffset;
 
     [ObservableProperty]
     private decimal _taxableAmount;
@@ -47,5 +47,5 @@ public sealed partial class PurchaseLineViewModel : ObservableObject
 
     public decimal DiscountPercent => decimal.TryParse(DiscountPercentText, out var v) ? v : 0;
 
-    public DateOnly? ExpiryDate => DateOnly.TryParse(ExpiryDateText, out var d) ? d : null;
+    public DateOnly? ExpiryDate => ExpiryDateOffset is { } offset ? DateOnly.FromDateTime(offset.Date) : null;
 }

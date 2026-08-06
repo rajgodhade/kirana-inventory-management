@@ -1,0 +1,220 @@
+<ContentDialog
+    x:Class="Kirana.App.Views.ProductImportDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kirana.App.ViewModels"
+    CloseButtonText="Close"
+    PrimaryButtonText="Import"
+    IsPrimaryButtonEnabled="{x:Bind ViewModel.CanCommit, Mode=OneWay}"
+    PrimaryButtonClick="OnPrimaryButtonClick"
+    DefaultButton="Primary">
+
+    <!-- A ContentDialog's actual rendered width comes from the ContentDialogMaxWidth theme
+         resource baked into its default template, not the MaxWidth property set on the element
+         itself (that has no visible effect — confirmed live: it rendered at ~620px regardless).
+         Overriding the theme resource here is the documented way to widen it. -->
+    <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMaxWidth">1300</x:Double>
+        <x:Double x:Key="ContentDialogMinWidth">900</x:Double>
+    </ContentDialog.Resources>
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Import Products" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
+                    Click="OnCloseIconClick" AutomationProperties.Name="Close">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
+
+    <!-- ContentDialog wraps whatever is set as Content in its own implicit ScrollViewer, and keeps
+         Primary/Secondary/Close outside it in a fixed footer — that's why "Close" has always stayed
+         visible no matter how tall the preview list gets, and why Import uses PrimaryButtonText
+         instead of a custom in-content Button: a button placed inside Content is never actually
+         pinned to the dialog's own viewport, only to the bottom of the content that scrolls with it
+         (this silently hid an earlier version of this button behind a large preview list).
+
+         The dialog's own width now comes from the ContentDialogMaxWidth/MinWidth resource override
+         above; this just stretches to fill whatever that gives it. -->
+    <ScrollViewer HorizontalAlignment="Stretch" MaxHeight="620" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="12">
+
+        <TextBlock TextWrapping="Wrap" Style="{StaticResource SecondaryTextStyle}"
+                   Text="Load a .csv or .xlsx file to add or update products in bulk. Nothing is saved until you press Import. Rows that match a product you already have can be updated, imported as a separate new product, or removed from this import." />
+
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Click="OnChooseFileClick" Style="{StaticResource AccentButtonStyle}"
+                    AutomationProperties.Name="Choose file">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE8E5;" FontSize="14" />
+                    <TextBlock Text="Choose File…" />
+                </StackPanel>
+            </Button>
+
+            <Button Grid.Column="1" Click="OnDownloadTemplateClick" AutomationProperties.Name="Download template">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE896;" FontSize="14" />
+                    <TextBlock Text="Download Template" />
+                </StackPanel>
+            </Button>
+
+            <TextBlock Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource CaptionTextStyle}"
+                       TextTrimming="CharacterEllipsis"
+                       Text="{x:Bind ViewModel.FileName, Mode=OneWay}" />
+        </Grid>
+
+        <ProgressBar IsIndeterminate="True"
+                     Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+        <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                 Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+
+        <InfoBar IsOpen="{x:Bind ViewModel.SuccessMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                 Severity="Success" Message="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}" />
+
+        <TextBlock Text="{x:Bind ViewModel.SummaryText, Mode=OneWay}" Style="{StaticResource CardTitleTextStyle}"
+                   Visibility="{x:Bind ViewModel.HasPreview, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+        <InfoBar IsOpen="{x:Bind ViewModel.HasNewReferenceData, Mode=OneWay}" Severity="Informational"
+                 Message="{x:Bind ViewModel.NewReferenceDataText, Mode=OneWay}" IsClosable="False" />
+
+        <Border Style="{StaticResource CardBorderStyle}" Padding="0" MaxHeight="420"
+                Visibility="{x:Bind ViewModel.HasPreview, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ListView ItemsSource="{x:Bind ViewModel.Rows}" SelectionMode="None">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="MinHeight" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ProductImportRowViewModel">
+                        <Grid Padding="16,10" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1"
+                              Opacity="{x:Bind RowOpacity, Mode=OneWay}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0" ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="220" />
+                                    <ColumnDefinition Width="110" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{x:Bind RowNumberText}" Style="{StaticResource CaptionTextStyle}"
+                                           VerticalAlignment="Center" />
+
+                                <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Name}" Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+                                    <TextBlock Text="{x:Bind Details}" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap"
+                                               Visibility="{x:Bind IsError, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                                    <TextBlock Text="{x:Bind ErrorSummary}" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap"
+                                               Foreground="{ThemeResource DangerBrush}"
+                                               Visibility="{x:Bind IsError, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                </StackPanel>
+
+                                <!-- Actions: what's offered depends on why the row needs attention.
+                                     Update rows matched an existing product by SKU/Barcode — that's
+                                     the "duplicate item" case — so they get the choice to update it
+                                     (the default, needs no click), import it as a separate new
+                                     product instead, or drop it from this import entirely. Error
+                                     rows get Fix first since they can't import until corrected. -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
+                                            Visibility="{x:Bind ShowActions, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Button Content="Fix…" Click="OnFixRowClick" Tag="{x:Bind}" Padding="10,4"
+                                            Visibility="{x:Bind IsError, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            AutomationProperties.Name="{x:Bind FixButtonAutomationName}" />
+                                    <Button Content="Import as new" Click="OnImportAsNewClick" Tag="{x:Bind}" Padding="10,4"
+                                            ToolTipService.ToolTip="Create a separate new product instead of updating the existing one (its SKU/Barcode will be cleared on this row)"
+                                            Visibility="{x:Bind IsDuplicateOfExisting, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            AutomationProperties.Name="{x:Bind ImportAsNewButtonAutomationName}" />
+                                    <Button Content="Remove" Click="OnRemoveRowClick" Tag="{x:Bind}" Padding="10,4"
+                                            AutomationProperties.Name="{x:Bind RemoveButtonAutomationName}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
+                                            Visibility="{x:Bind IsRemoved, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Button Content="Undo" Click="OnUndoRemoveClick" Tag="{x:Bind}" Padding="10,4"
+                                            AutomationProperties.Name="{x:Bind UndoRemoveButtonAutomationName}" />
+                                </StackPanel>
+
+                                <Border Grid.Column="3" Style="{StaticResource BadgeBorderStyle}" VerticalAlignment="Top"
+                                        HorizontalAlignment="Right"
+                                        Background="{ThemeResource SuccessSubtleBrush}"
+                                        Visibility="{x:Bind ShowNewBadge, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="NEW" Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource SuccessBrush}" />
+                                </Border>
+                                <Border Grid.Column="3" Style="{StaticResource BadgeBorderStyle}" VerticalAlignment="Top"
+                                        HorizontalAlignment="Right"
+                                        Background="{ThemeResource WarningSubtleBrush}"
+                                        Visibility="{x:Bind ShowUpdateBadge, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="DUPLICATE" Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource WarningBrush}" />
+                                </Border>
+                                <Border Grid.Column="3" Style="{StaticResource BadgeBorderStyle}" VerticalAlignment="Top"
+                                        HorizontalAlignment="Right"
+                                        Background="{ThemeResource DangerSubtleBrush}"
+                                        Visibility="{x:Bind ShowErrorBadge, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="ERROR" Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource DangerBrush}" />
+                                </Border>
+                                <Border Grid.Column="3" Style="{StaticResource BadgeBorderStyle}" VerticalAlignment="Top"
+                                        HorizontalAlignment="Right"
+                                        Background="{ThemeResource SurfaceAltBrush}"
+                                        Visibility="{x:Bind IsRemoved, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="REMOVED" Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource TextSecondaryBrush}" />
+                                </Border>
+                            </Grid>
+
+                            <!-- Inline correction form: expands in place instead of opening a second
+                                 ContentDialog (which would crash — see the class-level comment on
+                                 ProductImportRowViewModel). -->
+                            <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Margin="0,10,0,0" Padding="16"
+                                    Background="{ThemeResource SurfaceAltBrush}"
+                                    Visibility="{x:Bind IsEditing, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <StackPanel Spacing="12">
+                                    <ItemsControl ItemsSource="{x:Bind EditFields}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ProductImportFieldViewModel">
+                                                <TextBox Header="{x:Bind Label}" Text="{x:Bind Value, Mode=TwoWay}"
+                                                         KeyDown="OnFixFieldKeyDown"
+                                                         Width="300" Margin="0,0,12,10" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                        <Button Content="Cancel" Click="OnCancelFixClick" Tag="{x:Bind}" />
+                                        <Button Content="Save" Click="OnSaveFixClick" Tag="{x:Bind}"
+                                                Style="{StaticResource AccentButtonStyle}"
+                                                AutomationProperties.Name="{x:Bind SaveFixButtonAutomationName}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

@@ -1,5 +1,6 @@
 using Kirana.Application;
 using Kirana.Application.Authentication;
+using Kirana.Application.Backup;
 using Kirana.Application.Expenses;
 using Kirana.Application.Printing;
 using Kirana.Application.Setup;
@@ -92,7 +93,11 @@ public partial class App : Microsoft.UI.Xaml.Application
             var appSettings = await db.AppSettings.FirstOrDefaultAsync();
             if (appSettings is not null)
             {
-                Services.GetRequiredService<ManagementSession>().AutoLockMinutes = appSettings.AutoLockMinutes;
+                var session = Services.GetRequiredService<ManagementSession>();
+                session.AutoLockMinutes = appSettings.AutoLockMinutes;
+                session.RequirePinForPriceOverride = appSettings.RequirePinForPriceOverride;
+                session.RequirePinForLargeDiscount = appSettings.RequirePinForLargeDiscount;
+                session.RequirePinForReprint = appSettings.RequirePinForReprint;
             }
         }
 
@@ -113,5 +118,69 @@ public partial class App : Microsoft.UI.Xaml.Application
 
         _mainWindow.NavigateToInitialPage(setupCompleted);
         _mainWindow.Activate();
+        ApplyMinimumWindowSize(_mainWindow);
+
+        if (setupCompleted)
+        {
+            await RunScheduledBackupIfDueAsync();
+        }
+    }
+
+    /// <summary>
+    /// Floors the window at a size the densest admin screens (the 8-tab Reports Hub, its 4-column
+    /// KPI grid) still fit without clipping — nothing in this app's layout scrolls or reflows
+    /// horizontally, so below this size content silently runs off the right edge with no way to
+    /// reach it. Wrapped in try/catch like the theme init above: window chrome is never worth
+    /// failing launch over.
+    /// </summary>
+    private static void ApplyMinimumWindowSize(Window window)
+    {
+        try
+        {
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+            var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+            if (appWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+            {
+                presenter.PreferredMinimumWidth = 1180;
+                presenter.PreferredMinimumHeight = 700;
+            }
+        }
+        catch
+        {
+            // Best-effort only — an unset minimum just means very small windows can clip content.
+        }
+    }
+
+    /// <summary>
+    /// Runs the automatic backup if one is due. Deliberately after the window is shown and wrapped
+    /// in a catch-all: a store must be able to start billing whether or not a backup can be written
+    /// (a full disk, a backup folder on a disconnected drive), so this can never block or fail
+    /// launch. <see cref="MainWindow"/> polls this again periodically for shops that never restart.
+    /// </summary>
+    internal static async Task RunScheduledBackupIfDueAsync()
+    {
+        try
+        {
+            using var scope = Services.CreateScope();
+            var scheduler = scope.ServiceProvider.GetRequiredService<IAutomaticBackupScheduler>();
+            var outcome = await scheduler.RunIfDueAsync();
+
+            if (outcome.WasDue && outcome.Result is { } result)
+            {
+                if (result.Succeeded)
+                {
+                    Log.Information("Automatic backup written to {Path}.", result.FilePath);
+                }
+                else
+                {
+                    Log.Warning("Automatic backup failed: {Error}", result.ErrorMessage);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Automatic backup check failed.");
+        }
     }
 }

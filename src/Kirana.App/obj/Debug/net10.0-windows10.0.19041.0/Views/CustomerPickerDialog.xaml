@@ -30,12 +30,17 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox x:ConnectionId='14' Grid.Column="0" PlaceholderText="Search by Customer ID, phone or name"
-                                                                                                    />
+                                                                                                                                        
+                                                       />
             <Button x:ConnectionId='15' Grid.Column="1" Content="Search"                       />
         </Grid>
 
+        <!-- SelectionMode="Single" + SelectionChanged, not IsItemClickEnabled+ItemClick: the latter
+             picks the customer internally but leaves no visible highlight, which read as "clicking
+             does nothing" even though it worked — same fix already applied to the sibling
+             SupplierPickerDialog. -->
         <ListView x:ConnectionId='3' x:Name="ResultsList"                                          MaxHeight="200"
-                  SelectionMode="None" IsItemClickEnabled="True"                            >
+                  SelectionMode="Single"                                      >
             <ListView.ItemTemplate>
                 <DataTemplate                               >
                     <Grid x:ConnectionId='9' ColumnSpacing="10" Padding="0,4">

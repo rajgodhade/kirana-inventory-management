@@ -67,11 +67,17 @@ public sealed class SaleService(
             }
         }
 
+        // Store-level opt-out (Settings → Billing Authorization, Owner-only): a single-operator
+        // store can turn this requirement off so the Owner isn't asked to authorize their own
+        // action. Read fresh from AppSettings rather than trusting anything client-supplied, so the
+        // opt-out is enforced the same way regardless of which UI (or lack of one) called this.
+        var appSettings = await db.AppSettings.FirstOrDefaultAsync(cancellationToken);
+
         var maxDiscountRequested = Math.Max(
             request.BillDiscountPercent,
             request.Lines.Count == 0 ? 0 : request.Lines.Max(l => l.DiscountPercent));
 
-        if (maxDiscountRequested > MaxUnauthorizedDiscountPercent)
+        if (maxDiscountRequested > MaxUnauthorizedDiscountPercent && (appSettings?.RequirePinForLargeDiscount ?? true))
         {
             await EnsureDiscountAuthorizedAsync(request.DiscountAuthorizedByUserId, cancellationToken);
         }
@@ -79,7 +85,7 @@ public sealed class SaleService(
         var hasPriceOverride = request.Lines.Any(l =>
             l.UnitPriceOverride is { } overridePrice && overridePrice != products[l.ProductId].SellingPrice);
 
-        if (hasPriceOverride)
+        if (hasPriceOverride && (appSettings?.RequirePinForPriceOverride ?? true))
         {
             await EnsurePriceOverrideAuthorizedAsync(request.PriceOverrideAuthorizedByUserId, cancellationToken);
         }
@@ -120,6 +126,16 @@ public sealed class SaleService(
             if (payment.Method == PaymentMethod.CustomerCredit && request.CustomerId is null)
             {
                 throw new InvalidOperationException("A customer must be selected to use Customer Credit / Udhaar.");
+            }
+
+            // Physically impossible otherwise — cash tendered can't be less than the amount it's
+            // covering. Checked server-side independent of the client, same as everything else
+            // here: a caller bypassing PaymentDialog's own check must not be able to record a
+            // negative "change returned" on the invoice.
+            if (payment.Method == PaymentMethod.Cash && payment.AmountTendered is { } tendered && tendered < payment.Amount)
+            {
+                throw new ArgumentException(
+                    $"Cash received (₹{tendered:0.00}) is less than the amount due (₹{payment.Amount:0.00}) for this payment.");
             }
         }
 
@@ -167,6 +183,7 @@ public sealed class SaleService(
                 GstRatePercentSnapshot = product.GstRatePercent ?? 0,
                 Quantity = lineResult.Line.Quantity,
                 UnitPriceSnapshot = lineResult.Line.UnitPrice,
+                MrpSnapshot = product.Mrp,
                 DiscountPercent = lineResult.Line.DiscountPercent,
                 DiscountAmount = lineResult.DiscountAmount,
                 TaxableAmount = lineResult.TaxableAmount,

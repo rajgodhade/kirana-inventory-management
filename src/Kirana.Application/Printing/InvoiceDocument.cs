@@ -38,6 +38,14 @@ public sealed class InvoiceDocument
 
     public IReadOnlyList<InvoiceLine> Lines { get; init; } = [];
     public IReadOnlyList<InvoicePaymentLine> Payments { get; init; } = [];
+
+    /// <summary>The receipt-ready Payment Summary rows — built once by
+    /// <see cref="PaymentSummaryBuilder"/> from <see cref="Payments"/>, showing only the fields
+    /// relevant to the actual payment scenario (e.g. no "Cash Received"/"Change Returned" for a
+    /// UPI-only sale, no such rows at all for a split where cash was tendered exactly). The renderer
+    /// displays these as-is rather than deciding anything itself.</summary>
+    public IReadOnlyList<InvoicePaymentSummaryLine> PaymentSummaryLines { get; init; } = [];
+
     public IReadOnlyList<InvoiceGstGroup> GstGroups { get; init; } = [];
 
     public decimal SubTotal { get; init; }
@@ -48,5 +56,12 @@ public sealed class InvoiceDocument
     public decimal RoundOffAmount { get; init; }
     public decimal GrandTotal { get; init; }
 
+    /// <summary>Total of (MRP − what was actually charged) across every line, floored at zero —
+    /// never negative even if a price override pushed a line above its own MRP. Zero for any sale
+    /// completed before this field existed (its snapshot defaults to 0), which correctly suppresses
+    /// the "You Saved" row on an old invoice rather than showing a meaningless number.</summary>
+    public decimal TotalSavings { get; init; }
+
     public bool HasGst => TaxTotal != 0;
+    public bool HasSavings => TotalSavings > 0;
 }

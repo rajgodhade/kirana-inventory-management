@@ -156,6 +156,32 @@
                         <FontIcon Glyph="&#xE713;" />
                     </muxc:NavigationViewItem.Icon>
                 </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItemHeader x:Name="NavDataHeader" Content="Data" />
+
+                <muxc:NavigationViewItem x:Name="NavBackupManager" Content="Backup Manager" Tag="BackupManager">
+                    <muxc:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE896;" />
+                    </muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:Name="NavRestore" Content="Restore" Tag="Restore">
+                    <muxc:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE777;" />
+                    </muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:Name="NavExportCenter" Content="Export Center" Tag="ExportCenter">
+                    <muxc:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEDE1;" />
+                    </muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:Name="NavDatabaseMaintenance" Content="Database Maintenance" Tag="DatabaseMaintenance">
+                    <muxc:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9F5;" />
+                    </muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
             </muxc:NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" />

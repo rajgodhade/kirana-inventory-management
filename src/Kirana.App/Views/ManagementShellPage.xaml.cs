@@ -67,6 +67,10 @@ public sealed partial class ManagementShellPage : Page
             var t when t == typeof(AuditLogPage) => "Audit",
             var t when t == typeof(ReportsHubPage) => "Reports",
             var t when t == typeof(SettingsPage) => "Settings",
+            var t when t == typeof(BackupManagerPage) => "BackupManager",
+            var t when t == typeof(RestorePage) => "Restore",
+            var t when t == typeof(ExportCenterPage) => "ExportCenter",
+            var t when t == typeof(DatabaseMaintenancePage) => "DatabaseMaintenance",
             _ => null,
         };
 
@@ -115,6 +119,15 @@ public sealed partial class ManagementShellPage : Page
         SetVisible(NavReports, _session.HasPermission(PermissionKeys.ReportsView));
         SetVisible(NavSettings, _session.HasPermission(PermissionKeys.SettingsChange));
 
+        // Backup, restore and database maintenance all share the one "dangerous data operation"
+        // permission, which is Owner-only by default. The Export Center is deliberately looser: it
+        // enforces a permission per data set, so a Manager who cannot restore can still export the
+        // data they are already allowed to see.
+        SetVisible(NavBackupManager, _session.HasPermission(PermissionKeys.BackupRestore));
+        SetVisible(NavRestore, _session.HasPermission(PermissionKeys.BackupRestore));
+        SetVisible(NavDatabaseMaintenance, _session.HasPermission(PermissionKeys.BackupRestore));
+        SetVisible(NavExportCenter, CanExportAnything());
+
         // A group header with nothing under it reads as a broken pane, so drop it too.
         SetVisible(NavTradeHeader, NavCustomers.Visibility == Visibility.Visible
             || NavSuppliers.Visibility == Visibility.Visible
@@ -128,7 +141,20 @@ public sealed partial class ManagementShellPage : Page
             || NavAudit.Visibility == Visibility.Visible
             || NavReports.Visibility == Visibility.Visible
             || NavSettings.Visibility == Visibility.Visible);
+
+        SetVisible(NavDataHeader, NavBackupManager.Visibility == Visibility.Visible
+            || NavRestore.Visibility == Visibility.Visible
+            || NavExportCenter.Visibility == Visibility.Visible
+            || NavDatabaseMaintenance.Visibility == Visibility.Visible);
     }
+
+    private bool CanExportAnything() =>
+        _session.HasPermission(PermissionKeys.ProductsView)
+        || _session.HasPermission(PermissionKeys.CustomersManage)
+        || _session.HasPermission(PermissionKeys.PurchasesManage)
+        || _session.HasPermission(PermissionKeys.InventoryManage)
+        || _session.HasPermission(PermissionKeys.ReportsView)
+        || _session.HasPermission(PermissionKeys.ExpensesManage);
 
     private static void SetVisible(NavigationViewItemBase item, bool visible) =>
         item.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
@@ -155,6 +181,10 @@ public sealed partial class ManagementShellPage : Page
             "Audit" => typeof(AuditLogPage),
             "Reports" => typeof(ReportsHubPage),
             "Settings" => typeof(SettingsPage),
+            "BackupManager" => typeof(BackupManagerPage),
+            "Restore" => typeof(RestorePage),
+            "ExportCenter" => typeof(ExportCenterPage),
+            "DatabaseMaintenance" => typeof(DatabaseMaintenancePage),
             _ => null,
         };
 

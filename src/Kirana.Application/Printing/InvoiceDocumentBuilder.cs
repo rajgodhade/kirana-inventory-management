@@ -15,6 +15,7 @@ public sealed class InvoiceDocumentBuilder : IInvoiceDocumentBuilder
             Unit = item.UnitSnapshot,
             Quantity = item.Quantity,
             UnitPrice = item.UnitPriceSnapshot,
+            Mrp = item.MrpSnapshot,
             DiscountPercent = item.DiscountPercent,
             DiscountAmount = item.DiscountAmount,
             GstRatePercent = item.GstRatePercentSnapshot,
@@ -34,6 +35,14 @@ public sealed class InvoiceDocumentBuilder : IInvoiceDocumentBuilder
             })
             .OrderBy(g => g.RatePercent)
             .ToList();
+
+        // Compared against what was actually charged for the whole bill (GrandTotal), not summed
+        // per line before tax/discount — MRP is inherently tax-inclusive by law, and GrandTotal is
+        // the one number that already nets out item discounts, bill discount, tax and rounding, so
+        // it's the correct like-for-like comparison. Floored at zero: a price override that pushed
+        // a line above its own MRP must never show as a negative "savings".
+        var mrpTotal = sale.Items.Sum(item => item.MrpSnapshot * item.Quantity);
+        var totalSavings = Math.Max(0, mrpTotal - sale.GrandTotal);
 
         var payments = sale.Payments.Select(payment => new InvoicePaymentLine
         {
@@ -63,6 +72,7 @@ public sealed class InvoiceDocumentBuilder : IInvoiceDocumentBuilder
 
             Lines = lines,
             Payments = payments,
+            PaymentSummaryLines = PaymentSummaryBuilder.Build(payments),
             GstGroups = gstGroups,
 
             SubTotal = sale.SubTotal,
@@ -72,6 +82,7 @@ public sealed class InvoiceDocumentBuilder : IInvoiceDocumentBuilder
             TaxTotal = sale.TaxTotal,
             RoundOffAmount = sale.RoundOffAmount,
             GrandTotal = sale.GrandTotal,
+            TotalSavings = totalSavings,
         };
     }
 

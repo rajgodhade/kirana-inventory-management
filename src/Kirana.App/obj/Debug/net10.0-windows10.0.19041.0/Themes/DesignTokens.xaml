@@ -65,6 +65,36 @@
             <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#0F766E" />
             <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="#0F766E" />
             <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#0F766E" />
+
+            <!-- ===================== PASTEL DASHBOARD PALETTE =====================
+                 Tinted card fills for KPI tiles and chart series. Each pastel has a matching
+                 "On" foreground picked for AA contrast against its own fill, so a KPI's value
+                 never has to fall back to the generic text brush and lose the colour coding.
+                 Six hues, cycled deliberately rather than assigned at random: the same metric
+                 keeps the same colour every time the dashboard loads. -->
+            <SolidColorBrush x:Key="PastelTealBrush" Color="#DCF3F0" />
+            <SolidColorBrush x:Key="PastelTealOnBrush" Color="#0B5A54" />
+            <SolidColorBrush x:Key="PastelBlueBrush" Color="#E2EBFD" />
+            <SolidColorBrush x:Key="PastelBlueOnBrush" Color="#1E40AF" />
+            <SolidColorBrush x:Key="PastelVioletBrush" Color="#EBE6FB" />
+            <SolidColorBrush x:Key="PastelVioletOnBrush" Color="#5B21B6" />
+            <SolidColorBrush x:Key="PastelAmberBrush" Color="#FCF0DC" />
+            <SolidColorBrush x:Key="PastelAmberOnBrush" Color="#92400E" />
+            <SolidColorBrush x:Key="PastelRoseBrush" Color="#FBE4E6" />
+            <SolidColorBrush x:Key="PastelRoseOnBrush" Color="#9F1239" />
+            <SolidColorBrush x:Key="PastelGreenBrush" Color="#DFF3E6" />
+            <SolidColorBrush x:Key="PastelGreenOnBrush" Color="#14663A" />
+
+            <!-- Saturated companions for chart bars, where a pale fill would disappear. -->
+            <SolidColorBrush x:Key="ChartSeriesPrimaryBrush" Color="#14B8A6" />
+            <SolidColorBrush x:Key="ChartSeriesSecondaryBrush" Color="#F59E0B" />
+            <SolidColorBrush x:Key="ChartSeriesTertiaryBrush" Color="#8B5CF6" />
+            <SolidColorBrush x:Key="ChartGridLineBrush" Color="#EDF0F3" />
+
+            <!-- Card chrome: a hairline border plus a genuinely soft shadow. Light mode carries
+                 the shadow; dark mode leans on the border instead (see the Dark dictionary). -->
+            <SolidColorBrush x:Key="CardElevatedBorderBrush" Color="#EAEDF1" />
+            <Color x:Key="CardShadowColor">#1F2A37</Color>
         </ResourceDictionary>
 
         <!-- ================================= DARK ================================= -->
@@ -112,6 +142,32 @@
             <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#2DD4BF" />
             <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="#1F8C80" />
             <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#2DD4BF" />
+
+            <!-- Dark-mode pastels are deep tints, not pale ones: a literal pastel fill would glare
+                 against a #14181D page and wash out the value sitting on it. Same six hues at low
+                 luminance, with light "On" foregrounds — so a card keeps its colour identity across
+                 themes while the contrast direction flips. -->
+            <SolidColorBrush x:Key="PastelTealBrush" Color="#123A38" />
+            <SolidColorBrush x:Key="PastelTealOnBrush" Color="#7FE9DC" />
+            <SolidColorBrush x:Key="PastelBlueBrush" Color="#1A2338" />
+            <SolidColorBrush x:Key="PastelBlueOnBrush" Color="#A9C2FF" />
+            <SolidColorBrush x:Key="PastelVioletBrush" Color="#241E3A" />
+            <SolidColorBrush x:Key="PastelVioletOnBrush" Color="#C4B5FD" />
+            <SolidColorBrush x:Key="PastelAmberBrush" Color="#332612" />
+            <SolidColorBrush x:Key="PastelAmberOnBrush" Color="#FCD34D" />
+            <SolidColorBrush x:Key="PastelRoseBrush" Color="#341A20" />
+            <SolidColorBrush x:Key="PastelRoseOnBrush" Color="#FDA4AF" />
+            <SolidColorBrush x:Key="PastelGreenBrush" Color="#16301F" />
+            <SolidColorBrush x:Key="PastelGreenOnBrush" Color="#86EFAC" />
+
+            <SolidColorBrush x:Key="ChartSeriesPrimaryBrush" Color="#2DD4BF" />
+            <SolidColorBrush x:Key="ChartSeriesSecondaryBrush" Color="#FBBF24" />
+            <SolidColorBrush x:Key="ChartSeriesTertiaryBrush" Color="#A78BFA" />
+            <SolidColorBrush x:Key="ChartGridLineBrush" Color="#2A313A" />
+
+            <SolidColorBrush x:Key="CardElevatedBorderBrush" Color="#2E353E" />
+            <!-- Near-black: a shadow on a dark surface should deepen, never glow. -->
+            <Color x:Key="CardShadowColor">#000000</Color>
         </ResourceDictionary>
 
         <!-- ============================ HIGH CONTRAST ============================= -->
@@ -138,6 +194,30 @@
             <SolidColorBrush x:Key="DangerSubtleBrush" Color="{ThemeResource SystemColorWindowColor}" />
             <SolidColorBrush x:Key="InfoBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
             <SolidColorBrush x:Key="InfoSubtleBrush" Color="{ThemeResource SystemColorWindowColor}" />
+
+            <!-- High contrast deliberately discards the pastel identity entirely: colour-coding is
+                 exactly what a high-contrast user has asked the OS to strip out, so every card
+                 collapses to the system window/text pair and stays legible. -->
+            <SolidColorBrush x:Key="PastelTealBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="PastelTealOnBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="PastelBlueBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="PastelBlueOnBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="PastelVioletBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="PastelVioletOnBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="PastelAmberBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="PastelAmberOnBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="PastelRoseBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="PastelRoseOnBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="PastelGreenBrush" Color="{ThemeResource SystemColorWindowColor}" />
+            <SolidColorBrush x:Key="PastelGreenOnBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+
+            <SolidColorBrush x:Key="ChartSeriesPrimaryBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="ChartSeriesSecondaryBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <SolidColorBrush x:Key="ChartSeriesTertiaryBrush" Color="{ThemeResource SystemColorHighlightColor}" />
+            <SolidColorBrush x:Key="ChartGridLineBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+
+            <SolidColorBrush x:Key="CardElevatedBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+            <Color x:Key="CardShadowColor">#000000</Color>
         </ResourceDictionary>
 
     </ResourceDictionary.ThemeDictionaries>
@@ -161,6 +241,13 @@
     <CornerRadius x:Key="RadiusSmall">4</CornerRadius>
     <CornerRadius x:Key="RadiusMedium">8</CornerRadius>
     <CornerRadius x:Key="RadiusLarge">12</CornerRadius>
+
+    <!-- Softer radii introduced for the modernized dashboard. Kept as new keys rather than
+         re-pointing RadiusLarge, so every existing screen in the app keeps its current geometry
+         and only the surfaces that opt in get the rounder look. -->
+    <CornerRadius x:Key="RadiusXLarge">16</CornerRadius>
+    <CornerRadius x:Key="RadiusXXLarge">20</CornerRadius>
+    <CornerRadius x:Key="RadiusPill">999</CornerRadius>
 
     <!-- ================================ TYPOGRAPHY ============================== -->
     <Style x:Key="PageTitleTextStyle" TargetType="TextBlock">
@@ -265,6 +352,85 @@
     <Style x:Key="BadgeTextStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- ======================= MODERNIZED DASHBOARD SURFACES =======================
+         Additive styles for the pastel dashboard. Existing screens keep CardBorderStyle
+         untouched; only surfaces that explicitly opt into these keys get the new look. -->
+
+    <!-- Elevated white/dark card with a soft shadow. ThemeShadow needs a Translation with a
+         non-zero Z to actually cast, which the consuming element sets — a Style can't set
+         Translation (it isn't a dependency property on FrameworkElement in a settable-by-style
+         way), so the shadow lives on the element and this style carries the rest. -->
+    <Style x:Key="ElevatedCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardElevatedBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusXLarge}" />
+        <Setter Property="Padding" Value="{StaticResource CardPaddingLarge}" />
+    </Style>
+
+    <!-- Pastel KPI tile. Background/BorderBrush are supplied per-instance from the pastel
+         palette so each metric keeps a stable colour identity; everything structural is here. -->
+    <Style x:Key="KpiCardStyle" TargetType="Border">
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusXLarge}" />
+        <Setter Property="Padding" Value="18,16" />
+        <Setter Property="MinHeight" Value="104" />
+    </Style>
+
+    <!-- Circular icon chip inside a KPI tile. -->
+    <Style x:Key="KpiIconChipStyle" TargetType="Border">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusPill}" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <!-- KPI typography: small quiet label, large dominant value, tiny caption underneath. -->
+    <Style x:Key="KpiLabelTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="CharacterSpacing" Value="30" />
+        <Setter Property="Opacity" Value="0.85" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="KpiValueTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <Style x:Key="KpiCaptionTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Opacity" Value="0.7" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- Chart card header: title plus optional subtitle, consistent across all chart tiles. -->
+    <Style x:Key="ChartCardTitleTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{ThemeResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="ChartCardSubtitleTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{ThemeResource TextTertiaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- Rounded container for the date-filter row, so the toolbar reads as one grouped control
+         rather than three controls floating on the page background. -->
+    <Style x:Key="FilterBarStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardElevatedBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusXLarge}" />
+        <Setter Property="Padding" Value="16,12" />
     </Style>
 
 </ResourceDictionary>

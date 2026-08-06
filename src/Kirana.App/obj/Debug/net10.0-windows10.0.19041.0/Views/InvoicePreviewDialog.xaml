@@ -20,7 +20,7 @@
         </Grid>
     </ContentDialog.Title>
 
-    <StackPanel Spacing="10" MinWidth="420" MaxHeight="640">
+    <StackPanel Spacing="10" MinWidth="420">
 
         <ComboBox x:ConnectionId='3' Header="Format"                                                  
                                                                                 />
@@ -30,7 +30,14 @@
         <InfoBar x:ConnectionId='5'                                                                                                         
                  Severity="Success"                                                         />
 
-        <ScrollViewer MaxHeight="480" HorizontalScrollBarVisibility="Auto" Background="{ThemeResource LayerFillColorDefaultBrush}">
+        <!-- Scrolling itself already worked here (confirmed via UIA ScrollPattern — a 22-line bill
+             correctly reported VerticallyScrollable=True and scrolled on request). The real gap was
+             discoverability: WinUI's default "Auto" scrollbar is a thin, auto-hiding sliver that's
+             easy to miss on a bill that's cut off mid-list, especially for someone who isn't
+             already expecting a preview to scroll. VerticalScrollBarVisibility="Visible" keeps the
+             track permanently on-screen instead of only appearing on hover/drag. -->
+        <ScrollViewer MaxHeight="480" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"
+                      Background="{ThemeResource LayerFillColorDefaultBrush}">
             <ContentControl x:ConnectionId='7'                                                          HorizontalContentAlignment="Center" />
         </ScrollViewer>
 

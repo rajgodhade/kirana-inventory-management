@@ -51,13 +51,27 @@ public sealed partial class ManagementHomePage : Page
             return;
         }
 
-        var authService = App.Services.GetRequiredService<IAuthenticationService>();
-        var authDialog = new ManagerAuthorizationDialog(authService, PermissionKeys.SalesReprintInvoice).Themed(XamlRoot);
-        var authResult = await authDialog.ShowAsync();
+        var session = App.Services.GetRequiredService<ManagementSession>();
+        int userId;
 
-        if (authResult != ContentDialogResult.Primary || authDialog.AuthorizedUserId is not { } userId)
+        if (session.RequirePinForReprint)
         {
-            return;
+            var authService = App.Services.GetRequiredService<IAuthenticationService>();
+            var authDialog = new ManagerAuthorizationDialog(authService, PermissionKeys.SalesReprintInvoice).Themed(XamlRoot);
+            var authResult = await authDialog.ShowAsync();
+
+            if (authResult != ContentDialogResult.Primary || authDialog.AuthorizedUserId is not { } authorizedUserId)
+            {
+                return;
+            }
+
+            userId = authorizedUserId;
+        }
+        else
+        {
+            // Reached this page at all only via an unlocked Dashboard session, so a current user
+            // always exists here.
+            userId = session.CurrentUser!.Id;
         }
 
         var db = App.Services.GetRequiredService<IKiranaDbContext>();

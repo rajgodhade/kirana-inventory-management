@@ -87,6 +87,18 @@ public class SaleServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CompleteSaleAsync_SnapshotsProductMrp_OntoTheSaleItem()
+    {
+        // Server-derived from the loaded Product, never client-supplied — SaleLineInput carries no
+        // Mrp at all, matching how UnitPrice/GST are already re-derived server-side.
+        var product = await SeedProductAsync(price: 50);
+
+        var sale = await _sut.CompleteSaleAsync(CashRequest(product.Id, 1, 50));
+
+        Assert.Equal(product.Mrp, sale.Items.Single().MrpSnapshot);
+    }
+
+    [Fact]
     public async Task CompleteSaleAsync_GeneratesInvoiceNumberInExpectedFormat()
     {
         var product = await SeedProductAsync(price: 10);
@@ -229,6 +241,42 @@ public class SaleServiceTests : IDisposable
         var payment = sale.Payments.Single();
         Assert.Equal(100m, payment.AmountTendered);
         Assert.Equal(55m, payment.ChangeGiven);
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_Throws_WhenCashTenderedIsLessThanAmountDue()
+    {
+        // Physically impossible ("negative change") — must be rejected server-side regardless of
+        // what the client sent, not merely computed and stored as a negative ChangeGiven.
+        var product = await SeedProductAsync(price: 158);
+
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 158, AmountTendered = 100 }],
+        };
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => _sut.CompleteSaleAsync(request));
+        Assert.Contains("158.00", ex.Message);
+        Assert.Contains("100.00", ex.Message);
+        Assert.Empty(await _fixture.Context.Sales.ToListAsync());
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_Succeeds_WhenCashTenderedExactlyEqualsAmountDue()
+    {
+        // Boundary case — exact payment (zero change) must not be mistaken for underpayment.
+        var product = await SeedProductAsync(price: 50);
+
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 50, AmountTendered = 50 }],
+        };
+
+        var sale = await _sut.CompleteSaleAsync(request);
+
+        Assert.Equal(0m, sale.Payments.Single().ChangeGiven);
     }
 
     [Fact]
@@ -466,6 +514,83 @@ public class SaleServiceTests : IDisposable
 
         Assert.Equal(100m, sale.GrandTotal);
         Assert.Null(sale.PriceOverrideAuthorizedByUserId);
+    }
+
+    private async Task SetRequirePinAsync(bool priceOverride, bool largeDiscount)
+    {
+        _fixture.Context.AppSettings.Add(new AppSettings
+        {
+            RequirePinForPriceOverride = priceOverride,
+            RequirePinForLargeDiscount = largeDiscount,
+        });
+        await _fixture.Context.SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_Succeeds_WithNoAuthorization_WhenLargeDiscountPinDisabledInSettings()
+    {
+        await SetRequirePinAsync(priceOverride: true, largeDiscount: false);
+        var product = await SeedProductAsync(price: 100);
+
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1, DiscountPercent = 50 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 50, AmountTendered = 50 }],
+        };
+
+        var sale = await _sut.CompleteSaleAsync(request);
+
+        Assert.Equal(50m, sale.GrandTotal);
+        Assert.Null(sale.DiscountAuthorizedByUserId);
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_Succeeds_WithNoAuthorization_WhenPriceOverridePinDisabledInSettings()
+    {
+        await SetRequirePinAsync(priceOverride: false, largeDiscount: true);
+        var product = await SeedProductAsync(price: 100);
+
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1, UnitPriceOverride = 70 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 70, AmountTendered = 70 }],
+        };
+
+        var sale = await _sut.CompleteSaleAsync(request);
+
+        Assert.Equal(70m, sale.GrandTotal);
+        Assert.Null(sale.PriceOverrideAuthorizedByUserId);
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_StillRequiresAuthorization_WhenNoAppSettingsRowExists()
+    {
+        // No AppSettings row seeded at all — must fail safe (require authorization), matching every
+        // pre-opt-out test above that also seeds no AppSettings row.
+        var product = await SeedProductAsync(price: 100);
+
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1, DiscountPercent = 50 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 50, AmountTendered = 50 }],
+        };
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.CompleteSaleAsync(request));
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_StillRequiresAuthorization_WhenSettingLeftOn()
+    {
+        await SetRequirePinAsync(priceOverride: true, largeDiscount: true);
+        var product = await SeedProductAsync(price: 100);
+
+        var request = new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1, DiscountPercent = 50 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 50, AmountTendered = 50 }],
+        };
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.CompleteSaleAsync(request));
     }
 
     [Fact]

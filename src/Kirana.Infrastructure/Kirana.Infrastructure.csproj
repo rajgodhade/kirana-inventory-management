@@ -26,4 +26,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Backup/restore tests assert on file checksums and open the database file directly, using
+         the same helpers the services themselves use rather than reimplementing them. -->
+    <InternalsVisibleTo Include="Kirana.Tests" />
+  </ItemGroup>
+
 </Project>

@@ -1,5 +1,6 @@
 using Kirana.App.ViewModels.Reports;
 using Kirana.Application.Authentication;
+using Kirana.Application.Printing;
 using Kirana.Application.Reports;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
@@ -15,6 +16,9 @@ public sealed partial class DashboardView : UserControl
         var services = App.Services;
         ViewModel = new DashboardTabViewModel(
             services.GetRequiredService<IDashboardService>(),
+            services.GetRequiredService<IProductReportService>(),
+            services.GetRequiredService<IInventoryReportService>(),
+            services.GetRequiredService<IPrinterDiscoveryService>(),
             services.GetRequiredService<ManagementSession>());
 
         InitializeComponent();

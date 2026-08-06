@@ -62,6 +62,77 @@
                                  Severity="Success" Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Billing Authorization" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Style="{StaticResource PageSubtitleTextStyle}" TextWrapping="Wrap"
+                                       Text="Owner-only. Turn off a manager PIN prompt for stores where the Owner runs billing alone — each change saves immediately." />
+                        </StackPanel>
+
+                        <ToggleSwitch Header="Require PIN to change selling price at billing"
+                                      IsOn="{x:Bind ViewModel.RequirePinForPriceOverride, Mode=TwoWay}"
+                                      IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+
+                        <ToggleSwitch Header="Require PIN to approve large discounts at billing"
+                                      IsOn="{x:Bind ViewModel.RequirePinForLargeDiscount, Mode=TwoWay}"
+                                      IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+
+                        <ToggleSwitch Header="Require PIN to reprint an invoice"
+                                      IsOn="{x:Bind ViewModel.RequirePinForReprint, Mode=TwoWay}"
+                                      IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+
+                        <InfoBar IsOpen="{x:Bind ViewModel.PinToggleErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                                 Severity="Error" Message="{x:Bind ViewModel.PinToggleErrorMessage, Mode=OneWay}" />
+                        <InfoBar IsOpen="{x:Bind ViewModel.PinToggleStatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                                 Severity="Success" Message="{x:Bind ViewModel.PinToggleStatusMessage, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Backup &amp; Export" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Style="{StaticResource PageSubtitleTextStyle}" TextWrapping="Wrap"
+                                       Text="Where backups are kept, how often they are taken automatically, and how many to keep. Each change saves immediately." />
+                        </StackPanel>
+
+                        <ToggleSwitch Header="Take backups automatically"
+                                      IsOn="{x:Bind ViewModel.AutomaticBackupEnabled, Mode=TwoWay}"
+                                      IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+
+                        <ComboBox Header="Automatic backup frequency" ItemsSource="{x:Bind ViewModel.BackupFrequencyOptions}"
+                                  SelectedItem="{x:Bind ViewModel.AutomaticBackupFrequency, Mode=TwoWay}"
+                                  IsEnabled="{x:Bind ViewModel.CanChangeSettings}" HorizontalAlignment="Stretch" />
+
+                        <TextBox Header="Backup folder" IsReadOnly="True"
+                                 Text="{x:Bind ViewModel.BackupDirectory, Mode=OneWay}"
+                                 PlaceholderText="{x:Bind ViewModel.BackupDirectoryPlaceholder}" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Choose folder…" Click="OnChooseBackupFolderClick"
+                                    IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                            <Button Content="Use default" Command="{x:Bind ViewModel.UseDefaultBackupFolderCommand}"
+                                    IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                        </StackPanel>
+
+                        <TextBox Header="Backups to keep"
+                                 Text="{x:Bind ViewModel.BackupRetentionText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                        <Button Content="Save retention" Command="{x:Bind ViewModel.SaveRetentionCommand}"
+                                IsEnabled="{x:Bind ViewModel.CanChangeSettings}" HorizontalAlignment="Left" />
+
+                        <ComboBox Header="Preferred export format" ItemsSource="{x:Bind ViewModel.ExportFormatOptions}"
+                                  SelectedItem="{x:Bind ViewModel.DefaultExportFormat, Mode=TwoWay}"
+                                  IsEnabled="{x:Bind ViewModel.CanChangeSettings}" HorizontalAlignment="Stretch" />
+
+                        <InfoBar IsOpen="{x:Bind ViewModel.BackupSettingsErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                                 Severity="Error" Message="{x:Bind ViewModel.BackupSettingsErrorMessage, Mode=OneWay}" />
+                        <InfoBar IsOpen="{x:Bind ViewModel.BackupSettingsStatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                                 Severity="Success" Message="{x:Bind ViewModel.BackupSettingsStatusMessage, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>

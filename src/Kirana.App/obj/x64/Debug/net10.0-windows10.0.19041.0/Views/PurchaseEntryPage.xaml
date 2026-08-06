@@ -5,193 +5,484 @@
     xmlns:vm="using:Kirana.App.ViewModels"
     xmlns:dom="using:Kirana.Domain.Entities">
 
-    <Grid>
+    <Page.Resources>
+        <!-- Every editable cell in a purchase row shares one height and radius so the row reads as
+             a single aligned band rather than a set of independently-sized boxes. -->
+        <Style x:Key="LineInputStyle" TargetType="TextBox">
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+            <Setter Property="Padding" Value="10,5" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SummaryRowLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource SecondaryTextStyle}">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Page.Resources>
+
+    <Grid Background="{ThemeResource PageBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+        <Grid Grid.Row="0" Padding="24,20,24,12">
             <StackPanel Spacing="2">
                 <TextBlock Text="New Purchase" Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Text="Record goods received. Stock increases when the purchase is finalised." Style="{StaticResource PageSubtitleTextStyle}" />
+                <TextBlock Text="Record goods received. Stock increases when the purchase is finalised."
+                           Style="{StaticResource PageSubtitleTextStyle}" />
             </StackPanel>
         </Grid>
 
-        <!-- Supplier + scan/search + invoice fields -->
-        <Grid Grid.Row="1" Margin="20,12,20,0" ColumnSpacing="10">
+        <!-- Two-column working area: entry on the left, a summary rail that stays put on the right. -->
+        <Grid Grid.Row="1" Margin="24,0,24,20" ColumnSpacing="{StaticResource SpacingL}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="180" />
+                <ColumnDefinition Width="*" MinWidth="560" />
+                <ColumnDefinition Width="330" />
             </Grid.ColumnDefinitions>
 
-            <Button x:ConnectionId='26' Grid.Column="0"                        >
-                <TextBlock x:ConnectionId='38'                                                            />
-            </Button>
+            <!-- ================================ LEFT COLUMN ================================ -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-            <TextBox x:ConnectionId='27' x:Name="ScanSearchBox" Grid.Column="1" PlaceholderText="Scan Barcode / Product ID / SKU / Name"
-                                                                                          
-                                                           />
+                <!-- Supplier card -->
+                <Border Grid.Row="0" Style="{StaticResource ElevatedCardStyle}" Padding="16,14">
+                    <Grid ColumnSpacing="{StaticResource SpacingM}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-            <Popup x:ConnectionId='28' x:Name="SuggestionsPopup" Grid.Column="1" HorizontalOffset="0" VerticalOffset="46"
-                   IsLightDismissEnabled="False"                                                        >
-                <Border Style="{StaticResource CardBorderStyle}" Width="520" MaxHeight="360" Padding="4">
-                    <ListView x:ConnectionId='31' x:Name="SuggestionsList"                                                   
-                              SelectionMode="Single" IsItemClickEnabled="True"                                  >
-                        <ListView.ItemTemplate>
-                            <DataTemplate                         >
-                                <Grid x:ConnectionId='33' ColumnSpacing="12" Padding="8,6"                                          >
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0" Spacing="1">
-                                        <TextBlock x:ConnectionId='35'                      Style="{StaticResource BodyTextStyle}" />
-                                        <TextBlock Style="{StaticResource CaptionTextStyle}">
-                                            <Run x:ConnectionId='36'                             /><Run Text="  ·  " /><Run x:ConnectionId='37'                     />
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <TextBlock x:ConnectionId='34' Grid.Column="1"                                                                            
-                                               Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center" />
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                        <Border Grid.Column="0" Width="42" Height="42" CornerRadius="{StaticResource RadiusPill}"
+                                Background="{ThemeResource PastelVioletBrush}" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xE7B8;" FontSize="17" Foreground="{ThemeResource PastelVioletOnBrush}" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                            <TextBlock x:ConnectionId='49'                                                           
+                                       Style="{StaticResource SectionTitleTextStyle}" FontSize="15"
+                                       TextTrimming="CharacterEllipsis" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock x:ConnectionId='50'                                                        
+                                           Style="{StaticResource CodeTextStyle}" VerticalAlignment="Center"
+                                                                                                                                                          />
+                                <StackPanel x:ConnectionId='51' Orientation="Horizontal" Spacing="4"
+                                                                                                                                                               >
+                                    <TextBlock Text="GST" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                                    <TextBlock x:ConnectionId='55'                                                     
+                                               Style="{StaticResource CodeTextStyle}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel x:ConnectionId='52' Orientation="Horizontal" Spacing="4"
+                                                                                                                                                               >
+                                    <FontIcon Glyph="&#xE717;" FontSize="10" Foreground="{ThemeResource TextTertiaryBrush}" />
+                                    <TextBlock x:ConnectionId='54'                                                     
+                                               Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock x:ConnectionId='53' Text="No supplier selected yet — press F4 or click Select Supplier."
+                                           Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center"
+                                                                                                                                                                 />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Outstanding is the one number that changes how a shopkeeper negotiates
+                             this purchase, so it sits on the supplier card itself. -->
+                        <Border x:ConnectionId='45' Grid.Column="2" Style="{StaticResource BadgeBorderStyle}" Padding="12,6"
+                                CornerRadius="{StaticResource RadiusMedium}"
+                                Background="{ThemeResource PastelAmberBrush}" VerticalAlignment="Center"
+                                                                                                                                              >
+                            <StackPanel Spacing="0">
+                                <TextBlock Text="OUTSTANDING" Style="{StaticResource ColumnHeaderTextStyle}"
+                                           Foreground="{ThemeResource PastelAmberOnBrush}" />
+                                <TextBlock x:ConnectionId='48'                                                                                                        
+                                           FontSize="15" FontWeight="Bold"
+                                           Foreground="{ThemeResource PastelAmberOnBrush}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Button x:ConnectionId='46' Grid.Column="3"                         VerticalAlignment="Center"
+                                CornerRadius="{StaticResource RadiusMedium}" Padding="14,8"
+                                AutomationProperties.Name="Select Supplier (F4)">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE8B7;" FontSize="13" />
+                                <TextBlock x:ConnectionId='47'                                                            />
+                                <TextBlock Text="F4" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
                 </Border>
-            </Popup>
 
-            <!-- Scanners and typists submit with Enter; this gives mouse/touch users and pasted
-                 codes the same affordance, matching the Search buttons elsewhere in the app. -->
-            <Button x:ConnectionId='29' Grid.Column="2" Content="Add Item"                        Margin="4,0,0,0" />
+                <!-- Product entry. Enter (or picking a suggestion) adds directly; the search box
+                     re-focuses itself after every add so scanning stays a pure keyboard loop. -->
+                <Border Grid.Row="1" Style="{StaticResource ElevatedCardStyle}" Padding="16,14" Margin="0,12,0,0">
+                    <Grid ColumnSpacing="{StaticResource SpacingM}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="200" />
+                        </Grid.ColumnDefinitions>
 
-            <TextBox x:ConnectionId='30' Grid.Column="3" PlaceholderText="Supplier Invoice #"                                                              />
-        </Grid>
+                        <TextBox x:ConnectionId='35' x:Name="ScanSearchBox" Grid.Column="0" FontSize="15" Padding="14,10"
+                                 CornerRadius="{StaticResource RadiusMedium}"
+                                 PlaceholderText="Scan barcode, or type Product ID / SKU / name  (F2)"
+                                                                                                      
+                                                                      
+                                 AutomationProperties.Name="Scan or search product" />
 
-        <InfoBar x:ConnectionId='2' Grid.Row="1" Margin="20,0,20,0" VerticalAlignment="Bottom"
-                                                                                                                        
-                 Severity="Error"                                                        />
+                        <Popup x:ConnectionId='36' x:Name="SuggestionsPopup" Grid.Column="0" HorizontalOffset="0" VerticalOffset="52"
+                               IsLightDismissEnabled="False"                                                        >
+                            <Border Style="{StaticResource ElevatedCardStyle}" Width="520" MaxHeight="360" Padding="4">
+                                <ListView x:ConnectionId='38' x:Name="SuggestionsList"                                                   
+                                          SelectionMode="Single" IsItemClickEnabled="True"                                  >
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate                         >
+                                            <Grid x:ConnectionId='40' ColumnSpacing="12" Padding="8,6"                                          >
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0" Spacing="1">
+                                                    <TextBlock x:ConnectionId='42'                      Style="{StaticResource BodyTextStyle}" />
+                                                    <TextBlock Style="{StaticResource CaptionTextStyle}">
+                                                        <Run x:ConnectionId='43'                             /><Run Text="  ·  " /><Run x:ConnectionId='44'                     />
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                <TextBlock x:ConnectionId='41' Grid.Column="1"                                                                            
+                                                           Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </Border>
+                        </Popup>
 
-        <!-- Lines -->
-        <Grid Grid.Row="2" Margin="20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="260" />
-            </Grid.ColumnDefinitions>
+                        <TextBox x:ConnectionId='37' Grid.Column="1" PlaceholderText="Supplier Invoice #" Header="Supplier Invoice #"
+                                 CornerRadius="{StaticResource RadiusMedium}"
+                                                                                              />
+                    </Grid>
+                </Border>
 
-            <ListView x:ConnectionId='4' Grid.Column="0"                                        SelectionMode="None">
-                <ListView.HeaderTemplate>
-                    <DataTemplate>
-                        <Grid ColumnSpacing="6" Padding="8,4">
+                <InfoBar x:ConnectionId='20' Grid.Row="2" Margin="0,12,0,0"
+                                                                                                                                
+                         Severity="Error"                                                        />
+
+                <!-- Purchase items -->
+                <Border Grid.Row="3" Style="{StaticResource ElevatedCardStyle}" Padding="0" Margin="0,12,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Padding="16,12" ColumnSpacing="8"
+                              Background="{ThemeResource SurfaceAltBrush}"
+                              CornerRadius="16,16,0,0"
+                              BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="*" MinWidth="140" />
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="74" />
+                                <ColumnDefinition Width="56" />
+                                <ColumnDefinition Width="122" />
                                 <ColumnDefinition Width="90" />
-                                <ColumnDefinition Width="70" />
-                                <ColumnDefinition Width="100" />
-                                <ColumnDefinition Width="100" />
-                                <ColumnDefinition Width="110" />
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="36" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Product" FontWeight="SemiBold" />
-                            <TextBlock Grid.Column="1" Text="Qty" FontWeight="SemiBold" />
-                            <TextBlock Grid.Column="2" Text="Price" FontWeight="SemiBold" />
-                            <TextBlock Grid.Column="3" Text="Disc %" FontWeight="SemiBold" />
-                            <TextBlock Grid.Column="4" Text="Batch #" FontWeight="SemiBold" />
-                            <TextBlock Grid.Column="5" Text="Expiry" FontWeight="SemiBold" />
-                            <TextBlock Grid.Column="6" Text="Line Total" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="0" Text="PRODUCT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                            <TextBlock Grid.Column="1" Text="QTY" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="PRICE" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="3" Text="DISC %" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="4" Text="BATCH / EXPIRY" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="5" Text="TOTAL" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
                         </Grid>
-                    </DataTemplate>
-                </ListView.HeaderTemplate>
-                <ListView.ItemTemplate>
-                    <DataTemplate                                      >
-                        <Grid x:ConnectionId='16' ColumnSpacing="6" Padding="8,6" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="80" />
-                                <ColumnDefinition Width="90" />
-                                <ColumnDefinition Width="70" />
-                                <ColumnDefinition Width="100" />
-                                <ColumnDefinition Width="100" />
-                                <ColumnDefinition Width="110" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0">
-                                <TextBlock x:ConnectionId='24'                             TextWrapping="Wrap" />
-                                <TextBlock x:ConnectionId='25'                             Opacity="0.6" FontSize="11" />
+                        <StackPanel x:ConnectionId='21' Grid.Row="1" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                                                                                                      >
+                            <FontIcon Glyph="&#xE7B8;" FontSize="32" Foreground="{ThemeResource TextTertiaryBrush}" HorizontalAlignment="Center" />
+                            <TextBlock Text="No items yet" Style="{StaticResource CardTitleTextStyle}" HorizontalAlignment="Center" />
+                            <TextBlock Text="Scan a barcode or search for a product to add it (F2)"
+                                       Style="{StaticResource CaptionTextStyle}" HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <ListView x:ConnectionId='22' Grid.Row="1"                                        SelectionMode="None">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="MinHeight" Value="0" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate                                      >
+                                    <Grid x:ConnectionId='24' ColumnSpacing="8" Padding="16,12"
+                                          BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" MinWidth="140" />
+                                            <ColumnDefinition Width="60" />
+                                            <ColumnDefinition Width="74" />
+                                            <ColumnDefinition Width="56" />
+                                            <ColumnDefinition Width="122" />
+                                            <ColumnDefinition Width="90" />
+                                            <ColumnDefinition Width="36" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <TextBlock x:ConnectionId='33'                             Style="{StaticResource CardTitleTextStyle}" TextWrapping="Wrap" />
+                                            <TextBlock x:ConnectionId='34'                             Style="{StaticResource CodeTextStyle}" />
+                                        </StackPanel>
+
+                                        <!-- UpdateSourceTrigger=PropertyChanged is REQUIRED: a TwoWay
+                                             TextBox.Text binding defaults to LostFocus, which left
+                                             QuantityText/UnitPriceText stale in the ViewModel while the
+                                             row recalculated — quantity edits were silently ignored and
+                                             every line priced as qty 1. Same contract POS billing uses. -->
+                                        <TextBox x:ConnectionId='25' Grid.Column="1" Style="{StaticResource LineInputStyle}"
+                                                                                                                                              
+                                                                                                                      
+                                                 AutomationProperties.Name="Quantity" />
+
+                                        <TextBox x:ConnectionId='26' Grid.Column="2" Style="{StaticResource LineInputStyle}"
+                                                                                                                                               
+                                                                                                                      
+                                                 AutomationProperties.Name="Purchase price" />
+
+                                        <TextBox x:ConnectionId='27' Grid.Column="3" Style="{StaticResource LineInputStyle}"
+                                                                                                                                                     
+                                                                                                                      
+                                                 AutomationProperties.Name="Discount percent" />
+
+                                        <!-- Batch and expiry are stacked in one cell: they belong to the
+                                             same batch record, and as two separate columns the row could
+                                             not fit the card at a 1440px window — the Line Total column
+                                             was pushed off-screen entirely. Only shown for batch-tracked
+                                             products, so most rows stay a single compact line.
+                                             CalendarDatePicker (not DatePicker) because it is one compact
+                                             field with a calendar flyout, where DatePicker's three inline
+                                             day/month/year spinners need ~250px on their own. -->
+                                        <StackPanel x:ConnectionId='28' Grid.Column="4" Spacing="4" VerticalAlignment="Center"
+                                                                                                                                             >
+                                            <TextBox x:ConnectionId='31' Style="{StaticResource LineInputStyle}"
+                                                     PlaceholderText="Batch #"
+                                                                                                 
+                                                     AutomationProperties.Name="Batch number" />
+                                            <CalendarDatePicker x:ConnectionId='32' HorizontalAlignment="Stretch"
+                                                                CornerRadius="{StaticResource RadiusMedium}"
+                                                                PlaceholderText="Expiry"
+                                                                                                             
+                                                                AutomationProperties.Name="Expiry date" />
+                                        </StackPanel>
+
+                                        <TextBlock x:ConnectionId='29' Grid.Column="5" Style="{StaticResource AmountTextStyle}"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                                                                                                        />
+
+                                        <Button x:ConnectionId='30' Grid.Column="6"                                         
+                                                VerticalAlignment="Center" Padding="8,6" MinWidth="0"
+                                                Background="Transparent" BorderThickness="0"
+                                                CornerRadius="{StaticResource RadiusMedium}"
+                                                ToolTipService.ToolTip="Remove item"
+                                                AutomationProperties.Name="Remove item">
+                                            <FontIcon Glyph="&#xE711;" FontSize="13" Foreground="{ThemeResource DangerBrush}" />
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- =============================== RIGHT COLUMN ===============================
+                 Sticky rail: the summary and payment cards scroll internally if the window is
+                 short, but never scroll away with the item list. -->
+            <!-- Deliberately NOT wrapped in a ScrollViewer: a ScrollViewer measures its content
+                 with infinite width in any direction it can scroll, so the cards sized to their
+                 natural width instead of this column and their right-aligned amounts were clipped.
+                 The rail is short enough to fit the enforced 700px minimum window height. -->
+            <Grid Grid.Column="1">
+                <StackPanel Spacing="{StaticResource SpacingM}" VerticalAlignment="Top">
+
+                    <!-- Purchase summary -->
+                    <Border Style="{StaticResource ElevatedCardStyle}">
+                        <StackPanel Spacing="9">
+                            <TextBlock Text="Purchase Summary" Style="{StaticResource CardTitleTextStyle}" />
+
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="112" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Subtotal" Style="{StaticResource SummaryRowLabelStyle}" />
+                                <TextBlock x:ConnectionId='19' Grid.Column="1" Style="{StaticResource BodyTextStyle}" HorizontalTextAlignment="Right"
+                                                                                                                                         />
+                            </Grid>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="112" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Discount" Style="{StaticResource SummaryRowLabelStyle}" />
+                                <TextBlock x:ConnectionId='18' Grid.Column="1" Style="{StaticResource BodyTextStyle}" HorizontalTextAlignment="Right"
+                                                                                                                                              />
+                            </Grid>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="112" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="GST" Style="{StaticResource SummaryRowLabelStyle}" />
+                                <TextBlock x:ConnectionId='17' Grid.Column="1" Style="{StaticResource BodyTextStyle}" HorizontalTextAlignment="Right"
+                                                                                                                                         />
+                            </Grid>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="112" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Round Off" Style="{StaticResource SummaryRowLabelStyle}" />
+                                <TextBlock x:ConnectionId='16' Grid.Column="1" Style="{StaticResource BodyTextStyle}" HorizontalTextAlignment="Right"
+                                                                                                                                               />
+                            </Grid>
+
+                            <Border BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,1,0,0" Margin="0,4,0,4" />
+
+                            <StackPanel Spacing="0">
+                                <TextBlock Text="GRAND TOTAL" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock x:ConnectionId='15' Style="{StaticResource MetricTextStyle}" FontSize="30"
+                                           Foreground="{ThemeResource BrandPrimaryBrush}"
+                                                                                                                                           />
                             </StackPanel>
 
-                            <TextBox x:ConnectionId='17' Grid.Column="1"                                                                                           />
-                            <TextBox x:ConnectionId='18' Grid.Column="2"                                                                                            />
-                            <TextBox x:ConnectionId='19' Grid.Column="3"                                                                                                  />
-                            <TextBox x:ConnectionId='20' Grid.Column="4"                                             
-                                                                                                                               />
-                            <TextBox x:ConnectionId='21' Grid.Column="5" PlaceholderText="yyyy-mm-dd"                                            
-                                                                                                                               />
-                            <TextBlock x:ConnectionId='22' Grid.Column="6"                                        VerticalAlignment="Center" FontWeight="SemiBold" />
-                            <Button x:ConnectionId='23' Grid.Column="7" Content="✕"                                          />
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                            <Grid ColumnSpacing="8" Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="112" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Amount Paid" Style="{StaticResource SummaryRowLabelStyle}" />
+                                <TextBlock x:ConnectionId='14' Grid.Column="1" Style="{StaticResource BodyTextStyle}" HorizontalTextAlignment="Right"
+                                                                                                                                           />
+                            </Grid>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="112" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Remaining Balance" Style="{StaticResource SummaryRowLabelStyle}" />
+                                <TextBlock x:ConnectionId='13' Grid.Column="1" Style="{StaticResource BodyTextStyle}" HorizontalTextAlignment="Right"
+                                           FontWeight="SemiBold" Foreground="{ThemeResource WarningBrush}"
+                                                                                                                                                 />
+                            </Grid>
 
-            <!-- Totals -->
-            <StackPanel Grid.Column="1" Margin="16,0,0,0" Spacing="6" VerticalAlignment="Top">
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Subtotal" />
-                    <TextBlock x:ConnectionId='13' Grid.Column="1"                                                 />
-                </Grid>
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Discount" />
-                    <TextBlock x:ConnectionId='12' Grid.Column="1"                                                      />
-                </Grid>
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="GST" />
-                    <TextBlock x:ConnectionId='11' Grid.Column="1"                                                 />
-                </Grid>
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Round Off" />
-                    <TextBlock x:ConnectionId='10' Grid.Column="1"                                                       />
-                </Grid>
+                            <Border BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,1,0,0" Margin="0,4,0,4" />
 
-                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,8,0,8" />
+                            <Button x:ConnectionId='11' Style="{StaticResource AccentButtonStyle}"                                
+                                    HorizontalAlignment="Stretch" Padding="16,11"
+                                    CornerRadius="{StaticResource RadiusMedium}"
+                                    AutomationProperties.Name="Complete Purchase (F9)">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="14" />
+                                    <TextBlock Text="Complete Purchase" FontWeight="SemiBold" />
+                                    <TextBlock Text="F9" Opacity="0.75" />
+                                </StackPanel>
+                            </Button>
 
-                <TextBlock FontSize="28" FontWeight="Bold" HorizontalAlignment="Right">
-                    <Run x:ConnectionId='9'                                                                                                 />
-                </TextBlock>
+                            <Button x:ConnectionId='12'                       HorizontalAlignment="Stretch" Padding="16,9"
+                                    CornerRadius="{StaticResource RadiusMedium}"
+                                    AutomationProperties.Name="Cancel purchase">
+                                <TextBlock Text="Cancel" HorizontalAlignment="Center" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
 
-                <TextBox x:ConnectionId='5' Header="Amount Paid Now"                                                       Margin="0,12,0,0" />
-                <ComboBox x:ConnectionId='6' Header="Payment Method"                                                
-                                                                                               />
-                <TextBox x:ConnectionId='7' Header="Payment Reference #"                                                               />
-                <TextBox x:ConnectionId='8' Header="Notes"                                              />
-            </StackPanel>
+                    <!-- Payment -->
+                    <Border Style="{StaticResource ElevatedCardStyle}">
+                        <StackPanel Spacing="{StaticResource SpacingM}">
+                            <TextBlock Text="Payment" Style="{StaticResource CardTitleTextStyle}" />
+
+                            <TextBox x:ConnectionId='6' Header="Amount Paid Now" CornerRadius="{StaticResource RadiusMedium}"
+                                                                                                                               
+                                     AutomationProperties.Name="Amount paid now" />
+
+                            <ComboBox x:ConnectionId='7' Header="Payment Method" HorizontalAlignment="Stretch"
+                                      CornerRadius="{StaticResource RadiusMedium}"
+                                                                                     
+                                                                                                          
+                                      AutomationProperties.Name="Payment method">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding Converter={StaticResource PaymentMethodIconConverter}}" />
+                                            <TextBlock Text="{Binding Converter={StaticResource PaymentMethodConverter}}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <TextBox x:ConnectionId='8' Header="Reference Number" CornerRadius="{StaticResource RadiusMedium}"
+                                                                                                  
+                                     AutomationProperties.Name="Payment reference number" />
+
+                            <TextBox x:ConnectionId='9' Header="Notes" CornerRadius="{StaticResource RadiusMedium}"
+                                     TextWrapping="Wrap" AcceptsReturn="True" Height="70"
+                                                                                 
+                                     AutomationProperties.Name="Notes" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Supplier financial preview -->
+                    <Border x:ConnectionId='2' Style="{StaticResource ElevatedCardStyle}"
+                            Background="{ThemeResource PastelBlueBrush}"
+                            BorderBrush="{ThemeResource PastelBlueBrush}"
+                                                                                                                                          >
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Supplier Balance" Style="{StaticResource CardTitleTextStyle}"
+                                       Foreground="{ThemeResource PastelBlueOnBrush}" />
+
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="112" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Current Outstanding" FontSize="13"
+                                           Foreground="{ThemeResource PastelBlueOnBrush}" Opacity="0.85" VerticalAlignment="Center" />
+                                <TextBlock x:ConnectionId='5' Grid.Column="1" FontSize="13" HorizontalTextAlignment="Right" Foreground="{ThemeResource PastelBlueOnBrush}"
+                                                                                                                                                   />
+                            </Grid>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="112" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="This Purchase" FontSize="13"
+                                           Foreground="{ThemeResource PastelBlueOnBrush}" Opacity="0.85" VerticalAlignment="Center" />
+                                <TextBlock x:ConnectionId='4' Grid.Column="1" FontSize="13" HorizontalTextAlignment="Right" Foreground="{ThemeResource PastelBlueOnBrush}"
+                                                                                                                                                 />
+                            </Grid>
+
+                            <Border BorderBrush="{ThemeResource PastelBlueOnBrush}" BorderThickness="0,1,0,0" Opacity="0.3" />
+
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="112" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Outstanding After Purchase" FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{ThemeResource PastelBlueOnBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                <TextBlock x:ConnectionId='3' Grid.Column="1" FontSize="16" FontWeight="Bold"
+                                           Foreground="{ThemeResource PastelBlueOnBrush}" VerticalAlignment="Center"
+                                                                                                                                                         />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
         </Grid>
-
-        <!-- Action bar -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8" Padding="20,0,20,16" HorizontalAlignment="Right">
-            <Button x:ConnectionId='3' Content="Complete Purchase" Style="{StaticResource AccentButtonStyle}"                                 />
-        </StackPanel>
     </Grid>
 </Page>
 

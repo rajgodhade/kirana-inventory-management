@@ -3,6 +3,7 @@ MainWindow.xbf
 Themes\ChartTemplates.xbf
 Themes\DesignTokens.xbf
 Views\AuditLogPage.xbf
+Views\BackupManagerPage.xbf
 Views\BarcodeLabelDialog.xbf
 Views\BarcodeScanTestPage.xbf
 Views\BatchManagementDialog.xbf
@@ -14,10 +15,12 @@ Views\CustomerEditDialog.xbf
 Views\CustomerLedgerPage.xbf
 Views\CustomerPickerDialog.xbf
 Views\CustomersPage.xbf
+Views\DatabaseMaintenancePage.xbf
 Views\ExpenseCategoriesPage.xbf
 Views\ExpenseDetailsPage.xbf
 Views\ExpenseEditDialog.xbf
 Views\ExpensesPage.xbf
+Views\ExportCenterPage.xbf
 Views\HeldBillsDialog.xbf
 Views\InvoicePreviewDialog.xbf
 Views\ManagementHomePage.xbf
@@ -29,6 +32,7 @@ Views\NewSalesReturnPage.xbf
 Views\PaymentDialog.xbf
 Views\PosShellPage.xbf
 Views\ProductEditDialog.xbf
+Views\ProductImportDialog.xbf
 Views\ProductsPage.xbf
 Views\PurchaseDetailsDialog.xbf
 Views\PurchaseEntryPage.xbf
@@ -47,6 +51,7 @@ Views\Reports\SupplierReportView.xbf
 Views\ReportsHubPage.xbf
 Views\ReprintInvoiceDialog.xbf
 Views\ResetPasswordDialog.xbf
+Views\RestorePage.xbf
 Views\SalesReturnDetailsPage.xbf
 Views\SalesReturnsPage.xbf
 Views\SetPinDialog.xbf

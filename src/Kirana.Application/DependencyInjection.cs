@@ -1,8 +1,10 @@
 using Kirana.Application.Audit;
 using Kirana.Application.Authentication;
+using Kirana.Application.Backup;
 using Kirana.Application.Barcodes;
 using Kirana.Application.Billing;
 using Kirana.Application.Customers;
+using Kirana.Application.Export;
 using Kirana.Application.Expenses;
 using Kirana.Application.Inventories;
 using Kirana.Application.Printing;
@@ -28,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<IUserManagementService, UserManagementService>();
         services.AddScoped<IAuditLogQueryService, AuditLogQueryService>();
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IProductImportService, ProductImportService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IBrandService, BrandService>();
         services.AddScoped<IInventoryService, InventoryService>();
@@ -54,6 +57,8 @@ public static class DependencyInjection
         services.AddScoped<IExpenseReportService, ExpenseReportService>();
         services.AddScoped<IProfitReportService, ProfitReportService>();
         services.AddScoped<IReportExportService, ReportExportService>();
+        services.AddScoped<IDataExportService, DataExportService>();
+        services.AddScoped<IAutomaticBackupScheduler, AutomaticBackupScheduler>();
         return services;
     }
 }

@@ -12,6 +12,7 @@ public sealed class InvoiceLine
     public string Unit { get; init; } = string.Empty;
     public decimal Quantity { get; init; }
     public decimal UnitPrice { get; init; }
+    public decimal Mrp { get; init; }
     public decimal DiscountPercent { get; init; }
     public decimal DiscountAmount { get; init; }
     public decimal GstRatePercent { get; init; }

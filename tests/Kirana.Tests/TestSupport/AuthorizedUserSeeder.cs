@@ -1,5 +1,6 @@
 using Kirana.Application.Setup;
 using Kirana.Domain.Entities;
+using Kirana.Infrastructure.Persistence;
 using Kirana.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,9 +12,21 @@ namespace Kirana.Tests.TestSupport;
 /// re-implement the same setup boilerplate.</summary>
 public static class AuthorizedUserSeeder
 {
-    public static async Task<User> SeedOwnerAsync(this SqliteDbContextFixture fixture)
+    public static Task<User> SeedOwnerAsync(this SqliteDbContextFixture fixture) =>
+        fixture.Context.SeedOwnerAsync();
+
+    public static Task<User> SeedCashierAsync(this SqliteDbContextFixture fixture) =>
+        fixture.Context.SeedCashierAsync();
+
+    public static Task<User> SeedOwnerAsync(this SqliteFileDbContextFixture fixture) =>
+        fixture.Context.SeedOwnerAsync();
+
+    public static Task<User> SeedCashierAsync(this SqliteFileDbContextFixture fixture) =>
+        fixture.Context.SeedCashierAsync();
+
+    public static async Task<User> SeedOwnerAsync(this KiranaDbContext context)
     {
-        var setup = new FirstTimeSetupService(fixture.Context, new BCryptPasswordHasher());
+        var setup = new FirstTimeSetupService(context, new BCryptPasswordHasher());
         await setup.CompleteSetupAsync(new CompleteSetupRequest
         {
             StoreName = "Test Store",
@@ -24,12 +37,12 @@ public static class AuthorizedUserSeeder
             AdminPin = "1234",
         });
 
-        return await fixture.Context.Users.Include(u => u.Role).SingleAsync();
+        return await context.Users.Include(u => u.Role).SingleAsync();
     }
 
-    public static async Task<User> SeedCashierAsync(this SqliteDbContextFixture fixture)
+    public static async Task<User> SeedCashierAsync(this KiranaDbContext context)
     {
-        var cashierRole = await fixture.Context.Roles.SingleAsync(r => r.Name == "Cashier");
+        var cashierRole = await context.Roles.SingleAsync(r => r.Name == "Cashier");
         var cashier = new User
         {
             Username = $"cashier-{Guid.NewGuid():N}"[..15],
@@ -38,8 +51,8 @@ public static class AuthorizedUserSeeder
             Role = cashierRole,
             IsActive = true,
         };
-        fixture.Context.Users.Add(cashier);
-        await fixture.Context.SaveChangesAsync();
+        context.Users.Add(cashier);
+        await context.SaveChangesAsync();
         return cashier;
     }
 }

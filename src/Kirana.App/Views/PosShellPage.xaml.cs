@@ -49,23 +49,76 @@ public sealed partial class PosShellPage : Page
             await ViewModel.UpdateSuggestionsAsync(ScanSearchBox.Text);
         };
 
-        AddShortcut(Windows.System.VirtualKey.F2, () => ScanSearchBox.Focus(FocusState.Programmatic));
-        AddShortcut(Windows.System.VirtualKey.F4, () => _ = OpenCustomerPickerAsync());
-        AddShortcut(Windows.System.VirtualKey.F6, () => _ = HoldCurrentBillAsync());
-        AddShortcut(Windows.System.VirtualKey.F7, () => _ = OpenHeldBillsAsync());
-        AddShortcut(Windows.System.VirtualKey.F8, () => _ = OpenBillDiscountAsync());
-        AddShortcut(Windows.System.VirtualKey.F9, () => _ = OpenPaymentAsync());
+        // Shortcuts are routed from a single tunnelling handler registered with
+        // handledEventsToo, rather than from KeyboardAccelerator. Accelerators only fire when the
+        // focused element sits in the same focus scope and hasn't already marked the key handled —
+        // which is why F4 did nothing once focus moved into the cart's quantity/price/discount
+        // TextBoxes or the suggestions Popup (a Popup is its own visual root, so a Page-level
+        // accelerator never sees its keys at all). AddHandler(..., handledEventsToo: true) is the
+        // pattern MainWindow already relies on for idle-timer activity tracking, and it sees the
+        // key regardless of who handled it first.
+        AddHandler(KeyDownEvent, new KeyEventHandler(OnShortcutKeyDown), handledEventsToo: true);
+        SuggestionsPopup.AddHandler(KeyDownEvent, new KeyEventHandler(OnShortcutKeyDown), handledEventsToo: true);
     }
 
-    private void AddShortcut(Windows.System.VirtualKey key, Action action)
+    /// <summary>Guards against opening a second modal on top of one that is already showing —
+    /// WinUI throws when two ContentDialogs overlap, and it is also what the "except when a modal
+    /// dialog is already open" rule requires.</summary>
+    private bool _isModalOpen;
+
+    private void OnShortcutKeyDown(object sender, KeyRoutedEventArgs e)
     {
-        var accelerator = new KeyboardAccelerator { Key = key };
-        accelerator.Invoked += (_, args) =>
+        // While a dialog is up it owns the keyboard; the shortcut must not fire underneath it.
+        if (_isModalOpen)
         {
-            action();
-            args.Handled = true;
-        };
-        KeyboardAccelerators.Add(accelerator);
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case Windows.System.VirtualKey.F2:
+                ScanSearchBox.Focus(FocusState.Programmatic);
+                break;
+            case Windows.System.VirtualKey.F4:
+                _ = OpenCustomerPickerAsync();
+                break;
+            case Windows.System.VirtualKey.F6:
+                _ = HoldCurrentBillAsync();
+                break;
+            case Windows.System.VirtualKey.F7:
+                _ = OpenHeldBillsAsync();
+                break;
+            case Windows.System.VirtualKey.F8:
+                _ = OpenBillDiscountAsync();
+                break;
+            case Windows.System.VirtualKey.F9:
+                _ = OpenPaymentAsync();
+                break;
+            default:
+                return;
+        }
+
+        e.Handled = true;
+    }
+
+    /// <summary>Shows a dialog with the modal guard held, so shortcuts can't stack a second one
+    /// on top of it. Every dialog on this page goes through here.</summary>
+    private async Task<ContentDialogResult> ShowModalAsync(ContentDialog dialog)
+    {
+        if (_isModalOpen)
+        {
+            return ContentDialogResult.None;
+        }
+
+        _isModalOpen = true;
+        try
+        {
+            return await dialog.ShowAsync();
+        }
+        finally
+        {
+            _isModalOpen = false;
+        }
     }
 
     /// <summary>Theme toggle is available on the billing screen too — a cashier who never opens
@@ -90,12 +143,64 @@ public sealed partial class PosShellPage : Page
         var authService = App.Services.GetRequiredService<IAuthenticationService>();
         var dialog = new ManagementLoginDialog(authService).Themed(XamlRoot);
 
-        await dialog.ShowAsync();
+        await ShowModalAsync(dialog);
 
         if (dialog.Unlocked)
         {
             Frame.Navigate(typeof(ManagementShellPage));
         }
+    }
+
+    // ===============================  BILLING TABS  ===============================
+
+    private void OnNewBillClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.AddBill();
+        ScanSearchBox.Focus(FocusState.Programmatic);
+    }
+
+    private void OnBillTabClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is BillSessionViewModel bill)
+        {
+            ViewModel.SwitchToBill(bill);
+            ScanSearchBox.Focus(FocusState.Programmatic);
+        }
+    }
+
+    private async void OnCloseBillClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is not BillSessionViewModel bill)
+        {
+            return;
+        }
+
+        if (!ViewModel.CanCloseActiveBill)
+        {
+            return;
+        }
+
+        // Only interrupt the cashier when there is something to lose.
+        if (ViewModel.BillHasItems(bill))
+        {
+            var confirm = new ContentDialog
+            {
+                Title = $"Close {bill.Title}?",
+                Content = "This bill still has items in it. Closing it will discard them.",
+                PrimaryButtonText = "Close bill",
+                CloseButtonText = "Keep it",
+                DefaultButton = ContentDialogButton.Close,
+            };
+            confirm.Themed(XamlRoot);
+
+            if (await ShowModalAsync(confirm) != ContentDialogResult.Primary)
+            {
+                return;
+            }
+        }
+
+        ViewModel.CloseBill(bill);
+        ScanSearchBox.Focus(FocusState.Programmatic);
     }
 
     private void OnCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args) =>
@@ -157,7 +262,7 @@ public sealed partial class PosShellPage : Page
     private async Task OpenCustomerPickerAsync()
     {
         var dialog = new CustomerPickerDialog(ViewModel).Themed(XamlRoot);
-        await dialog.ShowAsync();
+        await ShowModalAsync(dialog);
 
         if (dialog.Confirmed)
         {
@@ -278,7 +383,7 @@ public sealed partial class PosShellPage : Page
     private async Task OpenHeldBillsAsync()
     {
         var dialog = new HeldBillsDialog(ViewModel).Themed(XamlRoot);
-        await dialog.ShowAsync();
+        await ShowModalAsync(dialog);
 
         if (dialog.ResumedHeldBillId is { } heldBillId)
         {
@@ -293,7 +398,7 @@ public sealed partial class PosShellPage : Page
     private async Task OpenBillDiscountAsync()
     {
         var dialog = new BillDiscountDialog(ViewModel.BillDiscountPercent).Themed(XamlRoot);
-        var result = await dialog.ShowAsync();
+        var result = await ShowModalAsync(dialog);
 
         if (result != ContentDialogResult.Primary)
         {
@@ -314,7 +419,7 @@ public sealed partial class PosShellPage : Page
     {
         var authService = App.Services.GetRequiredService<IAuthenticationService>();
         var dialog = new ManagerAuthorizationDialog(authService, PermissionKeys.BillingApproveLargeDiscount).Themed(XamlRoot);
-        var result = await dialog.ShowAsync();
+        var result = await ShowModalAsync(dialog);
 
         if (result == ContentDialogResult.Primary && dialog.AuthorizedUserId is { } userId)
         {
@@ -325,11 +430,17 @@ public sealed partial class PosShellPage : Page
         return false;
     }
 
+    private void OnClearBillDiscountClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ClearBillDiscount();
+        ScanSearchBox.Focus(FocusState.Programmatic);
+    }
+
     private async Task<bool> TryAuthorizePriceOverrideAsync()
     {
         var authService = App.Services.GetRequiredService<IAuthenticationService>();
         var dialog = new ManagerAuthorizationDialog(authService, PermissionKeys.PricingChangeSellingPrice).Themed(XamlRoot);
-        var result = await dialog.ShowAsync();
+        var result = await ShowModalAsync(dialog);
 
         if (result == ContentDialogResult.Primary && dialog.AuthorizedUserId is { } userId)
         {
@@ -351,7 +462,7 @@ public sealed partial class PosShellPage : Page
 
         var paymentViewModel = new PaymentViewModel(ViewModel, App.Services.GetRequiredService<ISaleService>());
         var dialog = new PaymentDialog(paymentViewModel).Themed(XamlRoot);
-        await dialog.ShowAsync();
+        await ShowModalAsync(dialog);
 
         if (paymentViewModel.CompletedSale is { } sale)
         {
@@ -374,7 +485,7 @@ public sealed partial class PosShellPage : Page
 
             var dialog = new InvoicePreviewDialog(previewViewModel).Themed(XamlRoot);
             dialog.Title = $"Sale Completed — Invoice {sale.InvoiceNumber} — ₹{sale.GrandTotal:0.00}";
-            await dialog.ShowAsync();
+            await ShowModalAsync(dialog);
         }
         catch (Exception ex)
         {
@@ -388,7 +499,7 @@ public sealed partial class PosShellPage : Page
                 DefaultButton = ContentDialogButton.Close,
             };
             errorDialog.Themed(XamlRoot);
-            await errorDialog.ShowAsync();
+            await ShowModalAsync(errorDialog);
         }
     }
 }

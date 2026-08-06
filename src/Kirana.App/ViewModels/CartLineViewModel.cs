@@ -20,6 +20,14 @@ public sealed partial class CartLineViewModel : ObservableObject
     /// mutated by editing the price; that only ever changes <see cref="UnitPriceText"/>.</summary>
     public required decimal OriginalUnitPrice { get; init; }
 
+    /// <summary>The product's MRP at the moment this line was added — used for the "You Saved"
+    /// figure and shown directly in its own cart column. 0 for a product with no MRP set, which
+    /// correctly contributes nothing to the savings total rather than showing a bogus negative
+    /// saving, and hides the MRP cell instead of showing "₹0.00".</summary>
+    public decimal Mrp { get; init; }
+
+    public bool HasMrp => Mrp > 0;
+
     public decimal GstRatePercent { get; init; }
     public bool IsTaxInclusive { get; init; }
 

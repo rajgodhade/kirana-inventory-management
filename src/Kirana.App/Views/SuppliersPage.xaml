@@ -28,7 +28,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBox Grid.Column="0" PlaceholderText="Search name / ID / phone…"
-                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" KeyDown="OnSearchBoxKeyDown"
+                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnSearchBoxKeyDown"
                      TextChanged="OnSearchTextChanged" />
 
             <CheckBox Grid.Column="1" Content="Show inactive" VerticalAlignment="Center" Margin="8,0,0,0"

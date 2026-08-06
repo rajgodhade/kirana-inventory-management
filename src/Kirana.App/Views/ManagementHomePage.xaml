@@ -75,13 +75,15 @@
             <StackPanel Spacing="10">
                 <TextBlock Text="Quick actions" Style="{StaticResource SectionTitleTextStyle}" />
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <Button Click="OnReprintInvoiceClick">
+                    <!-- Icon + TextBlock content leaves these buttons with no accessible name, so
+                         set one explicitly — same as the icon buttons elsewhere in the app. -->
+                    <Button Click="OnReprintInvoiceClick" AutomationProperties.Name="Reprint Invoice">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE749;" FontSize="14" />
                             <TextBlock Text="Reprint Invoice" />
                         </StackPanel>
                     </Button>
-                    <Button Click="OnBackToBillingClick">
+                    <Button Click="OnBackToBillingClick" AutomationProperties.Name="Back to Billing">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE7BF;" FontSize="14" />
                             <TextBlock Text="Back to Billing" />
@@ -113,9 +115,6 @@
                     </ItemsControl>
                 </Border>
             </StackPanel>
-
-            <TextBlock Text="Returns, refunds, expenses and the full reports suite arrive in later phases."
-                       Style="{StaticResource CaptionTextStyle}" />
         </StackPanel>
     </ScrollViewer>
 </Page>

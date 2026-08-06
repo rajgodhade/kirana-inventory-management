@@ -40,6 +40,23 @@ public sealed partial class PurchaseEntryPage : Page
             _suggestionDebounce.Stop();
             await ViewModel.UpdateSuggestionsAsync(ScanSearchBox.Text);
         };
+
+        // Same shortcut vocabulary as POS billing (F2 search, F4 party picker, F9 finish), so a
+        // shopkeeper's muscle memory carries across every transaction screen.
+        AddShortcut(Windows.System.VirtualKey.F2, () => ScanSearchBox.Focus(FocusState.Programmatic));
+        AddShortcut(Windows.System.VirtualKey.F4, () => _ = OpenSupplierPickerAsync());
+        AddShortcut(Windows.System.VirtualKey.F9, () => _ = CompletePurchaseAsync());
+    }
+
+    private void AddShortcut(Windows.System.VirtualKey key, Action action)
+    {
+        var accelerator = new KeyboardAccelerator { Key = key };
+        accelerator.Invoked += (_, args) =>
+        {
+            action();
+            args.Handled = true;
+        };
+        KeyboardAccelerators.Add(accelerator);
     }
 
     private void OnCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args) =>
@@ -75,13 +92,12 @@ public sealed partial class PurchaseEntryPage : Page
         if (handledAsScan)
         {
             ScanSearchBox.Text = string.Empty;
+            ScanSearchBox.Focus(FocusState.Programmatic);
             return;
         }
 
         await AddCurrentSearchTextAsync();
     }
-
-    private async void OnAddItemClick(object sender, RoutedEventArgs e) => await AddCurrentSearchTextAsync();
 
     private async Task AddCurrentSearchTextAsync()
     {
@@ -114,7 +130,9 @@ public sealed partial class PurchaseEntryPage : Page
         ScanSearchBox.Focus(FocusState.Programmatic);
     }
 
-    private async void OnSupplierClick(object sender, RoutedEventArgs e)
+    private async void OnSupplierClick(object sender, RoutedEventArgs e) => await OpenSupplierPickerAsync();
+
+    private async Task OpenSupplierPickerAsync()
     {
         var dialog = new SupplierPickerDialog(ViewModel).Themed(XamlRoot);
         var result = await dialog.ShowAsync();
@@ -127,11 +145,24 @@ public sealed partial class PurchaseEntryPage : Page
         ScanSearchBox.Focus(FocusState.Programmatic);
     }
 
+    private void OnCancelClick(object sender, RoutedEventArgs e) => Frame.Navigate(typeof(PurchasesPage));
+
     private void OnRemoveLineClick(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is PurchaseLineViewModel line)
         {
             ViewModel.RemoveLine(line);
+        }
+    }
+
+    /// <summary>Live-refreshes totals as a quantity/price/discount is typed. Pairs with the
+    /// <c>UpdateSourceTrigger=PropertyChanged</c> on those bindings — without both halves the
+    /// ViewModel only sees the edit once focus leaves the box.</summary>
+    private void OnLineFieldTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if ((sender as TextBox)?.Tag is PurchaseLineViewModel)
+        {
+            ViewModel.RecalculateTotals();
         }
     }
 
@@ -158,7 +189,9 @@ public sealed partial class PurchaseEntryPage : Page
         }
     }
 
-    private async void OnCompletePurchaseClick(object sender, RoutedEventArgs e)
+    private async void OnCompletePurchaseClick(object sender, RoutedEventArgs e) => await CompletePurchaseAsync();
+
+    private async Task CompletePurchaseAsync()
     {
         await ViewModel.CompletePurchaseCommand.ExecuteAsync(null);
 

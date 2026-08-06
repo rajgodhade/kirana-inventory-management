@@ -5,6 +5,7 @@ using Kirana.Application.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.Storage.Pickers;
 
 namespace Kirana.App.Views;
 
@@ -21,7 +22,10 @@ public sealed partial class SettingsPage : Page
     public SettingsPage()
     {
         var services = App.Services;
-        ViewModel = new SettingsViewModel(services.GetRequiredService<IKiranaDbContext>(), services.GetRequiredService<ManagementSession>());
+        ViewModel = new SettingsViewModel(
+            services.GetRequiredService<IKiranaDbContext>(),
+            services.GetRequiredService<IAppPaths>(),
+            services.GetRequiredService<ManagementSession>());
         _themeService = services.GetRequiredService<ThemeService>();
 
         InitializeComponent();
@@ -57,5 +61,19 @@ public sealed partial class SettingsPage : Page
         };
 
         await _themeService.SetModeAsync(mode);
+    }
+
+    private async void OnChooseBackupFolderClick(object sender, RoutedEventArgs e)
+    {
+        var picker = new FolderPicker();
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow));
+        picker.SuggestedStartLocation = PickerLocationId.ComputerFolder;
+        picker.FileTypeFilter.Add("*");
+
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder is not null)
+        {
+            await ViewModel.SaveBackupDirectoryAsync(folder.Path);
+        }
     }
 }

@@ -29,7 +29,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox Grid.Column="0" PlaceholderText="Search by name or Supplier ID"
-                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" KeyDown="OnSearchBoxKeyDown" />
+                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnSearchBoxKeyDown"
+                     TextChanged="OnSearchTextChanged" />
             <Button Grid.Column="1" Content="Search" Click="OnSearchClick" />
         </Grid>
 

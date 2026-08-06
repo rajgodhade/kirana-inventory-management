@@ -30,10 +30,12 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBox Grid.Column="0" PlaceholderText="Search name / SKU / barcode…"
-                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" KeyDown="OnSearchBoxKeyDown" />
+                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnSearchBoxKeyDown"
+                     TextChanged="OnSearchTextChanged" />
 
             <ComboBox Grid.Column="1" PlaceholderText="Category"
                       ItemsSource="{x:Bind ViewModel.Categories}" DisplayMemberPath="Name"
@@ -52,7 +54,10 @@
             <Button Grid.Column="6" Content="Brands" Click="OnManageBrandsClick" Margin="8,0,0,0" />
             <Button Grid.Column="7" Content="Bulk Labels" Click="OnBulkLabelsClick" Margin="8,0,0,0"
                     IsEnabled="{x:Bind ViewModel.CanManageInventory}" />
-            <Button Grid.Column="8" Content="Add Product" Style="{StaticResource AccentButtonStyle}"
+            <Button Grid.Column="8" Content="Import" Click="OnImportProductsClick" Margin="8,0,0,0"
+                    IsEnabled="{x:Bind ViewModel.CanEditProducts}"
+                    ToolTipService.ToolTip="Bulk-import products from a CSV or Excel file" />
+            <Button Grid.Column="9" Content="Add Product" Style="{StaticResource AccentButtonStyle}"
                     Click="OnAddProductClick" IsEnabled="{x:Bind ViewModel.CanEditProducts}" Margin="8,0,0,0" />
         </Grid>
 
@@ -70,10 +75,15 @@
                           BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" MinWidth="220" />
-                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="190" />
                             <ColumnDefinition Width="130" />
                             <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="Auto" MinWidth="280" />
+                            <!-- Fixed, not Auto: rows differ in button count (only batch-tracked
+                                 products get a "Batches" button), and an Auto column would size to
+                                 each row's own buttons, stealing different amounts of width from the
+                                 star-sized PRODUCT column and shifting every middle column out of
+                                 line row-to-row. A fixed width keeps all rows on the same grid. -->
+                            <ColumnDefinition Width="440" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="PRODUCT" Style="{StaticResource ColumnHeaderTextStyle}" />
                         <TextBlock Grid.Column="1" Text="CATEGORY / BRAND / UNIT" Style="{StaticResource ColumnHeaderTextStyle}" />
@@ -97,27 +107,42 @@
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="vm:ProductRowViewModel">
                                 <Grid Padding="12,10" ColumnSpacing="16" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+                                    <!-- Must stay byte-for-byte identical to the header row's columns
+                                         above, or the headers stop lining up with their data. -->
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" MinWidth="220" />
-                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="190" />
                                         <ColumnDefinition Width="130" />
                                         <ColumnDefinition Width="90" />
-                                        <ColumnDefinition Width="Auto" MinWidth="280" />
+                                        <ColumnDefinition Width="440" />
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                        <TextBlock Opacity="0.6" FontSize="12">
+                                        <!-- Ellipsis rather than a hard clip: the code/SKU/barcode line
+                                             can outrun the column on long names, and a trailing "…" reads
+                                             as "there's more" instead of looking like a truncated value. -->
+                                        <TextBlock Opacity="0.6" FontSize="12" TextTrimming="CharacterEllipsis">
                                             <Run Text="{x:Bind ProductCode}" />
                                             <Run Text=" · SKU: " /><Run Text="{x:Bind Sku}" />
                                             <Run Text=" · Barcode: " /><Run Text="{x:Bind Barcode}" />
                                         </TextBlock>
                                     </StackPanel>
 
+                                    <!-- Category and Brand are optional, so their TextBlocks are collapsed
+                                         when empty rather than left as blank lines — otherwise a product
+                                         with no category/brand pushed its Unit to the bottom of the cell
+                                         and the column read as ragged and misaligned across rows. -->
                                     <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind CategoryName}" FontSize="12" />
-                                        <TextBlock Text="{x:Bind BrandName}" FontSize="12" Opacity="0.7" />
-                                        <TextBlock Text="{x:Bind Unit}" FontSize="12" Opacity="0.7" />
+                                        <TextBlock Text="{x:Bind CategoryName}" FontSize="12"
+                                                   Visibility="{x:Bind CategoryName, Converter={StaticResource StringToVisibilityConverter}}" />
+                                        <TextBlock Text="{x:Bind BrandName}" FontSize="12" Opacity="0.7"
+                                                   Visibility="{x:Bind BrandName, Converter={StaticResource StringToVisibilityConverter}}" />
+                                        <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource SurfaceAltBrush}"
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Text="{x:Bind Unit}" Style="{StaticResource BadgeTextStyle}"
+                                                       Foreground="{ThemeResource TextSecondaryBrush}" />
+                                        </Border>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
@@ -138,7 +163,7 @@
                                         </Border>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" HorizontalAlignment="Left">
                                         <Button Content="Edit" Click="OnEditClick" Tag="{x:Bind}" />
                                         <Button Content="Stock" Click="OnAdjustStockClick" Tag="{x:Bind}" />
                                         <Button Content="Labels" Click="OnLabelsClick" Tag="{x:Bind}" />

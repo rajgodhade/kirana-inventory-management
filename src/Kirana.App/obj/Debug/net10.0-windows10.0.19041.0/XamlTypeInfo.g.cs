@@ -226,7 +226,7 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
         
         private void InitTypeTables()
         {
-            _typeNameTable = new string[172];
+            _typeNameTable = new string[190];
             _typeNameTable[0] = "Microsoft.UI.Xaml.Controls.XamlControlsResources";
             _typeNameTable[1] = "Microsoft.UI.Xaml.ResourceDictionary";
             _typeNameTable[2] = "Object";
@@ -240,167 +240,185 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
             _typeNameTable[10] = "Kirana.App.Converters.NullToVisibilityConverter";
             _typeNameTable[11] = "Kirana.App.Converters.CurrencyConverter";
             _typeNameTable[12] = "Kirana.App.Converters.QuantityConverter";
-            _typeNameTable[13] = "Kirana.App.MainWindow";
-            _typeNameTable[14] = "Microsoft.UI.Xaml.Window";
-            _typeNameTable[15] = "Microsoft.UI.Xaml.FrameworkElement";
-            _typeNameTable[16] = "Microsoft.UI.Xaml.Controls.Frame";
-            _typeNameTable[17] = "Windows.UI.Color";
-            _typeNameTable[18] = "System.ValueType";
-            _typeNameTable[19] = "Byte";
-            _typeNameTable[20] = "Microsoft.UI.Xaml.Thickness";
-            _typeNameTable[21] = "Double";
-            _typeNameTable[22] = "Microsoft.UI.Xaml.CornerRadius";
-            _typeNameTable[23] = "Microsoft.UI.Xaml.Controls.InfoBar";
-            _typeNameTable[24] = "Microsoft.UI.Xaml.Controls.Control";
-            _typeNameTable[25] = "Microsoft.UI.Xaml.Controls.InfoBarSeverity";
-            _typeNameTable[26] = "System.Enum";
-            _typeNameTable[27] = "String";
-            _typeNameTable[28] = "Microsoft.UI.Xaml.Controls.Primitives.ButtonBase";
-            _typeNameTable[29] = "System.Windows.Input.ICommand";
-            _typeNameTable[30] = "Microsoft.UI.Xaml.Style";
-            _typeNameTable[31] = "Microsoft.UI.Xaml.DataTemplate";
-            _typeNameTable[32] = "Microsoft.UI.Xaml.Controls.IconSource";
-            _typeNameTable[33] = "Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings";
-            _typeNameTable[34] = "Microsoft.UI.Xaml.DependencyObject";
-            _typeNameTable[35] = "Kirana.App.Views.AuditLogPage";
-            _typeNameTable[36] = "Microsoft.UI.Xaml.Controls.Page";
-            _typeNameTable[37] = "Microsoft.UI.Xaml.Controls.UserControl";
-            _typeNameTable[38] = "Kirana.App.ViewModels.AuditLogViewModel";
-            _typeNameTable[39] = "CommunityToolkit.Mvvm.ComponentModel.ObservableObject";
-            _typeNameTable[40] = "Kirana.App.Views.BarcodeLabelDialog";
-            _typeNameTable[41] = "Microsoft.UI.Xaml.Controls.ContentDialog";
-            _typeNameTable[42] = "Microsoft.UI.Xaml.Controls.ContentControl";
-            _typeNameTable[43] = "Kirana.App.ViewModels.BarcodeLabelViewModel";
-            _typeNameTable[44] = "Kirana.App.Views.BarcodeScanTestPage";
-            _typeNameTable[45] = "Kirana.App.ViewModels.BarcodeScanTestViewModel";
-            _typeNameTable[46] = "Kirana.App.Views.BatchManagementDialog";
-            _typeNameTable[47] = "Kirana.App.ViewModels.BatchManagementViewModel";
-            _typeNameTable[48] = "Kirana.App.Views.BillDiscountDialog";
-            _typeNameTable[49] = "System.Decimal";
-            _typeNameTable[50] = "Kirana.App.Views.BrandManagementDialog";
-            _typeNameTable[51] = "Kirana.App.ViewModels.BrandManagementViewModel";
-            _typeNameTable[52] = "Kirana.App.Views.CategoryManagementDialog";
-            _typeNameTable[53] = "Kirana.App.ViewModels.CategoryManagementViewModel";
-            _typeNameTable[54] = "Kirana.App.Views.CreditPaymentDialog";
-            _typeNameTable[55] = "Kirana.Domain.Entities.CreditPayment";
-            _typeNameTable[56] = "Kirana.Domain.Common.Entity";
-            _typeNameTable[57] = "Kirana.App.Views.CustomerEditDialog";
-            _typeNameTable[58] = "Kirana.App.ViewModels.CustomerEditViewModel";
-            _typeNameTable[59] = "Kirana.App.Views.CustomerLedgerPage";
-            _typeNameTable[60] = "Kirana.App.ViewModels.CustomerLedgerViewModel";
-            _typeNameTable[61] = "Kirana.App.Views.CustomerPickerDialog";
-            _typeNameTable[62] = "Kirana.App.ViewModels.CustomerPickerViewModel";
-            _typeNameTable[63] = "Kirana.Domain.Entities.Customer";
-            _typeNameTable[64] = "Kirana.App.Views.CustomersPage";
-            _typeNameTable[65] = "Kirana.App.ViewModels.CustomersViewModel";
-            _typeNameTable[66] = "Kirana.App.Views.ExpenseCategoriesPage";
-            _typeNameTable[67] = "Kirana.App.ViewModels.ExpenseCategoriesViewModel";
-            _typeNameTable[68] = "Kirana.App.Views.ExpenseDetailsPage";
-            _typeNameTable[69] = "Kirana.App.Views.ExpenseEditDialog";
-            _typeNameTable[70] = "Kirana.App.Views.ExpensesPage";
-            _typeNameTable[71] = "Kirana.App.ViewModels.ExpensesViewModel";
-            _typeNameTable[72] = "Kirana.App.Views.HeldBillsDialog";
-            _typeNameTable[73] = "Kirana.App.ViewModels.HeldBillsViewModel";
-            _typeNameTable[74] = "System.Nullable`1<Int32>";
-            _typeNameTable[75] = "Int32";
-            _typeNameTable[76] = "Microsoft.UI.Xaml.Controls.ProgressRing";
-            _typeNameTable[77] = "Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings";
-            _typeNameTable[78] = "Kirana.App.Views.InvoicePreviewDialog";
-            _typeNameTable[79] = "Kirana.App.ViewModels.InvoicePreviewViewModel";
-            _typeNameTable[80] = "Kirana.App.Views.ManagementHomePage";
-            _typeNameTable[81] = "Kirana.App.ViewModels.ManagementHomeViewModel";
-            _typeNameTable[82] = "Kirana.App.Views.ManagementLoginDialog";
-            _typeNameTable[83] = "Microsoft.UI.Xaml.Controls.NavigationView";
-            _typeNameTable[84] = "Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode";
-            _typeNameTable[85] = "Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible";
-            _typeNameTable[86] = "System.Collections.Generic.IList`1<Object>";
-            _typeNameTable[87] = "Microsoft.UI.Xaml.Controls.AutoSuggestBox";
-            _typeNameTable[88] = "Microsoft.UI.Xaml.UIElement";
-            _typeNameTable[89] = "Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode";
-            _typeNameTable[90] = "Microsoft.UI.Xaml.Controls.StyleSelector";
-            _typeNameTable[91] = "Microsoft.UI.Xaml.Controls.DataTemplateSelector";
-            _typeNameTable[92] = "Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode";
-            _typeNameTable[93] = "Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus";
-            _typeNameTable[94] = "Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled";
-            _typeNameTable[95] = "Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings";
-            _typeNameTable[96] = "Microsoft.UI.Xaml.Controls.NavigationViewItem";
-            _typeNameTable[97] = "Microsoft.UI.Xaml.Controls.NavigationViewItemBase";
-            _typeNameTable[98] = "Microsoft.UI.Xaml.Controls.IconElement";
-            _typeNameTable[99] = "Microsoft.UI.Xaml.Controls.InfoBadge";
-            _typeNameTable[100] = "Microsoft.UI.Xaml.Controls.NavigationViewItemHeader";
-            _typeNameTable[101] = "Kirana.App.Views.ManagementShellPage";
-            _typeNameTable[102] = "Kirana.App.Views.ManagerAuthorizationDialog";
-            _typeNameTable[103] = "Kirana.App.Views.NewPurchaseReturnPage";
-            _typeNameTable[104] = "Kirana.App.ViewModels.NewPurchaseReturnViewModel";
-            _typeNameTable[105] = "Kirana.App.Views.NewSalesReturnPage";
-            _typeNameTable[106] = "Kirana.App.ViewModels.NewSalesReturnViewModel";
-            _typeNameTable[107] = "Kirana.App.Views.PaymentDialog";
-            _typeNameTable[108] = "Kirana.App.ViewModels.PaymentViewModel";
-            _typeNameTable[109] = "Kirana.App.Views.PosShellPage";
-            _typeNameTable[110] = "Kirana.App.ViewModels.PosShellViewModel";
-            _typeNameTable[111] = "Kirana.App.Views.ProductEditDialog";
-            _typeNameTable[112] = "Kirana.App.ViewModels.ProductEditViewModel";
-            _typeNameTable[113] = "Kirana.App.Views.ProductsPage";
-            _typeNameTable[114] = "Kirana.App.ViewModels.ProductsViewModel";
-            _typeNameTable[115] = "Kirana.App.Views.PurchaseDetailsDialog";
-            _typeNameTable[116] = "Kirana.App.Views.PurchaseEntryPage";
-            _typeNameTable[117] = "Kirana.App.ViewModels.PurchaseEntryViewModel";
-            _typeNameTable[118] = "Kirana.App.Views.PurchasePaymentDialog";
-            _typeNameTable[119] = "Kirana.App.Views.PurchaseReturnDetailsPage";
-            _typeNameTable[120] = "Kirana.App.Views.PurchaseReturnsPage";
-            _typeNameTable[121] = "Kirana.App.ViewModels.PurchaseReturnsViewModel";
-            _typeNameTable[122] = "Kirana.App.Views.PurchasesPage";
-            _typeNameTable[123] = "Kirana.App.ViewModels.PurchasesViewModel";
-            _typeNameTable[124] = "Kirana.App.Views.Reports.ProfitReportView";
-            _typeNameTable[125] = "Kirana.App.ViewModels.Reports.ProfitReportTabViewModel";
-            _typeNameTable[126] = "Kirana.App.Views.Reports.ExpenseReportView";
-            _typeNameTable[127] = "Kirana.App.ViewModels.Reports.ExpenseReportTabViewModel";
-            _typeNameTable[128] = "Kirana.App.Views.Reports.SupplierReportView";
-            _typeNameTable[129] = "Kirana.App.ViewModels.Reports.SupplierReportTabViewModel";
-            _typeNameTable[130] = "Kirana.App.Views.Reports.CustomerReportView";
-            _typeNameTable[131] = "Kirana.App.ViewModels.Reports.CustomerReportTabViewModel";
-            _typeNameTable[132] = "Kirana.App.Views.Reports.InventoryReportView";
-            _typeNameTable[133] = "Kirana.App.ViewModels.Reports.InventoryReportTabViewModel";
-            _typeNameTable[134] = "Kirana.App.Views.Reports.ProductReportView";
-            _typeNameTable[135] = "Kirana.App.ViewModels.Reports.ProductReportTabViewModel";
-            _typeNameTable[136] = "Kirana.App.Views.Reports.SalesReportView";
-            _typeNameTable[137] = "Kirana.App.ViewModels.Reports.SalesReportTabViewModel";
-            _typeNameTable[138] = "Kirana.App.Views.Reports.DashboardView";
-            _typeNameTable[139] = "Kirana.App.ViewModels.Reports.DashboardTabViewModel";
-            _typeNameTable[140] = "Kirana.App.Views.ReportsHubPage";
-            _typeNameTable[141] = "Kirana.App.Views.ReprintInvoiceDialog";
-            _typeNameTable[142] = "Kirana.App.ViewModels.ReprintInvoiceViewModel";
-            _typeNameTable[143] = "Kirana.Application.Printing.InvoiceDocument";
-            _typeNameTable[144] = "Kirana.App.Views.ResetPasswordDialog";
-            _typeNameTable[145] = "Kirana.App.Views.SalesReturnDetailsPage";
-            _typeNameTable[146] = "Kirana.App.Views.SalesReturnsPage";
-            _typeNameTable[147] = "Kirana.App.ViewModels.SalesReturnsViewModel";
-            _typeNameTable[148] = "Kirana.App.Views.SetPinDialog";
-            _typeNameTable[149] = "Microsoft.UI.Xaml.Controls.RadioButtons";
-            _typeNameTable[150] = "Kirana.App.Views.SettingsPage";
-            _typeNameTable[151] = "Kirana.App.ViewModels.SettingsViewModel";
-            _typeNameTable[152] = "Kirana.App.Views.SetupWizardPage";
-            _typeNameTable[153] = "Kirana.App.ViewModels.SetupWizardViewModel";
-            _typeNameTable[154] = "Kirana.App.Views.StockAdjustmentDialog";
-            _typeNameTable[155] = "Kirana.App.ViewModels.StockAdjustmentViewModel";
-            _typeNameTable[156] = "Kirana.App.Views.SupplierEditDialog";
-            _typeNameTable[157] = "Kirana.App.ViewModels.SupplierEditViewModel";
-            _typeNameTable[158] = "Kirana.App.Views.SupplierLedgerPage";
-            _typeNameTable[159] = "Kirana.App.ViewModels.SupplierLedgerViewModel";
-            _typeNameTable[160] = "Kirana.App.Views.SupplierPaymentDialog";
-            _typeNameTable[161] = "Kirana.App.Views.SupplierPickerDialog";
-            _typeNameTable[162] = "Kirana.App.ViewModels.SupplierPickerViewModel";
-            _typeNameTable[163] = "Kirana.Domain.Entities.Supplier";
-            _typeNameTable[164] = "Kirana.App.Views.SuppliersPage";
-            _typeNameTable[165] = "Kirana.App.ViewModels.SuppliersViewModel";
-            _typeNameTable[166] = "Kirana.App.Views.UserEditDialog";
-            _typeNameTable[167] = "Kirana.App.ViewModels.UserEditViewModel";
-            _typeNameTable[168] = "Kirana.App.Views.UserManagementPage";
-            _typeNameTable[169] = "Kirana.App.ViewModels.UserManagementViewModel";
-            _typeNameTable[170] = "Microsoft.UI.Xaml.Controls.TreeViewNode";
-            _typeNameTable[171] = "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>";
+            _typeNameTable[13] = "Kirana.App.Converters.PaymentMethodConverter";
+            _typeNameTable[14] = "Kirana.App.Converters.PaymentMethodIconConverter";
+            _typeNameTable[15] = "Kirana.App.Converters.DetailIndentConverter";
+            _typeNameTable[16] = "Kirana.App.Converters.BillTabFontWeightConverter";
+            _typeNameTable[17] = "Kirana.App.MainWindow";
+            _typeNameTable[18] = "Microsoft.UI.Xaml.Window";
+            _typeNameTable[19] = "Microsoft.UI.Xaml.FrameworkElement";
+            _typeNameTable[20] = "Microsoft.UI.Xaml.Controls.Frame";
+            _typeNameTable[21] = "Windows.UI.Color";
+            _typeNameTable[22] = "System.ValueType";
+            _typeNameTable[23] = "Byte";
+            _typeNameTable[24] = "Microsoft.UI.Xaml.Thickness";
+            _typeNameTable[25] = "Double";
+            _typeNameTable[26] = "Microsoft.UI.Xaml.CornerRadius";
+            _typeNameTable[27] = "Microsoft.UI.Xaml.Controls.InfoBar";
+            _typeNameTable[28] = "Microsoft.UI.Xaml.Controls.Control";
+            _typeNameTable[29] = "Microsoft.UI.Xaml.Controls.InfoBarSeverity";
+            _typeNameTable[30] = "System.Enum";
+            _typeNameTable[31] = "String";
+            _typeNameTable[32] = "Microsoft.UI.Xaml.Controls.Primitives.ButtonBase";
+            _typeNameTable[33] = "System.Windows.Input.ICommand";
+            _typeNameTable[34] = "Microsoft.UI.Xaml.Style";
+            _typeNameTable[35] = "Microsoft.UI.Xaml.DataTemplate";
+            _typeNameTable[36] = "Microsoft.UI.Xaml.Controls.IconSource";
+            _typeNameTable[37] = "Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings";
+            _typeNameTable[38] = "Microsoft.UI.Xaml.DependencyObject";
+            _typeNameTable[39] = "Kirana.App.Views.AuditLogPage";
+            _typeNameTable[40] = "Microsoft.UI.Xaml.Controls.Page";
+            _typeNameTable[41] = "Microsoft.UI.Xaml.Controls.UserControl";
+            _typeNameTable[42] = "Kirana.App.ViewModels.AuditLogViewModel";
+            _typeNameTable[43] = "CommunityToolkit.Mvvm.ComponentModel.ObservableObject";
+            _typeNameTable[44] = "Microsoft.UI.Xaml.Controls.ProgressBar";
+            _typeNameTable[45] = "Microsoft.UI.Xaml.Controls.Primitives.RangeBase";
+            _typeNameTable[46] = "Microsoft.UI.Xaml.Controls.ProgressBarTemplateSettings";
+            _typeNameTable[47] = "Kirana.App.Views.BackupManagerPage";
+            _typeNameTable[48] = "Kirana.App.ViewModels.BackupManagerViewModel";
+            _typeNameTable[49] = "Kirana.App.Views.BarcodeLabelDialog";
+            _typeNameTable[50] = "Microsoft.UI.Xaml.Controls.ContentDialog";
+            _typeNameTable[51] = "Microsoft.UI.Xaml.Controls.ContentControl";
+            _typeNameTable[52] = "Kirana.App.ViewModels.BarcodeLabelViewModel";
+            _typeNameTable[53] = "Kirana.App.Views.BarcodeScanTestPage";
+            _typeNameTable[54] = "Kirana.App.ViewModels.BarcodeScanTestViewModel";
+            _typeNameTable[55] = "Kirana.App.Views.BatchManagementDialog";
+            _typeNameTable[56] = "Kirana.App.ViewModels.BatchManagementViewModel";
+            _typeNameTable[57] = "Kirana.App.Views.BillDiscountDialog";
+            _typeNameTable[58] = "System.Decimal";
+            _typeNameTable[59] = "Kirana.App.Views.BrandManagementDialog";
+            _typeNameTable[60] = "Kirana.App.ViewModels.BrandManagementViewModel";
+            _typeNameTable[61] = "Kirana.App.Views.CategoryManagementDialog";
+            _typeNameTable[62] = "Kirana.App.ViewModels.CategoryManagementViewModel";
+            _typeNameTable[63] = "Kirana.App.Views.CreditPaymentDialog";
+            _typeNameTable[64] = "Kirana.Domain.Entities.CreditPayment";
+            _typeNameTable[65] = "Kirana.Domain.Common.Entity";
+            _typeNameTable[66] = "Kirana.App.Views.CustomerEditDialog";
+            _typeNameTable[67] = "Kirana.App.ViewModels.CustomerEditViewModel";
+            _typeNameTable[68] = "Kirana.App.Views.CustomerLedgerPage";
+            _typeNameTable[69] = "Kirana.App.ViewModels.CustomerLedgerViewModel";
+            _typeNameTable[70] = "Kirana.App.Views.CustomerPickerDialog";
+            _typeNameTable[71] = "Kirana.App.ViewModels.CustomerPickerViewModel";
+            _typeNameTable[72] = "Kirana.Domain.Entities.Customer";
+            _typeNameTable[73] = "Kirana.App.Views.CustomersPage";
+            _typeNameTable[74] = "Kirana.App.ViewModels.CustomersViewModel";
+            _typeNameTable[75] = "Kirana.App.Views.DatabaseMaintenancePage";
+            _typeNameTable[76] = "Kirana.App.ViewModels.DatabaseMaintenanceViewModel";
+            _typeNameTable[77] = "Kirana.App.Views.ExpenseCategoriesPage";
+            _typeNameTable[78] = "Kirana.App.ViewModels.ExpenseCategoriesViewModel";
+            _typeNameTable[79] = "Kirana.App.Views.ExpenseDetailsPage";
+            _typeNameTable[80] = "Kirana.App.Views.ExpenseEditDialog";
+            _typeNameTable[81] = "Kirana.App.Views.ExpensesPage";
+            _typeNameTable[82] = "Kirana.App.ViewModels.ExpensesViewModel";
+            _typeNameTable[83] = "Kirana.App.Views.ExportCenterPage";
+            _typeNameTable[84] = "Kirana.App.ViewModels.ExportCenterViewModel";
+            _typeNameTable[85] = "Kirana.App.Views.HeldBillsDialog";
+            _typeNameTable[86] = "Kirana.App.ViewModels.HeldBillsViewModel";
+            _typeNameTable[87] = "System.Nullable`1<Int32>";
+            _typeNameTable[88] = "Int32";
+            _typeNameTable[89] = "Microsoft.UI.Xaml.Controls.ProgressRing";
+            _typeNameTable[90] = "Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings";
+            _typeNameTable[91] = "Kirana.App.Views.InvoicePreviewDialog";
+            _typeNameTable[92] = "Kirana.App.ViewModels.InvoicePreviewViewModel";
+            _typeNameTable[93] = "Kirana.App.Views.ManagementHomePage";
+            _typeNameTable[94] = "Kirana.App.ViewModels.ManagementHomeViewModel";
+            _typeNameTable[95] = "Kirana.App.Views.ManagementLoginDialog";
+            _typeNameTable[96] = "Microsoft.UI.Xaml.Controls.NavigationView";
+            _typeNameTable[97] = "Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode";
+            _typeNameTable[98] = "Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible";
+            _typeNameTable[99] = "System.Collections.Generic.IList`1<Object>";
+            _typeNameTable[100] = "Microsoft.UI.Xaml.Controls.AutoSuggestBox";
+            _typeNameTable[101] = "Microsoft.UI.Xaml.UIElement";
+            _typeNameTable[102] = "Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode";
+            _typeNameTable[103] = "Microsoft.UI.Xaml.Controls.StyleSelector";
+            _typeNameTable[104] = "Microsoft.UI.Xaml.Controls.DataTemplateSelector";
+            _typeNameTable[105] = "Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode";
+            _typeNameTable[106] = "Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus";
+            _typeNameTable[107] = "Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled";
+            _typeNameTable[108] = "Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings";
+            _typeNameTable[109] = "Microsoft.UI.Xaml.Controls.NavigationViewItem";
+            _typeNameTable[110] = "Microsoft.UI.Xaml.Controls.NavigationViewItemBase";
+            _typeNameTable[111] = "Microsoft.UI.Xaml.Controls.IconElement";
+            _typeNameTable[112] = "Microsoft.UI.Xaml.Controls.InfoBadge";
+            _typeNameTable[113] = "Microsoft.UI.Xaml.Controls.NavigationViewItemHeader";
+            _typeNameTable[114] = "Kirana.App.Views.ManagementShellPage";
+            _typeNameTable[115] = "Kirana.App.Views.ManagerAuthorizationDialog";
+            _typeNameTable[116] = "Kirana.App.Views.NewPurchaseReturnPage";
+            _typeNameTable[117] = "Kirana.App.ViewModels.NewPurchaseReturnViewModel";
+            _typeNameTable[118] = "Kirana.App.Views.NewSalesReturnPage";
+            _typeNameTable[119] = "Kirana.App.ViewModels.NewSalesReturnViewModel";
+            _typeNameTable[120] = "Kirana.App.Views.PaymentDialog";
+            _typeNameTable[121] = "Kirana.App.ViewModels.PaymentViewModel";
+            _typeNameTable[122] = "Kirana.App.Views.PosShellPage";
+            _typeNameTable[123] = "Kirana.App.ViewModels.PosShellViewModel";
+            _typeNameTable[124] = "Kirana.App.Views.ProductEditDialog";
+            _typeNameTable[125] = "Kirana.App.ViewModels.ProductEditViewModel";
+            _typeNameTable[126] = "Kirana.App.Views.ProductImportDialog";
+            _typeNameTable[127] = "Kirana.App.ViewModels.ProductImportViewModel";
+            _typeNameTable[128] = "Kirana.App.Views.ProductsPage";
+            _typeNameTable[129] = "Kirana.App.ViewModels.ProductsViewModel";
+            _typeNameTable[130] = "Kirana.App.Views.PurchaseDetailsDialog";
+            _typeNameTable[131] = "Kirana.App.Views.PurchaseEntryPage";
+            _typeNameTable[132] = "Kirana.App.ViewModels.PurchaseEntryViewModel";
+            _typeNameTable[133] = "Kirana.App.Views.PurchasePaymentDialog";
+            _typeNameTable[134] = "Kirana.App.Views.PurchaseReturnDetailsPage";
+            _typeNameTable[135] = "Kirana.App.Views.PurchaseReturnsPage";
+            _typeNameTable[136] = "Kirana.App.ViewModels.PurchaseReturnsViewModel";
+            _typeNameTable[137] = "Kirana.App.Views.PurchasesPage";
+            _typeNameTable[138] = "Kirana.App.ViewModels.PurchasesViewModel";
+            _typeNameTable[139] = "Microsoft.UI.Xaml.Controls.Primitives.PivotHeaderItem";
+            _typeNameTable[140] = "Kirana.App.Views.Reports.ProfitReportView";
+            _typeNameTable[141] = "Kirana.App.ViewModels.Reports.ProfitReportTabViewModel";
+            _typeNameTable[142] = "Kirana.App.Views.Reports.ExpenseReportView";
+            _typeNameTable[143] = "Kirana.App.ViewModels.Reports.ExpenseReportTabViewModel";
+            _typeNameTable[144] = "Kirana.App.Views.Reports.SupplierReportView";
+            _typeNameTable[145] = "Kirana.App.ViewModels.Reports.SupplierReportTabViewModel";
+            _typeNameTable[146] = "Kirana.App.Views.Reports.CustomerReportView";
+            _typeNameTable[147] = "Kirana.App.ViewModels.Reports.CustomerReportTabViewModel";
+            _typeNameTable[148] = "Kirana.App.Views.Reports.InventoryReportView";
+            _typeNameTable[149] = "Kirana.App.ViewModels.Reports.InventoryReportTabViewModel";
+            _typeNameTable[150] = "Kirana.App.Views.Reports.ProductReportView";
+            _typeNameTable[151] = "Kirana.App.ViewModels.Reports.ProductReportTabViewModel";
+            _typeNameTable[152] = "Kirana.App.Views.Reports.SalesReportView";
+            _typeNameTable[153] = "Kirana.App.ViewModels.Reports.SalesReportTabViewModel";
+            _typeNameTable[154] = "Kirana.App.Views.Reports.DashboardView";
+            _typeNameTable[155] = "Kirana.App.ViewModels.Reports.DashboardTabViewModel";
+            _typeNameTable[156] = "Kirana.App.Views.ReportsHubPage";
+            _typeNameTable[157] = "Kirana.App.Views.ReprintInvoiceDialog";
+            _typeNameTable[158] = "Kirana.App.ViewModels.ReprintInvoiceViewModel";
+            _typeNameTable[159] = "Kirana.Application.Printing.InvoiceDocument";
+            _typeNameTable[160] = "Kirana.App.Views.ResetPasswordDialog";
+            _typeNameTable[161] = "Kirana.App.Views.RestorePage";
+            _typeNameTable[162] = "Kirana.App.ViewModels.RestoreViewModel";
+            _typeNameTable[163] = "Kirana.App.Views.SalesReturnDetailsPage";
+            _typeNameTable[164] = "Kirana.App.Views.SalesReturnsPage";
+            _typeNameTable[165] = "Kirana.App.ViewModels.SalesReturnsViewModel";
+            _typeNameTable[166] = "Kirana.App.Views.SetPinDialog";
+            _typeNameTable[167] = "Microsoft.UI.Xaml.Controls.RadioButtons";
+            _typeNameTable[168] = "Kirana.App.Views.SettingsPage";
+            _typeNameTable[169] = "Kirana.App.ViewModels.SettingsViewModel";
+            _typeNameTable[170] = "Kirana.App.Views.SetupWizardPage";
+            _typeNameTable[171] = "Kirana.App.ViewModels.SetupWizardViewModel";
+            _typeNameTable[172] = "Kirana.App.Views.StockAdjustmentDialog";
+            _typeNameTable[173] = "Kirana.App.ViewModels.StockAdjustmentViewModel";
+            _typeNameTable[174] = "Kirana.App.Views.SupplierEditDialog";
+            _typeNameTable[175] = "Kirana.App.ViewModels.SupplierEditViewModel";
+            _typeNameTable[176] = "Kirana.App.Views.SupplierLedgerPage";
+            _typeNameTable[177] = "Kirana.App.ViewModels.SupplierLedgerViewModel";
+            _typeNameTable[178] = "Kirana.App.Views.SupplierPaymentDialog";
+            _typeNameTable[179] = "Kirana.App.Views.SupplierPickerDialog";
+            _typeNameTable[180] = "Kirana.App.ViewModels.SupplierPickerViewModel";
+            _typeNameTable[181] = "Kirana.Domain.Entities.Supplier";
+            _typeNameTable[182] = "Kirana.App.Views.SuppliersPage";
+            _typeNameTable[183] = "Kirana.App.ViewModels.SuppliersViewModel";
+            _typeNameTable[184] = "Kirana.App.Views.UserEditDialog";
+            _typeNameTable[185] = "Kirana.App.ViewModels.UserEditViewModel";
+            _typeNameTable[186] = "Kirana.App.Views.UserManagementPage";
+            _typeNameTable[187] = "Kirana.App.ViewModels.UserManagementViewModel";
+            _typeNameTable[188] = "Microsoft.UI.Xaml.Controls.TreeViewNode";
+            _typeNameTable[189] = "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>";
 
-            _typeTable = new global::System.Type[172];
+            _typeTable = new global::System.Type[190];
             _typeTable[0] = typeof(global::Microsoft.UI.Xaml.Controls.XamlControlsResources);
             _typeTable[1] = typeof(global::Microsoft.UI.Xaml.ResourceDictionary);
             _typeTable[2] = typeof(global::System.Object);
@@ -414,165 +432,183 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
             _typeTable[10] = typeof(global::Kirana.App.Converters.NullToVisibilityConverter);
             _typeTable[11] = typeof(global::Kirana.App.Converters.CurrencyConverter);
             _typeTable[12] = typeof(global::Kirana.App.Converters.QuantityConverter);
-            _typeTable[13] = typeof(global::Kirana.App.MainWindow);
-            _typeTable[14] = typeof(global::Microsoft.UI.Xaml.Window);
-            _typeTable[15] = typeof(global::Microsoft.UI.Xaml.FrameworkElement);
-            _typeTable[16] = typeof(global::Microsoft.UI.Xaml.Controls.Frame);
-            _typeTable[17] = typeof(global::Windows.UI.Color);
-            _typeTable[18] = typeof(global::System.ValueType);
-            _typeTable[19] = typeof(global::System.Byte);
-            _typeTable[20] = typeof(global::Microsoft.UI.Xaml.Thickness);
-            _typeTable[21] = typeof(global::System.Double);
-            _typeTable[22] = typeof(global::Microsoft.UI.Xaml.CornerRadius);
-            _typeTable[23] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBar);
-            _typeTable[24] = typeof(global::Microsoft.UI.Xaml.Controls.Control);
-            _typeTable[25] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBarSeverity);
-            _typeTable[26] = typeof(global::System.Enum);
-            _typeTable[27] = typeof(global::System.String);
-            _typeTable[28] = typeof(global::Microsoft.UI.Xaml.Controls.Primitives.ButtonBase);
-            _typeTable[29] = typeof(global::System.Windows.Input.ICommand);
-            _typeTable[30] = typeof(global::Microsoft.UI.Xaml.Style);
-            _typeTable[31] = typeof(global::Microsoft.UI.Xaml.DataTemplate);
-            _typeTable[32] = typeof(global::Microsoft.UI.Xaml.Controls.IconSource);
-            _typeTable[33] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings);
-            _typeTable[34] = typeof(global::Microsoft.UI.Xaml.DependencyObject);
-            _typeTable[35] = typeof(global::Kirana.App.Views.AuditLogPage);
-            _typeTable[36] = typeof(global::Microsoft.UI.Xaml.Controls.Page);
-            _typeTable[37] = typeof(global::Microsoft.UI.Xaml.Controls.UserControl);
-            _typeTable[38] = typeof(global::Kirana.App.ViewModels.AuditLogViewModel);
-            _typeTable[39] = typeof(global::CommunityToolkit.Mvvm.ComponentModel.ObservableObject);
-            _typeTable[40] = typeof(global::Kirana.App.Views.BarcodeLabelDialog);
-            _typeTable[41] = typeof(global::Microsoft.UI.Xaml.Controls.ContentDialog);
-            _typeTable[42] = typeof(global::Microsoft.UI.Xaml.Controls.ContentControl);
-            _typeTable[43] = typeof(global::Kirana.App.ViewModels.BarcodeLabelViewModel);
-            _typeTable[44] = typeof(global::Kirana.App.Views.BarcodeScanTestPage);
-            _typeTable[45] = typeof(global::Kirana.App.ViewModels.BarcodeScanTestViewModel);
-            _typeTable[46] = typeof(global::Kirana.App.Views.BatchManagementDialog);
-            _typeTable[47] = typeof(global::Kirana.App.ViewModels.BatchManagementViewModel);
-            _typeTable[48] = typeof(global::Kirana.App.Views.BillDiscountDialog);
-            _typeTable[49] = typeof(global::System.Decimal);
-            _typeTable[50] = typeof(global::Kirana.App.Views.BrandManagementDialog);
-            _typeTable[51] = typeof(global::Kirana.App.ViewModels.BrandManagementViewModel);
-            _typeTable[52] = typeof(global::Kirana.App.Views.CategoryManagementDialog);
-            _typeTable[53] = typeof(global::Kirana.App.ViewModels.CategoryManagementViewModel);
-            _typeTable[54] = typeof(global::Kirana.App.Views.CreditPaymentDialog);
-            _typeTable[55] = typeof(global::Kirana.Domain.Entities.CreditPayment);
-            _typeTable[56] = typeof(global::Kirana.Domain.Common.Entity);
-            _typeTable[57] = typeof(global::Kirana.App.Views.CustomerEditDialog);
-            _typeTable[58] = typeof(global::Kirana.App.ViewModels.CustomerEditViewModel);
-            _typeTable[59] = typeof(global::Kirana.App.Views.CustomerLedgerPage);
-            _typeTable[60] = typeof(global::Kirana.App.ViewModels.CustomerLedgerViewModel);
-            _typeTable[61] = typeof(global::Kirana.App.Views.CustomerPickerDialog);
-            _typeTable[62] = typeof(global::Kirana.App.ViewModels.CustomerPickerViewModel);
-            _typeTable[63] = typeof(global::Kirana.Domain.Entities.Customer);
-            _typeTable[64] = typeof(global::Kirana.App.Views.CustomersPage);
-            _typeTable[65] = typeof(global::Kirana.App.ViewModels.CustomersViewModel);
-            _typeTable[66] = typeof(global::Kirana.App.Views.ExpenseCategoriesPage);
-            _typeTable[67] = typeof(global::Kirana.App.ViewModels.ExpenseCategoriesViewModel);
-            _typeTable[68] = typeof(global::Kirana.App.Views.ExpenseDetailsPage);
-            _typeTable[69] = typeof(global::Kirana.App.Views.ExpenseEditDialog);
-            _typeTable[70] = typeof(global::Kirana.App.Views.ExpensesPage);
-            _typeTable[71] = typeof(global::Kirana.App.ViewModels.ExpensesViewModel);
-            _typeTable[72] = typeof(global::Kirana.App.Views.HeldBillsDialog);
-            _typeTable[73] = typeof(global::Kirana.App.ViewModels.HeldBillsViewModel);
-            _typeTable[74] = typeof(global::System.Nullable<global::System.Int32>);
-            _typeTable[75] = typeof(global::System.Int32);
-            _typeTable[76] = typeof(global::Microsoft.UI.Xaml.Controls.ProgressRing);
-            _typeTable[77] = typeof(global::Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings);
-            _typeTable[78] = typeof(global::Kirana.App.Views.InvoicePreviewDialog);
-            _typeTable[79] = typeof(global::Kirana.App.ViewModels.InvoicePreviewViewModel);
-            _typeTable[80] = typeof(global::Kirana.App.Views.ManagementHomePage);
-            _typeTable[81] = typeof(global::Kirana.App.ViewModels.ManagementHomeViewModel);
-            _typeTable[82] = typeof(global::Kirana.App.Views.ManagementLoginDialog);
-            _typeTable[83] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationView);
-            _typeTable[84] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode);
-            _typeTable[85] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible);
-            _typeTable[86] = typeof(global::System.Collections.Generic.IList<global::System.Object>);
-            _typeTable[87] = typeof(global::Microsoft.UI.Xaml.Controls.AutoSuggestBox);
-            _typeTable[88] = typeof(global::Microsoft.UI.Xaml.UIElement);
-            _typeTable[89] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode);
-            _typeTable[90] = typeof(global::Microsoft.UI.Xaml.Controls.StyleSelector);
-            _typeTable[91] = typeof(global::Microsoft.UI.Xaml.Controls.DataTemplateSelector);
-            _typeTable[92] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode);
-            _typeTable[93] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus);
-            _typeTable[94] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled);
-            _typeTable[95] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings);
-            _typeTable[96] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItem);
-            _typeTable[97] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItemBase);
-            _typeTable[98] = typeof(global::Microsoft.UI.Xaml.Controls.IconElement);
-            _typeTable[99] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBadge);
-            _typeTable[100] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItemHeader);
-            _typeTable[101] = typeof(global::Kirana.App.Views.ManagementShellPage);
-            _typeTable[102] = typeof(global::Kirana.App.Views.ManagerAuthorizationDialog);
-            _typeTable[103] = typeof(global::Kirana.App.Views.NewPurchaseReturnPage);
-            _typeTable[104] = typeof(global::Kirana.App.ViewModels.NewPurchaseReturnViewModel);
-            _typeTable[105] = typeof(global::Kirana.App.Views.NewSalesReturnPage);
-            _typeTable[106] = typeof(global::Kirana.App.ViewModels.NewSalesReturnViewModel);
-            _typeTable[107] = typeof(global::Kirana.App.Views.PaymentDialog);
-            _typeTable[108] = typeof(global::Kirana.App.ViewModels.PaymentViewModel);
-            _typeTable[109] = typeof(global::Kirana.App.Views.PosShellPage);
-            _typeTable[110] = typeof(global::Kirana.App.ViewModels.PosShellViewModel);
-            _typeTable[111] = typeof(global::Kirana.App.Views.ProductEditDialog);
-            _typeTable[112] = typeof(global::Kirana.App.ViewModels.ProductEditViewModel);
-            _typeTable[113] = typeof(global::Kirana.App.Views.ProductsPage);
-            _typeTable[114] = typeof(global::Kirana.App.ViewModels.ProductsViewModel);
-            _typeTable[115] = typeof(global::Kirana.App.Views.PurchaseDetailsDialog);
-            _typeTable[116] = typeof(global::Kirana.App.Views.PurchaseEntryPage);
-            _typeTable[117] = typeof(global::Kirana.App.ViewModels.PurchaseEntryViewModel);
-            _typeTable[118] = typeof(global::Kirana.App.Views.PurchasePaymentDialog);
-            _typeTable[119] = typeof(global::Kirana.App.Views.PurchaseReturnDetailsPage);
-            _typeTable[120] = typeof(global::Kirana.App.Views.PurchaseReturnsPage);
-            _typeTable[121] = typeof(global::Kirana.App.ViewModels.PurchaseReturnsViewModel);
-            _typeTable[122] = typeof(global::Kirana.App.Views.PurchasesPage);
-            _typeTable[123] = typeof(global::Kirana.App.ViewModels.PurchasesViewModel);
-            _typeTable[124] = typeof(global::Kirana.App.Views.Reports.ProfitReportView);
-            _typeTable[125] = typeof(global::Kirana.App.ViewModels.Reports.ProfitReportTabViewModel);
-            _typeTable[126] = typeof(global::Kirana.App.Views.Reports.ExpenseReportView);
-            _typeTable[127] = typeof(global::Kirana.App.ViewModels.Reports.ExpenseReportTabViewModel);
-            _typeTable[128] = typeof(global::Kirana.App.Views.Reports.SupplierReportView);
-            _typeTable[129] = typeof(global::Kirana.App.ViewModels.Reports.SupplierReportTabViewModel);
-            _typeTable[130] = typeof(global::Kirana.App.Views.Reports.CustomerReportView);
-            _typeTable[131] = typeof(global::Kirana.App.ViewModels.Reports.CustomerReportTabViewModel);
-            _typeTable[132] = typeof(global::Kirana.App.Views.Reports.InventoryReportView);
-            _typeTable[133] = typeof(global::Kirana.App.ViewModels.Reports.InventoryReportTabViewModel);
-            _typeTable[134] = typeof(global::Kirana.App.Views.Reports.ProductReportView);
-            _typeTable[135] = typeof(global::Kirana.App.ViewModels.Reports.ProductReportTabViewModel);
-            _typeTable[136] = typeof(global::Kirana.App.Views.Reports.SalesReportView);
-            _typeTable[137] = typeof(global::Kirana.App.ViewModels.Reports.SalesReportTabViewModel);
-            _typeTable[138] = typeof(global::Kirana.App.Views.Reports.DashboardView);
-            _typeTable[139] = typeof(global::Kirana.App.ViewModels.Reports.DashboardTabViewModel);
-            _typeTable[140] = typeof(global::Kirana.App.Views.ReportsHubPage);
-            _typeTable[141] = typeof(global::Kirana.App.Views.ReprintInvoiceDialog);
-            _typeTable[142] = typeof(global::Kirana.App.ViewModels.ReprintInvoiceViewModel);
-            _typeTable[143] = typeof(global::Kirana.Application.Printing.InvoiceDocument);
-            _typeTable[144] = typeof(global::Kirana.App.Views.ResetPasswordDialog);
-            _typeTable[145] = typeof(global::Kirana.App.Views.SalesReturnDetailsPage);
-            _typeTable[146] = typeof(global::Kirana.App.Views.SalesReturnsPage);
-            _typeTable[147] = typeof(global::Kirana.App.ViewModels.SalesReturnsViewModel);
-            _typeTable[148] = typeof(global::Kirana.App.Views.SetPinDialog);
-            _typeTable[149] = typeof(global::Microsoft.UI.Xaml.Controls.RadioButtons);
-            _typeTable[150] = typeof(global::Kirana.App.Views.SettingsPage);
-            _typeTable[151] = typeof(global::Kirana.App.ViewModels.SettingsViewModel);
-            _typeTable[152] = typeof(global::Kirana.App.Views.SetupWizardPage);
-            _typeTable[153] = typeof(global::Kirana.App.ViewModels.SetupWizardViewModel);
-            _typeTable[154] = typeof(global::Kirana.App.Views.StockAdjustmentDialog);
-            _typeTable[155] = typeof(global::Kirana.App.ViewModels.StockAdjustmentViewModel);
-            _typeTable[156] = typeof(global::Kirana.App.Views.SupplierEditDialog);
-            _typeTable[157] = typeof(global::Kirana.App.ViewModels.SupplierEditViewModel);
-            _typeTable[158] = typeof(global::Kirana.App.Views.SupplierLedgerPage);
-            _typeTable[159] = typeof(global::Kirana.App.ViewModels.SupplierLedgerViewModel);
-            _typeTable[160] = typeof(global::Kirana.App.Views.SupplierPaymentDialog);
-            _typeTable[161] = typeof(global::Kirana.App.Views.SupplierPickerDialog);
-            _typeTable[162] = typeof(global::Kirana.App.ViewModels.SupplierPickerViewModel);
-            _typeTable[163] = typeof(global::Kirana.Domain.Entities.Supplier);
-            _typeTable[164] = typeof(global::Kirana.App.Views.SuppliersPage);
-            _typeTable[165] = typeof(global::Kirana.App.ViewModels.SuppliersViewModel);
-            _typeTable[166] = typeof(global::Kirana.App.Views.UserEditDialog);
-            _typeTable[167] = typeof(global::Kirana.App.ViewModels.UserEditViewModel);
-            _typeTable[168] = typeof(global::Kirana.App.Views.UserManagementPage);
-            _typeTable[169] = typeof(global::Kirana.App.ViewModels.UserManagementViewModel);
-            _typeTable[170] = typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode);
-            _typeTable[171] = typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>);
+            _typeTable[13] = typeof(global::Kirana.App.Converters.PaymentMethodConverter);
+            _typeTable[14] = typeof(global::Kirana.App.Converters.PaymentMethodIconConverter);
+            _typeTable[15] = typeof(global::Kirana.App.Converters.DetailIndentConverter);
+            _typeTable[16] = typeof(global::Kirana.App.Converters.BillTabFontWeightConverter);
+            _typeTable[17] = typeof(global::Kirana.App.MainWindow);
+            _typeTable[18] = typeof(global::Microsoft.UI.Xaml.Window);
+            _typeTable[19] = typeof(global::Microsoft.UI.Xaml.FrameworkElement);
+            _typeTable[20] = typeof(global::Microsoft.UI.Xaml.Controls.Frame);
+            _typeTable[21] = typeof(global::Windows.UI.Color);
+            _typeTable[22] = typeof(global::System.ValueType);
+            _typeTable[23] = typeof(global::System.Byte);
+            _typeTable[24] = typeof(global::Microsoft.UI.Xaml.Thickness);
+            _typeTable[25] = typeof(global::System.Double);
+            _typeTable[26] = typeof(global::Microsoft.UI.Xaml.CornerRadius);
+            _typeTable[27] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBar);
+            _typeTable[28] = typeof(global::Microsoft.UI.Xaml.Controls.Control);
+            _typeTable[29] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBarSeverity);
+            _typeTable[30] = typeof(global::System.Enum);
+            _typeTable[31] = typeof(global::System.String);
+            _typeTable[32] = typeof(global::Microsoft.UI.Xaml.Controls.Primitives.ButtonBase);
+            _typeTable[33] = typeof(global::System.Windows.Input.ICommand);
+            _typeTable[34] = typeof(global::Microsoft.UI.Xaml.Style);
+            _typeTable[35] = typeof(global::Microsoft.UI.Xaml.DataTemplate);
+            _typeTable[36] = typeof(global::Microsoft.UI.Xaml.Controls.IconSource);
+            _typeTable[37] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings);
+            _typeTable[38] = typeof(global::Microsoft.UI.Xaml.DependencyObject);
+            _typeTable[39] = typeof(global::Kirana.App.Views.AuditLogPage);
+            _typeTable[40] = typeof(global::Microsoft.UI.Xaml.Controls.Page);
+            _typeTable[41] = typeof(global::Microsoft.UI.Xaml.Controls.UserControl);
+            _typeTable[42] = typeof(global::Kirana.App.ViewModels.AuditLogViewModel);
+            _typeTable[43] = typeof(global::CommunityToolkit.Mvvm.ComponentModel.ObservableObject);
+            _typeTable[44] = typeof(global::Microsoft.UI.Xaml.Controls.ProgressBar);
+            _typeTable[45] = typeof(global::Microsoft.UI.Xaml.Controls.Primitives.RangeBase);
+            _typeTable[46] = typeof(global::Microsoft.UI.Xaml.Controls.ProgressBarTemplateSettings);
+            _typeTable[47] = typeof(global::Kirana.App.Views.BackupManagerPage);
+            _typeTable[48] = typeof(global::Kirana.App.ViewModels.BackupManagerViewModel);
+            _typeTable[49] = typeof(global::Kirana.App.Views.BarcodeLabelDialog);
+            _typeTable[50] = typeof(global::Microsoft.UI.Xaml.Controls.ContentDialog);
+            _typeTable[51] = typeof(global::Microsoft.UI.Xaml.Controls.ContentControl);
+            _typeTable[52] = typeof(global::Kirana.App.ViewModels.BarcodeLabelViewModel);
+            _typeTable[53] = typeof(global::Kirana.App.Views.BarcodeScanTestPage);
+            _typeTable[54] = typeof(global::Kirana.App.ViewModels.BarcodeScanTestViewModel);
+            _typeTable[55] = typeof(global::Kirana.App.Views.BatchManagementDialog);
+            _typeTable[56] = typeof(global::Kirana.App.ViewModels.BatchManagementViewModel);
+            _typeTable[57] = typeof(global::Kirana.App.Views.BillDiscountDialog);
+            _typeTable[58] = typeof(global::System.Decimal);
+            _typeTable[59] = typeof(global::Kirana.App.Views.BrandManagementDialog);
+            _typeTable[60] = typeof(global::Kirana.App.ViewModels.BrandManagementViewModel);
+            _typeTable[61] = typeof(global::Kirana.App.Views.CategoryManagementDialog);
+            _typeTable[62] = typeof(global::Kirana.App.ViewModels.CategoryManagementViewModel);
+            _typeTable[63] = typeof(global::Kirana.App.Views.CreditPaymentDialog);
+            _typeTable[64] = typeof(global::Kirana.Domain.Entities.CreditPayment);
+            _typeTable[65] = typeof(global::Kirana.Domain.Common.Entity);
+            _typeTable[66] = typeof(global::Kirana.App.Views.CustomerEditDialog);
+            _typeTable[67] = typeof(global::Kirana.App.ViewModels.CustomerEditViewModel);
+            _typeTable[68] = typeof(global::Kirana.App.Views.CustomerLedgerPage);
+            _typeTable[69] = typeof(global::Kirana.App.ViewModels.CustomerLedgerViewModel);
+            _typeTable[70] = typeof(global::Kirana.App.Views.CustomerPickerDialog);
+            _typeTable[71] = typeof(global::Kirana.App.ViewModels.CustomerPickerViewModel);
+            _typeTable[72] = typeof(global::Kirana.Domain.Entities.Customer);
+            _typeTable[73] = typeof(global::Kirana.App.Views.CustomersPage);
+            _typeTable[74] = typeof(global::Kirana.App.ViewModels.CustomersViewModel);
+            _typeTable[75] = typeof(global::Kirana.App.Views.DatabaseMaintenancePage);
+            _typeTable[76] = typeof(global::Kirana.App.ViewModels.DatabaseMaintenanceViewModel);
+            _typeTable[77] = typeof(global::Kirana.App.Views.ExpenseCategoriesPage);
+            _typeTable[78] = typeof(global::Kirana.App.ViewModels.ExpenseCategoriesViewModel);
+            _typeTable[79] = typeof(global::Kirana.App.Views.ExpenseDetailsPage);
+            _typeTable[80] = typeof(global::Kirana.App.Views.ExpenseEditDialog);
+            _typeTable[81] = typeof(global::Kirana.App.Views.ExpensesPage);
+            _typeTable[82] = typeof(global::Kirana.App.ViewModels.ExpensesViewModel);
+            _typeTable[83] = typeof(global::Kirana.App.Views.ExportCenterPage);
+            _typeTable[84] = typeof(global::Kirana.App.ViewModels.ExportCenterViewModel);
+            _typeTable[85] = typeof(global::Kirana.App.Views.HeldBillsDialog);
+            _typeTable[86] = typeof(global::Kirana.App.ViewModels.HeldBillsViewModel);
+            _typeTable[87] = typeof(global::System.Nullable<global::System.Int32>);
+            _typeTable[88] = typeof(global::System.Int32);
+            _typeTable[89] = typeof(global::Microsoft.UI.Xaml.Controls.ProgressRing);
+            _typeTable[90] = typeof(global::Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings);
+            _typeTable[91] = typeof(global::Kirana.App.Views.InvoicePreviewDialog);
+            _typeTable[92] = typeof(global::Kirana.App.ViewModels.InvoicePreviewViewModel);
+            _typeTable[93] = typeof(global::Kirana.App.Views.ManagementHomePage);
+            _typeTable[94] = typeof(global::Kirana.App.ViewModels.ManagementHomeViewModel);
+            _typeTable[95] = typeof(global::Kirana.App.Views.ManagementLoginDialog);
+            _typeTable[96] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationView);
+            _typeTable[97] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode);
+            _typeTable[98] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible);
+            _typeTable[99] = typeof(global::System.Collections.Generic.IList<global::System.Object>);
+            _typeTable[100] = typeof(global::Microsoft.UI.Xaml.Controls.AutoSuggestBox);
+            _typeTable[101] = typeof(global::Microsoft.UI.Xaml.UIElement);
+            _typeTable[102] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode);
+            _typeTable[103] = typeof(global::Microsoft.UI.Xaml.Controls.StyleSelector);
+            _typeTable[104] = typeof(global::Microsoft.UI.Xaml.Controls.DataTemplateSelector);
+            _typeTable[105] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode);
+            _typeTable[106] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus);
+            _typeTable[107] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled);
+            _typeTable[108] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings);
+            _typeTable[109] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItem);
+            _typeTable[110] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItemBase);
+            _typeTable[111] = typeof(global::Microsoft.UI.Xaml.Controls.IconElement);
+            _typeTable[112] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBadge);
+            _typeTable[113] = typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItemHeader);
+            _typeTable[114] = typeof(global::Kirana.App.Views.ManagementShellPage);
+            _typeTable[115] = typeof(global::Kirana.App.Views.ManagerAuthorizationDialog);
+            _typeTable[116] = typeof(global::Kirana.App.Views.NewPurchaseReturnPage);
+            _typeTable[117] = typeof(global::Kirana.App.ViewModels.NewPurchaseReturnViewModel);
+            _typeTable[118] = typeof(global::Kirana.App.Views.NewSalesReturnPage);
+            _typeTable[119] = typeof(global::Kirana.App.ViewModels.NewSalesReturnViewModel);
+            _typeTable[120] = typeof(global::Kirana.App.Views.PaymentDialog);
+            _typeTable[121] = typeof(global::Kirana.App.ViewModels.PaymentViewModel);
+            _typeTable[122] = typeof(global::Kirana.App.Views.PosShellPage);
+            _typeTable[123] = typeof(global::Kirana.App.ViewModels.PosShellViewModel);
+            _typeTable[124] = typeof(global::Kirana.App.Views.ProductEditDialog);
+            _typeTable[125] = typeof(global::Kirana.App.ViewModels.ProductEditViewModel);
+            _typeTable[126] = typeof(global::Kirana.App.Views.ProductImportDialog);
+            _typeTable[127] = typeof(global::Kirana.App.ViewModels.ProductImportViewModel);
+            _typeTable[128] = typeof(global::Kirana.App.Views.ProductsPage);
+            _typeTable[129] = typeof(global::Kirana.App.ViewModels.ProductsViewModel);
+            _typeTable[130] = typeof(global::Kirana.App.Views.PurchaseDetailsDialog);
+            _typeTable[131] = typeof(global::Kirana.App.Views.PurchaseEntryPage);
+            _typeTable[132] = typeof(global::Kirana.App.ViewModels.PurchaseEntryViewModel);
+            _typeTable[133] = typeof(global::Kirana.App.Views.PurchasePaymentDialog);
+            _typeTable[134] = typeof(global::Kirana.App.Views.PurchaseReturnDetailsPage);
+            _typeTable[135] = typeof(global::Kirana.App.Views.PurchaseReturnsPage);
+            _typeTable[136] = typeof(global::Kirana.App.ViewModels.PurchaseReturnsViewModel);
+            _typeTable[137] = typeof(global::Kirana.App.Views.PurchasesPage);
+            _typeTable[138] = typeof(global::Kirana.App.ViewModels.PurchasesViewModel);
+            _typeTable[139] = typeof(global::Microsoft.UI.Xaml.Controls.Primitives.PivotHeaderItem);
+            _typeTable[140] = typeof(global::Kirana.App.Views.Reports.ProfitReportView);
+            _typeTable[141] = typeof(global::Kirana.App.ViewModels.Reports.ProfitReportTabViewModel);
+            _typeTable[142] = typeof(global::Kirana.App.Views.Reports.ExpenseReportView);
+            _typeTable[143] = typeof(global::Kirana.App.ViewModels.Reports.ExpenseReportTabViewModel);
+            _typeTable[144] = typeof(global::Kirana.App.Views.Reports.SupplierReportView);
+            _typeTable[145] = typeof(global::Kirana.App.ViewModels.Reports.SupplierReportTabViewModel);
+            _typeTable[146] = typeof(global::Kirana.App.Views.Reports.CustomerReportView);
+            _typeTable[147] = typeof(global::Kirana.App.ViewModels.Reports.CustomerReportTabViewModel);
+            _typeTable[148] = typeof(global::Kirana.App.Views.Reports.InventoryReportView);
+            _typeTable[149] = typeof(global::Kirana.App.ViewModels.Reports.InventoryReportTabViewModel);
+            _typeTable[150] = typeof(global::Kirana.App.Views.Reports.ProductReportView);
+            _typeTable[151] = typeof(global::Kirana.App.ViewModels.Reports.ProductReportTabViewModel);
+            _typeTable[152] = typeof(global::Kirana.App.Views.Reports.SalesReportView);
+            _typeTable[153] = typeof(global::Kirana.App.ViewModels.Reports.SalesReportTabViewModel);
+            _typeTable[154] = typeof(global::Kirana.App.Views.Reports.DashboardView);
+            _typeTable[155] = typeof(global::Kirana.App.ViewModels.Reports.DashboardTabViewModel);
+            _typeTable[156] = typeof(global::Kirana.App.Views.ReportsHubPage);
+            _typeTable[157] = typeof(global::Kirana.App.Views.ReprintInvoiceDialog);
+            _typeTable[158] = typeof(global::Kirana.App.ViewModels.ReprintInvoiceViewModel);
+            _typeTable[159] = typeof(global::Kirana.Application.Printing.InvoiceDocument);
+            _typeTable[160] = typeof(global::Kirana.App.Views.ResetPasswordDialog);
+            _typeTable[161] = typeof(global::Kirana.App.Views.RestorePage);
+            _typeTable[162] = typeof(global::Kirana.App.ViewModels.RestoreViewModel);
+            _typeTable[163] = typeof(global::Kirana.App.Views.SalesReturnDetailsPage);
+            _typeTable[164] = typeof(global::Kirana.App.Views.SalesReturnsPage);
+            _typeTable[165] = typeof(global::Kirana.App.ViewModels.SalesReturnsViewModel);
+            _typeTable[166] = typeof(global::Kirana.App.Views.SetPinDialog);
+            _typeTable[167] = typeof(global::Microsoft.UI.Xaml.Controls.RadioButtons);
+            _typeTable[168] = typeof(global::Kirana.App.Views.SettingsPage);
+            _typeTable[169] = typeof(global::Kirana.App.ViewModels.SettingsViewModel);
+            _typeTable[170] = typeof(global::Kirana.App.Views.SetupWizardPage);
+            _typeTable[171] = typeof(global::Kirana.App.ViewModels.SetupWizardViewModel);
+            _typeTable[172] = typeof(global::Kirana.App.Views.StockAdjustmentDialog);
+            _typeTable[173] = typeof(global::Kirana.App.ViewModels.StockAdjustmentViewModel);
+            _typeTable[174] = typeof(global::Kirana.App.Views.SupplierEditDialog);
+            _typeTable[175] = typeof(global::Kirana.App.ViewModels.SupplierEditViewModel);
+            _typeTable[176] = typeof(global::Kirana.App.Views.SupplierLedgerPage);
+            _typeTable[177] = typeof(global::Kirana.App.ViewModels.SupplierLedgerViewModel);
+            _typeTable[178] = typeof(global::Kirana.App.Views.SupplierPaymentDialog);
+            _typeTable[179] = typeof(global::Kirana.App.Views.SupplierPickerDialog);
+            _typeTable[180] = typeof(global::Kirana.App.ViewModels.SupplierPickerViewModel);
+            _typeTable[181] = typeof(global::Kirana.Domain.Entities.Supplier);
+            _typeTable[182] = typeof(global::Kirana.App.Views.SuppliersPage);
+            _typeTable[183] = typeof(global::Kirana.App.ViewModels.SuppliersViewModel);
+            _typeTable[184] = typeof(global::Kirana.App.Views.UserEditDialog);
+            _typeTable[185] = typeof(global::Kirana.App.ViewModels.UserEditViewModel);
+            _typeTable[186] = typeof(global::Kirana.App.Views.UserManagementPage);
+            _typeTable[187] = typeof(global::Kirana.App.ViewModels.UserManagementViewModel);
+            _typeTable[188] = typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode);
+            _typeTable[189] = typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -617,54 +653,63 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
         private object Activate_10_NullToVisibilityConverter() { return new global::Kirana.App.Converters.NullToVisibilityConverter(); }
         private object Activate_11_CurrencyConverter() { return new global::Kirana.App.Converters.CurrencyConverter(); }
         private object Activate_12_QuantityConverter() { return new global::Kirana.App.Converters.QuantityConverter(); }
-        private object Activate_13_MainWindow() { return new global::Kirana.App.MainWindow(); }
-        private object Activate_23_InfoBar() { return new global::Microsoft.UI.Xaml.Controls.InfoBar(); }
-        private object Activate_33_InfoBarTemplateSettings() { return new global::Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings(); }
-        private object Activate_35_AuditLogPage() { return new global::Kirana.App.Views.AuditLogPage(); }
-        private object Activate_44_BarcodeScanTestPage() { return new global::Kirana.App.Views.BarcodeScanTestPage(); }
-        private object Activate_55_CreditPayment() { return new global::Kirana.Domain.Entities.CreditPayment(); }
-        private object Activate_59_CustomerLedgerPage() { return new global::Kirana.App.Views.CustomerLedgerPage(); }
-        private object Activate_63_Customer() { return new global::Kirana.Domain.Entities.Customer(); }
-        private object Activate_64_CustomersPage() { return new global::Kirana.App.Views.CustomersPage(); }
-        private object Activate_66_ExpenseCategoriesPage() { return new global::Kirana.App.Views.ExpenseCategoriesPage(); }
-        private object Activate_68_ExpenseDetailsPage() { return new global::Kirana.App.Views.ExpenseDetailsPage(); }
-        private object Activate_70_ExpensesPage() { return new global::Kirana.App.Views.ExpensesPage(); }
-        private object Activate_76_ProgressRing() { return new global::Microsoft.UI.Xaml.Controls.ProgressRing(); }
-        private object Activate_80_ManagementHomePage() { return new global::Kirana.App.Views.ManagementHomePage(); }
-        private object Activate_83_NavigationView() { return new global::Microsoft.UI.Xaml.Controls.NavigationView(); }
-        private object Activate_95_NavigationViewTemplateSettings() { return new global::Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings(); }
-        private object Activate_96_NavigationViewItem() { return new global::Microsoft.UI.Xaml.Controls.NavigationViewItem(); }
-        private object Activate_99_InfoBadge() { return new global::Microsoft.UI.Xaml.Controls.InfoBadge(); }
-        private object Activate_100_NavigationViewItemHeader() { return new global::Microsoft.UI.Xaml.Controls.NavigationViewItemHeader(); }
-        private object Activate_101_ManagementShellPage() { return new global::Kirana.App.Views.ManagementShellPage(); }
-        private object Activate_103_NewPurchaseReturnPage() { return new global::Kirana.App.Views.NewPurchaseReturnPage(); }
-        private object Activate_105_NewSalesReturnPage() { return new global::Kirana.App.Views.NewSalesReturnPage(); }
-        private object Activate_109_PosShellPage() { return new global::Kirana.App.Views.PosShellPage(); }
-        private object Activate_113_ProductsPage() { return new global::Kirana.App.Views.ProductsPage(); }
-        private object Activate_116_PurchaseEntryPage() { return new global::Kirana.App.Views.PurchaseEntryPage(); }
-        private object Activate_119_PurchaseReturnDetailsPage() { return new global::Kirana.App.Views.PurchaseReturnDetailsPage(); }
-        private object Activate_120_PurchaseReturnsPage() { return new global::Kirana.App.Views.PurchaseReturnsPage(); }
-        private object Activate_122_PurchasesPage() { return new global::Kirana.App.Views.PurchasesPage(); }
-        private object Activate_124_ProfitReportView() { return new global::Kirana.App.Views.Reports.ProfitReportView(); }
-        private object Activate_126_ExpenseReportView() { return new global::Kirana.App.Views.Reports.ExpenseReportView(); }
-        private object Activate_128_SupplierReportView() { return new global::Kirana.App.Views.Reports.SupplierReportView(); }
-        private object Activate_130_CustomerReportView() { return new global::Kirana.App.Views.Reports.CustomerReportView(); }
-        private object Activate_132_InventoryReportView() { return new global::Kirana.App.Views.Reports.InventoryReportView(); }
-        private object Activate_134_ProductReportView() { return new global::Kirana.App.Views.Reports.ProductReportView(); }
-        private object Activate_136_SalesReportView() { return new global::Kirana.App.Views.Reports.SalesReportView(); }
-        private object Activate_138_DashboardView() { return new global::Kirana.App.Views.Reports.DashboardView(); }
-        private object Activate_140_ReportsHubPage() { return new global::Kirana.App.Views.ReportsHubPage(); }
-        private object Activate_143_InvoiceDocument() { return new global::Kirana.Application.Printing.InvoiceDocument(); }
-        private object Activate_145_SalesReturnDetailsPage() { return new global::Kirana.App.Views.SalesReturnDetailsPage(); }
-        private object Activate_146_SalesReturnsPage() { return new global::Kirana.App.Views.SalesReturnsPage(); }
-        private object Activate_149_RadioButtons() { return new global::Microsoft.UI.Xaml.Controls.RadioButtons(); }
-        private object Activate_150_SettingsPage() { return new global::Kirana.App.Views.SettingsPage(); }
-        private object Activate_152_SetupWizardPage() { return new global::Kirana.App.Views.SetupWizardPage(); }
-        private object Activate_158_SupplierLedgerPage() { return new global::Kirana.App.Views.SupplierLedgerPage(); }
-        private object Activate_163_Supplier() { return new global::Kirana.Domain.Entities.Supplier(); }
-        private object Activate_164_SuppliersPage() { return new global::Kirana.App.Views.SuppliersPage(); }
-        private object Activate_168_UserManagementPage() { return new global::Kirana.App.Views.UserManagementPage(); }
-        private object Activate_170_TreeViewNode() { return new global::Microsoft.UI.Xaml.Controls.TreeViewNode(); }
+        private object Activate_13_PaymentMethodConverter() { return new global::Kirana.App.Converters.PaymentMethodConverter(); }
+        private object Activate_14_PaymentMethodIconConverter() { return new global::Kirana.App.Converters.PaymentMethodIconConverter(); }
+        private object Activate_15_DetailIndentConverter() { return new global::Kirana.App.Converters.DetailIndentConverter(); }
+        private object Activate_16_BillTabFontWeightConverter() { return new global::Kirana.App.Converters.BillTabFontWeightConverter(); }
+        private object Activate_17_MainWindow() { return new global::Kirana.App.MainWindow(); }
+        private object Activate_27_InfoBar() { return new global::Microsoft.UI.Xaml.Controls.InfoBar(); }
+        private object Activate_37_InfoBarTemplateSettings() { return new global::Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings(); }
+        private object Activate_39_AuditLogPage() { return new global::Kirana.App.Views.AuditLogPage(); }
+        private object Activate_44_ProgressBar() { return new global::Microsoft.UI.Xaml.Controls.ProgressBar(); }
+        private object Activate_47_BackupManagerPage() { return new global::Kirana.App.Views.BackupManagerPage(); }
+        private object Activate_53_BarcodeScanTestPage() { return new global::Kirana.App.Views.BarcodeScanTestPage(); }
+        private object Activate_64_CreditPayment() { return new global::Kirana.Domain.Entities.CreditPayment(); }
+        private object Activate_68_CustomerLedgerPage() { return new global::Kirana.App.Views.CustomerLedgerPage(); }
+        private object Activate_72_Customer() { return new global::Kirana.Domain.Entities.Customer(); }
+        private object Activate_73_CustomersPage() { return new global::Kirana.App.Views.CustomersPage(); }
+        private object Activate_75_DatabaseMaintenancePage() { return new global::Kirana.App.Views.DatabaseMaintenancePage(); }
+        private object Activate_77_ExpenseCategoriesPage() { return new global::Kirana.App.Views.ExpenseCategoriesPage(); }
+        private object Activate_79_ExpenseDetailsPage() { return new global::Kirana.App.Views.ExpenseDetailsPage(); }
+        private object Activate_81_ExpensesPage() { return new global::Kirana.App.Views.ExpensesPage(); }
+        private object Activate_83_ExportCenterPage() { return new global::Kirana.App.Views.ExportCenterPage(); }
+        private object Activate_89_ProgressRing() { return new global::Microsoft.UI.Xaml.Controls.ProgressRing(); }
+        private object Activate_93_ManagementHomePage() { return new global::Kirana.App.Views.ManagementHomePage(); }
+        private object Activate_96_NavigationView() { return new global::Microsoft.UI.Xaml.Controls.NavigationView(); }
+        private object Activate_108_NavigationViewTemplateSettings() { return new global::Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings(); }
+        private object Activate_109_NavigationViewItem() { return new global::Microsoft.UI.Xaml.Controls.NavigationViewItem(); }
+        private object Activate_112_InfoBadge() { return new global::Microsoft.UI.Xaml.Controls.InfoBadge(); }
+        private object Activate_113_NavigationViewItemHeader() { return new global::Microsoft.UI.Xaml.Controls.NavigationViewItemHeader(); }
+        private object Activate_114_ManagementShellPage() { return new global::Kirana.App.Views.ManagementShellPage(); }
+        private object Activate_116_NewPurchaseReturnPage() { return new global::Kirana.App.Views.NewPurchaseReturnPage(); }
+        private object Activate_118_NewSalesReturnPage() { return new global::Kirana.App.Views.NewSalesReturnPage(); }
+        private object Activate_122_PosShellPage() { return new global::Kirana.App.Views.PosShellPage(); }
+        private object Activate_128_ProductsPage() { return new global::Kirana.App.Views.ProductsPage(); }
+        private object Activate_131_PurchaseEntryPage() { return new global::Kirana.App.Views.PurchaseEntryPage(); }
+        private object Activate_134_PurchaseReturnDetailsPage() { return new global::Kirana.App.Views.PurchaseReturnDetailsPage(); }
+        private object Activate_135_PurchaseReturnsPage() { return new global::Kirana.App.Views.PurchaseReturnsPage(); }
+        private object Activate_137_PurchasesPage() { return new global::Kirana.App.Views.PurchasesPage(); }
+        private object Activate_140_ProfitReportView() { return new global::Kirana.App.Views.Reports.ProfitReportView(); }
+        private object Activate_142_ExpenseReportView() { return new global::Kirana.App.Views.Reports.ExpenseReportView(); }
+        private object Activate_144_SupplierReportView() { return new global::Kirana.App.Views.Reports.SupplierReportView(); }
+        private object Activate_146_CustomerReportView() { return new global::Kirana.App.Views.Reports.CustomerReportView(); }
+        private object Activate_148_InventoryReportView() { return new global::Kirana.App.Views.Reports.InventoryReportView(); }
+        private object Activate_150_ProductReportView() { return new global::Kirana.App.Views.Reports.ProductReportView(); }
+        private object Activate_152_SalesReportView() { return new global::Kirana.App.Views.Reports.SalesReportView(); }
+        private object Activate_154_DashboardView() { return new global::Kirana.App.Views.Reports.DashboardView(); }
+        private object Activate_156_ReportsHubPage() { return new global::Kirana.App.Views.ReportsHubPage(); }
+        private object Activate_159_InvoiceDocument() { return new global::Kirana.Application.Printing.InvoiceDocument(); }
+        private object Activate_161_RestorePage() { return new global::Kirana.App.Views.RestorePage(); }
+        private object Activate_163_SalesReturnDetailsPage() { return new global::Kirana.App.Views.SalesReturnDetailsPage(); }
+        private object Activate_164_SalesReturnsPage() { return new global::Kirana.App.Views.SalesReturnsPage(); }
+        private object Activate_167_RadioButtons() { return new global::Microsoft.UI.Xaml.Controls.RadioButtons(); }
+        private object Activate_168_SettingsPage() { return new global::Kirana.App.Views.SettingsPage(); }
+        private object Activate_170_SetupWizardPage() { return new global::Kirana.App.Views.SetupWizardPage(); }
+        private object Activate_176_SupplierLedgerPage() { return new global::Kirana.App.Views.SupplierLedgerPage(); }
+        private object Activate_181_Supplier() { return new global::Kirana.Domain.Entities.Supplier(); }
+        private object Activate_182_SuppliersPage() { return new global::Kirana.App.Views.SuppliersPage(); }
+        private object Activate_186_UserManagementPage() { return new global::Kirana.App.Views.UserManagementPage(); }
+        private object Activate_188_TreeViewNode() { return new global::Microsoft.UI.Xaml.Controls.TreeViewNode(); }
         private void StaticInitializer_0_XamlControlsResources() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.XamlControlsResources).TypeHandle);
         private void StaticInitializer_4_StringToBoolConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Converters.StringToBoolConverter).TypeHandle);
         private void StaticInitializer_5_InverseBoolConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Converters.InverseBoolConverter).TypeHandle);
@@ -675,144 +720,160 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
         private void StaticInitializer_10_NullToVisibilityConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Converters.NullToVisibilityConverter).TypeHandle);
         private void StaticInitializer_11_CurrencyConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Converters.CurrencyConverter).TypeHandle);
         private void StaticInitializer_12_QuantityConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Converters.QuantityConverter).TypeHandle);
-        private void StaticInitializer_13_MainWindow() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.MainWindow).TypeHandle);
-        private void StaticInitializer_17_Color() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Windows.UI.Color).TypeHandle);
-        private void StaticInitializer_18_ValueType() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.ValueType).TypeHandle);
-        private void StaticInitializer_19_Byte() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Byte).TypeHandle);
-        private void StaticInitializer_20_Thickness() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Thickness).TypeHandle);
-        private void StaticInitializer_22_CornerRadius() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.CornerRadius).TypeHandle);
-        private void StaticInitializer_23_InfoBar() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBar).TypeHandle);
-        private void StaticInitializer_25_InfoBarSeverity() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBarSeverity).TypeHandle);
-        private void StaticInitializer_26_Enum() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Enum).TypeHandle);
-        private void StaticInitializer_29_ICommand() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Windows.Input.ICommand).TypeHandle);
-        private void StaticInitializer_33_InfoBarTemplateSettings() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings).TypeHandle);
-        private void StaticInitializer_35_AuditLogPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.AuditLogPage).TypeHandle);
-        private void StaticInitializer_38_AuditLogViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.AuditLogViewModel).TypeHandle);
-        private void StaticInitializer_39_ObservableObject() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::CommunityToolkit.Mvvm.ComponentModel.ObservableObject).TypeHandle);
-        private void StaticInitializer_40_BarcodeLabelDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BarcodeLabelDialog).TypeHandle);
-        private void StaticInitializer_43_BarcodeLabelViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.BarcodeLabelViewModel).TypeHandle);
-        private void StaticInitializer_44_BarcodeScanTestPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BarcodeScanTestPage).TypeHandle);
-        private void StaticInitializer_45_BarcodeScanTestViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.BarcodeScanTestViewModel).TypeHandle);
-        private void StaticInitializer_46_BatchManagementDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BatchManagementDialog).TypeHandle);
-        private void StaticInitializer_47_BatchManagementViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.BatchManagementViewModel).TypeHandle);
-        private void StaticInitializer_48_BillDiscountDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BillDiscountDialog).TypeHandle);
-        private void StaticInitializer_49_Decimal() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Decimal).TypeHandle);
-        private void StaticInitializer_50_BrandManagementDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BrandManagementDialog).TypeHandle);
-        private void StaticInitializer_51_BrandManagementViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.BrandManagementViewModel).TypeHandle);
-        private void StaticInitializer_52_CategoryManagementDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CategoryManagementDialog).TypeHandle);
-        private void StaticInitializer_53_CategoryManagementViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.CategoryManagementViewModel).TypeHandle);
-        private void StaticInitializer_54_CreditPaymentDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CreditPaymentDialog).TypeHandle);
-        private void StaticInitializer_55_CreditPayment() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.Domain.Entities.CreditPayment).TypeHandle);
-        private void StaticInitializer_56_Entity() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.Domain.Common.Entity).TypeHandle);
-        private void StaticInitializer_57_CustomerEditDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CustomerEditDialog).TypeHandle);
-        private void StaticInitializer_58_CustomerEditViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.CustomerEditViewModel).TypeHandle);
-        private void StaticInitializer_59_CustomerLedgerPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CustomerLedgerPage).TypeHandle);
-        private void StaticInitializer_60_CustomerLedgerViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.CustomerLedgerViewModel).TypeHandle);
-        private void StaticInitializer_61_CustomerPickerDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CustomerPickerDialog).TypeHandle);
-        private void StaticInitializer_62_CustomerPickerViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.CustomerPickerViewModel).TypeHandle);
-        private void StaticInitializer_63_Customer() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.Domain.Entities.Customer).TypeHandle);
-        private void StaticInitializer_64_CustomersPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CustomersPage).TypeHandle);
-        private void StaticInitializer_65_CustomersViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.CustomersViewModel).TypeHandle);
-        private void StaticInitializer_66_ExpenseCategoriesPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ExpenseCategoriesPage).TypeHandle);
-        private void StaticInitializer_67_ExpenseCategoriesViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ExpenseCategoriesViewModel).TypeHandle);
-        private void StaticInitializer_68_ExpenseDetailsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ExpenseDetailsPage).TypeHandle);
-        private void StaticInitializer_69_ExpenseEditDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ExpenseEditDialog).TypeHandle);
-        private void StaticInitializer_70_ExpensesPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ExpensesPage).TypeHandle);
-        private void StaticInitializer_71_ExpensesViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ExpensesViewModel).TypeHandle);
-        private void StaticInitializer_72_HeldBillsDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.HeldBillsDialog).TypeHandle);
-        private void StaticInitializer_73_HeldBillsViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.HeldBillsViewModel).TypeHandle);
-        private void StaticInitializer_74_Nullable() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Nullable<global::System.Int32>).TypeHandle);
-        private void StaticInitializer_76_ProgressRing() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.ProgressRing).TypeHandle);
-        private void StaticInitializer_77_ProgressRingTemplateSettings() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings).TypeHandle);
-        private void StaticInitializer_78_InvoicePreviewDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.InvoicePreviewDialog).TypeHandle);
-        private void StaticInitializer_79_InvoicePreviewViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.InvoicePreviewViewModel).TypeHandle);
-        private void StaticInitializer_80_ManagementHomePage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ManagementHomePage).TypeHandle);
-        private void StaticInitializer_81_ManagementHomeViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ManagementHomeViewModel).TypeHandle);
-        private void StaticInitializer_82_ManagementLoginDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ManagementLoginDialog).TypeHandle);
-        private void StaticInitializer_83_NavigationView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationView).TypeHandle);
-        private void StaticInitializer_84_NavigationViewPaneDisplayMode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode).TypeHandle);
-        private void StaticInitializer_85_NavigationViewBackButtonVisible() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible).TypeHandle);
-        private void StaticInitializer_86_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::System.Object>).TypeHandle);
-        private void StaticInitializer_89_NavigationViewDisplayMode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode).TypeHandle);
-        private void StaticInitializer_92_NavigationViewOverflowLabelMode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode).TypeHandle);
-        private void StaticInitializer_93_NavigationViewSelectionFollowsFocus() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus).TypeHandle);
-        private void StaticInitializer_94_NavigationViewShoulderNavigationEnabled() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled).TypeHandle);
-        private void StaticInitializer_95_NavigationViewTemplateSettings() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings).TypeHandle);
-        private void StaticInitializer_96_NavigationViewItem() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItem).TypeHandle);
-        private void StaticInitializer_97_NavigationViewItemBase() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItemBase).TypeHandle);
-        private void StaticInitializer_99_InfoBadge() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBadge).TypeHandle);
-        private void StaticInitializer_100_NavigationViewItemHeader() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItemHeader).TypeHandle);
-        private void StaticInitializer_101_ManagementShellPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ManagementShellPage).TypeHandle);
-        private void StaticInitializer_102_ManagerAuthorizationDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ManagerAuthorizationDialog).TypeHandle);
-        private void StaticInitializer_103_NewPurchaseReturnPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.NewPurchaseReturnPage).TypeHandle);
-        private void StaticInitializer_104_NewPurchaseReturnViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.NewPurchaseReturnViewModel).TypeHandle);
-        private void StaticInitializer_105_NewSalesReturnPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.NewSalesReturnPage).TypeHandle);
-        private void StaticInitializer_106_NewSalesReturnViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.NewSalesReturnViewModel).TypeHandle);
-        private void StaticInitializer_107_PaymentDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PaymentDialog).TypeHandle);
-        private void StaticInitializer_108_PaymentViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.PaymentViewModel).TypeHandle);
-        private void StaticInitializer_109_PosShellPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PosShellPage).TypeHandle);
-        private void StaticInitializer_110_PosShellViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.PosShellViewModel).TypeHandle);
-        private void StaticInitializer_111_ProductEditDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ProductEditDialog).TypeHandle);
-        private void StaticInitializer_112_ProductEditViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ProductEditViewModel).TypeHandle);
-        private void StaticInitializer_113_ProductsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ProductsPage).TypeHandle);
-        private void StaticInitializer_114_ProductsViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ProductsViewModel).TypeHandle);
-        private void StaticInitializer_115_PurchaseDetailsDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchaseDetailsDialog).TypeHandle);
-        private void StaticInitializer_116_PurchaseEntryPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchaseEntryPage).TypeHandle);
-        private void StaticInitializer_117_PurchaseEntryViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.PurchaseEntryViewModel).TypeHandle);
-        private void StaticInitializer_118_PurchasePaymentDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchasePaymentDialog).TypeHandle);
-        private void StaticInitializer_119_PurchaseReturnDetailsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchaseReturnDetailsPage).TypeHandle);
-        private void StaticInitializer_120_PurchaseReturnsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchaseReturnsPage).TypeHandle);
-        private void StaticInitializer_121_PurchaseReturnsViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.PurchaseReturnsViewModel).TypeHandle);
-        private void StaticInitializer_122_PurchasesPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchasesPage).TypeHandle);
-        private void StaticInitializer_123_PurchasesViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.PurchasesViewModel).TypeHandle);
-        private void StaticInitializer_124_ProfitReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.ProfitReportView).TypeHandle);
-        private void StaticInitializer_125_ProfitReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.ProfitReportTabViewModel).TypeHandle);
-        private void StaticInitializer_126_ExpenseReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.ExpenseReportView).TypeHandle);
-        private void StaticInitializer_127_ExpenseReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.ExpenseReportTabViewModel).TypeHandle);
-        private void StaticInitializer_128_SupplierReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.SupplierReportView).TypeHandle);
-        private void StaticInitializer_129_SupplierReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.SupplierReportTabViewModel).TypeHandle);
-        private void StaticInitializer_130_CustomerReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.CustomerReportView).TypeHandle);
-        private void StaticInitializer_131_CustomerReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.CustomerReportTabViewModel).TypeHandle);
-        private void StaticInitializer_132_InventoryReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.InventoryReportView).TypeHandle);
-        private void StaticInitializer_133_InventoryReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.InventoryReportTabViewModel).TypeHandle);
-        private void StaticInitializer_134_ProductReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.ProductReportView).TypeHandle);
-        private void StaticInitializer_135_ProductReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.ProductReportTabViewModel).TypeHandle);
-        private void StaticInitializer_136_SalesReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.SalesReportView).TypeHandle);
-        private void StaticInitializer_137_SalesReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.SalesReportTabViewModel).TypeHandle);
-        private void StaticInitializer_138_DashboardView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.DashboardView).TypeHandle);
-        private void StaticInitializer_139_DashboardTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.DashboardTabViewModel).TypeHandle);
-        private void StaticInitializer_140_ReportsHubPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ReportsHubPage).TypeHandle);
-        private void StaticInitializer_141_ReprintInvoiceDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ReprintInvoiceDialog).TypeHandle);
-        private void StaticInitializer_142_ReprintInvoiceViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ReprintInvoiceViewModel).TypeHandle);
-        private void StaticInitializer_143_InvoiceDocument() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.Application.Printing.InvoiceDocument).TypeHandle);
-        private void StaticInitializer_144_ResetPasswordDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ResetPasswordDialog).TypeHandle);
-        private void StaticInitializer_145_SalesReturnDetailsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SalesReturnDetailsPage).TypeHandle);
-        private void StaticInitializer_146_SalesReturnsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SalesReturnsPage).TypeHandle);
-        private void StaticInitializer_147_SalesReturnsViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SalesReturnsViewModel).TypeHandle);
-        private void StaticInitializer_148_SetPinDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SetPinDialog).TypeHandle);
-        private void StaticInitializer_149_RadioButtons() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.RadioButtons).TypeHandle);
-        private void StaticInitializer_150_SettingsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SettingsPage).TypeHandle);
-        private void StaticInitializer_151_SettingsViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SettingsViewModel).TypeHandle);
-        private void StaticInitializer_152_SetupWizardPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SetupWizardPage).TypeHandle);
-        private void StaticInitializer_153_SetupWizardViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SetupWizardViewModel).TypeHandle);
-        private void StaticInitializer_154_StockAdjustmentDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.StockAdjustmentDialog).TypeHandle);
-        private void StaticInitializer_155_StockAdjustmentViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.StockAdjustmentViewModel).TypeHandle);
-        private void StaticInitializer_156_SupplierEditDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SupplierEditDialog).TypeHandle);
-        private void StaticInitializer_157_SupplierEditViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SupplierEditViewModel).TypeHandle);
-        private void StaticInitializer_158_SupplierLedgerPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SupplierLedgerPage).TypeHandle);
-        private void StaticInitializer_159_SupplierLedgerViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SupplierLedgerViewModel).TypeHandle);
-        private void StaticInitializer_160_SupplierPaymentDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SupplierPaymentDialog).TypeHandle);
-        private void StaticInitializer_161_SupplierPickerDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SupplierPickerDialog).TypeHandle);
-        private void StaticInitializer_162_SupplierPickerViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SupplierPickerViewModel).TypeHandle);
-        private void StaticInitializer_163_Supplier() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.Domain.Entities.Supplier).TypeHandle);
-        private void StaticInitializer_164_SuppliersPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SuppliersPage).TypeHandle);
-        private void StaticInitializer_165_SuppliersViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SuppliersViewModel).TypeHandle);
-        private void StaticInitializer_166_UserEditDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.UserEditDialog).TypeHandle);
-        private void StaticInitializer_167_UserEditViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.UserEditViewModel).TypeHandle);
-        private void StaticInitializer_168_UserManagementPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.UserManagementPage).TypeHandle);
-        private void StaticInitializer_169_UserManagementViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.UserManagementViewModel).TypeHandle);
-        private void StaticInitializer_170_TreeViewNode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode).TypeHandle);
-        private void StaticInitializer_171_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>).TypeHandle);
+        private void StaticInitializer_13_PaymentMethodConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Converters.PaymentMethodConverter).TypeHandle);
+        private void StaticInitializer_14_PaymentMethodIconConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Converters.PaymentMethodIconConverter).TypeHandle);
+        private void StaticInitializer_15_DetailIndentConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Converters.DetailIndentConverter).TypeHandle);
+        private void StaticInitializer_16_BillTabFontWeightConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Converters.BillTabFontWeightConverter).TypeHandle);
+        private void StaticInitializer_17_MainWindow() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.MainWindow).TypeHandle);
+        private void StaticInitializer_21_Color() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Windows.UI.Color).TypeHandle);
+        private void StaticInitializer_22_ValueType() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.ValueType).TypeHandle);
+        private void StaticInitializer_23_Byte() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Byte).TypeHandle);
+        private void StaticInitializer_24_Thickness() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Thickness).TypeHandle);
+        private void StaticInitializer_26_CornerRadius() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.CornerRadius).TypeHandle);
+        private void StaticInitializer_27_InfoBar() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBar).TypeHandle);
+        private void StaticInitializer_29_InfoBarSeverity() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBarSeverity).TypeHandle);
+        private void StaticInitializer_30_Enum() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Enum).TypeHandle);
+        private void StaticInitializer_33_ICommand() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Windows.Input.ICommand).TypeHandle);
+        private void StaticInitializer_37_InfoBarTemplateSettings() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings).TypeHandle);
+        private void StaticInitializer_39_AuditLogPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.AuditLogPage).TypeHandle);
+        private void StaticInitializer_42_AuditLogViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.AuditLogViewModel).TypeHandle);
+        private void StaticInitializer_43_ObservableObject() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::CommunityToolkit.Mvvm.ComponentModel.ObservableObject).TypeHandle);
+        private void StaticInitializer_44_ProgressBar() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.ProgressBar).TypeHandle);
+        private void StaticInitializer_46_ProgressBarTemplateSettings() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.ProgressBarTemplateSettings).TypeHandle);
+        private void StaticInitializer_47_BackupManagerPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BackupManagerPage).TypeHandle);
+        private void StaticInitializer_48_BackupManagerViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.BackupManagerViewModel).TypeHandle);
+        private void StaticInitializer_49_BarcodeLabelDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BarcodeLabelDialog).TypeHandle);
+        private void StaticInitializer_52_BarcodeLabelViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.BarcodeLabelViewModel).TypeHandle);
+        private void StaticInitializer_53_BarcodeScanTestPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BarcodeScanTestPage).TypeHandle);
+        private void StaticInitializer_54_BarcodeScanTestViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.BarcodeScanTestViewModel).TypeHandle);
+        private void StaticInitializer_55_BatchManagementDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BatchManagementDialog).TypeHandle);
+        private void StaticInitializer_56_BatchManagementViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.BatchManagementViewModel).TypeHandle);
+        private void StaticInitializer_57_BillDiscountDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BillDiscountDialog).TypeHandle);
+        private void StaticInitializer_58_Decimal() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Decimal).TypeHandle);
+        private void StaticInitializer_59_BrandManagementDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.BrandManagementDialog).TypeHandle);
+        private void StaticInitializer_60_BrandManagementViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.BrandManagementViewModel).TypeHandle);
+        private void StaticInitializer_61_CategoryManagementDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CategoryManagementDialog).TypeHandle);
+        private void StaticInitializer_62_CategoryManagementViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.CategoryManagementViewModel).TypeHandle);
+        private void StaticInitializer_63_CreditPaymentDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CreditPaymentDialog).TypeHandle);
+        private void StaticInitializer_64_CreditPayment() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.Domain.Entities.CreditPayment).TypeHandle);
+        private void StaticInitializer_65_Entity() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.Domain.Common.Entity).TypeHandle);
+        private void StaticInitializer_66_CustomerEditDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CustomerEditDialog).TypeHandle);
+        private void StaticInitializer_67_CustomerEditViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.CustomerEditViewModel).TypeHandle);
+        private void StaticInitializer_68_CustomerLedgerPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CustomerLedgerPage).TypeHandle);
+        private void StaticInitializer_69_CustomerLedgerViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.CustomerLedgerViewModel).TypeHandle);
+        private void StaticInitializer_70_CustomerPickerDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CustomerPickerDialog).TypeHandle);
+        private void StaticInitializer_71_CustomerPickerViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.CustomerPickerViewModel).TypeHandle);
+        private void StaticInitializer_72_Customer() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.Domain.Entities.Customer).TypeHandle);
+        private void StaticInitializer_73_CustomersPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.CustomersPage).TypeHandle);
+        private void StaticInitializer_74_CustomersViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.CustomersViewModel).TypeHandle);
+        private void StaticInitializer_75_DatabaseMaintenancePage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.DatabaseMaintenancePage).TypeHandle);
+        private void StaticInitializer_76_DatabaseMaintenanceViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.DatabaseMaintenanceViewModel).TypeHandle);
+        private void StaticInitializer_77_ExpenseCategoriesPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ExpenseCategoriesPage).TypeHandle);
+        private void StaticInitializer_78_ExpenseCategoriesViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ExpenseCategoriesViewModel).TypeHandle);
+        private void StaticInitializer_79_ExpenseDetailsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ExpenseDetailsPage).TypeHandle);
+        private void StaticInitializer_80_ExpenseEditDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ExpenseEditDialog).TypeHandle);
+        private void StaticInitializer_81_ExpensesPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ExpensesPage).TypeHandle);
+        private void StaticInitializer_82_ExpensesViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ExpensesViewModel).TypeHandle);
+        private void StaticInitializer_83_ExportCenterPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ExportCenterPage).TypeHandle);
+        private void StaticInitializer_84_ExportCenterViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ExportCenterViewModel).TypeHandle);
+        private void StaticInitializer_85_HeldBillsDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.HeldBillsDialog).TypeHandle);
+        private void StaticInitializer_86_HeldBillsViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.HeldBillsViewModel).TypeHandle);
+        private void StaticInitializer_87_Nullable() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Nullable<global::System.Int32>).TypeHandle);
+        private void StaticInitializer_89_ProgressRing() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.ProgressRing).TypeHandle);
+        private void StaticInitializer_90_ProgressRingTemplateSettings() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings).TypeHandle);
+        private void StaticInitializer_91_InvoicePreviewDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.InvoicePreviewDialog).TypeHandle);
+        private void StaticInitializer_92_InvoicePreviewViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.InvoicePreviewViewModel).TypeHandle);
+        private void StaticInitializer_93_ManagementHomePage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ManagementHomePage).TypeHandle);
+        private void StaticInitializer_94_ManagementHomeViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ManagementHomeViewModel).TypeHandle);
+        private void StaticInitializer_95_ManagementLoginDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ManagementLoginDialog).TypeHandle);
+        private void StaticInitializer_96_NavigationView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationView).TypeHandle);
+        private void StaticInitializer_97_NavigationViewPaneDisplayMode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode).TypeHandle);
+        private void StaticInitializer_98_NavigationViewBackButtonVisible() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible).TypeHandle);
+        private void StaticInitializer_99_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::System.Object>).TypeHandle);
+        private void StaticInitializer_102_NavigationViewDisplayMode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode).TypeHandle);
+        private void StaticInitializer_105_NavigationViewOverflowLabelMode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode).TypeHandle);
+        private void StaticInitializer_106_NavigationViewSelectionFollowsFocus() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus).TypeHandle);
+        private void StaticInitializer_107_NavigationViewShoulderNavigationEnabled() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled).TypeHandle);
+        private void StaticInitializer_108_NavigationViewTemplateSettings() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings).TypeHandle);
+        private void StaticInitializer_109_NavigationViewItem() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItem).TypeHandle);
+        private void StaticInitializer_110_NavigationViewItemBase() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItemBase).TypeHandle);
+        private void StaticInitializer_112_InfoBadge() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBadge).TypeHandle);
+        private void StaticInitializer_113_NavigationViewItemHeader() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NavigationViewItemHeader).TypeHandle);
+        private void StaticInitializer_114_ManagementShellPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ManagementShellPage).TypeHandle);
+        private void StaticInitializer_115_ManagerAuthorizationDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ManagerAuthorizationDialog).TypeHandle);
+        private void StaticInitializer_116_NewPurchaseReturnPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.NewPurchaseReturnPage).TypeHandle);
+        private void StaticInitializer_117_NewPurchaseReturnViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.NewPurchaseReturnViewModel).TypeHandle);
+        private void StaticInitializer_118_NewSalesReturnPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.NewSalesReturnPage).TypeHandle);
+        private void StaticInitializer_119_NewSalesReturnViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.NewSalesReturnViewModel).TypeHandle);
+        private void StaticInitializer_120_PaymentDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PaymentDialog).TypeHandle);
+        private void StaticInitializer_121_PaymentViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.PaymentViewModel).TypeHandle);
+        private void StaticInitializer_122_PosShellPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PosShellPage).TypeHandle);
+        private void StaticInitializer_123_PosShellViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.PosShellViewModel).TypeHandle);
+        private void StaticInitializer_124_ProductEditDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ProductEditDialog).TypeHandle);
+        private void StaticInitializer_125_ProductEditViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ProductEditViewModel).TypeHandle);
+        private void StaticInitializer_126_ProductImportDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ProductImportDialog).TypeHandle);
+        private void StaticInitializer_127_ProductImportViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ProductImportViewModel).TypeHandle);
+        private void StaticInitializer_128_ProductsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ProductsPage).TypeHandle);
+        private void StaticInitializer_129_ProductsViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ProductsViewModel).TypeHandle);
+        private void StaticInitializer_130_PurchaseDetailsDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchaseDetailsDialog).TypeHandle);
+        private void StaticInitializer_131_PurchaseEntryPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchaseEntryPage).TypeHandle);
+        private void StaticInitializer_132_PurchaseEntryViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.PurchaseEntryViewModel).TypeHandle);
+        private void StaticInitializer_133_PurchasePaymentDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchasePaymentDialog).TypeHandle);
+        private void StaticInitializer_134_PurchaseReturnDetailsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchaseReturnDetailsPage).TypeHandle);
+        private void StaticInitializer_135_PurchaseReturnsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchaseReturnsPage).TypeHandle);
+        private void StaticInitializer_136_PurchaseReturnsViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.PurchaseReturnsViewModel).TypeHandle);
+        private void StaticInitializer_137_PurchasesPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.PurchasesPage).TypeHandle);
+        private void StaticInitializer_138_PurchasesViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.PurchasesViewModel).TypeHandle);
+        private void StaticInitializer_140_ProfitReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.ProfitReportView).TypeHandle);
+        private void StaticInitializer_141_ProfitReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.ProfitReportTabViewModel).TypeHandle);
+        private void StaticInitializer_142_ExpenseReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.ExpenseReportView).TypeHandle);
+        private void StaticInitializer_143_ExpenseReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.ExpenseReportTabViewModel).TypeHandle);
+        private void StaticInitializer_144_SupplierReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.SupplierReportView).TypeHandle);
+        private void StaticInitializer_145_SupplierReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.SupplierReportTabViewModel).TypeHandle);
+        private void StaticInitializer_146_CustomerReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.CustomerReportView).TypeHandle);
+        private void StaticInitializer_147_CustomerReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.CustomerReportTabViewModel).TypeHandle);
+        private void StaticInitializer_148_InventoryReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.InventoryReportView).TypeHandle);
+        private void StaticInitializer_149_InventoryReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.InventoryReportTabViewModel).TypeHandle);
+        private void StaticInitializer_150_ProductReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.ProductReportView).TypeHandle);
+        private void StaticInitializer_151_ProductReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.ProductReportTabViewModel).TypeHandle);
+        private void StaticInitializer_152_SalesReportView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.SalesReportView).TypeHandle);
+        private void StaticInitializer_153_SalesReportTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.SalesReportTabViewModel).TypeHandle);
+        private void StaticInitializer_154_DashboardView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.Reports.DashboardView).TypeHandle);
+        private void StaticInitializer_155_DashboardTabViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.Reports.DashboardTabViewModel).TypeHandle);
+        private void StaticInitializer_156_ReportsHubPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ReportsHubPage).TypeHandle);
+        private void StaticInitializer_157_ReprintInvoiceDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ReprintInvoiceDialog).TypeHandle);
+        private void StaticInitializer_158_ReprintInvoiceViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.ReprintInvoiceViewModel).TypeHandle);
+        private void StaticInitializer_159_InvoiceDocument() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.Application.Printing.InvoiceDocument).TypeHandle);
+        private void StaticInitializer_160_ResetPasswordDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.ResetPasswordDialog).TypeHandle);
+        private void StaticInitializer_161_RestorePage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.RestorePage).TypeHandle);
+        private void StaticInitializer_162_RestoreViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.RestoreViewModel).TypeHandle);
+        private void StaticInitializer_163_SalesReturnDetailsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SalesReturnDetailsPage).TypeHandle);
+        private void StaticInitializer_164_SalesReturnsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SalesReturnsPage).TypeHandle);
+        private void StaticInitializer_165_SalesReturnsViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SalesReturnsViewModel).TypeHandle);
+        private void StaticInitializer_166_SetPinDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SetPinDialog).TypeHandle);
+        private void StaticInitializer_167_RadioButtons() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.RadioButtons).TypeHandle);
+        private void StaticInitializer_168_SettingsPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SettingsPage).TypeHandle);
+        private void StaticInitializer_169_SettingsViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SettingsViewModel).TypeHandle);
+        private void StaticInitializer_170_SetupWizardPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SetupWizardPage).TypeHandle);
+        private void StaticInitializer_171_SetupWizardViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SetupWizardViewModel).TypeHandle);
+        private void StaticInitializer_172_StockAdjustmentDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.StockAdjustmentDialog).TypeHandle);
+        private void StaticInitializer_173_StockAdjustmentViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.StockAdjustmentViewModel).TypeHandle);
+        private void StaticInitializer_174_SupplierEditDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SupplierEditDialog).TypeHandle);
+        private void StaticInitializer_175_SupplierEditViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SupplierEditViewModel).TypeHandle);
+        private void StaticInitializer_176_SupplierLedgerPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SupplierLedgerPage).TypeHandle);
+        private void StaticInitializer_177_SupplierLedgerViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SupplierLedgerViewModel).TypeHandle);
+        private void StaticInitializer_178_SupplierPaymentDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SupplierPaymentDialog).TypeHandle);
+        private void StaticInitializer_179_SupplierPickerDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SupplierPickerDialog).TypeHandle);
+        private void StaticInitializer_180_SupplierPickerViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SupplierPickerViewModel).TypeHandle);
+        private void StaticInitializer_181_Supplier() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.Domain.Entities.Supplier).TypeHandle);
+        private void StaticInitializer_182_SuppliersPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.SuppliersPage).TypeHandle);
+        private void StaticInitializer_183_SuppliersViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.SuppliersViewModel).TypeHandle);
+        private void StaticInitializer_184_UserEditDialog() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.UserEditDialog).TypeHandle);
+        private void StaticInitializer_185_UserEditViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.UserEditViewModel).TypeHandle);
+        private void StaticInitializer_186_UserManagementPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.Views.UserManagementPage).TypeHandle);
+        private void StaticInitializer_187_UserManagementViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Kirana.App.ViewModels.UserManagementViewModel).TypeHandle);
+        private void StaticInitializer_188_TreeViewNode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode).TypeHandle);
+        private void StaticInitializer_189_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>).TypeHandle);
         private void MapAdd_0_XamlControlsResources(object instance, object key, object item)
         {
             var collection = (global::System.Collections.Generic.IDictionary<global::System.Object, global::System.Object>)instance;
@@ -820,13 +881,13 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
             var newItem = (global::System.Object)item;
             collection.Add(newKey, newItem);
         }
-        private void VectorAdd_86_IList(object instance, object item)
+        private void VectorAdd_99_IList(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::System.Object>)instance;
             var newItem = (global::System.Object)item;
             collection.Add(newItem);
         }
-        private void VectorAdd_171_IList(object instance, object item)
+        private void VectorAdd_189_IList(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::Microsoft.UI.Xaml.Controls.TreeViewNode>)instance;
             var newItem = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)item;
@@ -936,31 +997,63 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 13:   //  Kirana.App.MainWindow
+            case 13:   //  Kirana.App.Converters.PaymentMethodConverter
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.Activator = Activate_13_PaymentMethodConverter;
+                userType.StaticInitializer = StaticInitializer_13_PaymentMethodConverter;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 14:   //  Kirana.App.Converters.PaymentMethodIconConverter
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.Activator = Activate_14_PaymentMethodIconConverter;
+                userType.StaticInitializer = StaticInitializer_14_PaymentMethodIconConverter;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 15:   //  Kirana.App.Converters.DetailIndentConverter
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.Activator = Activate_15_DetailIndentConverter;
+                userType.StaticInitializer = StaticInitializer_15_DetailIndentConverter;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 16:   //  Kirana.App.Converters.BillTabFontWeightConverter
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.Activator = Activate_16_BillTabFontWeightConverter;
+                userType.StaticInitializer = StaticInitializer_16_BillTabFontWeightConverter;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 17:   //  Kirana.App.MainWindow
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Window"));
-                userType.Activator = Activate_13_MainWindow;
-                userType.StaticInitializer = StaticInitializer_13_MainWindow;
+                userType.Activator = Activate_17_MainWindow;
+                userType.StaticInitializer = StaticInitializer_17_MainWindow;
                 userType.AddMemberName("RootElement");
                 userType.AddMemberName("NavigationFrame");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 14:   //  Microsoft.UI.Xaml.Window
+            case 18:   //  Microsoft.UI.Xaml.Window
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 15:   //  Microsoft.UI.Xaml.FrameworkElement
+            case 19:   //  Microsoft.UI.Xaml.FrameworkElement
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 16:   //  Microsoft.UI.Xaml.Controls.Frame
+            case 20:   //  Microsoft.UI.Xaml.Controls.Frame
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 17:   //  Windows.UI.Color
+            case 21:   //  Windows.UI.Color
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
-                userType.StaticInitializer = StaticInitializer_17_Color;
+                userType.StaticInitializer = StaticInitializer_21_Color;
                 userType.AddMemberName("A");
                 userType.AddMemberName("R");
                 userType.AddMemberName("G");
@@ -968,22 +1061,22 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 18:   //  System.ValueType
+            case 22:   //  System.ValueType
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.StaticInitializer = StaticInitializer_18_ValueType;
+                userType.StaticInitializer = StaticInitializer_22_ValueType;
                 xamlType = userType;
                 break;
 
-            case 19:   //  Byte
+            case 23:   //  Byte
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
-                userType.StaticInitializer = StaticInitializer_19_Byte;
+                userType.StaticInitializer = StaticInitializer_23_Byte;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 20:   //  Microsoft.UI.Xaml.Thickness
+            case 24:   //  Microsoft.UI.Xaml.Thickness
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
-                userType.StaticInitializer = StaticInitializer_20_Thickness;
+                userType.StaticInitializer = StaticInitializer_24_Thickness;
                 userType.AddMemberName("Left");
                 userType.AddMemberName("Top");
                 userType.AddMemberName("Right");
@@ -991,13 +1084,13 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 21:   //  Double
+            case 25:   //  Double
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 22:   //  Microsoft.UI.Xaml.CornerRadius
+            case 26:   //  Microsoft.UI.Xaml.CornerRadius
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
-                userType.StaticInitializer = StaticInitializer_22_CornerRadius;
+                userType.StaticInitializer = StaticInitializer_26_CornerRadius;
                 userType.AddMemberName("TopLeft");
                 userType.AddMemberName("TopRight");
                 userType.AddMemberName("BottomRight");
@@ -1005,10 +1098,10 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 23:   //  Microsoft.UI.Xaml.Controls.InfoBar
+            case 27:   //  Microsoft.UI.Xaml.Controls.InfoBar
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Control"));
-                userType.Activator = Activate_23_InfoBar;
-                userType.StaticInitializer = StaticInitializer_23_InfoBar;
+                userType.Activator = Activate_27_InfoBar;
+                userType.StaticInitializer = StaticInitializer_27_InfoBar;
                 userType.SetContentPropertyName("Microsoft.UI.Xaml.Controls.InfoBar.Content");
                 userType.AddMemberName("Content");
                 userType.AddMemberName("IsOpen");
@@ -1027,13 +1120,13 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 24:   //  Microsoft.UI.Xaml.Controls.Control
+            case 28:   //  Microsoft.UI.Xaml.Controls.Control
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 25:   //  Microsoft.UI.Xaml.Controls.InfoBarSeverity
+            case 29:   //  Microsoft.UI.Xaml.Controls.InfoBarSeverity
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
-                userType.StaticInitializer = StaticInitializer_25_InfoBarSeverity;
+                userType.StaticInitializer = StaticInitializer_29_InfoBarSeverity;
                 userType.AddEnumValue("Informational", global::Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
                 userType.AddEnumValue("Success", global::Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
                 userType.AddEnumValue("Warning", global::Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
@@ -1041,242 +1134,281 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 26:   //  System.Enum
+            case 30:   //  System.Enum
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
-                userType.StaticInitializer = StaticInitializer_26_Enum;
+                userType.StaticInitializer = StaticInitializer_30_Enum;
                 xamlType = userType;
                 break;
 
-            case 27:   //  String
+            case 31:   //  String
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 28:   //  Microsoft.UI.Xaml.Controls.Primitives.ButtonBase
+            case 32:   //  Microsoft.UI.Xaml.Controls.Primitives.ButtonBase
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 29:   //  System.Windows.Input.ICommand
+            case 33:   //  System.Windows.Input.ICommand
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, null);
-                userType.StaticInitializer = StaticInitializer_29_ICommand;
+                userType.StaticInitializer = StaticInitializer_33_ICommand;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 30:   //  Microsoft.UI.Xaml.Style
+            case 34:   //  Microsoft.UI.Xaml.Style
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 31:   //  Microsoft.UI.Xaml.DataTemplate
+            case 35:   //  Microsoft.UI.Xaml.DataTemplate
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 32:   //  Microsoft.UI.Xaml.Controls.IconSource
+            case 36:   //  Microsoft.UI.Xaml.Controls.IconSource
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 33:   //  Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings
+            case 37:   //  Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
-                userType.StaticInitializer = StaticInitializer_33_InfoBarTemplateSettings;
+                userType.StaticInitializer = StaticInitializer_37_InfoBarTemplateSettings;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 34:   //  Microsoft.UI.Xaml.DependencyObject
+            case 38:   //  Microsoft.UI.Xaml.DependencyObject
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 35:   //  Kirana.App.Views.AuditLogPage
+            case 39:   //  Kirana.App.Views.AuditLogPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_35_AuditLogPage;
-                userType.StaticInitializer = StaticInitializer_35_AuditLogPage;
+                userType.Activator = Activate_39_AuditLogPage;
+                userType.StaticInitializer = StaticInitializer_39_AuditLogPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 36:   //  Microsoft.UI.Xaml.Controls.Page
+            case 40:   //  Microsoft.UI.Xaml.Controls.Page
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 37:   //  Microsoft.UI.Xaml.Controls.UserControl
+            case 41:   //  Microsoft.UI.Xaml.Controls.UserControl
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 38:   //  Kirana.App.ViewModels.AuditLogViewModel
+            case 42:   //  Kirana.App.ViewModels.AuditLogViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_38_AuditLogViewModel;
+                userType.StaticInitializer = StaticInitializer_42_AuditLogViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 39:   //  CommunityToolkit.Mvvm.ComponentModel.ObservableObject
+            case 43:   //  CommunityToolkit.Mvvm.ComponentModel.ObservableObject
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.StaticInitializer = StaticInitializer_39_ObservableObject;
+                userType.StaticInitializer = StaticInitializer_43_ObservableObject;
                 xamlType = userType;
                 break;
 
-            case 40:   //  Kirana.App.Views.BarcodeLabelDialog
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_40_BarcodeLabelDialog;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
+            case 44:   //  Microsoft.UI.Xaml.Controls.ProgressBar
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Primitives.RangeBase"));
+                userType.Activator = Activate_44_ProgressBar;
+                userType.StaticInitializer = StaticInitializer_44_ProgressBar;
+                userType.AddMemberName("IsIndeterminate");
+                userType.AddMemberName("ShowError");
+                userType.AddMemberName("ShowPaused");
+                userType.AddMemberName("TemplateSettings");
                 xamlType = userType;
                 break;
 
-            case 41:   //  Microsoft.UI.Xaml.Controls.ContentDialog
+            case 45:   //  Microsoft.UI.Xaml.Controls.Primitives.RangeBase
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 42:   //  Microsoft.UI.Xaml.Controls.ContentControl
-                xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
-                break;
-
-            case 43:   //  Kirana.App.ViewModels.BarcodeLabelViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_43_BarcodeLabelViewModel;
+            case 46:   //  Microsoft.UI.Xaml.Controls.ProgressBarTemplateSettings
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
+                userType.StaticInitializer = StaticInitializer_46_ProgressBarTemplateSettings;
                 userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 44:   //  Kirana.App.Views.BarcodeScanTestPage
+            case 47:   //  Kirana.App.Views.BackupManagerPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_44_BarcodeScanTestPage;
-                userType.StaticInitializer = StaticInitializer_44_BarcodeScanTestPage;
+                userType.Activator = Activate_47_BackupManagerPage;
+                userType.StaticInitializer = StaticInitializer_47_BackupManagerPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 45:   //  Kirana.App.ViewModels.BarcodeScanTestViewModel
+            case 48:   //  Kirana.App.ViewModels.BackupManagerViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_45_BarcodeScanTestViewModel;
+                userType.StaticInitializer = StaticInitializer_48_BackupManagerViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 46:   //  Kirana.App.Views.BatchManagementDialog
+            case 49:   //  Kirana.App.Views.BarcodeLabelDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_46_BatchManagementDialog;
+                userType.StaticInitializer = StaticInitializer_49_BarcodeLabelDialog;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 47:   //  Kirana.App.ViewModels.BatchManagementViewModel
+            case 50:   //  Microsoft.UI.Xaml.Controls.ContentDialog
+                xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 51:   //  Microsoft.UI.Xaml.Controls.ContentControl
+                xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 52:   //  Kirana.App.ViewModels.BarcodeLabelViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_47_BatchManagementViewModel;
+                userType.StaticInitializer = StaticInitializer_52_BarcodeLabelViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 48:   //  Kirana.App.Views.BillDiscountDialog
+            case 53:   //  Kirana.App.Views.BarcodeScanTestPage
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_53_BarcodeScanTestPage;
+                userType.StaticInitializer = StaticInitializer_53_BarcodeScanTestPage;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 54:   //  Kirana.App.ViewModels.BarcodeScanTestViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_54_BarcodeScanTestViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 55:   //  Kirana.App.Views.BatchManagementDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_48_BillDiscountDialog;
+                userType.StaticInitializer = StaticInitializer_55_BatchManagementDialog;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 56:   //  Kirana.App.ViewModels.BatchManagementViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_56_BatchManagementViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 57:   //  Kirana.App.Views.BillDiscountDialog
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
+                userType.StaticInitializer = StaticInitializer_57_BillDiscountDialog;
                 userType.AddMemberName("Percent");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 49:   //  System.Decimal
+            case 58:   //  System.Decimal
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
-                userType.StaticInitializer = StaticInitializer_49_Decimal;
+                userType.StaticInitializer = StaticInitializer_58_Decimal;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 50:   //  Kirana.App.Views.BrandManagementDialog
+            case 59:   //  Kirana.App.Views.BrandManagementDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_50_BrandManagementDialog;
+                userType.StaticInitializer = StaticInitializer_59_BrandManagementDialog;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 51:   //  Kirana.App.ViewModels.BrandManagementViewModel
+            case 60:   //  Kirana.App.ViewModels.BrandManagementViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_51_BrandManagementViewModel;
+                userType.StaticInitializer = StaticInitializer_60_BrandManagementViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 52:   //  Kirana.App.Views.CategoryManagementDialog
+            case 61:   //  Kirana.App.Views.CategoryManagementDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_52_CategoryManagementDialog;
+                userType.StaticInitializer = StaticInitializer_61_CategoryManagementDialog;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 53:   //  Kirana.App.ViewModels.CategoryManagementViewModel
+            case 62:   //  Kirana.App.ViewModels.CategoryManagementViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_53_CategoryManagementViewModel;
+                userType.StaticInitializer = StaticInitializer_62_CategoryManagementViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 54:   //  Kirana.App.Views.CreditPaymentDialog
+            case 63:   //  Kirana.App.Views.CreditPaymentDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_54_CreditPaymentDialog;
+                userType.StaticInitializer = StaticInitializer_63_CreditPaymentDialog;
                 userType.AddMemberName("RecordedPayment");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 55:   //  Kirana.Domain.Entities.CreditPayment
+            case 64:   //  Kirana.Domain.Entities.CreditPayment
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Kirana.Domain.Common.Entity"));
-                userType.StaticInitializer = StaticInitializer_55_CreditPayment;
+                userType.StaticInitializer = StaticInitializer_64_CreditPayment;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 56:   //  Kirana.Domain.Common.Entity
+            case 65:   //  Kirana.Domain.Common.Entity
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.StaticInitializer = StaticInitializer_56_Entity;
+                userType.StaticInitializer = StaticInitializer_65_Entity;
                 xamlType = userType;
                 break;
 
-            case 57:   //  Kirana.App.Views.CustomerEditDialog
+            case 66:   //  Kirana.App.Views.CustomerEditDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_57_CustomerEditDialog;
+                userType.StaticInitializer = StaticInitializer_66_CustomerEditDialog;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 58:   //  Kirana.App.ViewModels.CustomerEditViewModel
+            case 67:   //  Kirana.App.ViewModels.CustomerEditViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_58_CustomerEditViewModel;
+                userType.StaticInitializer = StaticInitializer_67_CustomerEditViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 59:   //  Kirana.App.Views.CustomerLedgerPage
+            case 68:   //  Kirana.App.Views.CustomerLedgerPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_59_CustomerLedgerPage;
-                userType.StaticInitializer = StaticInitializer_59_CustomerLedgerPage;
+                userType.Activator = Activate_68_CustomerLedgerPage;
+                userType.StaticInitializer = StaticInitializer_68_CustomerLedgerPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 60:   //  Kirana.App.ViewModels.CustomerLedgerViewModel
+            case 69:   //  Kirana.App.ViewModels.CustomerLedgerViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_60_CustomerLedgerViewModel;
+                userType.StaticInitializer = StaticInitializer_69_CustomerLedgerViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 61:   //  Kirana.App.Views.CustomerPickerDialog
+            case 70:   //  Kirana.App.Views.CustomerPickerDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_61_CustomerPickerDialog;
+                userType.StaticInitializer = StaticInitializer_70_CustomerPickerDialog;
                 userType.AddMemberName("ViewModel");
                 userType.AddMemberName("Confirmed");
                 userType.AddMemberName("SelectedCustomer");
@@ -1284,121 +1416,155 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 62:   //  Kirana.App.ViewModels.CustomerPickerViewModel
+            case 71:   //  Kirana.App.ViewModels.CustomerPickerViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_62_CustomerPickerViewModel;
+                userType.StaticInitializer = StaticInitializer_71_CustomerPickerViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 63:   //  Kirana.Domain.Entities.Customer
+            case 72:   //  Kirana.Domain.Entities.Customer
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Kirana.Domain.Common.Entity"));
-                userType.StaticInitializer = StaticInitializer_63_Customer;
+                userType.StaticInitializer = StaticInitializer_72_Customer;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 64:   //  Kirana.App.Views.CustomersPage
+            case 73:   //  Kirana.App.Views.CustomersPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_64_CustomersPage;
-                userType.StaticInitializer = StaticInitializer_64_CustomersPage;
+                userType.Activator = Activate_73_CustomersPage;
+                userType.StaticInitializer = StaticInitializer_73_CustomersPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 65:   //  Kirana.App.ViewModels.CustomersViewModel
+            case 74:   //  Kirana.App.ViewModels.CustomersViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_65_CustomersViewModel;
+                userType.StaticInitializer = StaticInitializer_74_CustomersViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 66:   //  Kirana.App.Views.ExpenseCategoriesPage
+            case 75:   //  Kirana.App.Views.DatabaseMaintenancePage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_66_ExpenseCategoriesPage;
-                userType.StaticInitializer = StaticInitializer_66_ExpenseCategoriesPage;
+                userType.Activator = Activate_75_DatabaseMaintenancePage;
+                userType.StaticInitializer = StaticInitializer_75_DatabaseMaintenancePage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 67:   //  Kirana.App.ViewModels.ExpenseCategoriesViewModel
+            case 76:   //  Kirana.App.ViewModels.DatabaseMaintenanceViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_67_ExpenseCategoriesViewModel;
+                userType.StaticInitializer = StaticInitializer_76_DatabaseMaintenanceViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 68:   //  Kirana.App.Views.ExpenseDetailsPage
+            case 77:   //  Kirana.App.Views.ExpenseCategoriesPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_68_ExpenseDetailsPage;
-                userType.StaticInitializer = StaticInitializer_68_ExpenseDetailsPage;
+                userType.Activator = Activate_77_ExpenseCategoriesPage;
+                userType.StaticInitializer = StaticInitializer_77_ExpenseCategoriesPage;
+                userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 69:   //  Kirana.App.Views.ExpenseEditDialog
+            case 78:   //  Kirana.App.ViewModels.ExpenseCategoriesViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_78_ExpenseCategoriesViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 79:   //  Kirana.App.Views.ExpenseDetailsPage
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_79_ExpenseDetailsPage;
+                userType.StaticInitializer = StaticInitializer_79_ExpenseDetailsPage;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 80:   //  Kirana.App.Views.ExpenseEditDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_69_ExpenseEditDialog;
+                userType.StaticInitializer = StaticInitializer_80_ExpenseEditDialog;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 70:   //  Kirana.App.Views.ExpensesPage
+            case 81:   //  Kirana.App.Views.ExpensesPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_70_ExpensesPage;
-                userType.StaticInitializer = StaticInitializer_70_ExpensesPage;
+                userType.Activator = Activate_81_ExpensesPage;
+                userType.StaticInitializer = StaticInitializer_81_ExpensesPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 71:   //  Kirana.App.ViewModels.ExpensesViewModel
+            case 82:   //  Kirana.App.ViewModels.ExpensesViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_71_ExpensesViewModel;
+                userType.StaticInitializer = StaticInitializer_82_ExpensesViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 72:   //  Kirana.App.Views.HeldBillsDialog
+            case 83:   //  Kirana.App.Views.ExportCenterPage
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_83_ExportCenterPage;
+                userType.StaticInitializer = StaticInitializer_83_ExportCenterPage;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 84:   //  Kirana.App.ViewModels.ExportCenterViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_84_ExportCenterViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 85:   //  Kirana.App.Views.HeldBillsDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_72_HeldBillsDialog;
+                userType.StaticInitializer = StaticInitializer_85_HeldBillsDialog;
                 userType.AddMemberName("ViewModel");
                 userType.AddMemberName("ResumedHeldBillId");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 73:   //  Kirana.App.ViewModels.HeldBillsViewModel
+            case 86:   //  Kirana.App.ViewModels.HeldBillsViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_73_HeldBillsViewModel;
+                userType.StaticInitializer = StaticInitializer_86_HeldBillsViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 74:   //  System.Nullable`1<Int32>
+            case 87:   //  System.Nullable`1<Int32>
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
                 userType.SetBoxedType(GetXamlTypeByName("Int32"));
                 userType.BoxInstance = userType.BoxType<global::System.Int32>;
-                userType.StaticInitializer = StaticInitializer_74_Nullable;
+                userType.StaticInitializer = StaticInitializer_87_Nullable;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 75:   //  Int32
+            case 88:   //  Int32
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 76:   //  Microsoft.UI.Xaml.Controls.ProgressRing
+            case 89:   //  Microsoft.UI.Xaml.Controls.ProgressRing
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Control"));
-                userType.Activator = Activate_76_ProgressRing;
-                userType.StaticInitializer = StaticInitializer_76_ProgressRing;
+                userType.Activator = Activate_89_ProgressRing;
+                userType.StaticInitializer = StaticInitializer_89_ProgressRing;
                 userType.AddMemberName("IsActive");
                 userType.AddMemberName("IsIndeterminate");
                 userType.AddMemberName("Maximum");
@@ -1408,58 +1574,58 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 77:   //  Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings
+            case 90:   //  Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
-                userType.StaticInitializer = StaticInitializer_77_ProgressRingTemplateSettings;
+                userType.StaticInitializer = StaticInitializer_90_ProgressRingTemplateSettings;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 78:   //  Kirana.App.Views.InvoicePreviewDialog
+            case 91:   //  Kirana.App.Views.InvoicePreviewDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_78_InvoicePreviewDialog;
+                userType.StaticInitializer = StaticInitializer_91_InvoicePreviewDialog;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 79:   //  Kirana.App.ViewModels.InvoicePreviewViewModel
+            case 92:   //  Kirana.App.ViewModels.InvoicePreviewViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_79_InvoicePreviewViewModel;
+                userType.StaticInitializer = StaticInitializer_92_InvoicePreviewViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 80:   //  Kirana.App.Views.ManagementHomePage
+            case 93:   //  Kirana.App.Views.ManagementHomePage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_80_ManagementHomePage;
-                userType.StaticInitializer = StaticInitializer_80_ManagementHomePage;
+                userType.Activator = Activate_93_ManagementHomePage;
+                userType.StaticInitializer = StaticInitializer_93_ManagementHomePage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 81:   //  Kirana.App.ViewModels.ManagementHomeViewModel
+            case 94:   //  Kirana.App.ViewModels.ManagementHomeViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_81_ManagementHomeViewModel;
+                userType.StaticInitializer = StaticInitializer_94_ManagementHomeViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 82:   //  Kirana.App.Views.ManagementLoginDialog
+            case 95:   //  Kirana.App.Views.ManagementLoginDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_82_ManagementLoginDialog;
+                userType.StaticInitializer = StaticInitializer_95_ManagementLoginDialog;
                 userType.AddMemberName("Unlocked");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 83:   //  Microsoft.UI.Xaml.Controls.NavigationView
+            case 96:   //  Microsoft.UI.Xaml.Controls.NavigationView
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentControl"));
-                userType.Activator = Activate_83_NavigationView;
-                userType.StaticInitializer = StaticInitializer_83_NavigationView;
+                userType.Activator = Activate_96_NavigationView;
+                userType.StaticInitializer = StaticInitializer_96_NavigationView;
                 userType.AddMemberName("PaneDisplayMode");
                 userType.AddMemberName("OpenPaneLength");
                 userType.AddMemberName("IsSettingsVisible");
@@ -1500,9 +1666,9 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 84:   //  Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode
+            case 97:   //  Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
-                userType.StaticInitializer = StaticInitializer_84_NavigationViewPaneDisplayMode;
+                userType.StaticInitializer = StaticInitializer_97_NavigationViewPaneDisplayMode;
                 userType.AddEnumValue("Auto", global::Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode.Auto);
                 userType.AddEnumValue("Left", global::Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode.Left);
                 userType.AddEnumValue("Top", global::Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode.Top);
@@ -1511,84 +1677,84 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 85:   //  Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible
+            case 98:   //  Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
-                userType.StaticInitializer = StaticInitializer_85_NavigationViewBackButtonVisible;
+                userType.StaticInitializer = StaticInitializer_98_NavigationViewBackButtonVisible;
                 userType.AddEnumValue("Collapsed", global::Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible.Collapsed);
                 userType.AddEnumValue("Visible", global::Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible.Visible);
                 userType.AddEnumValue("Auto", global::Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible.Auto);
                 xamlType = userType;
                 break;
 
-            case 86:   //  System.Collections.Generic.IList`1<Object>
+            case 99:   //  System.Collections.Generic.IList`1<Object>
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, null);
-                userType.StaticInitializer = StaticInitializer_86_IList;
-                userType.CollectionAdd = VectorAdd_86_IList;
+                userType.StaticInitializer = StaticInitializer_99_IList;
+                userType.CollectionAdd = VectorAdd_99_IList;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 87:   //  Microsoft.UI.Xaml.Controls.AutoSuggestBox
+            case 100:   //  Microsoft.UI.Xaml.Controls.AutoSuggestBox
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 88:   //  Microsoft.UI.Xaml.UIElement
+            case 101:   //  Microsoft.UI.Xaml.UIElement
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 89:   //  Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode
+            case 102:   //  Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
-                userType.StaticInitializer = StaticInitializer_89_NavigationViewDisplayMode;
+                userType.StaticInitializer = StaticInitializer_102_NavigationViewDisplayMode;
                 userType.AddEnumValue("Minimal", global::Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode.Minimal);
                 userType.AddEnumValue("Compact", global::Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode.Compact);
                 userType.AddEnumValue("Expanded", global::Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode.Expanded);
                 xamlType = userType;
                 break;
 
-            case 90:   //  Microsoft.UI.Xaml.Controls.StyleSelector
+            case 103:   //  Microsoft.UI.Xaml.Controls.StyleSelector
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 91:   //  Microsoft.UI.Xaml.Controls.DataTemplateSelector
+            case 104:   //  Microsoft.UI.Xaml.Controls.DataTemplateSelector
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 92:   //  Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode
+            case 105:   //  Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
-                userType.StaticInitializer = StaticInitializer_92_NavigationViewOverflowLabelMode;
+                userType.StaticInitializer = StaticInitializer_105_NavigationViewOverflowLabelMode;
                 userType.AddEnumValue("MoreLabel", global::Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode.MoreLabel);
                 userType.AddEnumValue("NoLabel", global::Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode.NoLabel);
                 xamlType = userType;
                 break;
 
-            case 93:   //  Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus
+            case 106:   //  Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
-                userType.StaticInitializer = StaticInitializer_93_NavigationViewSelectionFollowsFocus;
+                userType.StaticInitializer = StaticInitializer_106_NavigationViewSelectionFollowsFocus;
                 userType.AddEnumValue("Disabled", global::Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus.Disabled);
                 userType.AddEnumValue("Enabled", global::Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus.Enabled);
                 xamlType = userType;
                 break;
 
-            case 94:   //  Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled
+            case 107:   //  Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
-                userType.StaticInitializer = StaticInitializer_94_NavigationViewShoulderNavigationEnabled;
+                userType.StaticInitializer = StaticInitializer_107_NavigationViewShoulderNavigationEnabled;
                 userType.AddEnumValue("WhenSelectionFollowsFocus", global::Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled.WhenSelectionFollowsFocus);
                 userType.AddEnumValue("Always", global::Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled.Always);
                 userType.AddEnumValue("Never", global::Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled.Never);
                 xamlType = userType;
                 break;
 
-            case 95:   //  Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings
+            case 108:   //  Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
-                userType.StaticInitializer = StaticInitializer_95_NavigationViewTemplateSettings;
+                userType.StaticInitializer = StaticInitializer_108_NavigationViewTemplateSettings;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 96:   //  Microsoft.UI.Xaml.Controls.NavigationViewItem
+            case 109:   //  Microsoft.UI.Xaml.Controls.NavigationViewItem
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItemBase"));
-                userType.Activator = Activate_96_NavigationViewItem;
-                userType.StaticInitializer = StaticInitializer_96_NavigationViewItem;
+                userType.Activator = Activate_109_NavigationViewItem;
+                userType.StaticInitializer = StaticInitializer_109_NavigationViewItem;
                 userType.AddMemberName("Icon");
                 userType.AddMemberName("CompactPaneLength");
                 userType.AddMemberName("HasUnrealizedChildren");
@@ -1601,431 +1767,469 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 97:   //  Microsoft.UI.Xaml.Controls.NavigationViewItemBase
+            case 110:   //  Microsoft.UI.Xaml.Controls.NavigationViewItemBase
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentControl"));
-                userType.StaticInitializer = StaticInitializer_97_NavigationViewItemBase;
+                userType.StaticInitializer = StaticInitializer_110_NavigationViewItemBase;
                 userType.AddMemberName("IsSelected");
                 xamlType = userType;
                 break;
 
-            case 98:   //  Microsoft.UI.Xaml.Controls.IconElement
+            case 111:   //  Microsoft.UI.Xaml.Controls.IconElement
                 xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 99:   //  Microsoft.UI.Xaml.Controls.InfoBadge
+            case 112:   //  Microsoft.UI.Xaml.Controls.InfoBadge
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Control"));
-                userType.StaticInitializer = StaticInitializer_99_InfoBadge;
+                userType.StaticInitializer = StaticInitializer_112_InfoBadge;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 100:   //  Microsoft.UI.Xaml.Controls.NavigationViewItemHeader
+            case 113:   //  Microsoft.UI.Xaml.Controls.NavigationViewItemHeader
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItemBase"));
-                userType.Activator = Activate_100_NavigationViewItemHeader;
-                userType.StaticInitializer = StaticInitializer_100_NavigationViewItemHeader;
+                userType.Activator = Activate_113_NavigationViewItemHeader;
+                userType.StaticInitializer = StaticInitializer_113_NavigationViewItemHeader;
                 xamlType = userType;
                 break;
 
-            case 101:   //  Kirana.App.Views.ManagementShellPage
+            case 114:   //  Kirana.App.Views.ManagementShellPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_101_ManagementShellPage;
-                userType.StaticInitializer = StaticInitializer_101_ManagementShellPage;
+                userType.Activator = Activate_114_ManagementShellPage;
+                userType.StaticInitializer = StaticInitializer_114_ManagementShellPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 102:   //  Kirana.App.Views.ManagerAuthorizationDialog
+            case 115:   //  Kirana.App.Views.ManagerAuthorizationDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_102_ManagerAuthorizationDialog;
+                userType.StaticInitializer = StaticInitializer_115_ManagerAuthorizationDialog;
                 userType.AddMemberName("AuthorizedUserId");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 103:   //  Kirana.App.Views.NewPurchaseReturnPage
+            case 116:   //  Kirana.App.Views.NewPurchaseReturnPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_103_NewPurchaseReturnPage;
-                userType.StaticInitializer = StaticInitializer_103_NewPurchaseReturnPage;
+                userType.Activator = Activate_116_NewPurchaseReturnPage;
+                userType.StaticInitializer = StaticInitializer_116_NewPurchaseReturnPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 104:   //  Kirana.App.ViewModels.NewPurchaseReturnViewModel
+            case 117:   //  Kirana.App.ViewModels.NewPurchaseReturnViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_104_NewPurchaseReturnViewModel;
+                userType.StaticInitializer = StaticInitializer_117_NewPurchaseReturnViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 105:   //  Kirana.App.Views.NewSalesReturnPage
+            case 118:   //  Kirana.App.Views.NewSalesReturnPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_105_NewSalesReturnPage;
-                userType.StaticInitializer = StaticInitializer_105_NewSalesReturnPage;
+                userType.Activator = Activate_118_NewSalesReturnPage;
+                userType.StaticInitializer = StaticInitializer_118_NewSalesReturnPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 106:   //  Kirana.App.ViewModels.NewSalesReturnViewModel
+            case 119:   //  Kirana.App.ViewModels.NewSalesReturnViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_106_NewSalesReturnViewModel;
+                userType.StaticInitializer = StaticInitializer_119_NewSalesReturnViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 107:   //  Kirana.App.Views.PaymentDialog
+            case 120:   //  Kirana.App.Views.PaymentDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_107_PaymentDialog;
+                userType.StaticInitializer = StaticInitializer_120_PaymentDialog;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 108:   //  Kirana.App.ViewModels.PaymentViewModel
+            case 121:   //  Kirana.App.ViewModels.PaymentViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_108_PaymentViewModel;
+                userType.StaticInitializer = StaticInitializer_121_PaymentViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 109:   //  Kirana.App.Views.PosShellPage
+            case 122:   //  Kirana.App.Views.PosShellPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_109_PosShellPage;
-                userType.StaticInitializer = StaticInitializer_109_PosShellPage;
+                userType.Activator = Activate_122_PosShellPage;
+                userType.StaticInitializer = StaticInitializer_122_PosShellPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 110:   //  Kirana.App.ViewModels.PosShellViewModel
+            case 123:   //  Kirana.App.ViewModels.PosShellViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_110_PosShellViewModel;
+                userType.StaticInitializer = StaticInitializer_123_PosShellViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 111:   //  Kirana.App.Views.ProductEditDialog
+            case 124:   //  Kirana.App.Views.ProductEditDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_111_ProductEditDialog;
+                userType.StaticInitializer = StaticInitializer_124_ProductEditDialog;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 112:   //  Kirana.App.ViewModels.ProductEditViewModel
+            case 125:   //  Kirana.App.ViewModels.ProductEditViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_112_ProductEditViewModel;
+                userType.StaticInitializer = StaticInitializer_125_ProductEditViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 113:   //  Kirana.App.Views.ProductsPage
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_113_ProductsPage;
-                userType.StaticInitializer = StaticInitializer_113_ProductsPage;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 114:   //  Kirana.App.ViewModels.ProductsViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_114_ProductsViewModel;
-                userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 115:   //  Kirana.App.Views.PurchaseDetailsDialog
+            case 126:   //  Kirana.App.Views.ProductImportDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_115_PurchaseDetailsDialog;
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 116:   //  Kirana.App.Views.PurchaseEntryPage
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_116_PurchaseEntryPage;
-                userType.StaticInitializer = StaticInitializer_116_PurchaseEntryPage;
+                userType.StaticInitializer = StaticInitializer_126_ProductImportDialog;
                 userType.AddMemberName("ViewModel");
+                userType.AddMemberName("ImportedAnything");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 117:   //  Kirana.App.ViewModels.PurchaseEntryViewModel
+            case 127:   //  Kirana.App.ViewModels.ProductImportViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_117_PurchaseEntryViewModel;
+                userType.StaticInitializer = StaticInitializer_127_ProductImportViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 118:   //  Kirana.App.Views.PurchasePaymentDialog
+            case 128:   //  Kirana.App.Views.ProductsPage
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_128_ProductsPage;
+                userType.StaticInitializer = StaticInitializer_128_ProductsPage;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 129:   //  Kirana.App.ViewModels.ProductsViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_129_ProductsViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 130:   //  Kirana.App.Views.PurchaseDetailsDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_118_PurchasePaymentDialog;
+                userType.StaticInitializer = StaticInitializer_130_PurchaseDetailsDialog;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 119:   //  Kirana.App.Views.PurchaseReturnDetailsPage
+            case 131:   //  Kirana.App.Views.PurchaseEntryPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_119_PurchaseReturnDetailsPage;
-                userType.StaticInitializer = StaticInitializer_119_PurchaseReturnDetailsPage;
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 120:   //  Kirana.App.Views.PurchaseReturnsPage
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_120_PurchaseReturnsPage;
-                userType.StaticInitializer = StaticInitializer_120_PurchaseReturnsPage;
+                userType.Activator = Activate_131_PurchaseEntryPage;
+                userType.StaticInitializer = StaticInitializer_131_PurchaseEntryPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 121:   //  Kirana.App.ViewModels.PurchaseReturnsViewModel
+            case 132:   //  Kirana.App.ViewModels.PurchaseEntryViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_121_PurchaseReturnsViewModel;
+                userType.StaticInitializer = StaticInitializer_132_PurchaseEntryViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 122:   //  Kirana.App.Views.PurchasesPage
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_122_PurchasesPage;
-                userType.StaticInitializer = StaticInitializer_122_PurchasesPage;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 123:   //  Kirana.App.ViewModels.PurchasesViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_123_PurchasesViewModel;
-                userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 124:   //  Kirana.App.Views.Reports.ProfitReportView
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_124_ProfitReportView;
-                userType.StaticInitializer = StaticInitializer_124_ProfitReportView;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 125:   //  Kirana.App.ViewModels.Reports.ProfitReportTabViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_125_ProfitReportTabViewModel;
-                userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 126:   //  Kirana.App.Views.Reports.ExpenseReportView
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_126_ExpenseReportView;
-                userType.StaticInitializer = StaticInitializer_126_ExpenseReportView;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 127:   //  Kirana.App.ViewModels.Reports.ExpenseReportTabViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_127_ExpenseReportTabViewModel;
-                userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 128:   //  Kirana.App.Views.Reports.SupplierReportView
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_128_SupplierReportView;
-                userType.StaticInitializer = StaticInitializer_128_SupplierReportView;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 129:   //  Kirana.App.ViewModels.Reports.SupplierReportTabViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_129_SupplierReportTabViewModel;
-                userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 130:   //  Kirana.App.Views.Reports.CustomerReportView
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_130_CustomerReportView;
-                userType.StaticInitializer = StaticInitializer_130_CustomerReportView;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 131:   //  Kirana.App.ViewModels.Reports.CustomerReportTabViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_131_CustomerReportTabViewModel;
-                userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 132:   //  Kirana.App.Views.Reports.InventoryReportView
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_132_InventoryReportView;
-                userType.StaticInitializer = StaticInitializer_132_InventoryReportView;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 133:   //  Kirana.App.ViewModels.Reports.InventoryReportTabViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_133_InventoryReportTabViewModel;
-                userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 134:   //  Kirana.App.Views.Reports.ProductReportView
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_134_ProductReportView;
-                userType.StaticInitializer = StaticInitializer_134_ProductReportView;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 135:   //  Kirana.App.ViewModels.Reports.ProductReportTabViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_135_ProductReportTabViewModel;
-                userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 136:   //  Kirana.App.Views.Reports.SalesReportView
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_136_SalesReportView;
-                userType.StaticInitializer = StaticInitializer_136_SalesReportView;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 137:   //  Kirana.App.ViewModels.Reports.SalesReportTabViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_137_SalesReportTabViewModel;
-                userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 138:   //  Kirana.App.Views.Reports.DashboardView
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_138_DashboardView;
-                userType.StaticInitializer = StaticInitializer_138_DashboardView;
-                userType.AddMemberName("ViewModel");
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 139:   //  Kirana.App.ViewModels.Reports.DashboardTabViewModel
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_139_DashboardTabViewModel;
-                userType.SetIsReturnTypeStub();
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 140:   //  Kirana.App.Views.ReportsHubPage
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_140_ReportsHubPage;
-                userType.StaticInitializer = StaticInitializer_140_ReportsHubPage;
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 141:   //  Kirana.App.Views.ReprintInvoiceDialog
+            case 133:   //  Kirana.App.Views.PurchasePaymentDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_141_ReprintInvoiceDialog;
+                userType.StaticInitializer = StaticInitializer_133_PurchasePaymentDialog;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 134:   //  Kirana.App.Views.PurchaseReturnDetailsPage
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_134_PurchaseReturnDetailsPage;
+                userType.StaticInitializer = StaticInitializer_134_PurchaseReturnDetailsPage;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 135:   //  Kirana.App.Views.PurchaseReturnsPage
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_135_PurchaseReturnsPage;
+                userType.StaticInitializer = StaticInitializer_135_PurchaseReturnsPage;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 136:   //  Kirana.App.ViewModels.PurchaseReturnsViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_136_PurchaseReturnsViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 137:   //  Kirana.App.Views.PurchasesPage
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_137_PurchasesPage;
+                userType.StaticInitializer = StaticInitializer_137_PurchasesPage;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 138:   //  Kirana.App.ViewModels.PurchasesViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_138_PurchasesViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 139:   //  Microsoft.UI.Xaml.Controls.Primitives.PivotHeaderItem
+                xamlType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 140:   //  Kirana.App.Views.Reports.ProfitReportView
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_140_ProfitReportView;
+                userType.StaticInitializer = StaticInitializer_140_ProfitReportView;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 141:   //  Kirana.App.ViewModels.Reports.ProfitReportTabViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_141_ProfitReportTabViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 142:   //  Kirana.App.Views.Reports.ExpenseReportView
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_142_ExpenseReportView;
+                userType.StaticInitializer = StaticInitializer_142_ExpenseReportView;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 143:   //  Kirana.App.ViewModels.Reports.ExpenseReportTabViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_143_ExpenseReportTabViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 144:   //  Kirana.App.Views.Reports.SupplierReportView
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_144_SupplierReportView;
+                userType.StaticInitializer = StaticInitializer_144_SupplierReportView;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 145:   //  Kirana.App.ViewModels.Reports.SupplierReportTabViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_145_SupplierReportTabViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 146:   //  Kirana.App.Views.Reports.CustomerReportView
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_146_CustomerReportView;
+                userType.StaticInitializer = StaticInitializer_146_CustomerReportView;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 147:   //  Kirana.App.ViewModels.Reports.CustomerReportTabViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_147_CustomerReportTabViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 148:   //  Kirana.App.Views.Reports.InventoryReportView
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_148_InventoryReportView;
+                userType.StaticInitializer = StaticInitializer_148_InventoryReportView;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 149:   //  Kirana.App.ViewModels.Reports.InventoryReportTabViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_149_InventoryReportTabViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 150:   //  Kirana.App.Views.Reports.ProductReportView
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_150_ProductReportView;
+                userType.StaticInitializer = StaticInitializer_150_ProductReportView;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 151:   //  Kirana.App.ViewModels.Reports.ProductReportTabViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_151_ProductReportTabViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 152:   //  Kirana.App.Views.Reports.SalesReportView
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_152_SalesReportView;
+                userType.StaticInitializer = StaticInitializer_152_SalesReportView;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 153:   //  Kirana.App.ViewModels.Reports.SalesReportTabViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_153_SalesReportTabViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 154:   //  Kirana.App.Views.Reports.DashboardView
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_154_DashboardView;
+                userType.StaticInitializer = StaticInitializer_154_DashboardView;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 155:   //  Kirana.App.ViewModels.Reports.DashboardTabViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_155_DashboardTabViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 156:   //  Kirana.App.Views.ReportsHubPage
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_156_ReportsHubPage;
+                userType.StaticInitializer = StaticInitializer_156_ReportsHubPage;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 157:   //  Kirana.App.Views.ReprintInvoiceDialog
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
+                userType.StaticInitializer = StaticInitializer_157_ReprintInvoiceDialog;
                 userType.AddMemberName("ViewModel");
                 userType.AddMemberName("FoundDocument");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 142:   //  Kirana.App.ViewModels.ReprintInvoiceViewModel
+            case 158:   //  Kirana.App.ViewModels.ReprintInvoiceViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_142_ReprintInvoiceViewModel;
+                userType.StaticInitializer = StaticInitializer_158_ReprintInvoiceViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 143:   //  Kirana.Application.Printing.InvoiceDocument
+            case 159:   //  Kirana.Application.Printing.InvoiceDocument
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.StaticInitializer = StaticInitializer_143_InvoiceDocument;
+                userType.StaticInitializer = StaticInitializer_159_InvoiceDocument;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 144:   //  Kirana.App.Views.ResetPasswordDialog
+            case 160:   //  Kirana.App.Views.ResetPasswordDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_144_ResetPasswordDialog;
+                userType.StaticInitializer = StaticInitializer_160_ResetPasswordDialog;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 145:   //  Kirana.App.Views.SalesReturnDetailsPage
+            case 161:   //  Kirana.App.Views.RestorePage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_145_SalesReturnDetailsPage;
-                userType.StaticInitializer = StaticInitializer_145_SalesReturnDetailsPage;
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 146:   //  Kirana.App.Views.SalesReturnsPage
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_146_SalesReturnsPage;
-                userType.StaticInitializer = StaticInitializer_146_SalesReturnsPage;
+                userType.Activator = Activate_161_RestorePage;
+                userType.StaticInitializer = StaticInitializer_161_RestorePage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 147:   //  Kirana.App.ViewModels.SalesReturnsViewModel
+            case 162:   //  Kirana.App.ViewModels.RestoreViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_147_SalesReturnsViewModel;
+                userType.StaticInitializer = StaticInitializer_162_RestoreViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 148:   //  Kirana.App.Views.SetPinDialog
-                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_148_SetPinDialog;
+            case 163:   //  Kirana.App.Views.SalesReturnDetailsPage
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_163_SalesReturnDetailsPage;
+                userType.StaticInitializer = StaticInitializer_163_SalesReturnDetailsPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 149:   //  Microsoft.UI.Xaml.Controls.RadioButtons
+            case 164:   //  Kirana.App.Views.SalesReturnsPage
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_164_SalesReturnsPage;
+                userType.StaticInitializer = StaticInitializer_164_SalesReturnsPage;
+                userType.AddMemberName("ViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 165:   //  Kirana.App.ViewModels.SalesReturnsViewModel
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
+                userType.StaticInitializer = StaticInitializer_165_SalesReturnsViewModel;
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 166:   //  Kirana.App.Views.SetPinDialog
+                userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
+                userType.StaticInitializer = StaticInitializer_166_SetPinDialog;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 167:   //  Microsoft.UI.Xaml.Controls.RadioButtons
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Control"));
-                userType.Activator = Activate_149_RadioButtons;
-                userType.StaticInitializer = StaticInitializer_149_RadioButtons;
+                userType.Activator = Activate_167_RadioButtons;
+                userType.StaticInitializer = StaticInitializer_167_RadioButtons;
                 userType.SetContentPropertyName("Microsoft.UI.Xaml.Controls.RadioButtons.Items");
                 userType.AddMemberName("Items");
                 userType.AddMemberName("SelectedIndex");
@@ -2038,99 +2242,99 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 150:   //  Kirana.App.Views.SettingsPage
+            case 168:   //  Kirana.App.Views.SettingsPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_150_SettingsPage;
-                userType.StaticInitializer = StaticInitializer_150_SettingsPage;
+                userType.Activator = Activate_168_SettingsPage;
+                userType.StaticInitializer = StaticInitializer_168_SettingsPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 151:   //  Kirana.App.ViewModels.SettingsViewModel
+            case 169:   //  Kirana.App.ViewModels.SettingsViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_151_SettingsViewModel;
+                userType.StaticInitializer = StaticInitializer_169_SettingsViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 152:   //  Kirana.App.Views.SetupWizardPage
+            case 170:   //  Kirana.App.Views.SetupWizardPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_152_SetupWizardPage;
-                userType.StaticInitializer = StaticInitializer_152_SetupWizardPage;
+                userType.Activator = Activate_170_SetupWizardPage;
+                userType.StaticInitializer = StaticInitializer_170_SetupWizardPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 153:   //  Kirana.App.ViewModels.SetupWizardViewModel
+            case 171:   //  Kirana.App.ViewModels.SetupWizardViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_153_SetupWizardViewModel;
+                userType.StaticInitializer = StaticInitializer_171_SetupWizardViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 154:   //  Kirana.App.Views.StockAdjustmentDialog
+            case 172:   //  Kirana.App.Views.StockAdjustmentDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_154_StockAdjustmentDialog;
+                userType.StaticInitializer = StaticInitializer_172_StockAdjustmentDialog;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 155:   //  Kirana.App.ViewModels.StockAdjustmentViewModel
+            case 173:   //  Kirana.App.ViewModels.StockAdjustmentViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_155_StockAdjustmentViewModel;
+                userType.StaticInitializer = StaticInitializer_173_StockAdjustmentViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 156:   //  Kirana.App.Views.SupplierEditDialog
+            case 174:   //  Kirana.App.Views.SupplierEditDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_156_SupplierEditDialog;
+                userType.StaticInitializer = StaticInitializer_174_SupplierEditDialog;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 157:   //  Kirana.App.ViewModels.SupplierEditViewModel
+            case 175:   //  Kirana.App.ViewModels.SupplierEditViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_157_SupplierEditViewModel;
+                userType.StaticInitializer = StaticInitializer_175_SupplierEditViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 158:   //  Kirana.App.Views.SupplierLedgerPage
+            case 176:   //  Kirana.App.Views.SupplierLedgerPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_158_SupplierLedgerPage;
-                userType.StaticInitializer = StaticInitializer_158_SupplierLedgerPage;
+                userType.Activator = Activate_176_SupplierLedgerPage;
+                userType.StaticInitializer = StaticInitializer_176_SupplierLedgerPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 159:   //  Kirana.App.ViewModels.SupplierLedgerViewModel
+            case 177:   //  Kirana.App.ViewModels.SupplierLedgerViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_159_SupplierLedgerViewModel;
+                userType.StaticInitializer = StaticInitializer_177_SupplierLedgerViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 160:   //  Kirana.App.Views.SupplierPaymentDialog
+            case 178:   //  Kirana.App.Views.SupplierPaymentDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_160_SupplierPaymentDialog;
+                userType.StaticInitializer = StaticInitializer_178_SupplierPaymentDialog;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 161:   //  Kirana.App.Views.SupplierPickerDialog
+            case 179:   //  Kirana.App.Views.SupplierPickerDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_161_SupplierPickerDialog;
+                userType.StaticInitializer = StaticInitializer_179_SupplierPickerDialog;
                 userType.AddMemberName("ViewModel");
                 userType.AddMemberName("Confirmed");
                 userType.AddMemberName("SelectedSupplier");
@@ -2138,75 +2342,75 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 162:   //  Kirana.App.ViewModels.SupplierPickerViewModel
+            case 180:   //  Kirana.App.ViewModels.SupplierPickerViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_162_SupplierPickerViewModel;
+                userType.StaticInitializer = StaticInitializer_180_SupplierPickerViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 163:   //  Kirana.Domain.Entities.Supplier
+            case 181:   //  Kirana.Domain.Entities.Supplier
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Kirana.Domain.Common.Entity"));
-                userType.StaticInitializer = StaticInitializer_163_Supplier;
+                userType.StaticInitializer = StaticInitializer_181_Supplier;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 164:   //  Kirana.App.Views.SuppliersPage
+            case 182:   //  Kirana.App.Views.SuppliersPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_164_SuppliersPage;
-                userType.StaticInitializer = StaticInitializer_164_SuppliersPage;
+                userType.Activator = Activate_182_SuppliersPage;
+                userType.StaticInitializer = StaticInitializer_182_SuppliersPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 165:   //  Kirana.App.ViewModels.SuppliersViewModel
+            case 183:   //  Kirana.App.ViewModels.SuppliersViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_165_SuppliersViewModel;
+                userType.StaticInitializer = StaticInitializer_183_SuppliersViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 166:   //  Kirana.App.Views.UserEditDialog
+            case 184:   //  Kirana.App.Views.UserEditDialog
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ContentDialog"));
-                userType.StaticInitializer = StaticInitializer_166_UserEditDialog;
+                userType.StaticInitializer = StaticInitializer_184_UserEditDialog;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 167:   //  Kirana.App.ViewModels.UserEditViewModel
+            case 185:   //  Kirana.App.ViewModels.UserEditViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_167_UserEditViewModel;
+                userType.StaticInitializer = StaticInitializer_185_UserEditViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 168:   //  Kirana.App.Views.UserManagementPage
+            case 186:   //  Kirana.App.Views.UserManagementPage
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_168_UserManagementPage;
-                userType.StaticInitializer = StaticInitializer_168_UserManagementPage;
+                userType.Activator = Activate_186_UserManagementPage;
+                userType.StaticInitializer = StaticInitializer_186_UserManagementPage;
                 userType.AddMemberName("ViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 169:   //  Kirana.App.ViewModels.UserManagementViewModel
+            case 187:   //  Kirana.App.ViewModels.UserManagementViewModel
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("CommunityToolkit.Mvvm.ComponentModel.ObservableObject"));
-                userType.StaticInitializer = StaticInitializer_169_UserManagementViewModel;
+                userType.StaticInitializer = StaticInitializer_187_UserManagementViewModel;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 170:   //  Microsoft.UI.Xaml.Controls.TreeViewNode
+            case 188:   //  Microsoft.UI.Xaml.Controls.TreeViewNode
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
-                userType.Activator = Activate_170_TreeViewNode;
-                userType.StaticInitializer = StaticInitializer_170_TreeViewNode;
+                userType.Activator = Activate_188_TreeViewNode;
+                userType.StaticInitializer = StaticInitializer_188_TreeViewNode;
                 userType.AddMemberName("Children");
                 userType.AddMemberName("Content");
                 userType.AddMemberName("Depth");
@@ -2218,10 +2422,10 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 171:   //  System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>
+            case 189:   //  System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>
                 userType = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType(this, typeName, type, null);
-                userType.StaticInitializer = StaticInitializer_171_IList;
-                userType.CollectionAdd = VectorAdd_171_IList;
+                userType.StaticInitializer = StaticInitializer_189_IList;
+                userType.CollectionAdd = VectorAdd_189_IList;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
@@ -2564,877 +2768,942 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
             var that = (global::Kirana.App.Views.AuditLogPage)instance;
             return that.ViewModel;
         }
-        private object get_30_BarcodeLabelDialog_ViewModel(object instance)
+        private object get_30_ProgressBar_IsIndeterminate(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressBar)instance;
+            return that.IsIndeterminate;
+        }
+        private void set_30_ProgressBar_IsIndeterminate(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressBar)instance;
+            that.IsIndeterminate = (global::System.Boolean)Value;
+        }
+        private object get_31_ProgressBar_ShowError(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressBar)instance;
+            return that.ShowError;
+        }
+        private void set_31_ProgressBar_ShowError(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressBar)instance;
+            that.ShowError = (global::System.Boolean)Value;
+        }
+        private object get_32_ProgressBar_ShowPaused(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressBar)instance;
+            return that.ShowPaused;
+        }
+        private void set_32_ProgressBar_ShowPaused(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressBar)instance;
+            that.ShowPaused = (global::System.Boolean)Value;
+        }
+        private object get_33_ProgressBar_TemplateSettings(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressBar)instance;
+            return that.TemplateSettings;
+        }
+        private object get_34_BackupManagerPage_ViewModel(object instance)
+        {
+            var that = (global::Kirana.App.Views.BackupManagerPage)instance;
+            return that.ViewModel;
+        }
+        private object get_35_BarcodeLabelDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.BarcodeLabelDialog)instance;
             return that.ViewModel;
         }
-        private object get_31_BarcodeScanTestPage_ViewModel(object instance)
+        private object get_36_BarcodeScanTestPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.BarcodeScanTestPage)instance;
             return that.ViewModel;
         }
-        private object get_32_BatchManagementDialog_ViewModel(object instance)
+        private object get_37_BatchManagementDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.BatchManagementDialog)instance;
             return that.ViewModel;
         }
-        private object get_33_BillDiscountDialog_Percent(object instance)
+        private object get_38_BillDiscountDialog_Percent(object instance)
         {
             var that = (global::Kirana.App.Views.BillDiscountDialog)instance;
             return that.Percent;
         }
-        private object get_34_BrandManagementDialog_ViewModel(object instance)
+        private object get_39_BrandManagementDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.BrandManagementDialog)instance;
             return that.ViewModel;
         }
-        private object get_35_CategoryManagementDialog_ViewModel(object instance)
+        private object get_40_CategoryManagementDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.CategoryManagementDialog)instance;
             return that.ViewModel;
         }
-        private object get_36_CreditPaymentDialog_RecordedPayment(object instance)
+        private object get_41_CreditPaymentDialog_RecordedPayment(object instance)
         {
             var that = (global::Kirana.App.Views.CreditPaymentDialog)instance;
             return that.RecordedPayment;
         }
-        private object get_37_CustomerEditDialog_ViewModel(object instance)
+        private object get_42_CustomerEditDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.CustomerEditDialog)instance;
             return that.ViewModel;
         }
-        private object get_38_CustomerLedgerPage_ViewModel(object instance)
+        private object get_43_CustomerLedgerPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.CustomerLedgerPage)instance;
             return that.ViewModel;
         }
-        private object get_39_CustomerPickerDialog_ViewModel(object instance)
+        private object get_44_CustomerPickerDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.CustomerPickerDialog)instance;
             return that.ViewModel;
         }
-        private object get_40_CustomerPickerDialog_Confirmed(object instance)
+        private object get_45_CustomerPickerDialog_Confirmed(object instance)
         {
             var that = (global::Kirana.App.Views.CustomerPickerDialog)instance;
             return that.Confirmed;
         }
-        private object get_41_CustomerPickerDialog_SelectedCustomer(object instance)
+        private object get_46_CustomerPickerDialog_SelectedCustomer(object instance)
         {
             var that = (global::Kirana.App.Views.CustomerPickerDialog)instance;
             return that.SelectedCustomer;
         }
-        private object get_42_CustomersPage_ViewModel(object instance)
+        private object get_47_CustomersPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.CustomersPage)instance;
             return that.ViewModel;
         }
-        private object get_43_ExpenseCategoriesPage_ViewModel(object instance)
+        private object get_48_DatabaseMaintenancePage_ViewModel(object instance)
+        {
+            var that = (global::Kirana.App.Views.DatabaseMaintenancePage)instance;
+            return that.ViewModel;
+        }
+        private object get_49_ExpenseCategoriesPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.ExpenseCategoriesPage)instance;
             return that.ViewModel;
         }
-        private object get_44_ExpensesPage_ViewModel(object instance)
+        private object get_50_ExpensesPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.ExpensesPage)instance;
             return that.ViewModel;
         }
-        private object get_45_HeldBillsDialog_ViewModel(object instance)
+        private object get_51_ExportCenterPage_ViewModel(object instance)
+        {
+            var that = (global::Kirana.App.Views.ExportCenterPage)instance;
+            return that.ViewModel;
+        }
+        private object get_52_HeldBillsDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.HeldBillsDialog)instance;
             return that.ViewModel;
         }
-        private object get_46_HeldBillsDialog_ResumedHeldBillId(object instance)
+        private object get_53_HeldBillsDialog_ResumedHeldBillId(object instance)
         {
             var that = (global::Kirana.App.Views.HeldBillsDialog)instance;
             return that.ResumedHeldBillId;
         }
-        private object get_47_ProgressRing_IsActive(object instance)
+        private object get_54_ProgressRing_IsActive(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             return that.IsActive;
         }
-        private void set_47_ProgressRing_IsActive(object instance, object Value)
+        private void set_54_ProgressRing_IsActive(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             that.IsActive = (global::System.Boolean)Value;
         }
-        private object get_48_ProgressRing_IsIndeterminate(object instance)
+        private object get_55_ProgressRing_IsIndeterminate(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             return that.IsIndeterminate;
         }
-        private void set_48_ProgressRing_IsIndeterminate(object instance, object Value)
+        private void set_55_ProgressRing_IsIndeterminate(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             that.IsIndeterminate = (global::System.Boolean)Value;
         }
-        private object get_49_ProgressRing_Maximum(object instance)
+        private object get_56_ProgressRing_Maximum(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             return that.Maximum;
         }
-        private void set_49_ProgressRing_Maximum(object instance, object Value)
+        private void set_56_ProgressRing_Maximum(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             that.Maximum = (global::System.Double)Value;
         }
-        private object get_50_ProgressRing_Minimum(object instance)
+        private object get_57_ProgressRing_Minimum(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             return that.Minimum;
         }
-        private void set_50_ProgressRing_Minimum(object instance, object Value)
+        private void set_57_ProgressRing_Minimum(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             that.Minimum = (global::System.Double)Value;
         }
-        private object get_51_ProgressRing_TemplateSettings(object instance)
+        private object get_58_ProgressRing_TemplateSettings(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             return that.TemplateSettings;
         }
-        private object get_52_ProgressRing_Value(object instance)
+        private object get_59_ProgressRing_Value(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             return that.Value;
         }
-        private void set_52_ProgressRing_Value(object instance, object Value)
+        private void set_59_ProgressRing_Value(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
             that.Value = (global::System.Double)Value;
         }
-        private object get_53_InvoicePreviewDialog_ViewModel(object instance)
+        private object get_60_InvoicePreviewDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.InvoicePreviewDialog)instance;
             return that.ViewModel;
         }
-        private object get_54_ManagementHomePage_ViewModel(object instance)
+        private object get_61_ManagementHomePage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.ManagementHomePage)instance;
             return that.ViewModel;
         }
-        private object get_55_ManagementLoginDialog_Unlocked(object instance)
+        private object get_62_ManagementLoginDialog_Unlocked(object instance)
         {
             var that = (global::Kirana.App.Views.ManagementLoginDialog)instance;
             return that.Unlocked;
         }
-        private object get_56_NavigationView_PaneDisplayMode(object instance)
+        private object get_63_NavigationView_PaneDisplayMode(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.PaneDisplayMode;
         }
-        private void set_56_NavigationView_PaneDisplayMode(object instance, object Value)
+        private void set_63_NavigationView_PaneDisplayMode(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.PaneDisplayMode = (global::Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode)Value;
         }
-        private object get_57_NavigationView_OpenPaneLength(object instance)
+        private object get_64_NavigationView_OpenPaneLength(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.OpenPaneLength;
         }
-        private void set_57_NavigationView_OpenPaneLength(object instance, object Value)
+        private void set_64_NavigationView_OpenPaneLength(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.OpenPaneLength = (global::System.Double)Value;
         }
-        private object get_58_NavigationView_IsSettingsVisible(object instance)
+        private object get_65_NavigationView_IsSettingsVisible(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.IsSettingsVisible;
         }
-        private void set_58_NavigationView_IsSettingsVisible(object instance, object Value)
+        private void set_65_NavigationView_IsSettingsVisible(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.IsSettingsVisible = (global::System.Boolean)Value;
         }
-        private object get_59_NavigationView_IsBackButtonVisible(object instance)
+        private object get_66_NavigationView_IsBackButtonVisible(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.IsBackButtonVisible;
         }
-        private void set_59_NavigationView_IsBackButtonVisible(object instance, object Value)
+        private void set_66_NavigationView_IsBackButtonVisible(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.IsBackButtonVisible = (global::Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible)Value;
         }
-        private object get_60_NavigationView_IsPaneToggleButtonVisible(object instance)
+        private object get_67_NavigationView_IsPaneToggleButtonVisible(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.IsPaneToggleButtonVisible;
         }
-        private void set_60_NavigationView_IsPaneToggleButtonVisible(object instance, object Value)
+        private void set_67_NavigationView_IsPaneToggleButtonVisible(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.IsPaneToggleButtonVisible = (global::System.Boolean)Value;
         }
-        private object get_61_NavigationView_MenuItems(object instance)
+        private object get_68_NavigationView_MenuItems(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.MenuItems;
         }
-        private object get_62_NavigationView_AlwaysShowHeader(object instance)
+        private object get_69_NavigationView_AlwaysShowHeader(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.AlwaysShowHeader;
         }
-        private void set_62_NavigationView_AlwaysShowHeader(object instance, object Value)
+        private void set_69_NavigationView_AlwaysShowHeader(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.AlwaysShowHeader = (global::System.Boolean)Value;
         }
-        private object get_63_NavigationView_AutoSuggestBox(object instance)
+        private object get_70_NavigationView_AutoSuggestBox(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.AutoSuggestBox;
         }
-        private void set_63_NavigationView_AutoSuggestBox(object instance, object Value)
+        private void set_70_NavigationView_AutoSuggestBox(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.AutoSuggestBox = (global::Microsoft.UI.Xaml.Controls.AutoSuggestBox)Value;
         }
-        private object get_64_NavigationView_CompactModeThresholdWidth(object instance)
+        private object get_71_NavigationView_CompactModeThresholdWidth(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.CompactModeThresholdWidth;
         }
-        private void set_64_NavigationView_CompactModeThresholdWidth(object instance, object Value)
+        private void set_71_NavigationView_CompactModeThresholdWidth(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.CompactModeThresholdWidth = (global::System.Double)Value;
         }
-        private object get_65_NavigationView_CompactPaneLength(object instance)
+        private object get_72_NavigationView_CompactPaneLength(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.CompactPaneLength;
         }
-        private void set_65_NavigationView_CompactPaneLength(object instance, object Value)
+        private void set_72_NavigationView_CompactPaneLength(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.CompactPaneLength = (global::System.Double)Value;
         }
-        private object get_66_NavigationView_ContentOverlay(object instance)
+        private object get_73_NavigationView_ContentOverlay(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.ContentOverlay;
         }
-        private void set_66_NavigationView_ContentOverlay(object instance, object Value)
+        private void set_73_NavigationView_ContentOverlay(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.ContentOverlay = (global::Microsoft.UI.Xaml.UIElement)Value;
         }
-        private object get_67_NavigationView_DisplayMode(object instance)
+        private object get_74_NavigationView_DisplayMode(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.DisplayMode;
         }
-        private object get_68_NavigationView_ExpandedModeThresholdWidth(object instance)
+        private object get_75_NavigationView_ExpandedModeThresholdWidth(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.ExpandedModeThresholdWidth;
         }
-        private void set_68_NavigationView_ExpandedModeThresholdWidth(object instance, object Value)
+        private void set_75_NavigationView_ExpandedModeThresholdWidth(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.ExpandedModeThresholdWidth = (global::System.Double)Value;
         }
-        private object get_69_NavigationView_FooterMenuItems(object instance)
+        private object get_76_NavigationView_FooterMenuItems(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.FooterMenuItems;
         }
-        private object get_70_NavigationView_FooterMenuItemsSource(object instance)
+        private object get_77_NavigationView_FooterMenuItemsSource(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.FooterMenuItemsSource;
         }
-        private void set_70_NavigationView_FooterMenuItemsSource(object instance, object Value)
+        private void set_77_NavigationView_FooterMenuItemsSource(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.FooterMenuItemsSource = (global::System.Object)Value;
         }
-        private object get_71_NavigationView_Header(object instance)
+        private object get_78_NavigationView_Header(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.Header;
         }
-        private void set_71_NavigationView_Header(object instance, object Value)
+        private void set_78_NavigationView_Header(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.Header = (global::System.Object)Value;
         }
-        private object get_72_NavigationView_HeaderTemplate(object instance)
+        private object get_79_NavigationView_HeaderTemplate(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.HeaderTemplate;
         }
-        private void set_72_NavigationView_HeaderTemplate(object instance, object Value)
+        private void set_79_NavigationView_HeaderTemplate(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.HeaderTemplate = (global::Microsoft.UI.Xaml.DataTemplate)Value;
         }
-        private object get_73_NavigationView_IsBackEnabled(object instance)
+        private object get_80_NavigationView_IsBackEnabled(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.IsBackEnabled;
         }
-        private void set_73_NavigationView_IsBackEnabled(object instance, object Value)
+        private void set_80_NavigationView_IsBackEnabled(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.IsBackEnabled = (global::System.Boolean)Value;
         }
-        private object get_74_NavigationView_IsPaneOpen(object instance)
+        private object get_81_NavigationView_IsPaneOpen(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.IsPaneOpen;
         }
-        private void set_74_NavigationView_IsPaneOpen(object instance, object Value)
+        private void set_81_NavigationView_IsPaneOpen(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.IsPaneOpen = (global::System.Boolean)Value;
         }
-        private object get_75_NavigationView_IsPaneVisible(object instance)
+        private object get_82_NavigationView_IsPaneVisible(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.IsPaneVisible;
         }
-        private void set_75_NavigationView_IsPaneVisible(object instance, object Value)
+        private void set_82_NavigationView_IsPaneVisible(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.IsPaneVisible = (global::System.Boolean)Value;
         }
-        private object get_76_NavigationView_IsTitleBarAutoPaddingEnabled(object instance)
+        private object get_83_NavigationView_IsTitleBarAutoPaddingEnabled(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.IsTitleBarAutoPaddingEnabled;
         }
-        private void set_76_NavigationView_IsTitleBarAutoPaddingEnabled(object instance, object Value)
+        private void set_83_NavigationView_IsTitleBarAutoPaddingEnabled(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.IsTitleBarAutoPaddingEnabled = (global::System.Boolean)Value;
         }
-        private object get_77_NavigationView_MenuItemContainerStyle(object instance)
+        private object get_84_NavigationView_MenuItemContainerStyle(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.MenuItemContainerStyle;
         }
-        private void set_77_NavigationView_MenuItemContainerStyle(object instance, object Value)
+        private void set_84_NavigationView_MenuItemContainerStyle(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.MenuItemContainerStyle = (global::Microsoft.UI.Xaml.Style)Value;
         }
-        private object get_78_NavigationView_MenuItemContainerStyleSelector(object instance)
+        private object get_85_NavigationView_MenuItemContainerStyleSelector(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.MenuItemContainerStyleSelector;
         }
-        private void set_78_NavigationView_MenuItemContainerStyleSelector(object instance, object Value)
+        private void set_85_NavigationView_MenuItemContainerStyleSelector(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.MenuItemContainerStyleSelector = (global::Microsoft.UI.Xaml.Controls.StyleSelector)Value;
         }
-        private object get_79_NavigationView_MenuItemTemplate(object instance)
+        private object get_86_NavigationView_MenuItemTemplate(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.MenuItemTemplate;
         }
-        private void set_79_NavigationView_MenuItemTemplate(object instance, object Value)
+        private void set_86_NavigationView_MenuItemTemplate(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.MenuItemTemplate = (global::Microsoft.UI.Xaml.DataTemplate)Value;
         }
-        private object get_80_NavigationView_MenuItemTemplateSelector(object instance)
+        private object get_87_NavigationView_MenuItemTemplateSelector(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.MenuItemTemplateSelector;
         }
-        private void set_80_NavigationView_MenuItemTemplateSelector(object instance, object Value)
+        private void set_87_NavigationView_MenuItemTemplateSelector(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.MenuItemTemplateSelector = (global::Microsoft.UI.Xaml.Controls.DataTemplateSelector)Value;
         }
-        private object get_81_NavigationView_MenuItemsSource(object instance)
+        private object get_88_NavigationView_MenuItemsSource(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.MenuItemsSource;
         }
-        private void set_81_NavigationView_MenuItemsSource(object instance, object Value)
+        private void set_88_NavigationView_MenuItemsSource(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.MenuItemsSource = (global::System.Object)Value;
         }
-        private object get_82_NavigationView_OverflowLabelMode(object instance)
+        private object get_89_NavigationView_OverflowLabelMode(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.OverflowLabelMode;
         }
-        private void set_82_NavigationView_OverflowLabelMode(object instance, object Value)
+        private void set_89_NavigationView_OverflowLabelMode(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.OverflowLabelMode = (global::Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode)Value;
         }
-        private object get_83_NavigationView_PaneCustomContent(object instance)
+        private object get_90_NavigationView_PaneCustomContent(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.PaneCustomContent;
         }
-        private void set_83_NavigationView_PaneCustomContent(object instance, object Value)
+        private void set_90_NavigationView_PaneCustomContent(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.PaneCustomContent = (global::Microsoft.UI.Xaml.UIElement)Value;
         }
-        private object get_84_NavigationView_PaneFooter(object instance)
+        private object get_91_NavigationView_PaneFooter(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.PaneFooter;
         }
-        private void set_84_NavigationView_PaneFooter(object instance, object Value)
+        private void set_91_NavigationView_PaneFooter(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.PaneFooter = (global::Microsoft.UI.Xaml.UIElement)Value;
         }
-        private object get_85_NavigationView_PaneHeader(object instance)
+        private object get_92_NavigationView_PaneHeader(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.PaneHeader;
         }
-        private void set_85_NavigationView_PaneHeader(object instance, object Value)
+        private void set_92_NavigationView_PaneHeader(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.PaneHeader = (global::Microsoft.UI.Xaml.UIElement)Value;
         }
-        private object get_86_NavigationView_PaneTitle(object instance)
+        private object get_93_NavigationView_PaneTitle(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.PaneTitle;
         }
-        private void set_86_NavigationView_PaneTitle(object instance, object Value)
+        private void set_93_NavigationView_PaneTitle(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.PaneTitle = (global::System.String)Value;
         }
-        private object get_87_NavigationView_PaneToggleButtonStyle(object instance)
+        private object get_94_NavigationView_PaneToggleButtonStyle(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.PaneToggleButtonStyle;
         }
-        private void set_87_NavigationView_PaneToggleButtonStyle(object instance, object Value)
+        private void set_94_NavigationView_PaneToggleButtonStyle(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.PaneToggleButtonStyle = (global::Microsoft.UI.Xaml.Style)Value;
         }
-        private object get_88_NavigationView_SelectedItem(object instance)
+        private object get_95_NavigationView_SelectedItem(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.SelectedItem;
         }
-        private void set_88_NavigationView_SelectedItem(object instance, object Value)
+        private void set_95_NavigationView_SelectedItem(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.SelectedItem = (global::System.Object)Value;
         }
-        private object get_89_NavigationView_SelectionFollowsFocus(object instance)
+        private object get_96_NavigationView_SelectionFollowsFocus(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.SelectionFollowsFocus;
         }
-        private void set_89_NavigationView_SelectionFollowsFocus(object instance, object Value)
+        private void set_96_NavigationView_SelectionFollowsFocus(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.SelectionFollowsFocus = (global::Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus)Value;
         }
-        private object get_90_NavigationView_SettingsItem(object instance)
+        private object get_97_NavigationView_SettingsItem(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.SettingsItem;
         }
-        private object get_91_NavigationView_ShoulderNavigationEnabled(object instance)
+        private object get_98_NavigationView_ShoulderNavigationEnabled(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.ShoulderNavigationEnabled;
         }
-        private void set_91_NavigationView_ShoulderNavigationEnabled(object instance, object Value)
+        private void set_98_NavigationView_ShoulderNavigationEnabled(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             that.ShoulderNavigationEnabled = (global::Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled)Value;
         }
-        private object get_92_NavigationView_TemplateSettings(object instance)
+        private object get_99_NavigationView_TemplateSettings(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationView)instance;
             return that.TemplateSettings;
         }
-        private object get_93_NavigationViewItem_Icon(object instance)
+        private object get_100_NavigationViewItem_Icon(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             return that.Icon;
         }
-        private void set_93_NavigationViewItem_Icon(object instance, object Value)
+        private void set_100_NavigationViewItem_Icon(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             that.Icon = (global::Microsoft.UI.Xaml.Controls.IconElement)Value;
         }
-        private object get_94_NavigationViewItem_CompactPaneLength(object instance)
+        private object get_101_NavigationViewItem_CompactPaneLength(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             return that.CompactPaneLength;
         }
-        private object get_95_NavigationViewItem_HasUnrealizedChildren(object instance)
+        private object get_102_NavigationViewItem_HasUnrealizedChildren(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             return that.HasUnrealizedChildren;
         }
-        private void set_95_NavigationViewItem_HasUnrealizedChildren(object instance, object Value)
+        private void set_102_NavigationViewItem_HasUnrealizedChildren(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             that.HasUnrealizedChildren = (global::System.Boolean)Value;
         }
-        private object get_96_NavigationViewItem_InfoBadge(object instance)
+        private object get_103_NavigationViewItem_InfoBadge(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             return that.InfoBadge;
         }
-        private void set_96_NavigationViewItem_InfoBadge(object instance, object Value)
+        private void set_103_NavigationViewItem_InfoBadge(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             that.InfoBadge = (global::Microsoft.UI.Xaml.Controls.InfoBadge)Value;
         }
-        private object get_97_NavigationViewItem_IsChildSelected(object instance)
+        private object get_104_NavigationViewItem_IsChildSelected(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             return that.IsChildSelected;
         }
-        private void set_97_NavigationViewItem_IsChildSelected(object instance, object Value)
+        private void set_104_NavigationViewItem_IsChildSelected(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             that.IsChildSelected = (global::System.Boolean)Value;
         }
-        private object get_98_NavigationViewItem_IsExpanded(object instance)
+        private object get_105_NavigationViewItem_IsExpanded(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             return that.IsExpanded;
         }
-        private void set_98_NavigationViewItem_IsExpanded(object instance, object Value)
+        private void set_105_NavigationViewItem_IsExpanded(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             that.IsExpanded = (global::System.Boolean)Value;
         }
-        private object get_99_NavigationViewItem_MenuItems(object instance)
+        private object get_106_NavigationViewItem_MenuItems(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             return that.MenuItems;
         }
-        private object get_100_NavigationViewItem_MenuItemsSource(object instance)
+        private object get_107_NavigationViewItem_MenuItemsSource(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             return that.MenuItemsSource;
         }
-        private void set_100_NavigationViewItem_MenuItemsSource(object instance, object Value)
+        private void set_107_NavigationViewItem_MenuItemsSource(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             that.MenuItemsSource = (global::System.Object)Value;
         }
-        private object get_101_NavigationViewItem_SelectsOnInvoked(object instance)
+        private object get_108_NavigationViewItem_SelectsOnInvoked(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             return that.SelectsOnInvoked;
         }
-        private void set_101_NavigationViewItem_SelectsOnInvoked(object instance, object Value)
+        private void set_108_NavigationViewItem_SelectsOnInvoked(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItem)instance;
             that.SelectsOnInvoked = (global::System.Boolean)Value;
         }
-        private object get_102_NavigationViewItemBase_IsSelected(object instance)
+        private object get_109_NavigationViewItemBase_IsSelected(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItemBase)instance;
             return that.IsSelected;
         }
-        private void set_102_NavigationViewItemBase_IsSelected(object instance, object Value)
+        private void set_109_NavigationViewItemBase_IsSelected(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.NavigationViewItemBase)instance;
             that.IsSelected = (global::System.Boolean)Value;
         }
-        private object get_103_ManagerAuthorizationDialog_AuthorizedUserId(object instance)
+        private object get_110_ManagerAuthorizationDialog_AuthorizedUserId(object instance)
         {
             var that = (global::Kirana.App.Views.ManagerAuthorizationDialog)instance;
             return that.AuthorizedUserId;
         }
-        private object get_104_NewPurchaseReturnPage_ViewModel(object instance)
+        private object get_111_NewPurchaseReturnPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.NewPurchaseReturnPage)instance;
             return that.ViewModel;
         }
-        private object get_105_NewSalesReturnPage_ViewModel(object instance)
+        private object get_112_NewSalesReturnPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.NewSalesReturnPage)instance;
             return that.ViewModel;
         }
-        private object get_106_PaymentDialog_ViewModel(object instance)
+        private object get_113_PaymentDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.PaymentDialog)instance;
             return that.ViewModel;
         }
-        private object get_107_PosShellPage_ViewModel(object instance)
+        private object get_114_PosShellPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.PosShellPage)instance;
             return that.ViewModel;
         }
-        private object get_108_ProductEditDialog_ViewModel(object instance)
+        private object get_115_ProductEditDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.ProductEditDialog)instance;
             return that.ViewModel;
         }
-        private object get_109_ProductsPage_ViewModel(object instance)
+        private object get_116_ProductImportDialog_ViewModel(object instance)
+        {
+            var that = (global::Kirana.App.Views.ProductImportDialog)instance;
+            return that.ViewModel;
+        }
+        private object get_117_ProductImportDialog_ImportedAnything(object instance)
+        {
+            var that = (global::Kirana.App.Views.ProductImportDialog)instance;
+            return that.ImportedAnything;
+        }
+        private object get_118_ProductsPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.ProductsPage)instance;
             return that.ViewModel;
         }
-        private object get_110_PurchaseEntryPage_ViewModel(object instance)
+        private object get_119_PurchaseEntryPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.PurchaseEntryPage)instance;
             return that.ViewModel;
         }
-        private object get_111_PurchaseReturnsPage_ViewModel(object instance)
+        private object get_120_PurchaseReturnsPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.PurchaseReturnsPage)instance;
             return that.ViewModel;
         }
-        private object get_112_PurchasesPage_ViewModel(object instance)
+        private object get_121_PurchasesPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.PurchasesPage)instance;
             return that.ViewModel;
         }
-        private object get_113_ProfitReportView_ViewModel(object instance)
+        private object get_122_ProfitReportView_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.Reports.ProfitReportView)instance;
             return that.ViewModel;
         }
-        private object get_114_ExpenseReportView_ViewModel(object instance)
+        private object get_123_ExpenseReportView_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.Reports.ExpenseReportView)instance;
             return that.ViewModel;
         }
-        private object get_115_SupplierReportView_ViewModel(object instance)
+        private object get_124_SupplierReportView_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.Reports.SupplierReportView)instance;
             return that.ViewModel;
         }
-        private object get_116_CustomerReportView_ViewModel(object instance)
+        private object get_125_CustomerReportView_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.Reports.CustomerReportView)instance;
             return that.ViewModel;
         }
-        private object get_117_InventoryReportView_ViewModel(object instance)
+        private object get_126_InventoryReportView_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.Reports.InventoryReportView)instance;
             return that.ViewModel;
         }
-        private object get_118_ProductReportView_ViewModel(object instance)
+        private object get_127_ProductReportView_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.Reports.ProductReportView)instance;
             return that.ViewModel;
         }
-        private object get_119_SalesReportView_ViewModel(object instance)
+        private object get_128_SalesReportView_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.Reports.SalesReportView)instance;
             return that.ViewModel;
         }
-        private object get_120_DashboardView_ViewModel(object instance)
+        private object get_129_DashboardView_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.Reports.DashboardView)instance;
             return that.ViewModel;
         }
-        private object get_121_ReprintInvoiceDialog_ViewModel(object instance)
+        private object get_130_ReprintInvoiceDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.ReprintInvoiceDialog)instance;
             return that.ViewModel;
         }
-        private object get_122_ReprintInvoiceDialog_FoundDocument(object instance)
+        private object get_131_ReprintInvoiceDialog_FoundDocument(object instance)
         {
             var that = (global::Kirana.App.Views.ReprintInvoiceDialog)instance;
             return that.FoundDocument;
         }
-        private object get_123_SalesReturnsPage_ViewModel(object instance)
+        private object get_132_RestorePage_ViewModel(object instance)
+        {
+            var that = (global::Kirana.App.Views.RestorePage)instance;
+            return that.ViewModel;
+        }
+        private object get_133_SalesReturnsPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.SalesReturnsPage)instance;
             return that.ViewModel;
         }
-        private object get_124_RadioButtons_Items(object instance)
+        private object get_134_RadioButtons_Items(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             return that.Items;
         }
-        private object get_125_RadioButtons_SelectedIndex(object instance)
+        private object get_135_RadioButtons_SelectedIndex(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             return that.SelectedIndex;
         }
-        private void set_125_RadioButtons_SelectedIndex(object instance, object Value)
+        private void set_135_RadioButtons_SelectedIndex(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             that.SelectedIndex = (global::System.Int32)Value;
         }
-        private object get_126_RadioButtons_Header(object instance)
+        private object get_136_RadioButtons_Header(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             return that.Header;
         }
-        private void set_126_RadioButtons_Header(object instance, object Value)
+        private void set_136_RadioButtons_Header(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             that.Header = (global::System.Object)Value;
         }
-        private object get_127_RadioButtons_HeaderTemplate(object instance)
+        private object get_137_RadioButtons_HeaderTemplate(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             return that.HeaderTemplate;
         }
-        private void set_127_RadioButtons_HeaderTemplate(object instance, object Value)
+        private void set_137_RadioButtons_HeaderTemplate(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             that.HeaderTemplate = (global::Microsoft.UI.Xaml.DataTemplate)Value;
         }
-        private object get_128_RadioButtons_ItemTemplate(object instance)
+        private object get_138_RadioButtons_ItemTemplate(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             return that.ItemTemplate;
         }
-        private void set_128_RadioButtons_ItemTemplate(object instance, object Value)
+        private void set_138_RadioButtons_ItemTemplate(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             that.ItemTemplate = (global::System.Object)Value;
         }
-        private object get_129_RadioButtons_ItemsSource(object instance)
+        private object get_139_RadioButtons_ItemsSource(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             return that.ItemsSource;
         }
-        private void set_129_RadioButtons_ItemsSource(object instance, object Value)
+        private void set_139_RadioButtons_ItemsSource(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             that.ItemsSource = (global::System.Object)Value;
         }
-        private object get_130_RadioButtons_MaxColumns(object instance)
+        private object get_140_RadioButtons_MaxColumns(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             return that.MaxColumns;
         }
-        private void set_130_RadioButtons_MaxColumns(object instance, object Value)
+        private void set_140_RadioButtons_MaxColumns(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             that.MaxColumns = (global::System.Int32)Value;
         }
-        private object get_131_RadioButtons_SelectedItem(object instance)
+        private object get_141_RadioButtons_SelectedItem(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             return that.SelectedItem;
         }
-        private void set_131_RadioButtons_SelectedItem(object instance, object Value)
+        private void set_141_RadioButtons_SelectedItem(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.RadioButtons)instance;
             that.SelectedItem = (global::System.Object)Value;
         }
-        private object get_132_SettingsPage_ViewModel(object instance)
+        private object get_142_SettingsPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.SettingsPage)instance;
             return that.ViewModel;
         }
-        private object get_133_SetupWizardPage_ViewModel(object instance)
+        private object get_143_SetupWizardPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.SetupWizardPage)instance;
             return that.ViewModel;
         }
-        private object get_134_StockAdjustmentDialog_ViewModel(object instance)
+        private object get_144_StockAdjustmentDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.StockAdjustmentDialog)instance;
             return that.ViewModel;
         }
-        private object get_135_SupplierEditDialog_ViewModel(object instance)
+        private object get_145_SupplierEditDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.SupplierEditDialog)instance;
             return that.ViewModel;
         }
-        private object get_136_SupplierLedgerPage_ViewModel(object instance)
+        private object get_146_SupplierLedgerPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.SupplierLedgerPage)instance;
             return that.ViewModel;
         }
-        private object get_137_SupplierPickerDialog_ViewModel(object instance)
+        private object get_147_SupplierPickerDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.SupplierPickerDialog)instance;
             return that.ViewModel;
         }
-        private object get_138_SupplierPickerDialog_Confirmed(object instance)
+        private object get_148_SupplierPickerDialog_Confirmed(object instance)
         {
             var that = (global::Kirana.App.Views.SupplierPickerDialog)instance;
             return that.Confirmed;
         }
-        private object get_139_SupplierPickerDialog_SelectedSupplier(object instance)
+        private object get_149_SupplierPickerDialog_SelectedSupplier(object instance)
         {
             var that = (global::Kirana.App.Views.SupplierPickerDialog)instance;
             return that.SelectedSupplier;
         }
-        private object get_140_SuppliersPage_ViewModel(object instance)
+        private object get_150_SuppliersPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.SuppliersPage)instance;
             return that.ViewModel;
         }
-        private object get_141_UserEditDialog_ViewModel(object instance)
+        private object get_151_UserEditDialog_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.UserEditDialog)instance;
             return that.ViewModel;
         }
-        private object get_142_UserManagementPage_ViewModel(object instance)
+        private object get_152_UserManagementPage_ViewModel(object instance)
         {
             var that = (global::Kirana.App.Views.UserManagementPage)instance;
             return that.ViewModel;
         }
-        private object get_143_TreeViewNode_Children(object instance)
+        private object get_153_TreeViewNode_Children(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Children;
         }
-        private object get_144_TreeViewNode_Content(object instance)
+        private object get_154_TreeViewNode_Content(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Content;
         }
-        private void set_144_TreeViewNode_Content(object instance, object Value)
+        private void set_154_TreeViewNode_Content(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.Content = (global::System.Object)Value;
         }
-        private object get_145_TreeViewNode_Depth(object instance)
+        private object get_155_TreeViewNode_Depth(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Depth;
         }
-        private object get_146_TreeViewNode_HasChildren(object instance)
+        private object get_156_TreeViewNode_HasChildren(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.HasChildren;
         }
-        private object get_147_TreeViewNode_HasUnrealizedChildren(object instance)
+        private object get_157_TreeViewNode_HasUnrealizedChildren(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.HasUnrealizedChildren;
         }
-        private void set_147_TreeViewNode_HasUnrealizedChildren(object instance, object Value)
+        private void set_157_TreeViewNode_HasUnrealizedChildren(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.HasUnrealizedChildren = (global::System.Boolean)Value;
         }
-        private object get_148_TreeViewNode_IsExpanded(object instance)
+        private object get_158_TreeViewNode_IsExpanded(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.IsExpanded;
         }
-        private void set_148_TreeViewNode_IsExpanded(object instance, object Value)
+        private void set_158_TreeViewNode_IsExpanded(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.IsExpanded = (global::System.Boolean)Value;
         }
-        private object get_149_TreeViewNode_Parent(object instance)
+        private object get_159_TreeViewNode_Parent(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Parent;
@@ -3642,788 +3911,851 @@ namespace Kirana.App.Kirana_App_XamlTypeInfo
                 xamlMember.Getter = get_29_AuditLogPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
+            case "Microsoft.UI.Xaml.Controls.ProgressBar.IsIndeterminate":
+                userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressBar");
+                xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsIndeterminate", "Boolean");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_30_ProgressBar_IsIndeterminate;
+                xamlMember.Setter = set_30_ProgressBar_IsIndeterminate;
+                break;
+            case "Microsoft.UI.Xaml.Controls.ProgressBar.ShowError":
+                userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressBar");
+                xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ShowError", "Boolean");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_31_ProgressBar_ShowError;
+                xamlMember.Setter = set_31_ProgressBar_ShowError;
+                break;
+            case "Microsoft.UI.Xaml.Controls.ProgressBar.ShowPaused":
+                userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressBar");
+                xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ShowPaused", "Boolean");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_32_ProgressBar_ShowPaused;
+                xamlMember.Setter = set_32_ProgressBar_ShowPaused;
+                break;
+            case "Microsoft.UI.Xaml.Controls.ProgressBar.TemplateSettings":
+                userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressBar");
+                xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "TemplateSettings", "Microsoft.UI.Xaml.Controls.ProgressBarTemplateSettings");
+                xamlMember.Getter = get_33_ProgressBar_TemplateSettings;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "Kirana.App.Views.BackupManagerPage.ViewModel":
+                userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.BackupManagerPage");
+                xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.BackupManagerViewModel");
+                xamlMember.Getter = get_34_BackupManagerPage_ViewModel;
+                xamlMember.SetIsReadOnly();
+                break;
             case "Kirana.App.Views.BarcodeLabelDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.BarcodeLabelDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.BarcodeLabelViewModel");
-                xamlMember.Getter = get_30_BarcodeLabelDialog_ViewModel;
+                xamlMember.Getter = get_35_BarcodeLabelDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.BarcodeScanTestPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.BarcodeScanTestPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.BarcodeScanTestViewModel");
-                xamlMember.Getter = get_31_BarcodeScanTestPage_ViewModel;
+                xamlMember.Getter = get_36_BarcodeScanTestPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.BatchManagementDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.BatchManagementDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.BatchManagementViewModel");
-                xamlMember.Getter = get_32_BatchManagementDialog_ViewModel;
+                xamlMember.Getter = get_37_BatchManagementDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.BillDiscountDialog.Percent":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.BillDiscountDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Percent", "System.Decimal");
-                xamlMember.Getter = get_33_BillDiscountDialog_Percent;
+                xamlMember.Getter = get_38_BillDiscountDialog_Percent;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.BrandManagementDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.BrandManagementDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.BrandManagementViewModel");
-                xamlMember.Getter = get_34_BrandManagementDialog_ViewModel;
+                xamlMember.Getter = get_39_BrandManagementDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.CategoryManagementDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.CategoryManagementDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.CategoryManagementViewModel");
-                xamlMember.Getter = get_35_CategoryManagementDialog_ViewModel;
+                xamlMember.Getter = get_40_CategoryManagementDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.CreditPaymentDialog.RecordedPayment":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.CreditPaymentDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "RecordedPayment", "Kirana.Domain.Entities.CreditPayment");
-                xamlMember.Getter = get_36_CreditPaymentDialog_RecordedPayment;
+                xamlMember.Getter = get_41_CreditPaymentDialog_RecordedPayment;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.CustomerEditDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.CustomerEditDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.CustomerEditViewModel");
-                xamlMember.Getter = get_37_CustomerEditDialog_ViewModel;
+                xamlMember.Getter = get_42_CustomerEditDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.CustomerLedgerPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.CustomerLedgerPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.CustomerLedgerViewModel");
-                xamlMember.Getter = get_38_CustomerLedgerPage_ViewModel;
+                xamlMember.Getter = get_43_CustomerLedgerPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.CustomerPickerDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.CustomerPickerDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.CustomerPickerViewModel");
-                xamlMember.Getter = get_39_CustomerPickerDialog_ViewModel;
+                xamlMember.Getter = get_44_CustomerPickerDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.CustomerPickerDialog.Confirmed":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.CustomerPickerDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Confirmed", "Boolean");
-                xamlMember.Getter = get_40_CustomerPickerDialog_Confirmed;
+                xamlMember.Getter = get_45_CustomerPickerDialog_Confirmed;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.CustomerPickerDialog.SelectedCustomer":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.CustomerPickerDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "SelectedCustomer", "Kirana.Domain.Entities.Customer");
-                xamlMember.Getter = get_41_CustomerPickerDialog_SelectedCustomer;
+                xamlMember.Getter = get_46_CustomerPickerDialog_SelectedCustomer;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.CustomersPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.CustomersPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.CustomersViewModel");
-                xamlMember.Getter = get_42_CustomersPage_ViewModel;
+                xamlMember.Getter = get_47_CustomersPage_ViewModel;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "Kirana.App.Views.DatabaseMaintenancePage.ViewModel":
+                userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.DatabaseMaintenancePage");
+                xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.DatabaseMaintenanceViewModel");
+                xamlMember.Getter = get_48_DatabaseMaintenancePage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.ExpenseCategoriesPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ExpenseCategoriesPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.ExpenseCategoriesViewModel");
-                xamlMember.Getter = get_43_ExpenseCategoriesPage_ViewModel;
+                xamlMember.Getter = get_49_ExpenseCategoriesPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.ExpensesPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ExpensesPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.ExpensesViewModel");
-                xamlMember.Getter = get_44_ExpensesPage_ViewModel;
+                xamlMember.Getter = get_50_ExpensesPage_ViewModel;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "Kirana.App.Views.ExportCenterPage.ViewModel":
+                userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ExportCenterPage");
+                xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.ExportCenterViewModel");
+                xamlMember.Getter = get_51_ExportCenterPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.HeldBillsDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.HeldBillsDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.HeldBillsViewModel");
-                xamlMember.Getter = get_45_HeldBillsDialog_ViewModel;
+                xamlMember.Getter = get_52_HeldBillsDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.HeldBillsDialog.ResumedHeldBillId":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.HeldBillsDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ResumedHeldBillId", "System.Nullable`1<Int32>");
-                xamlMember.Getter = get_46_HeldBillsDialog_ResumedHeldBillId;
+                xamlMember.Getter = get_53_HeldBillsDialog_ResumedHeldBillId;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.ProgressRing.IsActive":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsActive", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_47_ProgressRing_IsActive;
-                xamlMember.Setter = set_47_ProgressRing_IsActive;
+                xamlMember.Getter = get_54_ProgressRing_IsActive;
+                xamlMember.Setter = set_54_ProgressRing_IsActive;
                 break;
             case "Microsoft.UI.Xaml.Controls.ProgressRing.IsIndeterminate":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsIndeterminate", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_48_ProgressRing_IsIndeterminate;
-                xamlMember.Setter = set_48_ProgressRing_IsIndeterminate;
+                xamlMember.Getter = get_55_ProgressRing_IsIndeterminate;
+                xamlMember.Setter = set_55_ProgressRing_IsIndeterminate;
                 break;
             case "Microsoft.UI.Xaml.Controls.ProgressRing.Maximum":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Maximum", "Double");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_49_ProgressRing_Maximum;
-                xamlMember.Setter = set_49_ProgressRing_Maximum;
+                xamlMember.Getter = get_56_ProgressRing_Maximum;
+                xamlMember.Setter = set_56_ProgressRing_Maximum;
                 break;
             case "Microsoft.UI.Xaml.Controls.ProgressRing.Minimum":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Minimum", "Double");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_50_ProgressRing_Minimum;
-                xamlMember.Setter = set_50_ProgressRing_Minimum;
+                xamlMember.Getter = get_57_ProgressRing_Minimum;
+                xamlMember.Setter = set_57_ProgressRing_Minimum;
                 break;
             case "Microsoft.UI.Xaml.Controls.ProgressRing.TemplateSettings":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "TemplateSettings", "Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings");
-                xamlMember.Getter = get_51_ProgressRing_TemplateSettings;
+                xamlMember.Getter = get_58_ProgressRing_TemplateSettings;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.ProgressRing.Value":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Value", "Double");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_52_ProgressRing_Value;
-                xamlMember.Setter = set_52_ProgressRing_Value;
+                xamlMember.Getter = get_59_ProgressRing_Value;
+                xamlMember.Setter = set_59_ProgressRing_Value;
                 break;
             case "Kirana.App.Views.InvoicePreviewDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.InvoicePreviewDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.InvoicePreviewViewModel");
-                xamlMember.Getter = get_53_InvoicePreviewDialog_ViewModel;
+                xamlMember.Getter = get_60_InvoicePreviewDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.ManagementHomePage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ManagementHomePage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.ManagementHomeViewModel");
-                xamlMember.Getter = get_54_ManagementHomePage_ViewModel;
+                xamlMember.Getter = get_61_ManagementHomePage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.ManagementLoginDialog.Unlocked":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ManagementLoginDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Unlocked", "Boolean");
-                xamlMember.Getter = get_55_ManagementLoginDialog_Unlocked;
+                xamlMember.Getter = get_62_ManagementLoginDialog_Unlocked;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.PaneDisplayMode":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "PaneDisplayMode", "Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_56_NavigationView_PaneDisplayMode;
-                xamlMember.Setter = set_56_NavigationView_PaneDisplayMode;
+                xamlMember.Getter = get_63_NavigationView_PaneDisplayMode;
+                xamlMember.Setter = set_63_NavigationView_PaneDisplayMode;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.OpenPaneLength":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "OpenPaneLength", "Double");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_57_NavigationView_OpenPaneLength;
-                xamlMember.Setter = set_57_NavigationView_OpenPaneLength;
+                xamlMember.Getter = get_64_NavigationView_OpenPaneLength;
+                xamlMember.Setter = set_64_NavigationView_OpenPaneLength;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.IsSettingsVisible":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsSettingsVisible", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_58_NavigationView_IsSettingsVisible;
-                xamlMember.Setter = set_58_NavigationView_IsSettingsVisible;
+                xamlMember.Getter = get_65_NavigationView_IsSettingsVisible;
+                xamlMember.Setter = set_65_NavigationView_IsSettingsVisible;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.IsBackButtonVisible":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsBackButtonVisible", "Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_59_NavigationView_IsBackButtonVisible;
-                xamlMember.Setter = set_59_NavigationView_IsBackButtonVisible;
+                xamlMember.Getter = get_66_NavigationView_IsBackButtonVisible;
+                xamlMember.Setter = set_66_NavigationView_IsBackButtonVisible;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.IsPaneToggleButtonVisible":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsPaneToggleButtonVisible", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_60_NavigationView_IsPaneToggleButtonVisible;
-                xamlMember.Setter = set_60_NavigationView_IsPaneToggleButtonVisible;
+                xamlMember.Getter = get_67_NavigationView_IsPaneToggleButtonVisible;
+                xamlMember.Setter = set_67_NavigationView_IsPaneToggleButtonVisible;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.MenuItems":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "MenuItems", "System.Collections.Generic.IList`1<Object>");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_61_NavigationView_MenuItems;
+                xamlMember.Getter = get_68_NavigationView_MenuItems;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.AlwaysShowHeader":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "AlwaysShowHeader", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_62_NavigationView_AlwaysShowHeader;
-                xamlMember.Setter = set_62_NavigationView_AlwaysShowHeader;
+                xamlMember.Getter = get_69_NavigationView_AlwaysShowHeader;
+                xamlMember.Setter = set_69_NavigationView_AlwaysShowHeader;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.AutoSuggestBox":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "AutoSuggestBox", "Microsoft.UI.Xaml.Controls.AutoSuggestBox");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_63_NavigationView_AutoSuggestBox;
-                xamlMember.Setter = set_63_NavigationView_AutoSuggestBox;
+                xamlMember.Getter = get_70_NavigationView_AutoSuggestBox;
+                xamlMember.Setter = set_70_NavigationView_AutoSuggestBox;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.CompactModeThresholdWidth":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "CompactModeThresholdWidth", "Double");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_64_NavigationView_CompactModeThresholdWidth;
-                xamlMember.Setter = set_64_NavigationView_CompactModeThresholdWidth;
+                xamlMember.Getter = get_71_NavigationView_CompactModeThresholdWidth;
+                xamlMember.Setter = set_71_NavigationView_CompactModeThresholdWidth;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.CompactPaneLength":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "CompactPaneLength", "Double");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_65_NavigationView_CompactPaneLength;
-                xamlMember.Setter = set_65_NavigationView_CompactPaneLength;
+                xamlMember.Getter = get_72_NavigationView_CompactPaneLength;
+                xamlMember.Setter = set_72_NavigationView_CompactPaneLength;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.ContentOverlay":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ContentOverlay", "Microsoft.UI.Xaml.UIElement");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_66_NavigationView_ContentOverlay;
-                xamlMember.Setter = set_66_NavigationView_ContentOverlay;
+                xamlMember.Getter = get_73_NavigationView_ContentOverlay;
+                xamlMember.Setter = set_73_NavigationView_ContentOverlay;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.DisplayMode":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "DisplayMode", "Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_67_NavigationView_DisplayMode;
+                xamlMember.Getter = get_74_NavigationView_DisplayMode;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.ExpandedModeThresholdWidth":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ExpandedModeThresholdWidth", "Double");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_68_NavigationView_ExpandedModeThresholdWidth;
-                xamlMember.Setter = set_68_NavigationView_ExpandedModeThresholdWidth;
+                xamlMember.Getter = get_75_NavigationView_ExpandedModeThresholdWidth;
+                xamlMember.Setter = set_75_NavigationView_ExpandedModeThresholdWidth;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.FooterMenuItems":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "FooterMenuItems", "System.Collections.Generic.IList`1<Object>");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_69_NavigationView_FooterMenuItems;
+                xamlMember.Getter = get_76_NavigationView_FooterMenuItems;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.FooterMenuItemsSource":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "FooterMenuItemsSource", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_70_NavigationView_FooterMenuItemsSource;
-                xamlMember.Setter = set_70_NavigationView_FooterMenuItemsSource;
+                xamlMember.Getter = get_77_NavigationView_FooterMenuItemsSource;
+                xamlMember.Setter = set_77_NavigationView_FooterMenuItemsSource;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.Header":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Header", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_71_NavigationView_Header;
-                xamlMember.Setter = set_71_NavigationView_Header;
+                xamlMember.Getter = get_78_NavigationView_Header;
+                xamlMember.Setter = set_78_NavigationView_Header;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.HeaderTemplate":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "HeaderTemplate", "Microsoft.UI.Xaml.DataTemplate");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_72_NavigationView_HeaderTemplate;
-                xamlMember.Setter = set_72_NavigationView_HeaderTemplate;
+                xamlMember.Getter = get_79_NavigationView_HeaderTemplate;
+                xamlMember.Setter = set_79_NavigationView_HeaderTemplate;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.IsBackEnabled":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsBackEnabled", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_73_NavigationView_IsBackEnabled;
-                xamlMember.Setter = set_73_NavigationView_IsBackEnabled;
+                xamlMember.Getter = get_80_NavigationView_IsBackEnabled;
+                xamlMember.Setter = set_80_NavigationView_IsBackEnabled;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.IsPaneOpen":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsPaneOpen", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_74_NavigationView_IsPaneOpen;
-                xamlMember.Setter = set_74_NavigationView_IsPaneOpen;
+                xamlMember.Getter = get_81_NavigationView_IsPaneOpen;
+                xamlMember.Setter = set_81_NavigationView_IsPaneOpen;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.IsPaneVisible":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsPaneVisible", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_75_NavigationView_IsPaneVisible;
-                xamlMember.Setter = set_75_NavigationView_IsPaneVisible;
+                xamlMember.Getter = get_82_NavigationView_IsPaneVisible;
+                xamlMember.Setter = set_82_NavigationView_IsPaneVisible;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.IsTitleBarAutoPaddingEnabled":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsTitleBarAutoPaddingEnabled", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_76_NavigationView_IsTitleBarAutoPaddingEnabled;
-                xamlMember.Setter = set_76_NavigationView_IsTitleBarAutoPaddingEnabled;
+                xamlMember.Getter = get_83_NavigationView_IsTitleBarAutoPaddingEnabled;
+                xamlMember.Setter = set_83_NavigationView_IsTitleBarAutoPaddingEnabled;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.MenuItemContainerStyle":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "MenuItemContainerStyle", "Microsoft.UI.Xaml.Style");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_77_NavigationView_MenuItemContainerStyle;
-                xamlMember.Setter = set_77_NavigationView_MenuItemContainerStyle;
+                xamlMember.Getter = get_84_NavigationView_MenuItemContainerStyle;
+                xamlMember.Setter = set_84_NavigationView_MenuItemContainerStyle;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.MenuItemContainerStyleSelector":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "MenuItemContainerStyleSelector", "Microsoft.UI.Xaml.Controls.StyleSelector");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_78_NavigationView_MenuItemContainerStyleSelector;
-                xamlMember.Setter = set_78_NavigationView_MenuItemContainerStyleSelector;
+                xamlMember.Getter = get_85_NavigationView_MenuItemContainerStyleSelector;
+                xamlMember.Setter = set_85_NavigationView_MenuItemContainerStyleSelector;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.MenuItemTemplate":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "MenuItemTemplate", "Microsoft.UI.Xaml.DataTemplate");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_79_NavigationView_MenuItemTemplate;
-                xamlMember.Setter = set_79_NavigationView_MenuItemTemplate;
+                xamlMember.Getter = get_86_NavigationView_MenuItemTemplate;
+                xamlMember.Setter = set_86_NavigationView_MenuItemTemplate;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.MenuItemTemplateSelector":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "MenuItemTemplateSelector", "Microsoft.UI.Xaml.Controls.DataTemplateSelector");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_80_NavigationView_MenuItemTemplateSelector;
-                xamlMember.Setter = set_80_NavigationView_MenuItemTemplateSelector;
+                xamlMember.Getter = get_87_NavigationView_MenuItemTemplateSelector;
+                xamlMember.Setter = set_87_NavigationView_MenuItemTemplateSelector;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.MenuItemsSource":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "MenuItemsSource", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_81_NavigationView_MenuItemsSource;
-                xamlMember.Setter = set_81_NavigationView_MenuItemsSource;
+                xamlMember.Getter = get_88_NavigationView_MenuItemsSource;
+                xamlMember.Setter = set_88_NavigationView_MenuItemsSource;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.OverflowLabelMode":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "OverflowLabelMode", "Microsoft.UI.Xaml.Controls.NavigationViewOverflowLabelMode");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_82_NavigationView_OverflowLabelMode;
-                xamlMember.Setter = set_82_NavigationView_OverflowLabelMode;
+                xamlMember.Getter = get_89_NavigationView_OverflowLabelMode;
+                xamlMember.Setter = set_89_NavigationView_OverflowLabelMode;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.PaneCustomContent":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "PaneCustomContent", "Microsoft.UI.Xaml.UIElement");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_83_NavigationView_PaneCustomContent;
-                xamlMember.Setter = set_83_NavigationView_PaneCustomContent;
+                xamlMember.Getter = get_90_NavigationView_PaneCustomContent;
+                xamlMember.Setter = set_90_NavigationView_PaneCustomContent;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.PaneFooter":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "PaneFooter", "Microsoft.UI.Xaml.UIElement");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_84_NavigationView_PaneFooter;
-                xamlMember.Setter = set_84_NavigationView_PaneFooter;
+                xamlMember.Getter = get_91_NavigationView_PaneFooter;
+                xamlMember.Setter = set_91_NavigationView_PaneFooter;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.PaneHeader":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "PaneHeader", "Microsoft.UI.Xaml.UIElement");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_85_NavigationView_PaneHeader;
-                xamlMember.Setter = set_85_NavigationView_PaneHeader;
+                xamlMember.Getter = get_92_NavigationView_PaneHeader;
+                xamlMember.Setter = set_92_NavigationView_PaneHeader;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.PaneTitle":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "PaneTitle", "String");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_86_NavigationView_PaneTitle;
-                xamlMember.Setter = set_86_NavigationView_PaneTitle;
+                xamlMember.Getter = get_93_NavigationView_PaneTitle;
+                xamlMember.Setter = set_93_NavigationView_PaneTitle;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.PaneToggleButtonStyle":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "PaneToggleButtonStyle", "Microsoft.UI.Xaml.Style");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_87_NavigationView_PaneToggleButtonStyle;
-                xamlMember.Setter = set_87_NavigationView_PaneToggleButtonStyle;
+                xamlMember.Getter = get_94_NavigationView_PaneToggleButtonStyle;
+                xamlMember.Setter = set_94_NavigationView_PaneToggleButtonStyle;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.SelectedItem":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "SelectedItem", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_88_NavigationView_SelectedItem;
-                xamlMember.Setter = set_88_NavigationView_SelectedItem;
+                xamlMember.Getter = get_95_NavigationView_SelectedItem;
+                xamlMember.Setter = set_95_NavigationView_SelectedItem;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.SelectionFollowsFocus":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "SelectionFollowsFocus", "Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_89_NavigationView_SelectionFollowsFocus;
-                xamlMember.Setter = set_89_NavigationView_SelectionFollowsFocus;
+                xamlMember.Getter = get_96_NavigationView_SelectionFollowsFocus;
+                xamlMember.Setter = set_96_NavigationView_SelectionFollowsFocus;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.SettingsItem":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "SettingsItem", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_90_NavigationView_SettingsItem;
+                xamlMember.Getter = get_97_NavigationView_SettingsItem;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.ShoulderNavigationEnabled":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ShoulderNavigationEnabled", "Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_91_NavigationView_ShoulderNavigationEnabled;
-                xamlMember.Setter = set_91_NavigationView_ShoulderNavigationEnabled;
+                xamlMember.Getter = get_98_NavigationView_ShoulderNavigationEnabled;
+                xamlMember.Setter = set_98_NavigationView_ShoulderNavigationEnabled;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationView.TemplateSettings":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "TemplateSettings", "Microsoft.UI.Xaml.Controls.NavigationViewTemplateSettings");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_92_NavigationView_TemplateSettings;
+                xamlMember.Getter = get_99_NavigationView_TemplateSettings;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationViewItem.Icon":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItem");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Icon", "Microsoft.UI.Xaml.Controls.IconElement");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_93_NavigationViewItem_Icon;
-                xamlMember.Setter = set_93_NavigationViewItem_Icon;
+                xamlMember.Getter = get_100_NavigationViewItem_Icon;
+                xamlMember.Setter = set_100_NavigationViewItem_Icon;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationViewItem.CompactPaneLength":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItem");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "CompactPaneLength", "Double");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_94_NavigationViewItem_CompactPaneLength;
+                xamlMember.Getter = get_101_NavigationViewItem_CompactPaneLength;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationViewItem.HasUnrealizedChildren":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItem");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "HasUnrealizedChildren", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_95_NavigationViewItem_HasUnrealizedChildren;
-                xamlMember.Setter = set_95_NavigationViewItem_HasUnrealizedChildren;
+                xamlMember.Getter = get_102_NavigationViewItem_HasUnrealizedChildren;
+                xamlMember.Setter = set_102_NavigationViewItem_HasUnrealizedChildren;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationViewItem.InfoBadge":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItem");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "InfoBadge", "Microsoft.UI.Xaml.Controls.InfoBadge");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_96_NavigationViewItem_InfoBadge;
-                xamlMember.Setter = set_96_NavigationViewItem_InfoBadge;
+                xamlMember.Getter = get_103_NavigationViewItem_InfoBadge;
+                xamlMember.Setter = set_103_NavigationViewItem_InfoBadge;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationViewItem.IsChildSelected":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItem");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsChildSelected", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_97_NavigationViewItem_IsChildSelected;
-                xamlMember.Setter = set_97_NavigationViewItem_IsChildSelected;
+                xamlMember.Getter = get_104_NavigationViewItem_IsChildSelected;
+                xamlMember.Setter = set_104_NavigationViewItem_IsChildSelected;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationViewItem.IsExpanded":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItem");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsExpanded", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_98_NavigationViewItem_IsExpanded;
-                xamlMember.Setter = set_98_NavigationViewItem_IsExpanded;
+                xamlMember.Getter = get_105_NavigationViewItem_IsExpanded;
+                xamlMember.Setter = set_105_NavigationViewItem_IsExpanded;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationViewItem.MenuItems":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItem");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "MenuItems", "System.Collections.Generic.IList`1<Object>");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_99_NavigationViewItem_MenuItems;
+                xamlMember.Getter = get_106_NavigationViewItem_MenuItems;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationViewItem.MenuItemsSource":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItem");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "MenuItemsSource", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_100_NavigationViewItem_MenuItemsSource;
-                xamlMember.Setter = set_100_NavigationViewItem_MenuItemsSource;
+                xamlMember.Getter = get_107_NavigationViewItem_MenuItemsSource;
+                xamlMember.Setter = set_107_NavigationViewItem_MenuItemsSource;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationViewItem.SelectsOnInvoked":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItem");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "SelectsOnInvoked", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_101_NavigationViewItem_SelectsOnInvoked;
-                xamlMember.Setter = set_101_NavigationViewItem_SelectsOnInvoked;
+                xamlMember.Getter = get_108_NavigationViewItem_SelectsOnInvoked;
+                xamlMember.Setter = set_108_NavigationViewItem_SelectsOnInvoked;
                 break;
             case "Microsoft.UI.Xaml.Controls.NavigationViewItemBase.IsSelected":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.NavigationViewItemBase");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsSelected", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_102_NavigationViewItemBase_IsSelected;
-                xamlMember.Setter = set_102_NavigationViewItemBase_IsSelected;
+                xamlMember.Getter = get_109_NavigationViewItemBase_IsSelected;
+                xamlMember.Setter = set_109_NavigationViewItemBase_IsSelected;
                 break;
             case "Kirana.App.Views.ManagerAuthorizationDialog.AuthorizedUserId":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ManagerAuthorizationDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "AuthorizedUserId", "System.Nullable`1<Int32>");
-                xamlMember.Getter = get_103_ManagerAuthorizationDialog_AuthorizedUserId;
+                xamlMember.Getter = get_110_ManagerAuthorizationDialog_AuthorizedUserId;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.NewPurchaseReturnPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.NewPurchaseReturnPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.NewPurchaseReturnViewModel");
-                xamlMember.Getter = get_104_NewPurchaseReturnPage_ViewModel;
+                xamlMember.Getter = get_111_NewPurchaseReturnPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.NewSalesReturnPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.NewSalesReturnPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.NewSalesReturnViewModel");
-                xamlMember.Getter = get_105_NewSalesReturnPage_ViewModel;
+                xamlMember.Getter = get_112_NewSalesReturnPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.PaymentDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.PaymentDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.PaymentViewModel");
-                xamlMember.Getter = get_106_PaymentDialog_ViewModel;
+                xamlMember.Getter = get_113_PaymentDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.PosShellPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.PosShellPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.PosShellViewModel");
-                xamlMember.Getter = get_107_PosShellPage_ViewModel;
+                xamlMember.Getter = get_114_PosShellPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.ProductEditDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ProductEditDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.ProductEditViewModel");
-                xamlMember.Getter = get_108_ProductEditDialog_ViewModel;
+                xamlMember.Getter = get_115_ProductEditDialog_ViewModel;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "Kirana.App.Views.ProductImportDialog.ViewModel":
+                userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ProductImportDialog");
+                xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.ProductImportViewModel");
+                xamlMember.Getter = get_116_ProductImportDialog_ViewModel;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "Kirana.App.Views.ProductImportDialog.ImportedAnything":
+                userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ProductImportDialog");
+                xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ImportedAnything", "Boolean");
+                xamlMember.Getter = get_117_ProductImportDialog_ImportedAnything;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.ProductsPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ProductsPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.ProductsViewModel");
-                xamlMember.Getter = get_109_ProductsPage_ViewModel;
+                xamlMember.Getter = get_118_ProductsPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.PurchaseEntryPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.PurchaseEntryPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.PurchaseEntryViewModel");
-                xamlMember.Getter = get_110_PurchaseEntryPage_ViewModel;
+                xamlMember.Getter = get_119_PurchaseEntryPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.PurchaseReturnsPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.PurchaseReturnsPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.PurchaseReturnsViewModel");
-                xamlMember.Getter = get_111_PurchaseReturnsPage_ViewModel;
+                xamlMember.Getter = get_120_PurchaseReturnsPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.PurchasesPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.PurchasesPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.PurchasesViewModel");
-                xamlMember.Getter = get_112_PurchasesPage_ViewModel;
+                xamlMember.Getter = get_121_PurchasesPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.Reports.ProfitReportView.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.Reports.ProfitReportView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.Reports.ProfitReportTabViewModel");
-                xamlMember.Getter = get_113_ProfitReportView_ViewModel;
+                xamlMember.Getter = get_122_ProfitReportView_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.Reports.ExpenseReportView.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.Reports.ExpenseReportView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.Reports.ExpenseReportTabViewModel");
-                xamlMember.Getter = get_114_ExpenseReportView_ViewModel;
+                xamlMember.Getter = get_123_ExpenseReportView_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.Reports.SupplierReportView.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.Reports.SupplierReportView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.Reports.SupplierReportTabViewModel");
-                xamlMember.Getter = get_115_SupplierReportView_ViewModel;
+                xamlMember.Getter = get_124_SupplierReportView_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.Reports.CustomerReportView.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.Reports.CustomerReportView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.Reports.CustomerReportTabViewModel");
-                xamlMember.Getter = get_116_CustomerReportView_ViewModel;
+                xamlMember.Getter = get_125_CustomerReportView_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.Reports.InventoryReportView.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.Reports.InventoryReportView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.Reports.InventoryReportTabViewModel");
-                xamlMember.Getter = get_117_InventoryReportView_ViewModel;
+                xamlMember.Getter = get_126_InventoryReportView_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.Reports.ProductReportView.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.Reports.ProductReportView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.Reports.ProductReportTabViewModel");
-                xamlMember.Getter = get_118_ProductReportView_ViewModel;
+                xamlMember.Getter = get_127_ProductReportView_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.Reports.SalesReportView.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.Reports.SalesReportView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.Reports.SalesReportTabViewModel");
-                xamlMember.Getter = get_119_SalesReportView_ViewModel;
+                xamlMember.Getter = get_128_SalesReportView_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.Reports.DashboardView.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.Reports.DashboardView");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.Reports.DashboardTabViewModel");
-                xamlMember.Getter = get_120_DashboardView_ViewModel;
+                xamlMember.Getter = get_129_DashboardView_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.ReprintInvoiceDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ReprintInvoiceDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.ReprintInvoiceViewModel");
-                xamlMember.Getter = get_121_ReprintInvoiceDialog_ViewModel;
+                xamlMember.Getter = get_130_ReprintInvoiceDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.ReprintInvoiceDialog.FoundDocument":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.ReprintInvoiceDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "FoundDocument", "Kirana.Application.Printing.InvoiceDocument");
-                xamlMember.Getter = get_122_ReprintInvoiceDialog_FoundDocument;
+                xamlMember.Getter = get_131_ReprintInvoiceDialog_FoundDocument;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "Kirana.App.Views.RestorePage.ViewModel":
+                userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.RestorePage");
+                xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.RestoreViewModel");
+                xamlMember.Getter = get_132_RestorePage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.SalesReturnsPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.SalesReturnsPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.SalesReturnsViewModel");
-                xamlMember.Getter = get_123_SalesReturnsPage_ViewModel;
+                xamlMember.Getter = get_133_SalesReturnsPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.RadioButtons.Items":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.RadioButtons");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Items", "System.Collections.Generic.IList`1<Object>");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_124_RadioButtons_Items;
+                xamlMember.Getter = get_134_RadioButtons_Items;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.RadioButtons.SelectedIndex":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.RadioButtons");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "SelectedIndex", "Int32");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_125_RadioButtons_SelectedIndex;
-                xamlMember.Setter = set_125_RadioButtons_SelectedIndex;
+                xamlMember.Getter = get_135_RadioButtons_SelectedIndex;
+                xamlMember.Setter = set_135_RadioButtons_SelectedIndex;
                 break;
             case "Microsoft.UI.Xaml.Controls.RadioButtons.Header":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.RadioButtons");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Header", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_126_RadioButtons_Header;
-                xamlMember.Setter = set_126_RadioButtons_Header;
+                xamlMember.Getter = get_136_RadioButtons_Header;
+                xamlMember.Setter = set_136_RadioButtons_Header;
                 break;
             case "Microsoft.UI.Xaml.Controls.RadioButtons.HeaderTemplate":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.RadioButtons");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "HeaderTemplate", "Microsoft.UI.Xaml.DataTemplate");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_127_RadioButtons_HeaderTemplate;
-                xamlMember.Setter = set_127_RadioButtons_HeaderTemplate;
+                xamlMember.Getter = get_137_RadioButtons_HeaderTemplate;
+                xamlMember.Setter = set_137_RadioButtons_HeaderTemplate;
                 break;
             case "Microsoft.UI.Xaml.Controls.RadioButtons.ItemTemplate":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.RadioButtons");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ItemTemplate", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_128_RadioButtons_ItemTemplate;
-                xamlMember.Setter = set_128_RadioButtons_ItemTemplate;
+                xamlMember.Getter = get_138_RadioButtons_ItemTemplate;
+                xamlMember.Setter = set_138_RadioButtons_ItemTemplate;
                 break;
             case "Microsoft.UI.Xaml.Controls.RadioButtons.ItemsSource":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.RadioButtons");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ItemsSource", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_129_RadioButtons_ItemsSource;
-                xamlMember.Setter = set_129_RadioButtons_ItemsSource;
+                xamlMember.Getter = get_139_RadioButtons_ItemsSource;
+                xamlMember.Setter = set_139_RadioButtons_ItemsSource;
                 break;
             case "Microsoft.UI.Xaml.Controls.RadioButtons.MaxColumns":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.RadioButtons");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "MaxColumns", "Int32");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_130_RadioButtons_MaxColumns;
-                xamlMember.Setter = set_130_RadioButtons_MaxColumns;
+                xamlMember.Getter = get_140_RadioButtons_MaxColumns;
+                xamlMember.Setter = set_140_RadioButtons_MaxColumns;
                 break;
             case "Microsoft.UI.Xaml.Controls.RadioButtons.SelectedItem":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.RadioButtons");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "SelectedItem", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_131_RadioButtons_SelectedItem;
-                xamlMember.Setter = set_131_RadioButtons_SelectedItem;
+                xamlMember.Getter = get_141_RadioButtons_SelectedItem;
+                xamlMember.Setter = set_141_RadioButtons_SelectedItem;
                 break;
             case "Kirana.App.Views.SettingsPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.SettingsPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.SettingsViewModel");
-                xamlMember.Getter = get_132_SettingsPage_ViewModel;
+                xamlMember.Getter = get_142_SettingsPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.SetupWizardPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.SetupWizardPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.SetupWizardViewModel");
-                xamlMember.Getter = get_133_SetupWizardPage_ViewModel;
+                xamlMember.Getter = get_143_SetupWizardPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.StockAdjustmentDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.StockAdjustmentDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.StockAdjustmentViewModel");
-                xamlMember.Getter = get_134_StockAdjustmentDialog_ViewModel;
+                xamlMember.Getter = get_144_StockAdjustmentDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.SupplierEditDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.SupplierEditDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.SupplierEditViewModel");
-                xamlMember.Getter = get_135_SupplierEditDialog_ViewModel;
+                xamlMember.Getter = get_145_SupplierEditDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.SupplierLedgerPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.SupplierLedgerPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.SupplierLedgerViewModel");
-                xamlMember.Getter = get_136_SupplierLedgerPage_ViewModel;
+                xamlMember.Getter = get_146_SupplierLedgerPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.SupplierPickerDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.SupplierPickerDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.SupplierPickerViewModel");
-                xamlMember.Getter = get_137_SupplierPickerDialog_ViewModel;
+                xamlMember.Getter = get_147_SupplierPickerDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.SupplierPickerDialog.Confirmed":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.SupplierPickerDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Confirmed", "Boolean");
-                xamlMember.Getter = get_138_SupplierPickerDialog_Confirmed;
+                xamlMember.Getter = get_148_SupplierPickerDialog_Confirmed;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.SupplierPickerDialog.SelectedSupplier":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.SupplierPickerDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "SelectedSupplier", "Kirana.Domain.Entities.Supplier");
-                xamlMember.Getter = get_139_SupplierPickerDialog_SelectedSupplier;
+                xamlMember.Getter = get_149_SupplierPickerDialog_SelectedSupplier;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.SuppliersPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.SuppliersPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.SuppliersViewModel");
-                xamlMember.Getter = get_140_SuppliersPage_ViewModel;
+                xamlMember.Getter = get_150_SuppliersPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.UserEditDialog.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.UserEditDialog");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.UserEditViewModel");
-                xamlMember.Getter = get_141_UserEditDialog_ViewModel;
+                xamlMember.Getter = get_151_UserEditDialog_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Kirana.App.Views.UserManagementPage.ViewModel":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Kirana.App.Views.UserManagementPage");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "ViewModel", "Kirana.App.ViewModels.UserManagementViewModel");
-                xamlMember.Getter = get_142_UserManagementPage_ViewModel;
+                xamlMember.Getter = get_152_UserManagementPage_ViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Children":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Children", "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>");
-                xamlMember.Getter = get_143_TreeViewNode_Children;
+                xamlMember.Getter = get_153_TreeViewNode_Children;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Content":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Content", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_144_TreeViewNode_Content;
-                xamlMember.Setter = set_144_TreeViewNode_Content;
+                xamlMember.Getter = get_154_TreeViewNode_Content;
+                xamlMember.Setter = set_154_TreeViewNode_Content;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Depth":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Depth", "Int32");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_145_TreeViewNode_Depth;
+                xamlMember.Getter = get_155_TreeViewNode_Depth;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.HasChildren":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "HasChildren", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_146_TreeViewNode_HasChildren;
+                xamlMember.Getter = get_156_TreeViewNode_HasChildren;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.HasUnrealizedChildren":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "HasUnrealizedChildren", "Boolean");
-                xamlMember.Getter = get_147_TreeViewNode_HasUnrealizedChildren;
-                xamlMember.Setter = set_147_TreeViewNode_HasUnrealizedChildren;
+                xamlMember.Getter = get_157_TreeViewNode_HasUnrealizedChildren;
+                xamlMember.Setter = set_157_TreeViewNode_HasUnrealizedChildren;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.IsExpanded":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "IsExpanded", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_148_TreeViewNode_IsExpanded;
-                xamlMember.Setter = set_148_TreeViewNode_IsExpanded;
+                xamlMember.Getter = get_158_TreeViewNode_IsExpanded;
+                xamlMember.Setter = set_158_TreeViewNode_IsExpanded;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Parent":
                 userType = (global::Kirana.App.Kirana_App_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::Kirana.App.Kirana_App_XamlTypeInfo.XamlMember(this, "Parent", "Microsoft.UI.Xaml.Controls.TreeViewNode");
-                xamlMember.Getter = get_149_TreeViewNode_Parent;
+                xamlMember.Getter = get_159_TreeViewNode_Parent;
                 xamlMember.SetIsReadOnly();
                 break;
             }

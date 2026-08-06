@@ -118,4 +118,85 @@ public class PurchasePricingCalculatorTests
 
         Assert.Equal(60m, totals.SubTotal);
     }
+
+    // ----------------------------------------------------------------------------------
+    // Quantity regression suite. A reported bug had every purchase line priced as if
+    // quantity were 1 (10 x ₹210 billed as ₹235.20 instead of ₹2,352). The root cause was
+    // in the UI binding rather than here, but these lock down the contract the screen
+    // depends on: quantity must scale gross, taxable, GST and the grand total.
+    // ----------------------------------------------------------------------------------
+
+    [Fact]
+    public void Calculate_QuantityOne_TaxExclusive_ScalesNothing()
+    {
+        var totals = PurchasePricingCalculator.Calculate([Line(quantity: 1, unitPrice: 210, gstRatePercent: 12)]);
+
+        Assert.Equal(210m, totals.SubTotal);
+        Assert.Equal(210m, totals.TaxableTotal);
+        Assert.Equal(25.20m, totals.TaxTotal);
+        Assert.Equal(235.20m, totals.Lines.Single().LineTotal);
+    }
+
+    [Fact]
+    public void Calculate_QuantityGreaterThanOne_ScalesGrossTaxableGstAndLineTotal()
+    {
+        var totals = PurchasePricingCalculator.Calculate([Line(quantity: 10, unitPrice: 210, gstRatePercent: 12)]);
+
+        Assert.Equal(2100m, totals.SubTotal);
+        Assert.Equal(2100m, totals.TaxableTotal);
+        Assert.Equal(252m, totals.TaxTotal);
+        Assert.Equal(2352m, totals.Lines.Single().LineTotal);
+        Assert.Equal(2352m, totals.GrandTotal);
+    }
+
+    [Fact]
+    public void Calculate_QuantityChangedFromOneToTen_MultipliesEveryAmountByTen()
+    {
+        var one = PurchasePricingCalculator.Calculate([Line(quantity: 1, unitPrice: 210, gstRatePercent: 12)]);
+        var ten = PurchasePricingCalculator.Calculate([Line(quantity: 10, unitPrice: 210, gstRatePercent: 12)]);
+
+        Assert.Equal(one.SubTotal * 10, ten.SubTotal);
+        Assert.Equal(one.TaxableTotal * 10, ten.TaxableTotal);
+        Assert.Equal(one.TaxTotal * 10, ten.TaxTotal);
+        Assert.Equal(one.Lines.Single().LineTotal * 10, ten.Lines.Single().LineTotal);
+    }
+
+    /// <summary>The exact reported scenario: 1 x ₹220 @5% GST plus 10 x ₹210 @12% GST.</summary>
+    [Fact]
+    public void Calculate_MultipleProductsWithDifferentQuantities_UsesEachLinesOwnQuantity()
+    {
+        var totals = PurchasePricingCalculator.Calculate([
+            Line(productId: 1, quantity: 1, unitPrice: 220, gstRatePercent: 5),
+            Line(productId: 2, quantity: 10, unitPrice: 210, gstRatePercent: 12),
+        ]);
+
+        var atta = totals.Lines.Single(l => l.Line.ProductId == 1);
+        var butter = totals.Lines.Single(l => l.Line.ProductId == 2);
+
+        Assert.Equal(220m, atta.GrossAmount);
+        Assert.Equal(11m, atta.GstAmount);
+        Assert.Equal(231m, atta.LineTotal);
+
+        Assert.Equal(2100m, butter.GrossAmount);
+        Assert.Equal(252m, butter.GstAmount);
+        Assert.Equal(2352m, butter.LineTotal);
+
+        Assert.Equal(2320m, totals.SubTotal);
+        Assert.Equal(263m, totals.TaxTotal);
+        Assert.Equal(2583m, totals.GrandTotal);
+    }
+
+    [Fact]
+    public void Calculate_QuantityScales_WithDiscountAndInclusiveTax()
+    {
+        var totals = PurchasePricingCalculator.Calculate([
+            Line(quantity: 4, unitPrice: 112, isTaxInclusive: true, gstRatePercent: 12, discountPercent: 10),
+        ]);
+
+        // 4 x 112 = 448 gross, less 10% = 403.20 inclusive, back-split at 12%.
+        Assert.Equal(448m, totals.SubTotal);
+        Assert.Equal(44.80m, totals.DiscountTotal);
+        Assert.Equal(360m, totals.TaxableTotal);
+        Assert.Equal(43.20m, totals.TaxTotal);
+    }
 }

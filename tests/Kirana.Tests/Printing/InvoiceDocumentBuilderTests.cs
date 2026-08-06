@@ -35,7 +35,7 @@ public class InvoiceDocumentBuilderTests
     private static SaleItem MakeItem(
         string name = "Tata Salt 1kg", string code = "PRD-000001", string? sku = "SKU1", string? hsn = "2501",
         decimal qty = 1, decimal unitPrice = 25, decimal gstRate = 5, decimal taxable = 25, decimal gst = 1.25m,
-        decimal lineTotal = 26.25m, decimal discountPercent = 0, decimal discountAmount = 0) => new()
+        decimal lineTotal = 26.25m, decimal discountPercent = 0, decimal discountAmount = 0, decimal mrp = 0) => new()
     {
         ProductNameSnapshot = name,
         ProductCodeSnapshot = code,
@@ -45,6 +45,7 @@ public class InvoiceDocumentBuilderTests
         GstRatePercentSnapshot = gstRate,
         Quantity = qty,
         UnitPriceSnapshot = unitPrice,
+        MrpSnapshot = mrp,
         DiscountPercent = discountPercent,
         DiscountAmount = discountAmount,
         TaxableAmount = taxable,
@@ -148,6 +149,23 @@ public class InvoiceDocumentBuilderTests
     }
 
     [Fact]
+    public void Build_PopulatesPaymentSummaryLines_FromSalePayments()
+    {
+        // Confirms InvoiceDocumentBuilder actually wires PaymentSummaryBuilder in — the detailed
+        // per-scenario rules themselves are covered by PaymentSummaryBuilderTests.
+        var sale = MakeSale();
+        sale.GrandTotal = 289m;
+        sale.Payments.Add(new Payment { Method = PaymentMethod.Cash, Amount = 200m });
+        sale.Payments.Add(new Payment { Method = PaymentMethod.CustomerCredit, Amount = 89m });
+
+        var document = _sut.Build(sale, MakeStore());
+
+        Assert.Collection(document.PaymentSummaryLines,
+            r => { Assert.Equal("Cash Paid", r.Label); Assert.Equal(200m, r.Amount); },
+            r => { Assert.Equal("Customer Credit", r.Label); Assert.Equal(89m, r.Amount); });
+    }
+
+    [Fact]
     public void Build_HandlesMissingCustomer_WithoutThrowing()
     {
         var sale = MakeSale();
@@ -225,5 +243,61 @@ public class InvoiceDocumentBuilderTests
         var document = _sut.Build(MakeSale(), store);
 
         Assert.Equal("No returns after 7 days.", document.FooterText);
+    }
+
+    [Fact]
+    public void Build_ComputesTotalSavings_AsMrpTotalMinusGrandTotal()
+    {
+        var sale = MakeSale();
+        sale.GrandTotal = 158m;
+        sale.Items.Add(MakeItem(qty: 1, mrp: 100, lineTotal: 95));
+        sale.Items.Add(MakeItem(qty: 2, mrp: 80, lineTotal: 130));
+        // MRP total = 1*100 + 2*80 = 260; savings = 260 - 158 = 102.
+
+        var document = _sut.Build(sale, MakeStore());
+
+        Assert.Equal(102m, document.TotalSavings);
+        Assert.True(document.HasSavings);
+    }
+
+    [Fact]
+    public void Build_FloorsTotalSavingsAtZero_WhenChargedMoreThanMrpTotal()
+    {
+        // A price override can legitimately push a line above its own MRP — must never show as a
+        // negative "You Saved".
+        var sale = MakeSale();
+        sale.GrandTotal = 500m;
+        sale.Items.Add(MakeItem(qty: 1, mrp: 100, lineTotal: 500));
+
+        var document = _sut.Build(sale, MakeStore());
+
+        Assert.Equal(0m, document.TotalSavings);
+        Assert.False(document.HasSavings);
+    }
+
+    [Fact]
+    public void Build_HasNoSavings_ForHistoricalSaleWithNoMrpSnapshot()
+    {
+        // A sale completed before this field existed defaults MrpSnapshot to 0 — must suppress the
+        // "You Saved" row rather than show a meaningless number.
+        var sale = MakeSale();
+        sale.GrandTotal = 100m;
+        sale.Items.Add(MakeItem(qty: 1, mrp: 0, lineTotal: 100));
+
+        var document = _sut.Build(sale, MakeStore());
+
+        Assert.Equal(0m, document.TotalSavings);
+        Assert.False(document.HasSavings);
+    }
+
+    [Fact]
+    public void Build_MapsMrpOntoEachLine()
+    {
+        var sale = MakeSale();
+        sale.Items.Add(MakeItem(mrp: 45));
+
+        var document = _sut.Build(sale, MakeStore());
+
+        Assert.Equal(45m, document.Lines.Single().Mrp);
     }
 }

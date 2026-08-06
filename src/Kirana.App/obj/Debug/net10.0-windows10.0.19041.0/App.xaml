@@ -21,6 +21,10 @@
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <conv:CurrencyConverter x:Key="CurrencyConverter" />
             <conv:QuantityConverter x:Key="QuantityConverter" />
+            <conv:PaymentMethodConverter x:Key="PaymentMethodConverter" />
+            <conv:PaymentMethodIconConverter x:Key="PaymentMethodIconConverter" />
+            <conv:DetailIndentConverter x:Key="DetailIndentConverter" />
+            <conv:BillTabFontWeightConverter x:Key="BillTabFontWeightConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

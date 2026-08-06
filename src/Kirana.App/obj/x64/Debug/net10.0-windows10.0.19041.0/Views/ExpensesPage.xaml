@@ -55,7 +55,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBox x:ConnectionId='15' Grid.Column="0" PlaceholderText="Search voucher / category / description…"
-                                                                                                
+                                                                                                                                     
                                                        />
             <Button x:ConnectionId='16' Grid.Column="1"                       AutomationProperties.Name="Search expenses">
                 <FontIcon Glyph="&#xE721;" FontSize="14" />

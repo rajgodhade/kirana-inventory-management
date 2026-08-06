@@ -11,6 +11,10 @@ public sealed partial class MainWindow : Window
 {
     private static readonly TimeSpan IdleCheckInterval = TimeSpan.FromSeconds(15);
 
+    /// <summary>How often to ask whether a scheduled backup is due. A shop typically leaves Kirana
+    /// open all day, so the launch-time check alone would never fire a daily backup.</summary>
+    private static readonly TimeSpan BackupCheckInterval = TimeSpan.FromHours(1);
+
     /// <summary>The element the theme is applied to — see <see cref="Theming.ThemeService"/>.</summary>
     public FrameworkElement RootElement => ThemeRoot;
 
@@ -20,6 +24,7 @@ public sealed partial class MainWindow : Window
 
     private readonly ManagementSession _session;
     private readonly DispatcherTimer _idleCheckTimer;
+    private readonly DispatcherTimer _backupCheckTimer;
 
     public MainWindow()
     {
@@ -38,6 +43,10 @@ public sealed partial class MainWindow : Window
         _idleCheckTimer = new DispatcherTimer { Interval = IdleCheckInterval };
         _idleCheckTimer.Tick += OnIdleCheckTick;
         _idleCheckTimer.Start();
+
+        _backupCheckTimer = new DispatcherTimer { Interval = BackupCheckInterval };
+        _backupCheckTimer.Tick += async (_, _) => await App.RunScheduledBackupIfDueAsync();
+        _backupCheckTimer.Start();
     }
 
     /// <summary>

@@ -28,7 +28,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBox x:ConnectionId='16' Grid.Column="0" PlaceholderText="Search name / ID / phone…"
-                                                                                                   
+                                                                                                                                        
                                                        />
 
             <CheckBox x:ConnectionId='17' Grid.Column="1" Content="Show inactive" VerticalAlignment="Center" Margin="8,0,0,0"

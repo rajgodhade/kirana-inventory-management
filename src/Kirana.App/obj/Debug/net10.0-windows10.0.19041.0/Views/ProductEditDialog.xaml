@@ -115,9 +115,9 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBox x:ConnectionId='9' Grid.Column="0" Header="Minimum stock"                                                         />
-                <TextBox x:ConnectionId='10' Grid.Column="1" Header="Reorder quantity"                                                            />
-                <TextBox x:ConnectionId='11' Grid.Column="2" Header="Opening stock"                                                        
+                <TextBox x:ConnectionId='9' Grid.Column="0"                                                                                                                     />
+                <TextBox x:ConnectionId='10' Grid.Column="1"                                                                                                                           />
+                <TextBox x:ConnectionId='11' Grid.Column="2"                                                                                                                    
                                                                                                                     />
             </Grid>
 

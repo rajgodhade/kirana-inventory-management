@@ -38,7 +38,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBox Grid.Column="0" PlaceholderText="Search return / invoice / customer…"
-                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" KeyDown="OnSearchKeyDown"
+                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnSearchKeyDown"
                      TextChanged="OnSearchTextChanged" />
             <Button Grid.Column="1" Click="OnSearchClick" AutomationProperties.Name="Search returns">
                 <FontIcon Glyph="&#xE721;" FontSize="14" />
