@@ -25,6 +25,9 @@
             <conv:PaymentMethodIconConverter x:Key="PaymentMethodIconConverter" />
             <conv:DetailIndentConverter x:Key="DetailIndentConverter" />
             <conv:BillTabFontWeightConverter x:Key="BillTabFontWeightConverter" />
+            <conv:ImportRowBackgroundConverter x:Key="ErrorRowBackgroundConverter" />
+            <conv:ImportStatusForegroundConverter x:Key="ErrorStatusForegroundConverter" />
+            <conv:ImportRowBorderConverter x:Key="ErrorRowBorderConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

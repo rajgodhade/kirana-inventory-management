@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace Kirana.App.Views;
 
@@ -40,14 +41,7 @@ public sealed partial class ProductImportDialog : ContentDialog
             return;
         }
 
-        // Copy into memory first: the Application layer takes a plain Stream and must not depend on
-        // WinRT storage types, and the parser may need to seek.
-        using var fileStream = await file.OpenStreamForReadAsync();
-        using var stream = new MemoryStream();
-        await fileStream.CopyToAsync(stream);
-        stream.Position = 0;
-
-        await ViewModel.LoadPreviewAsync(stream, file.Name);
+        await LoadFileAsync(file);
     }
 
     private async void OnDownloadTemplateClick(object sender, RoutedEventArgs e)
@@ -153,4 +147,52 @@ public sealed partial class ProductImportDialog : ContentDialog
     }
 
     private void OnCloseIconClick(object sender, RoutedEventArgs e) => Hide();
+
+    private void OnViewProductsClick(object sender, RoutedEventArgs e) => Hide();
+
+    private void OnImportAnotherFileClick(object sender, RoutedEventArgs e) => ViewModel.ResetForAnotherFile();
+
+    private void OnFileDragOver(object sender, DragEventArgs e)
+    {
+        if (e.DataView.Contains(StandardDataFormats.StorageItems))
+        {
+            e.AcceptedOperation = DataPackageOperation.Copy;
+        }
+    }
+
+    private async void OnFileDrop(object sender, DragEventArgs e)
+    {
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        {
+            return;
+        }
+
+        var file = (await e.DataView.GetStorageItemsAsync()).OfType<StorageFile>().FirstOrDefault();
+        if (file is null)
+        {
+            return;
+        }
+
+        if (!string.Equals(file.FileType, ".csv", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(file.FileType, ".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            ViewModel.ShowFileTypeError();
+            return;
+        }
+
+        await LoadFileAsync(file);
+    }
+
+    private async Task LoadFileAsync(StorageFile file)
+    {
+        // Copy into memory first: the Application layer takes a plain Stream and must not depend on
+        // WinRT storage types, and the parser may need to seek.
+        using var fileStream = await file.OpenStreamForReadAsync();
+        using var stream = new MemoryStream();
+        await fileStream.CopyToAsync(stream);
+        stream.Position = 0;
+
+        var properties = await file.GetBasicPropertiesAsync();
+        await ViewModel.LoadPreviewAsync(stream, file.Name, (long)properties.Size);
+    }
 }

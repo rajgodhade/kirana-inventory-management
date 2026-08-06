@@ -83,7 +83,7 @@
                                  each row's own buttons, stealing different amounts of width from the
                                  star-sized PRODUCT column and shifting every middle column out of
                                  line row-to-row. A fixed width keeps all rows on the same grid. -->
-                            <ColumnDefinition Width="440" />
+                            <ColumnDefinition Width="150" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="PRODUCT" Style="{StaticResource ColumnHeaderTextStyle}" />
                         <TextBlock Grid.Column="1" Text="CATEGORY / BRAND / UNIT" Style="{StaticResource ColumnHeaderTextStyle}" />
@@ -96,7 +96,7 @@
                              Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
                              Margin="12,8,12,0" VerticalAlignment="Top" />
 
-                    <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.Products}" SelectionMode="None">
+                    <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.Products}" SelectionMode="None" DoubleTapped="OnProductDoubleTapped">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="Padding" Value="0" />
@@ -114,11 +114,11 @@
                                         <ColumnDefinition Width="190" />
                                         <ColumnDefinition Width="130" />
                                         <ColumnDefinition Width="90" />
-                                        <ColumnDefinition Width="440" />
+                                        <ColumnDefinition Width="150" />
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="15" TextWrapping="Wrap" />
                                         <!-- Ellipsis rather than a hard clip: the code/SKU/barcode line
                                              can outrun the column on long names, and a trailing "…" reads
                                              as "there's more" instead of looking like a truncated value. -->
@@ -134,10 +134,8 @@
                                          with no category/brand pushed its Unit to the bottom of the cell
                                          and the column read as ragged and misaligned across rows. -->
                                     <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind CategoryName}" FontSize="12"
-                                                   Visibility="{x:Bind CategoryName, Converter={StaticResource StringToVisibilityConverter}}" />
-                                        <TextBlock Text="{x:Bind BrandName}" FontSize="12" Opacity="0.7"
-                                                   Visibility="{x:Bind BrandName, Converter={StaticResource StringToVisibilityConverter}}" />
+                                        <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource PastelBlueBrush}" HorizontalAlignment="Left" Visibility="{x:Bind CategoryName, Converter={StaticResource StringToVisibilityConverter}}"><TextBlock Text="{x:Bind CategoryName}" Foreground="{ThemeResource PastelBlueOnBrush}" Style="{StaticResource BadgeTextStyle}" /></Border>
+                                        <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource PastelVioletBrush}" HorizontalAlignment="Left" Visibility="{x:Bind BrandName, Converter={StaticResource StringToVisibilityConverter}}"><TextBlock Text="{x:Bind BrandName}" Foreground="{ThemeResource PastelVioletOnBrush}" Style="{StaticResource BadgeTextStyle}" /></Border>
                                         <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource SurfaceAltBrush}"
                                                 HorizontalAlignment="Left">
                                             <TextBlock Text="{x:Bind Unit}" Style="{StaticResource BadgeTextStyle}"
@@ -146,8 +144,8 @@
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock FontSize="12"><Run Text="MRP " /><Run Text="{x:Bind Mrp, Converter={StaticResource CurrencyConverter}}" /></TextBlock>
-                                        <TextBlock FontWeight="SemiBold"><Run Text="Sell " /><Run Text="{x:Bind SellingPrice, Converter={StaticResource CurrencyConverter}}" /></TextBlock>
+                                        <TextBlock FontSize="11" Foreground="{ThemeResource TextSecondaryBrush}"><Run Text="MRP  " /><Run Text="{x:Bind Mrp, Converter={StaticResource CurrencyConverter}}" /></TextBlock>
+                                        <TextBlock FontWeight="SemiBold" FontSize="16"><Run Text="SELL  " /><Run Text="{x:Bind SellingPrice, Converter={StaticResource CurrencyConverter}}" /></TextBlock>
                                         <TextBlock FontSize="12" Opacity="0.7"
                                                    Visibility="{x:Bind ShowPurchasePrice, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <Run Text="Cost " /><Run Text="{x:Bind PurchasePrice, Converter={StaticResource CurrencyConverter}}" />
@@ -155,7 +153,7 @@
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="3" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind Stock}" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock FontWeight="SemiBold" HorizontalAlignment="Center"><Run Text="{x:Bind Stock}" /><Run Text=" " /><Run Text="{x:Bind Unit}" /></TextBlock>
                                         <Border Background="{x:Bind StockStatus, Converter={StaticResource StockStatusToBrushConverter}}"
                                                 Visibility="{x:Bind StockStatus, Converter={StaticResource StringToVisibilityConverter}}"
                                                 CornerRadius="3" Padding="6,2">
@@ -163,16 +161,9 @@
                                         </Border>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" HorizontalAlignment="Left">
                                         <Button Content="Edit" Click="OnEditClick" Tag="{x:Bind}" />
-                                        <Button Content="Stock" Click="OnAdjustStockClick" Tag="{x:Bind}" />
-                                        <Button Content="Labels" Click="OnLabelsClick" Tag="{x:Bind}" />
-                                        <Button Content="Batches" Click="OnBatchesClick" Tag="{x:Bind}"
-                                                Visibility="{x:Bind TracksBatches, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                        <Button Content="Deactivate" Click="OnToggleActiveClick" Tag="{x:Bind}"
-                                                Visibility="{x:Bind IsActive, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                        <Button Content="Reactivate" Click="OnToggleActiveClick" Tag="{x:Bind}"
-                                                Visibility="{x:Bind IsActive, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                                        <Button Content="⋯" FontSize="18" Padding="10,0" AutomationProperties.Name="More product actions"><Button.Flyout><Flyout><StackPanel MinWidth="150" Spacing="2" Padding="4"><Button Content="Edit" Click="OnEditClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" /><Button Content="Stock" Click="OnAdjustStockClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" /><Button Content="Labels" Click="OnLabelsClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" /><Button Content="Batches" Click="OnBatchesClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" Visibility="{x:Bind TracksBatches, Converter={StaticResource BoolToVisibilityConverter}}" /><Button Content="Deactivate" Click="OnToggleActiveClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" Visibility="{x:Bind IsActive, Converter={StaticResource BoolToVisibilityConverter}}" /><Button Content="Reactivate" Click="OnToggleActiveClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" Visibility="{x:Bind IsActive, Converter={StaticResource InverseBoolToVisibilityConverter}}" /></StackPanel></Flyout></Button.Flyout></Button>
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>

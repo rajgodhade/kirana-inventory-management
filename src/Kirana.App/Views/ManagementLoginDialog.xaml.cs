@@ -28,9 +28,15 @@ public sealed partial class ManagementLoginDialog : ContentDialog
             var username = UsernameBox.Text;
             var secret = PasswordBox.Password;
 
+            // A numeric secret is a PIN even when a username is supplied. This keeps the
+            // username field useful for selecting the account while allowing the normal
+            // four-to-six digit management PIN entered in this dialog.
+            var isPin = secret.Length is >= 4 and <= 6 && secret.All(char.IsDigit);
             var result = string.IsNullOrWhiteSpace(username)
                 ? await _authService.LoginWithPinAsync(secret)
-                : await _authService.LoginWithPasswordAsync(username, secret);
+                : isPin
+                    ? await _authService.LoginWithUsernameAndPinAsync(username, secret)
+                    : await _authService.LoginWithPasswordAsync(username, secret);
 
             if (!result.Success)
             {

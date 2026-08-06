@@ -70,6 +70,29 @@ public class AuthenticationServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task LoginWithUsernameAndPinAsync_Succeeds_WithCorrectPinForNamedUser()
+    {
+        await SeedAdminAsync();
+
+        var result = await _sut.LoginWithUsernameAndPinAsync("admin", "1234");
+
+        Assert.True(result.Success);
+        Assert.True(_session.IsUnlocked);
+    }
+
+    [Fact]
+    public async Task LoginWithUsernameAndPinAsync_Fails_WhenPinBelongsToAnotherUser()
+    {
+        await SeedAdminAsync();
+        await SeedCashierAsync();
+
+        var result = await _sut.LoginWithUsernameAndPinAsync("admin", "4321");
+
+        Assert.False(result.Success);
+        Assert.False(_session.IsUnlocked);
+    }
+
+    [Fact]
     public async Task LockAndReturnToBilling_ClearsSession()
     {
         await SeedAdminAsync();
