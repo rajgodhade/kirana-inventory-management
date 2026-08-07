@@ -50,6 +50,7 @@ public sealed class InvoiceDocument
 
     public decimal SubTotal { get; init; }
     public decimal ItemDiscountTotal { get; init; }
+    public decimal PromotionDiscountTotal { get; init; }
     public decimal BillDiscountPercent { get; init; }
     public decimal BillDiscountAmount { get; init; }
     public decimal TaxTotal { get; init; }

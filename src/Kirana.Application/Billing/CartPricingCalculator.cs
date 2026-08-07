@@ -37,6 +37,11 @@ public static class CartPricingCalculator
             {
                 throw new ArgumentException($"Discount percent for product {line.ProductId} must be between 0 and 100.");
             }
+
+            if (line.PromotionBeforeTaxDiscountAmount < 0 || line.PromotionAfterTaxDiscountAmount < 0)
+            {
+                throw new ArgumentException($"Promotion discount for product {line.ProductId} cannot be negative.");
+            }
         }
 
         var preBillDiscount = lines.Select(line =>
@@ -44,31 +49,36 @@ public static class CartPricingCalculator
             var gross = Round(line.Quantity * line.UnitPrice);
             var discount = Round(gross * line.DiscountPercent / 100m);
             var afterItemDiscount = gross - discount;
+            var beforeTaxPromotion = Math.Min(Round(line.PromotionBeforeTaxDiscountAmount), afterItemDiscount);
+            var promotionAdjustedAmount = afterItemDiscount - beforeTaxPromotion;
 
             var effectiveRate = isGstEnabledForStore ? line.GstRatePercent : 0m;
             decimal taxable, gst;
             if (line.IsTaxInclusive && effectiveRate > 0)
             {
-                taxable = Round(afterItemDiscount / (1 + effectiveRate / 100m));
-                gst = afterItemDiscount - taxable;
+                taxable = Round(promotionAdjustedAmount / (1 + effectiveRate / 100m));
+                gst = promotionAdjustedAmount - taxable;
             }
             else if (effectiveRate > 0)
             {
-                taxable = afterItemDiscount;
-                gst = Round(afterItemDiscount * effectiveRate / 100m);
+                taxable = promotionAdjustedAmount;
+                gst = Round(promotionAdjustedAmount * effectiveRate / 100m);
             }
             else
             {
-                taxable = afterItemDiscount;
+                taxable = promotionAdjustedAmount;
                 gst = 0m;
             }
 
-            return (Line: line, gross, discount, afterItemDiscount, taxable, gst);
+            var afterTaxPromotion = Math.Min(Round(line.PromotionAfterTaxDiscountAmount), taxable + gst);
+            var netBeforeBillDiscount = taxable + gst - afterTaxPromotion;
+            return (Line: line, gross, discount, beforeTaxPromotion, afterTaxPromotion, netBeforeBillDiscount, taxable, gst);
         }).ToList();
 
         var subTotal = preBillDiscount.Sum(x => x.gross);
         var itemDiscountTotal = preBillDiscount.Sum(x => x.discount);
-        var sumAfterItemDiscount = preBillDiscount.Sum(x => x.afterItemDiscount);
+        var promotionDiscountTotal = preBillDiscount.Sum(x => x.beforeTaxPromotion + x.afterTaxPromotion);
+        var sumAfterItemDiscount = preBillDiscount.Sum(x => x.netBeforeBillDiscount);
 
         var billDiscountAmount = Round(sumAfterItemDiscount * billDiscountPercent / 100m);
         var scaleFactor = sumAfterItemDiscount == 0
@@ -84,15 +94,16 @@ public static class CartPricingCalculator
                 Line = x.Line,
                 GrossAmount = x.gross,
                 DiscountAmount = x.discount,
+                PromotionDiscountAmount = x.beforeTaxPromotion + x.afterTaxPromotion,
                 TaxableAmount = finalTaxable,
                 GstAmount = finalGst,
-                LineTotal = finalTaxable + finalGst,
+                LineTotal = Round(x.netBeforeBillDiscount * scaleFactor),
             };
         }).ToList();
 
         var taxableTotal = lineResults.Sum(l => l.TaxableAmount);
         var gstTotal = lineResults.Sum(l => l.GstAmount);
-        var preRoundTotal = taxableTotal + gstTotal;
+        var preRoundTotal = lineResults.Sum(l => l.LineTotal);
         var grandTotal = Math.Round(preRoundTotal, 0, MidpointRounding.AwayFromZero);
         var roundOff = grandTotal - preRoundTotal;
 
@@ -101,6 +112,7 @@ public static class CartPricingCalculator
             Lines = lineResults,
             SubTotal = subTotal,
             ItemDiscountTotal = itemDiscountTotal,
+            PromotionDiscountTotal = promotionDiscountTotal,
             BillDiscountPercent = billDiscountPercent,
             BillDiscountAmount = billDiscountAmount,
             TaxableTotal = taxableTotal,

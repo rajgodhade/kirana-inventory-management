@@ -20,6 +20,7 @@ public sealed partial class ExportCenterViewModel(
         (ExportDataset.Sales, "Sales", "Every invoice with totals, tax and payment method."),
         (ExportDataset.Purchases, "Purchases", "Every purchase with supplier, totals and outstanding amount."),
         (ExportDataset.Expenses, "Expenses", "Every expense voucher with category and payment method."),
+        (ExportDataset.Promotions, "Promotions", "Offer schedules, scopes, values, status and usage."),
     ];
 
     public ObservableCollection<ExportDatasetViewModel> Datasets { get; } =

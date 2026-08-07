@@ -29,6 +29,8 @@ public static class PermissionKeys
     public const string SettingsChange = "settings.change";
     public const string BackupRestore = "backup.restore";
     public const string AuditLogView = "auditlog.view";
+    public const string PromotionsView = "promotions.view";
+    public const string PromotionsManage = "promotions.manage";
 
     public static readonly IReadOnlyList<(string Key, string Description)> All = new[]
     {
@@ -51,6 +53,8 @@ public static class PermissionKeys
         (SettingsChange, "Change application settings"),
         (BackupRestore, "Perform backup and restore"),
         (AuditLogView, "View audit logs"),
+        (PromotionsView, "View promotions"),
+        (PromotionsManage, "Create and manage promotions"),
     };
 
     public static readonly IReadOnlyList<string> Owner = All.Select(p => p.Key).ToArray();
@@ -59,6 +63,7 @@ public static class PermissionKeys
     {
         ProductsView,
         BillingApplyDiscount,
+        PromotionsView,
     };
 
     public static readonly IReadOnlyList<string> Manager = new[]
@@ -69,5 +74,6 @@ public static class PermissionKeys
         InventoryManage, PurchasesManage, CustomersManage,
         ReportsView,
         ExpensesManage,
+        PromotionsView, PromotionsManage,
     };
 }

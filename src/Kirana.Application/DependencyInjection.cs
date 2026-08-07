@@ -8,6 +8,7 @@ using Kirana.Application.Export;
 using Kirana.Application.Expenses;
 using Kirana.Application.Inventories;
 using Kirana.Application.Printing;
+using Kirana.Application.Promotions;
 using Kirana.Application.Products;
 using Kirana.Application.Purchasing;
 using Kirana.Application.Reports;
@@ -39,6 +40,8 @@ public static class DependencyInjection
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<ICustomerCreditService, CustomerCreditService>();
         services.AddScoped<ISaleService, SaleService>();
+        services.AddScoped<IPromotionService, PromotionService>();
+        services.AddScoped<IPromotionEngine, PromotionEngine>();
         services.AddScoped<IHeldBillService, HeldBillService>();
         services.AddScoped<IInvoiceDocumentBuilder, InvoiceDocumentBuilder>();
         services.AddScoped<IInvoicePrintService, InvoicePrintService>();

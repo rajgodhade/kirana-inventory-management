@@ -127,6 +127,9 @@
             <PivotItem Header="Expenses">
                 <reports:ExpenseReportView x:Name="ExpensesTab" />
             </PivotItem>
+            <PivotItem Header="Promotions">
+                <reports:PromotionReportView x:Name="PromotionsTab" />
+            </PivotItem>
             <PivotItem x:Name="ProfitPivotItem" Header="Profit">
                 <reports:ProfitReportView x:Name="ProfitTab" />
             </PivotItem>

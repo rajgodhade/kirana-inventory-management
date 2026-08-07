@@ -7,6 +7,7 @@ using Kirana.Application.Billing;
 using Kirana.Application.Customers;
 using Kirana.Application.Printing;
 using Kirana.Application.Products;
+using Kirana.Application.Promotions;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,6 +24,7 @@ public sealed partial class PosShellViewModel(
     IBarcodeLookupService barcodeLookupService,
     IHeldBillService heldBillService,
     ICustomerService customerService,
+    IPromotionEngine promotionEngine,
     IKiranaDbContext db,
     ManagementSession session) : ObservableObject
 {
@@ -47,6 +49,12 @@ public sealed partial class PosShellViewModel(
 
     [ObservableProperty]
     private decimal _itemDiscountTotal;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPromotionDiscount))]
+    private decimal _promotionDiscountTotal;
+
+    public bool HasPromotionDiscount => PromotionDiscountTotal > 0;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasBillDiscount))]
@@ -142,6 +150,8 @@ public sealed partial class PosShellViewModel(
 
     private bool _scannerWired;
     private int _suggestionQueryToken;
+    private int _promotionEvaluationToken;
+    private bool _applyingPromotionResults;
 
     // ==============================  BILLING TABS  ==============================
     // Several customers can be part-way through a bill at once. Only the active tab's state lives
@@ -468,11 +478,14 @@ public sealed partial class PosShellViewModel(
             IsTaxInclusive = l.IsTaxInclusive,
             GstRatePercent = l.GstRatePercent,
             DiscountPercent = l.DiscountPercent,
+            PromotionBeforeTaxDiscountAmount = l.PromotionBeforeTaxDiscountAmount,
+            PromotionAfterTaxDiscountAmount = l.PromotionAfterTaxDiscountAmount,
         }).ToList();
 
         if (cartLines.Count == 0)
         {
             SubTotal = ItemDiscountTotal = BillDiscountAmount = TaxTotal = RoundOffAmount = GrandTotal = TotalSavings = 0;
+            PromotionDiscountTotal = 0;
             return;
         }
 
@@ -497,6 +510,7 @@ public sealed partial class PosShellViewModel(
 
         SubTotal = totals.SubTotal;
         ItemDiscountTotal = totals.ItemDiscountTotal;
+        PromotionDiscountTotal = totals.PromotionDiscountTotal;
         BillDiscountAmount = totals.BillDiscountAmount;
         TaxTotal = totals.GstTotal;
         RoundOffAmount = totals.RoundOffAmount;
@@ -508,6 +522,67 @@ public sealed partial class PosShellViewModel(
         // the printed bill.
         var mrpTotal = CartLines.Sum(l => l.Mrp * l.Quantity);
         TotalSavings = Math.Max(0, mrpTotal - GrandTotal);
+
+        if (!_applyingPromotionResults)
+        {
+            _ = RefreshPromotionsAsync();
+        }
+    }
+
+    public async Task RefreshPromotionsAsync()
+    {
+        var token = ++_promotionEvaluationToken;
+        if (CartLines.Count == 0 || CartLines.Any(x => x.Quantity <= 0 || x.UnitPrice <= 0))
+        {
+            return;
+        }
+
+        try
+        {
+            var results = await promotionEngine.EvaluateCartAsync(new PromotionCartContext
+            {
+                Lines = CartLines.Select(x => new PromotionLineContext
+                {
+                    ProductId = x.ProductId,
+                    Quantity = x.Quantity,
+                    UnitPrice = x.UnitPrice,
+                }).ToList(),
+                BillAmount = CartLines.Sum(x => x.Quantity * x.UnitPrice),
+                CustomerId = SelectedCustomer?.Id,
+                AtUtc = DateTime.UtcNow,
+            });
+            if (token != _promotionEvaluationToken)
+            {
+                return;
+            }
+
+            var byProduct = results.ToDictionary(x => x.ProductId);
+            foreach (var line in CartLines)
+            {
+                if (!byProduct.TryGetValue(line.ProductId, out var result))
+                {
+                    continue;
+                }
+
+                line.PromotionBeforeTaxDiscountAmount = result.AppliedPromotions
+                    .Where(x => x.CalculationMode == DiscountCalculationMode.BeforeTax).Sum(x => x.DiscountAmount);
+                line.PromotionAfterTaxDiscountAmount = result.AppliedPromotions
+                    .Where(x => x.CalculationMode == DiscountCalculationMode.AfterTax).Sum(x => x.DiscountAmount);
+                line.PromotionDiscountAmount = result.DiscountAmount;
+                line.PromotionText = string.Join(" + ", result.AppliedPromotions.Select(x => x.PromotionName));
+            }
+
+            _applyingPromotionResults = true;
+            RecalculateCart();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Promotions could not be refreshed. {ex.Message}";
+        }
+        finally
+        {
+            _applyingPromotionResults = false;
+        }
     }
 
     public bool NeedsDiscountAuthorization(decimal percent) =>

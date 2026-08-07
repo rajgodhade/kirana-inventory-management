@@ -34,6 +34,8 @@ Views\PosShellPage.xbf
 Views\ProductEditDialog.xbf
 Views\ProductImportDialog.xbf
 Views\ProductsPage.xbf
+Views\PromotionEditDialog.xbf
+Views\PromotionsPage.xbf
 Views\PurchaseDetailsDialog.xbf
 Views\PurchaseEntryPage.xbf
 Views\PurchasePaymentDialog.xbf
@@ -46,6 +48,7 @@ Views\Reports\ExpenseReportView.xbf
 Views\Reports\InventoryReportView.xbf
 Views\Reports\ProductReportView.xbf
 Views\Reports\ProfitReportView.xbf
+Views\Reports\PromotionReportView.xbf
 Views\Reports\SalesReportView.xbf
 Views\Reports\SupplierReportView.xbf
 Views\ReportsHubPage.xbf

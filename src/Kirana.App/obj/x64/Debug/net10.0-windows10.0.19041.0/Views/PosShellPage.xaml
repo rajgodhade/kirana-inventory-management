@@ -89,17 +89,17 @@
             </Border>
 
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0">
-                <TextBlock x:ConnectionId='63'                                                  FontSize="14" FontWeight="SemiBold"
+                <TextBlock x:ConnectionId='67'                                                  FontSize="14" FontWeight="SemiBold"
                            Foreground="{ThemeResource TextPrimaryBrush}" />
                 <TextBlock Text="Billing" Style="{StaticResource CaptionTextStyle}" />
             </StackPanel>
 
-            <Button x:ConnectionId='60' Grid.Column="2"                            VerticalAlignment="Center"
+            <Button x:ConnectionId='64' Grid.Column="2"                            VerticalAlignment="Center"
                     AutomationProperties.Name="Toggle light and dark theme">
-                <FontIcon x:ConnectionId='62' x:Name="ThemeIcon" Glyph="&#xE706;" FontSize="15" />
+                <FontIcon x:ConnectionId='66' x:Name="ThemeIcon" Glyph="&#xE706;" FontSize="15" />
             </Button>
 
-            <Button x:ConnectionId='61' Grid.Column="3"                          VerticalAlignment="Center"
+            <Button x:ConnectionId='65' Grid.Column="3"                          VerticalAlignment="Center"
                     AutomationProperties.Name="Open management dashboard">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE72E;" FontSize="14" />
@@ -115,36 +115,28 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled"
                           VerticalScrollBarVisibility="Disabled">
-                <ItemsControl x:ConnectionId='59'                                        ItemTemplate="{StaticResource BillTabTemplate}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="2" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <ItemsControl x:ConnectionId='62'                                        ItemTemplate="{StaticResource BillTabTemplate}">
+                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="4" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <Button x:ConnectionId='63'                        VerticalAlignment="Center" Margin="4,0,0,0" Padding="12,7"
+                            CornerRadius="{StaticResource RadiusMedium}"                                                       
+                            ToolTipService.ToolTip="Start another bill (up to 10)" AutomationProperties.Name="New Bill beside bill tabs">
+                        <StackPanel Orientation="Horizontal" Spacing="6"><FontIcon Glyph="&#xE710;" FontSize="12" /><TextBlock Text="New Bill" FontSize="13" /></StackPanel>
+                    </Button>
+                </StackPanel>
             </ScrollViewer>
 
-            <TextBox x:ConnectionId='57' Grid.Column="1" Width="190" Height="34" VerticalAlignment="Center" Margin="0,0,0,6"
+            <TextBox x:ConnectionId='61' Grid.Column="1" Width="190" Height="34" VerticalAlignment="Center" Margin="0,0,0,6"
                      CornerRadius="{StaticResource RadiusMedium}"
                      PlaceholderText="Note for this bill"
                                                                                                                
                      AutomationProperties.Name="Note for this bill" />
 
-            <Button x:ConnectionId='58' Grid.Column="2"                        VerticalAlignment="Center" Margin="0,0,0,6"
-                    Padding="12,7" CornerRadius="{StaticResource RadiusMedium}"
-                                                                          
-                    ToolTipService.ToolTip="Start another bill (up to 10)"
-                    AutomationProperties.Name="New Bill">
-                <StackPanel Orientation="Horizontal" Spacing="6">
-                    <FontIcon Glyph="&#xE710;" FontSize="12" />
-                    <TextBlock Text="New Bill" FontSize="13" />
-                </StackPanel>
-            </Button>
         </Grid>
 
         <!-- Scan / search bar + customer -->
@@ -154,30 +146,30 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBox x:ConnectionId='43' x:Name="ScanSearchBox" Grid.Column="0" FontSize="17" Padding="14,11"
+            <TextBox x:ConnectionId='47' x:Name="ScanSearchBox" Grid.Column="0" FontSize="17" Padding="14,11"
                      PlaceholderText="Scan barcode, or type Product ID / SKU / name  (F2)"
                                                                                           
                                                            />
 
-            <Popup x:ConnectionId='44' x:Name="SuggestionsPopup" Grid.Column="0" HorizontalOffset="0" VerticalOffset="52"
+            <Popup x:ConnectionId='48' x:Name="SuggestionsPopup" Grid.Column="0" HorizontalOffset="0" VerticalOffset="52"
                    IsLightDismissEnabled="False"                                                        >
                 <Border Style="{StaticResource CardBorderStyle}" Width="520" MaxHeight="360" Padding="4">
-                    <ListView x:ConnectionId='50' x:Name="SuggestionsList"                                                   
+                    <ListView x:ConnectionId='54' x:Name="SuggestionsList"                                                   
                               SelectionMode="Single" IsItemClickEnabled="True"                                  >
                         <ListView.ItemTemplate>
                             <DataTemplate                         >
-                                <Grid x:ConnectionId='52' ColumnSpacing="12" Padding="8,6"                                          >
+                                <Grid x:ConnectionId='56' ColumnSpacing="12" Padding="8,6"                                          >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0" Spacing="1">
-                                        <TextBlock x:ConnectionId='54'                      Style="{StaticResource BodyTextStyle}" />
+                                        <TextBlock x:ConnectionId='58'                      Style="{StaticResource BodyTextStyle}" />
                                         <TextBlock Style="{StaticResource CaptionTextStyle}">
-                                            <Run x:ConnectionId='55'                             /><Run Text="  ·  " /><Run x:ConnectionId='56'                     />
+                                            <Run x:ConnectionId='59'                             /><Run Text="  ·  " /><Run x:ConnectionId='60'                     />
                                         </TextBlock>
                                     </StackPanel>
-                                    <TextBlock x:ConnectionId='53' Grid.Column="1"                                                                           
+                                    <TextBlock x:ConnectionId='57' Grid.Column="1"                                                                           
                                                Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center" />
                                 </Grid>
                             </DataTemplate>
@@ -188,23 +180,23 @@
 
             <!-- The button's content is icon + bound text, which leaves it without an accessible
                  name; set one explicitly so screen readers announce it. -->
-            <Button x:ConnectionId='45' Grid.Column="1"                         Padding="14,9"
+            <Button x:ConnectionId='49' Grid.Column="1"                         Padding="14,9"
                     CornerRadius="{StaticResource RadiusMedium}"
                     AutomationProperties.Name="Select Customer (F4)">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <FontIcon Glyph="&#xE77B;" FontSize="15" VerticalAlignment="Center" />
                     <StackPanel Spacing="0" VerticalAlignment="Center">
-                        <TextBlock x:ConnectionId='46'                                                            FontWeight="SemiBold" />
+                        <TextBlock x:ConnectionId='50'                                                            FontWeight="SemiBold" />
                         <!-- Outstanding udhaar surfaces here so the cashier sees it before adding
                              more credit, without opening the customer's ledger. -->
-                        <StackPanel x:ConnectionId='47' Orientation="Horizontal" Spacing="4"
+                        <StackPanel x:ConnectionId='51' Orientation="Horizontal" Spacing="4"
                                                                                                                                                              >
                             <TextBlock Text="Owes" Style="{StaticResource CaptionTextStyle}" />
-                            <TextBlock x:ConnectionId='49'                                                               
+                            <TextBlock x:ConnectionId='53'                                                               
                                        Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold"
                                        Foreground="{ThemeResource WarningBrush}" />
                         </StackPanel>
-                        <TextBlock x:ConnectionId='48' Text="Press F4 to change" Style="{StaticResource CaptionTextStyle}"
+                        <TextBlock x:ConnectionId='52' Text="Press F4 to change" Style="{StaticResource CaptionTextStyle}"
                                                                                                                                                                     />
                     </StackPanel>
                     <TextBlock Text="F4" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
@@ -249,7 +241,7 @@
                     <!-- Empty state doubles as the keyboard cheat-sheet: this is the screen a new
                          cashier stares at most, so the shortcuts are taught here rather than hidden
                          in a manual. -->
-                    <StackPanel x:ConnectionId='29' Grid.Row="1" Spacing="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    <StackPanel x:ConnectionId='31' Grid.Row="1" Spacing="14" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                                                                                                                       >
                         <FontIcon Glyph="&#xE7BF;" FontSize="34" Foreground="{ThemeResource TextTertiaryBrush}" HorizontalAlignment="Center" />
                         <TextBlock Text="Cart is empty" Style="{StaticResource SectionTitleTextStyle}" HorizontalAlignment="Center" />
@@ -290,7 +282,7 @@
                         </Border>
                     </StackPanel>
 
-                    <ListView x:ConnectionId='30' Grid.Row="1"                                            SelectionMode="None">
+                    <ListView x:ConnectionId='32' Grid.Row="1"                                            SelectionMode="None">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="Padding" Value="0" />
@@ -300,7 +292,7 @@
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate                                  >
-                                <Grid x:ConnectionId='32' ColumnSpacing="10" Padding="14,10"
+                                <Grid x:ConnectionId='34' ColumnSpacing="10" Padding="14,10"
                                       BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" MinWidth="160" />
@@ -313,48 +305,57 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock x:ConnectionId='41'                             Style="{StaticResource CardTitleTextStyle}" TextWrapping="Wrap" />
-                                        <TextBlock x:ConnectionId='42'                             Style="{StaticResource CodeTextStyle}" />
+                                        <TextBlock x:ConnectionId='43'                             Style="{StaticResource CardTitleTextStyle}" TextWrapping="Wrap" />
+                                        <TextBlock x:ConnectionId='44'                             Style="{StaticResource CodeTextStyle}" />
+                                        <Border x:ConnectionId='45' Background="{ThemeResource PastelGreenBrush}" CornerRadius="10" Padding="7,3"
+                                                HorizontalAlignment="Left"
+                                                                                                                                                     >
+                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                <FontIcon Glyph="&#xE73E;" FontSize="10" Foreground="{ThemeResource PastelGreenOnBrush}" />
+                                                <TextBlock x:ConnectionId='46'                                            FontSize="10" FontWeight="SemiBold"
+                                                           Foreground="{ThemeResource PastelGreenOnBrush}" />
+                                            </StackPanel>
+                                        </Border>
                                     </StackPanel>
 
                                     <!-- Unit sits under the quantity box because it qualifies that number
                                          ("1.5 Kilogram"), and it is the same unit printed on the invoice. -->
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                        <TextBox x:ConnectionId='39'                                                                                              
+                                        <TextBox x:ConnectionId='41'                                                                                              
                                                                                                                     
                                                  TextAlignment="Center" />
-                                        <TextBlock x:ConnectionId='40'                      Style="{StaticResource CaptionTextStyle}"
+                                        <TextBlock x:ConnectionId='42'                      Style="{StaticResource CaptionTextStyle}"
                                                    HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
 
                                     <!-- Read-only: MRP is a product attribute shown for comparison, never
                                          something a cashier edits mid-bill (unlike the Price cell). Hidden
                                          rather than shown as "₹0.00" for a product with no MRP set. -->
-                                    <TextBlock x:ConnectionId='33' Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource BodyTextStyle}"
+                                    <TextBlock x:ConnectionId='35' Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource BodyTextStyle}"
                                                HorizontalAlignment="Center" Opacity="0.75"
                                                                                                                 
                                                                                                                                   />
 
                                     <StackPanel Grid.Column="3" VerticalAlignment="Center" Spacing="1">
-                                        <TextBox x:ConnectionId='37'                                                                                               
+                                        <TextBox x:ConnectionId='39'                                                                                               
                                                                                                               
                                                  TextAlignment="Center"
                                                  AutomationProperties.Name="Price (editable — applies to this bill only)" />
-                                        <TextBlock x:ConnectionId='38'                                                                                
+                                        <TextBlock x:ConnectionId='40'                                                                                
                                                    Style="{StaticResource CaptionTextStyle}" HorizontalAlignment="Center"
                                                    TextDecorations="Strikethrough"
                                                                                                                                                               />
                                     </StackPanel>
 
-                                    <TextBox x:ConnectionId='34' Grid.Column="4"                                                                                                     
+                                    <TextBox x:ConnectionId='36' Grid.Column="4"                                                                                                     
                                                                                                                 
                                              VerticalAlignment="Center" TextAlignment="Center" />
 
-                                    <TextBlock x:ConnectionId='35' Grid.Column="5" VerticalAlignment="Center" Style="{StaticResource AmountTextStyle}"
+                                    <TextBlock x:ConnectionId='37' Grid.Column="5" VerticalAlignment="Center" Style="{StaticResource AmountTextStyle}"
                                                HorizontalAlignment="Right"
                                                                                                                                     />
 
-                                    <Button x:ConnectionId='36' Grid.Column="6"                                         
+                                    <Button x:ConnectionId='38' Grid.Column="6"                                         
                                             VerticalAlignment="Center" Padding="8,4"
                                             AutomationProperties.Name="Remove line">
                                         <FontIcon Glyph="&#xE711;" FontSize="13" Foreground="{ThemeResource DangerBrush}" />
@@ -391,7 +392,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Total items" Style="{StaticResource SecondaryTextStyle}" />
-                        <TextBlock x:ConnectionId='28' Grid.Column="1" Style="{StaticResource BodyTextStyle}"
+                        <TextBlock x:ConnectionId='30' Grid.Column="1" Style="{StaticResource BodyTextStyle}"
                                                                                          />
                     </Grid>
                     <Grid ColumnSpacing="8">
@@ -400,7 +401,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Subtotal" Style="{StaticResource SecondaryTextStyle}" />
-                        <TextBlock x:ConnectionId='27' Grid.Column="1" Style="{StaticResource BodyTextStyle}"
+                        <TextBlock x:ConnectionId='29' Grid.Column="1" Style="{StaticResource BodyTextStyle}"
                                                                                                                                  />
                     </Grid>
                     <Grid ColumnSpacing="8">
@@ -409,8 +410,17 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Item discounts" Style="{StaticResource SecondaryTextStyle}" />
-                        <TextBlock x:ConnectionId='26' Grid.Column="1" Style="{StaticResource BodyTextStyle}"
+                        <TextBlock x:ConnectionId='28' Grid.Column="1" Style="{StaticResource BodyTextStyle}"
                                                                                                                                           />
+                    </Grid>
+                    <Grid x:ConnectionId='22' ColumnSpacing="8"                                                                                                                        >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Promotion savings" Style="{StaticResource SecondaryTextStyle}" />
+                        <TextBlock x:ConnectionId='27' Grid.Column="1" FontWeight="SemiBold" Foreground="{ThemeResource SuccessBrush}"
+                                                                                                                                               />
                     </Grid>
                     <Grid ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
@@ -420,11 +430,11 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Bill discount" Style="{StaticResource SecondaryTextStyle}"
                                    VerticalAlignment="Center" />
-                        <TextBlock x:ConnectionId='24' Grid.Column="1" Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center"
+                        <TextBlock x:ConnectionId='25' Grid.Column="1" Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center"
                                                                                                                                            />
                         <!-- Only way to undo a bill discount used to be reopening the dialog and
                              typing 0, which reads as "change it", not "remove it". -->
-                        <Button x:ConnectionId='25' Grid.Column="2"                                  Padding="5,2" MinWidth="0"
+                        <Button x:ConnectionId='26' Grid.Column="2"                                  Padding="5,2" MinWidth="0"
                                 Background="Transparent" BorderThickness="0" VerticalAlignment="Center"
                                 AutomationProperties.Name="Remove bill discount"
                                 ToolTipService.ToolTip="Remove bill discount"
@@ -438,7 +448,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="GST" Style="{StaticResource SecondaryTextStyle}" />
-                        <TextBlock x:ConnectionId='23' Grid.Column="1" Style="{StaticResource BodyTextStyle}"
+                        <TextBlock x:ConnectionId='24' Grid.Column="1" Style="{StaticResource BodyTextStyle}"
                                                                                                                                  />
                     </Grid>
                     <Grid ColumnSpacing="8">
@@ -447,7 +457,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Round off" Style="{StaticResource SecondaryTextStyle}" />
-                        <TextBlock x:ConnectionId='22' Grid.Column="1" Style="{StaticResource BodyTextStyle}"
+                        <TextBlock x:ConnectionId='23' Grid.Column="1" Style="{StaticResource BodyTextStyle}"
                                                                                                                                        />
                     </Grid>
                 </StackPanel>

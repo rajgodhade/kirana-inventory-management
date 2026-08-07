@@ -107,25 +107,28 @@
                 <Style TargetType="PivotHeaderItem" BasedOn="{StaticResource SegmentedPivotHeaderItemStyle}" />
             </Pivot.Resources>
             <PivotItem Header="Dashboard">
-                <reports:DashboardView x:ConnectionId='23' x:Name="DashboardTab" />
+                <reports:DashboardView x:ConnectionId='24' x:Name="DashboardTab" />
             </PivotItem>
             <PivotItem Header="Sales &amp; GST">
-                <reports:SalesReportView x:ConnectionId='22' x:Name="SalesTab" />
+                <reports:SalesReportView x:ConnectionId='23' x:Name="SalesTab" />
             </PivotItem>
             <PivotItem Header="Products">
-                <reports:ProductReportView x:ConnectionId='21' x:Name="ProductsTab" />
+                <reports:ProductReportView x:ConnectionId='22' x:Name="ProductsTab" />
             </PivotItem>
             <PivotItem Header="Inventory">
-                <reports:InventoryReportView x:ConnectionId='20' x:Name="InventoryTab" />
+                <reports:InventoryReportView x:ConnectionId='21' x:Name="InventoryTab" />
             </PivotItem>
             <PivotItem Header="Customers">
-                <reports:CustomerReportView x:ConnectionId='19' x:Name="CustomersTab" />
+                <reports:CustomerReportView x:ConnectionId='20' x:Name="CustomersTab" />
             </PivotItem>
             <PivotItem Header="Suppliers">
-                <reports:SupplierReportView x:ConnectionId='18' x:Name="SuppliersTab" />
+                <reports:SupplierReportView x:ConnectionId='19' x:Name="SuppliersTab" />
             </PivotItem>
             <PivotItem Header="Expenses">
-                <reports:ExpenseReportView x:ConnectionId='17' x:Name="ExpensesTab" />
+                <reports:ExpenseReportView x:ConnectionId='18' x:Name="ExpensesTab" />
+            </PivotItem>
+            <PivotItem Header="Promotions">
+                <reports:PromotionReportView x:ConnectionId='17' x:Name="PromotionsTab" />
             </PivotItem>
             <PivotItem x:ConnectionId='15' x:Name="ProfitPivotItem" Header="Profit">
                 <reports:ProfitReportView x:ConnectionId='16' x:Name="ProfitTab" />

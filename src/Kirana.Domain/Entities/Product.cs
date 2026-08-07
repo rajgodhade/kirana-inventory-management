@@ -46,4 +46,5 @@ public class Product : Entity
     public Inventory? Inventory { get; set; }
     public ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
     public ICollection<ProductBatch> Batches { get; set; } = new List<ProductBatch>();
+    public ICollection<PromotionTarget> PromotionTargets { get; set; } = new List<PromotionTarget>();
 }

@@ -7,6 +7,14 @@ namespace Kirana.Application.Authentication;
 /// </summary>
 public interface IAuthenticationService
 {
+    /// <summary>
+    /// Unlocks management for the named user with whichever secret they typed. The user is not
+    /// expected to know whether their credential is a PIN or a password: the PIN is checked
+    /// first, then the password, and the two comparisons count as a single login attempt —
+    /// one increment toward the account lockout and one audit entry at most.
+    /// </summary>
+    Task<AuthResult> LoginAsync(string username, string secret, CancellationToken cancellationToken = default);
+
     Task<AuthResult> LoginWithPasswordAsync(string username, string password, CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -18,6 +18,8 @@ public sealed class InvoiceDocumentBuilder : IInvoiceDocumentBuilder
             Mrp = item.MrpSnapshot,
             DiscountPercent = item.DiscountPercent,
             DiscountAmount = item.DiscountAmount,
+            PromotionDiscountAmount = item.PromotionDiscountAmount,
+            PromotionText = string.Join(" + ", item.Promotions.Select(x => x.PromotionNameSnapshot)),
             GstRatePercent = item.GstRatePercentSnapshot,
             TaxableAmount = item.TaxableAmount,
             GstAmount = item.GstAmount,
@@ -77,6 +79,7 @@ public sealed class InvoiceDocumentBuilder : IInvoiceDocumentBuilder
 
             SubTotal = sale.SubTotal,
             ItemDiscountTotal = sale.ItemDiscountTotal,
+            PromotionDiscountTotal = sale.PromotionDiscountTotal,
             BillDiscountPercent = sale.BillDiscountPercent,
             BillDiscountAmount = sale.BillDiscountAmount,
             TaxTotal = sale.TaxTotal,

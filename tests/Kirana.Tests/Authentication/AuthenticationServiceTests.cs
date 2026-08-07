@@ -265,5 +265,181 @@ public class AuthenticationServiceTests : IDisposable
             (e.Reason?.Contains("wrong-password-guess") ?? false));
     }
 
+    // --- LoginAsync: the dialog hands over a username and whatever secret was typed, and the
+    // --- service works out whether it is a PIN or a password (PIN first, password second).
+
+    [Fact]
+    public async Task LoginAsync_Succeeds_WithCorrectPin()
+    {
+        await SeedAdminAsync();
+
+        var result = await _sut.LoginAsync("admin", "1234");
+
+        Assert.True(result.Success);
+        Assert.True(_session.IsUnlocked);
+        Assert.True(_session.HasPermission(PermissionKeys.UsersManage));
+    }
+
+    [Fact]
+    public async Task LoginAsync_Succeeds_WithCorrectPassword()
+    {
+        await SeedAdminAsync();
+
+        var result = await _sut.LoginAsync("admin", "S3cure!Pass");
+
+        Assert.True(result.Success);
+        Assert.True(_session.IsUnlocked);
+    }
+
+    [Fact]
+    public async Task LoginAsync_FallsBackToPassword_WhenSecretIsNotThePin()
+    {
+        await SeedAdminAsync();
+
+        // "S3cure!Pass" is not the PIN, so the PIN comparison fails first and the password wins.
+        var result = await _sut.LoginAsync("admin", "S3cure!Pass");
+
+        Assert.True(result.Success);
+
+        var admin = await _fixture.Context.Users.FirstAsync(u => u.Username == "admin");
+        Assert.Equal(0, admin.FailedLoginAttempts);
+    }
+
+    [Fact]
+    public async Task LoginAsync_Succeeds_WithNumericPassword_ViaPasswordFallback()
+    {
+        await SeedAdminAsync();
+        await SeedNumericPasswordUserAsync();
+
+        // Regression: a 4-6 digit password used to be misread as a PIN and rejected outright.
+        var result = await _sut.LoginAsync("numeric1", "987654");
+
+        Assert.True(result.Success);
+        Assert.True(_session.IsUnlocked);
+    }
+
+    [Fact]
+    public async Task LoginAsync_Fails_WithAnotherUsersPin()
+    {
+        await SeedAdminAsync();
+        await SeedCashierAsync();
+
+        var result = await _sut.LoginAsync("admin", "4321");
+
+        Assert.False(result.Success);
+        Assert.False(_session.IsUnlocked);
+    }
+
+    [Fact]
+    public async Task LoginAsync_RecordsExactlyOneFailedAttempt_WhenPinAndPasswordBothWrong()
+    {
+        await SeedAdminAsync();
+
+        var result = await _sut.LoginAsync("admin", "not-the-pin-or-password");
+
+        Assert.False(result.Success);
+
+        var admin = await _fixture.Context.Users.FirstAsync(u => u.Username == "admin");
+        Assert.Equal(1, admin.FailedLoginAttempts);
+    }
+
+    [Fact]
+    public async Task LoginAsync_WritesExactlyOneAuditEntry_WhenPinAndPasswordBothWrong()
+    {
+        await SeedAdminAsync();
+
+        await _sut.LoginAsync("admin", "not-the-pin-or-password");
+
+        var failures = await _fixture.Context.AuditLogs
+            .Where(e => e.Action == "FailedLogin")
+            .ToListAsync();
+
+        Assert.Single(failures);
+    }
+
+    [Fact]
+    public async Task LoginAsync_WritesExactlyOneAuditEntry_OnSuccess()
+    {
+        await SeedAdminAsync();
+
+        await _sut.LoginAsync("admin", "1234");
+
+        var logins = await _fixture.Context.AuditLogs
+            .Where(e => e.Action == "ManagementLogin")
+            .ToListAsync();
+
+        Assert.Single(logins);
+    }
+
+    [Fact]
+    public async Task LoginAsync_TakesFiveWholeAttempts_ToLockTheAccount()
+    {
+        await SeedAdminAsync();
+
+        // Four failures must not lock: each call is one attempt even though it compares two hashes.
+        for (var i = 0; i < 4; i++)
+        {
+            await _sut.LoginAsync("admin", "wrong-on-both-counts");
+        }
+
+        var admin = await _fixture.Context.Users.FirstAsync(u => u.Username == "admin");
+        Assert.Equal(4, admin.FailedLoginAttempts);
+        Assert.Null(admin.LockedUntilUtc);
+
+        // The PIN still works at this point, proving nothing locked early.
+        var recovered = await _sut.LoginAsync("admin", "1234");
+        Assert.True(recovered.Success);
+    }
+
+    [Fact]
+    public async Task LoginAsync_LocksAccount_OnFifthFailedAttempt()
+    {
+        await SeedAdminAsync();
+
+        for (var i = 0; i < 5; i++)
+        {
+            await _sut.LoginAsync("admin", "wrong-on-both-counts");
+        }
+
+        var result = await _sut.LoginAsync("admin", "1234");
+
+        Assert.False(result.Success);
+        Assert.Contains("locked", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task LoginAsync_DoesNotTripGlobalPinLockout_ForNumericPasswordHolder()
+    {
+        await SeedAdminAsync();
+        await SeedNumericPasswordUserAsync();
+
+        // Four ambiguous misses must not exhaust the shared PIN throttle used by the
+        // username-less quick unlock.
+        for (var i = 0; i < 4; i++)
+        {
+            await _sut.LoginAsync("numeric1", "000000");
+        }
+
+        Assert.False(_session.IsPinLocked);
+        Assert.True((await _sut.LoginWithPinAsync("1234")).Success);
+    }
+
+    private async Task<User> SeedNumericPasswordUserAsync()
+    {
+        var managerRole = await _fixture.Context.Roles.FirstAsync(r => r.Name == "Manager");
+        var user = new User
+        {
+            Username = "numeric1",
+            FullName = "Numeric Password User",
+            PasswordHash = _hasher.Hash("987654"),
+            PinHash = _hasher.Hash("5555"),
+            Role = managerRole,
+            IsActive = true,
+        };
+        _fixture.Context.Users.Add(user);
+        await _fixture.Context.SaveChangesAsync();
+        return user;
+    }
+
     public void Dispose() => _fixture.Dispose();
 }

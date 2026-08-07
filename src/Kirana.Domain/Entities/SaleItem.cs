@@ -35,7 +35,9 @@ public class SaleItem : Entity
     public decimal MrpSnapshot { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal DiscountAmount { get; set; }
+    public decimal PromotionDiscountAmount { get; set; }
     public decimal TaxableAmount { get; set; }
     public decimal GstAmount { get; set; }
     public decimal LineTotal { get; set; }
+    public ICollection<SaleItemPromotion> Promotions { get; set; } = new List<SaleItemPromotion>();
 }

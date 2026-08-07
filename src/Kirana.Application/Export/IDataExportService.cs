@@ -15,6 +15,7 @@ public enum ExportDataset
     Sales,
     Purchases,
     Expenses,
+    Promotions,
 }
 
 /// <summary>

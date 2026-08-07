@@ -7,6 +7,7 @@ using Kirana.Application.Billing;
 using Kirana.Application.Customers;
 using Kirana.Application.Printing;
 using Kirana.Application.Products;
+using Kirana.Application.Promotions;
 using Kirana.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -32,6 +33,7 @@ public sealed partial class PosShellPage : Page
             services.GetRequiredService<IBarcodeLookupService>(),
             services.GetRequiredService<IHeldBillService>(),
             services.GetRequiredService<ICustomerService>(),
+            services.GetRequiredService<IPromotionEngine>(),
             services.GetRequiredService<IKiranaDbContext>(),
             services.GetRequiredService<ManagementSession>());
 
@@ -267,6 +269,7 @@ public sealed partial class PosShellPage : Page
         if (dialog.Confirmed)
         {
             ViewModel.SelectedCustomer = dialog.SelectedCustomer;
+            await ViewModel.RefreshPromotionsAsync();
         }
 
         ScanSearchBox.Focus(FocusState.Programmatic);
@@ -373,6 +376,8 @@ public sealed partial class PosShellPage : Page
         {
             return;
         }
+
+        await ViewModel.RefreshPromotionsAsync();
 
         await ViewModel.HoldCurrentBillAsync();
         ScanSearchBox.Focus(FocusState.Programmatic);

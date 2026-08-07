@@ -854,6 +854,267 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.ToTable("ProductBatches");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.Promotion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("AllowStacking")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CalculationMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CurrentUsage")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("FixedPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("FlatAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("MaximumDiscount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("MaximumUsage")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("MinimumBillAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("MinimumQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("Percentage")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PriorityMode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PromotionCode")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PromotionName")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PromotionType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("Priority");
+
+                    b.HasIndex("PromotionCode")
+                        .IsUnique();
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.HasIndex("IsActive", "Status");
+
+                    b.ToTable("Promotions");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PromotionRule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PromotionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RuleType")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RuleValue")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PromotionId");
+
+                    b.ToTable("PromotionRules");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PromotionSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeSpan?>("DailyEndTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeSpan?>("DailyStartTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("EndAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PromotionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("StartAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PromotionId")
+                        .IsUnique();
+
+                    b.HasIndex("StartAtUtc", "EndAtUtc");
+
+                    b.ToTable("PromotionSchedules");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PromotionScope", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PromotionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ScopeType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PromotionId")
+                        .IsUnique();
+
+                    b.ToTable("PromotionScopes");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PromotionTarget", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("BrandId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PromotionScopeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("PromotionScopeId", "BrandId")
+                        .IsUnique()
+                        .HasFilter("\"BrandId\" IS NOT NULL");
+
+                    b.HasIndex("PromotionScopeId", "CategoryId")
+                        .IsUnique()
+                        .HasFilter("\"CategoryId\" IS NOT NULL");
+
+                    b.HasIndex("PromotionScopeId", "ProductId")
+                        .IsUnique()
+                        .HasFilter("\"ProductId\" IS NOT NULL");
+
+                    b.ToTable("PromotionTargets");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.Purchase", b =>
                 {
                     b.Property<int>("Id")
@@ -1264,6 +1525,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Property<int?>("PriceOverrideAuthorizedByUserId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal>("PromotionDiscountTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("RoundOffAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
@@ -1361,6 +1626,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal>("PromotionDiscountAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("Quantity")
                         .HasPrecision(18, 3)
                         .HasColumnType("TEXT");
@@ -1395,6 +1664,57 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.HasIndex("SaleId");
 
                     b.ToTable("SaleItems");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.SaleItemPromotion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CalculationModeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PromotionCodeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PromotionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PromotionNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PromotionTypeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SaleItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PromotionId");
+
+                    b.HasIndex("SaleItemId");
+
+                    b.ToTable("SaleItemPromotions");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.SalesReturn", b =>
@@ -2069,6 +2389,88 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.Promotion", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Kirana.Domain.Entities.User", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PromotionRule", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.Promotion", "Promotion")
+                        .WithMany("Rules")
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Promotion");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PromotionSchedule", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.Promotion", "Promotion")
+                        .WithOne("Schedule")
+                        .HasForeignKey("Kirana.Domain.Entities.PromotionSchedule", "PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Promotion");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PromotionScope", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.Promotion", "Promotion")
+                        .WithOne("Scope")
+                        .HasForeignKey("Kirana.Domain.Entities.PromotionScope", "PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Promotion");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PromotionTarget", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.Brand", "Brand")
+                        .WithMany("PromotionTargets")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Kirana.Domain.Entities.Category", "Category")
+                        .WithMany("PromotionTargets")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Kirana.Domain.Entities.Product", "Product")
+                        .WithMany("PromotionTargets")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Kirana.Domain.Entities.PromotionScope", "PromotionScope")
+                        .WithMany("Targets")
+                        .HasForeignKey("PromotionScopeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("PromotionScope");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.Purchase", b =>
                 {
                     b.HasOne("Kirana.Domain.Entities.User", "CreatedByUser")
@@ -2228,6 +2630,25 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Sale");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.SaleItemPromotion", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.Promotion", "Promotion")
+                        .WithMany("SaleApplications")
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Kirana.Domain.Entities.SaleItem", "SaleItem")
+                        .WithMany("Promotions")
+                        .HasForeignKey("SaleItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Promotion");
+
+                    b.Navigation("SaleItem");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.SalesReturn", b =>
                 {
                     b.HasOne("Kirana.Domain.Entities.User", "AuthorizedByUser")
@@ -2344,11 +2765,15 @@ namespace Kirana.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Kirana.Domain.Entities.Brand", b =>
                 {
                     b.Navigation("Products");
+
+                    b.Navigation("PromotionTargets");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.Category", b =>
                 {
                     b.Navigation("Products");
+
+                    b.Navigation("PromotionTargets");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.CreditPayment", b =>
@@ -2377,7 +2802,25 @@ namespace Kirana.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Inventory");
 
+                    b.Navigation("PromotionTargets");
+
                     b.Navigation("StockMovements");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.Promotion", b =>
+                {
+                    b.Navigation("Rules");
+
+                    b.Navigation("SaleApplications");
+
+                    b.Navigation("Schedule");
+
+                    b.Navigation("Scope");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PromotionScope", b =>
+                {
+                    b.Navigation("Targets");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.Purchase", b =>
@@ -2404,6 +2847,11 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.SaleItem", b =>
+                {
+                    b.Navigation("Promotions");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.SalesReturn", b =>

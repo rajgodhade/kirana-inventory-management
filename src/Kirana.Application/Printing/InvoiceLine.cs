@@ -15,6 +15,9 @@ public sealed class InvoiceLine
     public decimal Mrp { get; init; }
     public decimal DiscountPercent { get; init; }
     public decimal DiscountAmount { get; init; }
+    public decimal PromotionDiscountAmount { get; init; }
+    public string PromotionText { get; init; } = string.Empty;
+    public bool HasPromotion => PromotionDiscountAmount > 0 && PromotionText.Length > 0;
     public decimal GstRatePercent { get; init; }
     public decimal TaxableAmount { get; init; }
     public decimal GstAmount { get; init; }

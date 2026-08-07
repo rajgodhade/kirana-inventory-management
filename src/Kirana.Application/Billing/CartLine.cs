@@ -11,4 +11,6 @@ public sealed class CartLine
     public required bool IsTaxInclusive { get; init; }
     public decimal GstRatePercent { get; init; }
     public decimal DiscountPercent { get; init; }
+    public decimal PromotionBeforeTaxDiscountAmount { get; init; }
+    public decimal PromotionAfterTaxDiscountAmount { get; init; }
 }

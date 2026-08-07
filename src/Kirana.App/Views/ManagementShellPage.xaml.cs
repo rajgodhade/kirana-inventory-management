@@ -53,6 +53,7 @@ public sealed partial class ManagementShellPage : Page
         {
             var t when t == typeof(ManagementHomePage) => "Home",
             var t when t == typeof(ProductsPage) => "Products",
+            var t when t == typeof(PromotionsPage) => "Promotions",
             var t when t == typeof(BarcodeScanTestPage) => "Barcodes",
             var t when t == typeof(CustomersPage) || t == typeof(CustomerLedgerPage) => "Customers",
             var t when t == typeof(SuppliersPage) || t == typeof(SupplierLedgerPage) => "Suppliers",
@@ -106,6 +107,7 @@ public sealed partial class ManagementShellPage : Page
     private void ApplyPermissionsToPane()
     {
         SetVisible(NavCustomers, _session.HasPermission(PermissionKeys.CustomersManage));
+        SetVisible(NavPromotions, _session.HasPermission(PermissionKeys.PromotionsView));
         SetVisible(NavSuppliers, _session.HasPermission(PermissionKeys.PurchasesManage));
         SetVisible(NavPurchases, _session.HasPermission(PermissionKeys.PurchasesManage));
         // Phase 9 adds no new permission keys: returns reuse the refund permission, purchase
@@ -170,6 +172,7 @@ public sealed partial class ManagementShellPage : Page
         {
             "Home" => typeof(ManagementHomePage),
             "Products" => typeof(ProductsPage),
+            "Promotions" => typeof(PromotionsPage),
             "Barcodes" => typeof(BarcodeScanTestPage),
             "Customers" => typeof(CustomersPage),
             "Suppliers" => typeof(SuppliersPage),

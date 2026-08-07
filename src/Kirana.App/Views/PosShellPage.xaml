@@ -115,18 +115,20 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled"
                           VerticalScrollBarVisibility="Disabled">
-                <ItemsControl ItemsSource="{x:Bind ViewModel.Bills}" ItemTemplate="{StaticResource BillTabTemplate}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="2" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.Bills}" ItemTemplate="{StaticResource BillTabTemplate}">
+                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="4" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <Button Click="OnNewBillClick" VerticalAlignment="Center" Margin="4,0,0,0" Padding="12,7"
+                            CornerRadius="{StaticResource RadiusMedium}" IsEnabled="{x:Bind ViewModel.CanAddBill, Mode=OneWay}"
+                            ToolTipService.ToolTip="Start another bill (up to 10)" AutomationProperties.Name="New Bill beside bill tabs">
+                        <StackPanel Orientation="Horizontal" Spacing="6"><FontIcon Glyph="&#xE710;" FontSize="12" /><TextBlock Text="New Bill" FontSize="13" /></StackPanel>
+                    </Button>
+                </StackPanel>
             </ScrollViewer>
 
             <TextBox Grid.Column="1" Width="190" Height="34" VerticalAlignment="Center" Margin="0,0,0,6"
@@ -135,16 +137,6 @@
                      Text="{x:Bind ViewModel.ActiveBillNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      AutomationProperties.Name="Note for this bill" />
 
-            <Button Grid.Column="2" Click="OnNewBillClick" VerticalAlignment="Center" Margin="0,0,0,6"
-                    Padding="12,7" CornerRadius="{StaticResource RadiusMedium}"
-                    IsEnabled="{x:Bind ViewModel.CanAddBill, Mode=OneWay}"
-                    ToolTipService.ToolTip="Start another bill (up to 10)"
-                    AutomationProperties.Name="New Bill">
-                <StackPanel Orientation="Horizontal" Spacing="6">
-                    <FontIcon Glyph="&#xE710;" FontSize="12" />
-                    <TextBlock Text="New Bill" FontSize="13" />
-                </StackPanel>
-            </Button>
         </Grid>
 
         <!-- Scan / search bar + customer -->
@@ -315,6 +307,15 @@
                                     <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind ProductName}" Style="{StaticResource CardTitleTextStyle}" TextWrapping="Wrap" />
                                         <TextBlock Text="{x:Bind ProductCode}" Style="{StaticResource CodeTextStyle}" />
+                                        <Border Background="{ThemeResource PastelGreenBrush}" CornerRadius="10" Padding="7,3"
+                                                HorizontalAlignment="Left"
+                                                Visibility="{x:Bind HasPromotion, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                <FontIcon Glyph="&#xE73E;" FontSize="10" Foreground="{ThemeResource PastelGreenOnBrush}" />
+                                                <TextBlock Text="{x:Bind PromotionText, Mode=OneWay}" FontSize="10" FontWeight="SemiBold"
+                                                           Foreground="{ThemeResource PastelGreenOnBrush}" />
+                                            </StackPanel>
+                                        </Border>
                                     </StackPanel>
 
                                     <!-- Unit sits under the quantity box because it qualifies that number
@@ -411,6 +412,15 @@
                         <TextBlock Grid.Column="0" Text="Item discounts" Style="{StaticResource SecondaryTextStyle}" />
                         <TextBlock Grid.Column="1" Style="{StaticResource BodyTextStyle}"
                                    Text="{x:Bind ViewModel.ItemDiscountTotal, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
+                    </Grid>
+                    <Grid ColumnSpacing="8" Visibility="{x:Bind ViewModel.HasPromotionDiscount, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Promotion savings" Style="{StaticResource SecondaryTextStyle}" />
+                        <TextBlock Grid.Column="1" FontWeight="SemiBold" Foreground="{ThemeResource SuccessBrush}"
+                                   Text="{x:Bind ViewModel.PromotionDiscountTotal, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
                     </Grid>
                     <Grid ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
