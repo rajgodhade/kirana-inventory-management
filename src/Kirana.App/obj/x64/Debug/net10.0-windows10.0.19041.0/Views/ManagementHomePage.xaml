@@ -3,7 +3,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:Kirana.App.ViewModels"
-    xmlns:rpt="using:Kirana.Application.Reports">
+    xmlns:rpt="using:Kirana.Application.Reports"
+    xmlns:controls="using:Kirana.App.Views.Controls">
 
     <Page.Resources>
         <Style x:Key="DashboardTileButtonStyle" TargetType="Button">
@@ -296,13 +297,13 @@
                 </Border>
             </StackPanel>
 
-            <!-- Operational devices; scanner monitoring is not invented when no API exists. -->
+            <!-- Operational devices use the same reusable monitor as POS and Hardware Settings. -->
             <StackPanel Spacing="10">
                 <TextBlock Text="Store systems" Style="{StaticResource SectionTitleTextStyle}" />
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Style="{StaticResource DashboardPanelStyle}" Padding="16"><StackPanel Orientation="Horizontal" Spacing="12"><Border Width="36" Height="36" CornerRadius="10" Background="{ThemeResource PastelBlueBrush}"><FontIcon Glyph="&#xE749;" FontSize="14" Foreground="{ThemeResource PastelBlueOnBrush}" /></Border><StackPanel><TextBlock Text="Receipt printer" FontWeight="SemiBold" /><TextBlock x:ConnectionId='7'                                                          Style="{StaticResource CaptionTextStyle}" /><TextBlock x:ConnectionId='8'                                                           Style="{StaticResource CaptionTextStyle}" /></StackPanel></StackPanel></Border>
-                    <Border Grid.Column="1" Style="{StaticResource DashboardPanelStyle}" Padding="16"><StackPanel Orientation="Horizontal" Spacing="12"><Border Width="36" Height="36" CornerRadius="10" Background="{ThemeResource PastelVioletBrush}"><FontIcon Glyph="&#xE8A9;" FontSize="14" Foreground="{ThemeResource PastelVioletOnBrush}" /></Border><StackPanel><TextBlock Text="Barcode scanner" FontWeight="SemiBold" /><TextBlock Text="Ready for keyboard input" Style="{StaticResource CaptionTextStyle}" /><TextBlock Text="Connection is not monitored" Style="{StaticResource CaptionTextStyle}" /></StackPanel></StackPanel></Border>
+                    <controls:DeviceStatusWidget x:ConnectionId='7' Grid.Column="0" Title="Receipt printer" Glyph="&#xE749;"                                                                                                                            />
+                    <controls:DeviceStatusWidget x:ConnectionId='8' Grid.Column="1" Title="Barcode scanner" Glyph="&#xE8BD;"                                                                                                                           />
                     <Border Grid.Column="2" Style="{StaticResource DashboardPanelStyle}" Padding="16"><StackPanel Orientation="Horizontal" Spacing="12"><Border Width="36" Height="36" CornerRadius="10" Background="{ThemeResource PastelGreenBrush}"><FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource PastelGreenOnBrush}" /></Border><StackPanel><TextBlock Text="Database" FontWeight="SemiBold" /><TextBlock Text="Connected" Style="{StaticResource CaptionTextStyle}" /><TextBlock Text="Local store data available" Style="{StaticResource CaptionTextStyle}" /></StackPanel></StackPanel></Border>
                 </Grid>
             </StackPanel>

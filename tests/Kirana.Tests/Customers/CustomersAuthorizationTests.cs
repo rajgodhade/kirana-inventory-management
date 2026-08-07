@@ -89,6 +89,11 @@ public class CustomersAuthorizationTests : IDisposable
             () => _creditService.GetOutstandingSummaryAsync(_cashierId));
 
     [Fact]
+    public async Task Cashier_CannotReadCustomerOverview() =>
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _creditService.SearchOverviewAsync(new CustomerSearchQuery(), _cashierId));
+
+    [Fact]
     public async Task Cashier_CannotReadPurchaseHistory() =>
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _creditService.GetPurchaseHistoryAsync(_customerId, _cashierId));
@@ -146,6 +151,7 @@ public class CustomersAuthorizationTests : IDisposable
     {
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _creditService.GetLedgerAsync(_customerId, null));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _creditService.GetOutstandingSummaryAsync(null));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _creditService.SearchOverviewAsync(new CustomerSearchQuery(), null));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _creditService.GetRepaymentHistoryAsync(_customerId, null));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _receiptService.GetReceiptAsync(_paymentId, null));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(

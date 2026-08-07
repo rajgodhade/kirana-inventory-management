@@ -1,0 +1,31 @@
+<Page
+    x:Class="Kirana.App.Views.HardwareDiagnosticsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kirana.App.ViewModels">
+    <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+        <Grid Padding="{StaticResource PageHeaderPadding}" ColumnSpacing="8">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <StackPanel><TextBlock Text="Hardware Diagnostics" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Check devices and local system dependencies without interrupting billing." Style="{StaticResource PageSubtitleTextStyle}" /></StackPanel>
+            <Button Grid.Column="1" Content="Run diagnostics" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.RunCommand}" IsEnabled="{x:Bind ViewModel.CanManage}" />
+            <Button Grid.Column="2" Content="Export report" Click="OnExportClick" IsEnabled="{x:Bind ViewModel.CanManage}" />
+        </Grid>
+        <StackPanel Grid.Row="1" Margin="24,0,24,12" Spacing="8">
+            <TextBlock Text="{x:Bind ViewModel.LastRunText, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" />
+            <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}" Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+        </StackPanel>
+        <ListView Grid.Row="2" Margin="24,0,24,24" ItemsSource="{x:Bind ViewModel.Results}" SelectionMode="None">
+            <ListView.ItemTemplate><DataTemplate x:DataType="vm:DiagnosticRowViewModel">
+                <Border Style="{StaticResource CardBorderStyle}" Padding="16" Margin="0,0,0,8">
+                    <Grid ColumnSpacing="16"><Grid.ColumnDefinitions><ColumnDefinition Width="200" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <TextBlock Text="{x:Bind Component}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <Border Grid.Column="1" Background="{x:Bind Status, Converter={StaticResource HardwareStatusBackgroundConverter}}" CornerRadius="12" Padding="10,5"><TextBlock Text="{x:Bind StatusText}" FontWeight="SemiBold" Foreground="{x:Bind Status, Converter={StaticResource HardwareStatusForegroundConverter}}" /></Border>
+                        <TextBlock Grid.Column="2" Text="{x:Bind Detail}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+            </DataTemplate></ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>

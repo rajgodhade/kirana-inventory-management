@@ -20,6 +20,9 @@ public interface ISupplierService
 
     Task<IReadOnlyList<Supplier>> SearchAsync(SupplierSearchQuery query, int? performedByUserId, CancellationToken cancellationToken = default);
 
+    /// <summary>Read-only supplier rows enriched with existing purchase/payment history for the supplier list.</summary>
+    Task<IReadOnlyList<SupplierOverview>> SearchOverviewAsync(SupplierSearchQuery query, int? performedByUserId, CancellationToken cancellationToken = default);
+
     /// <summary>All purchases and payments for this supplier, merged and sorted chronologically
     /// with a running balance (PRD §29).</summary>
     Task<IReadOnlyList<SupplierLedgerEntry>> GetLedgerAsync(int supplierId, int? performedByUserId, CancellationToken cancellationToken = default);

@@ -146,7 +146,15 @@ public sealed partial class PosShellViewModel(
 
     public ObservableCollection<Product> SearchSuggestions { get; } = [];
 
-    public IScannerInputBuffer ScannerBuffer { get; } = new ScannerInputBuffer();
+    public IScannerInputBuffer ScannerBuffer { get; private set; } = new ScannerInputBuffer();
+
+    /// <summary>Applies persisted keyboard-wedge timing before InitializeAsync wires the scan
+    /// callback. Manual product search is deliberately independent of this setting.</summary>
+    public void ConfigureScannerTiming(int timeoutMilliseconds)
+    {
+        if (_scannerWired) return;
+        ScannerBuffer = new ScannerInputBuffer(TimeSpan.FromMilliseconds(Math.Clamp(timeoutMilliseconds, 10, 2000)));
+    }
 
     private bool _scannerWired;
     private int _suggestionQueryToken;

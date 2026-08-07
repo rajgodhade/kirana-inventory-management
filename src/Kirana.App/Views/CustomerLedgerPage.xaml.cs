@@ -4,6 +4,7 @@ using Kirana.App.ViewModels;
 using Kirana.Application.Authentication;
 using Kirana.Application.Customers;
 using Kirana.Application.Printing;
+using Kirana.Application.Reports;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -13,6 +14,8 @@ namespace Kirana.App.Views;
 
 public sealed partial class CustomerLedgerPage : Page
 {
+    private IReportExportService? _exportService;
+
     public CustomerLedgerViewModel ViewModel { get; private set; } = null!;
 
     public CustomerLedgerPage()
@@ -26,6 +29,7 @@ public sealed partial class CustomerLedgerPage : Page
 
         var customerId = (int)e.Parameter;
         var services = App.Services;
+        _exportService = services.GetRequiredService<IReportExportService>();
         ViewModel = new CustomerLedgerViewModel(
             customerId,
             services.GetRequiredService<ICustomerService>(),
@@ -86,4 +90,13 @@ public sealed partial class CustomerLedgerPage : Page
             ViewModel.ErrorMessage = $"Could not print the receipt: {ex.Message}. The repayment is saved and can be reprinted.";
         }
     }
+
+    private async void OnPrintLedgerClick(object sender, RoutedEventArgs e) =>
+        await ReportExportHelper.ExportToPdfAsync(App.MainWindow, ViewModel.BuildLedgerExportData(), _exportService!, ViewModel.CurrentUserId);
+
+    private async void OnExportExcelClick(object sender, RoutedEventArgs e) =>
+        await ReportExportHelper.ExportToFileAsync(App.MainWindow, ViewModel.BuildLedgerExportData(), ReportExportFormat.Excel, _exportService!, ViewModel.CurrentUserId);
+
+    private async void OnExportPdfClick(object sender, RoutedEventArgs e) =>
+        await ReportExportHelper.ExportToPdfAsync(App.MainWindow, ViewModel.BuildLedgerExportData(), _exportService!, ViewModel.CurrentUserId);
 }

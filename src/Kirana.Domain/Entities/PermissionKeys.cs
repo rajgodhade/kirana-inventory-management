@@ -31,6 +31,8 @@ public static class PermissionKeys
     public const string AuditLogView = "auditlog.view";
     public const string PromotionsView = "promotions.view";
     public const string PromotionsManage = "promotions.manage";
+    public const string HardwareView = "hardware.view";
+    public const string HardwareManage = "hardware.manage";
 
     public static readonly IReadOnlyList<(string Key, string Description)> All = new[]
     {
@@ -55,6 +57,8 @@ public static class PermissionKeys
         (AuditLogView, "View audit logs"),
         (PromotionsView, "View promotions"),
         (PromotionsManage, "Create and manage promotions"),
+        (HardwareView, "View hardware status and diagnostics"),
+        (HardwareManage, "Configure and test hardware devices"),
     };
 
     public static readonly IReadOnlyList<string> Owner = All.Select(p => p.Key).ToArray();
@@ -64,6 +68,7 @@ public static class PermissionKeys
         ProductsView,
         BillingApplyDiscount,
         PromotionsView,
+        HardwareView,
     };
 
     public static readonly IReadOnlyList<string> Manager = new[]
@@ -75,5 +80,6 @@ public static class PermissionKeys
         ReportsView,
         ExpensesManage,
         PromotionsView, PromotionsManage,
+        HardwareView, HardwareManage,
     };
 }

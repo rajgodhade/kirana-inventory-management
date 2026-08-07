@@ -101,11 +101,11 @@
         <Border Grid.Row="2" Style="{StaticResource FilterBarStyle}" Margin="24,0,24,16">
             <Grid ColumnSpacing="{StaticResource SpacingS}" RowSpacing="8">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="130" />
-                    <ColumnDefinition Width="104" />
-                    <ColumnDefinition Width="92" />
-                    <ColumnDefinition Width="78" />
-                    <ColumnDefinition Width="78" />
+                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="160" />
+                    <ColumnDefinition Width="132" />
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="140" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -179,7 +179,7 @@
                             <ColumnDefinition Width="112" />
                             <ColumnDefinition Width="90" />
                             <ColumnDefinition Width="94" />
-                            <ColumnDefinition Width="42" />
+                            <ColumnDefinition Width="294" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="PURCHASE NO." Style="{StaticResource ColumnHeaderTextStyle}" />
                         <TextBlock Grid.Column="1" Text="SUPPLIER" Style="{StaticResource ColumnHeaderTextStyle}" />
@@ -187,11 +187,8 @@
                         <TextBlock Grid.Column="3" Text="STATUS" Style="{StaticResource ColumnHeaderTextStyle}" />
                         <TextBlock Grid.Column="4" Text="TOTAL" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
                         <TextBlock Grid.Column="5" Text="OUTSTANDING" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
-                        <!-- CharacterSpacing overridden to 0 (ColumnHeaderTextStyle's default 60 is
-                             letter-spacing in 1/1000 em, which alone made this label wider than the
-                             42px action column and clipped it at the card's right edge). -->
                         <TextBlock Grid.Column="6" Text="ACTIONS" Style="{StaticResource ColumnHeaderTextStyle}"
-                                   CharacterSpacing="0" FontSize="10" HorizontalAlignment="Center" />
+                                   HorizontalAlignment="Left" />
                     </Grid>
 
                     <!-- Empty state -->
@@ -227,13 +224,10 @@
                                     <Border Background="{ThemeResource SurfaceAltBrush}" Opacity="0.5"
                                             Visibility="{x:Bind IsAlternateRow, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-                                    <!-- Content + hover: the hover tint is applied here in code-behind
-                                         via Pointer events, rather than relying on ListViewItem's own
-                                         built-in hover visual, which would otherwise be hidden behind
-                                         this opaque row content. -->
+                                    <!-- Keep the normal zebra background on hover; inline actions provide
+                                         the interaction affordance without tinting the full row. -->
                                     <Grid Padding="8,11" ColumnSpacing="6" Background="Transparent"
                                           BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1"
-                                          PointerEntered="OnRowPointerEntered" PointerExited="OnRowPointerExited"
                                           DoubleTapped="OnRowDoubleTapped" Tag="{x:Bind}"
                                           AutomationProperties.Name="{x:Bind PurchaseNumber}">
                                         <Grid.ColumnDefinitions>
@@ -243,7 +237,7 @@
                                             <ColumnDefinition Width="112" />
                                             <ColumnDefinition Width="90" />
                                             <ColumnDefinition Width="94" />
-                                            <ColumnDefinition Width="42" />
+                                            <ColumnDefinition Width="294" />
                                         </Grid.ColumnDefinitions>
 
                                         <TextBlock Grid.Column="0" Text="{x:Bind PurchaseNumber}" Style="{StaticResource CardTitleTextStyle}"
@@ -300,40 +294,43 @@
                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
                                                    Visibility="{x:Bind HasOutstanding, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
 
-                                        <!-- Overflow action menu. -->
-                                        <Button Grid.Column="6" Padding="8,6" MinWidth="0" HorizontalAlignment="Center"
-                                                VerticalAlignment="Center" Background="Transparent" BorderThickness="0"
-                                                CornerRadius="{StaticResource RadiusMedium}"
-                                                AutomationProperties.Name="More actions for this purchase">
-                                            <FontIcon Glyph="&#xE712;" FontSize="15" />
-                                            <Button.Flyout>
-                                                <MenuFlyout Placement="Bottom">
-                                                    <MenuFlyoutItem Text="View" Click="OnViewClick" Tag="{x:Bind}">
-                                                        <MenuFlyoutItem.Icon>
-                                                            <FontIcon Glyph="&#xE890;" />
-                                                        </MenuFlyoutItem.Icon>
-                                                    </MenuFlyoutItem>
-                                                    <MenuFlyoutItem Text="Record Payment" Click="OnRecordPaymentClick" Tag="{x:Bind}"
-                                                                    IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManagePurchases}">
-                                                        <MenuFlyoutItem.Icon>
-                                                            <FontIcon Glyph="&#xE8C7;" />
-                                                        </MenuFlyoutItem.Icon>
-                                                    </MenuFlyoutItem>
-                                                    <MenuFlyoutItem Text="Print Purchase" Click="OnPrintClick" Tag="{x:Bind}">
-                                                        <MenuFlyoutItem.Icon>
-                                                            <FontIcon Glyph="&#xE749;" />
-                                                        </MenuFlyoutItem.Icon>
-                                                    </MenuFlyoutItem>
-                                                    <MenuFlyoutSeparator />
-                                                    <MenuFlyoutItem Text="Create Purchase Return" Click="OnCreateReturnClick" Tag="{x:Bind}"
-                                                                    IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManagePurchases}">
-                                                        <MenuFlyoutItem.Icon>
-                                                            <FontIcon Glyph="&#xE7A7;" />
-                                                        </MenuFlyoutItem.Icon>
-                                                    </MenuFlyoutItem>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
+                                        <!-- Frequent actions stay visible in the row so they are one click away.
+                                             The existing handlers continue to enforce permissions and behavior. -->
+                                        <StackPanel Grid.Column="6" Orientation="Horizontal" Spacing="6"
+                                                    HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <Button Tag="{x:Bind}" Click="OnViewClick" Padding="9,5" MinWidth="0" Height="32"
+                                                    CornerRadius="{StaticResource RadiusMedium}"
+                                                    AutomationProperties.Name="View purchase details">
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <FontIcon Glyph="&#xE890;" FontSize="13" />
+                                                    <TextBlock Text="View" FontSize="12" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Tag="{x:Bind}" Click="OnRecordPaymentClick" Padding="9,5" MinWidth="0" Height="32"
+                                                    CornerRadius="{StaticResource RadiusMedium}"
+                                                    IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManagePurchases}"
+                                                    AutomationProperties.Name="Record purchase payment">
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <FontIcon Glyph="&#xE8C7;" FontSize="13" />
+                                                    <TextBlock Text="Payment" FontSize="12" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Tag="{x:Bind}" Click="OnPrintClick" Padding="8,5" MinWidth="0" Width="34" Height="32"
+                                                    CornerRadius="{StaticResource RadiusMedium}"
+                                                    ToolTipService.ToolTip="Print purchase"
+                                                    AutomationProperties.Name="Print purchase">
+                                                <FontIcon Glyph="&#xE749;" FontSize="13" />
+                                            </Button>
+                                            <Button Tag="{x:Bind}" Click="OnCreateReturnClick" Padding="9,5" MinWidth="0" Height="32"
+                                                    CornerRadius="{StaticResource RadiusMedium}"
+                                                    IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManagePurchases}"
+                                                    AutomationProperties.Name="Create purchase return">
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <FontIcon Glyph="&#xE7A7;" FontSize="13" />
+                                                    <TextBlock Text="Return" FontSize="12" />
+                                                </StackPanel>
+                                            </Button>
+                                        </StackPanel>
                                     </Grid>
                                 </Grid>
                             </DataTemplate>

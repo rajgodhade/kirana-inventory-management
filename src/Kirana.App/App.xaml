@@ -28,6 +28,8 @@
             <conv:ImportRowBackgroundConverter x:Key="ErrorRowBackgroundConverter" />
             <conv:ImportStatusForegroundConverter x:Key="ErrorStatusForegroundConverter" />
             <conv:ImportRowBorderConverter x:Key="ErrorRowBorderConverter" />
+            <conv:HardwareStatusForegroundConverter x:Key="HardwareStatusForegroundConverter" />
+            <conv:HardwareStatusBackgroundConverter x:Key="HardwareStatusBackgroundConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

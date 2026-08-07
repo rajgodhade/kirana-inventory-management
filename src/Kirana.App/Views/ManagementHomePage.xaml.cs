@@ -4,6 +4,7 @@ using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
 using Kirana.Application.Backup;
 using Kirana.Application.Inventories;
+using Kirana.Application.Hardware;
 using Kirana.Application.Printing;
 using Kirana.Application.Reports;
 using Kirana.Application.Promotions;
@@ -29,7 +30,8 @@ public sealed partial class ManagementHomePage : Page
             services.GetRequiredService<ISalesReportService>(),
             services.GetRequiredService<IProductReportService>(),
             services.GetRequiredService<IBackupService>(),
-            services.GetRequiredService<IPrinterDiscoveryService>(),
+            services.GetRequiredService<IHardwareMonitor>(),
+            services.GetRequiredService<IHardwareSettingsService>(),
             services.GetRequiredService<IPromotionService>(),
             services.GetRequiredService<ManagementSession>());
 

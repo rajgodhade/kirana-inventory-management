@@ -157,6 +157,38 @@ public class SupplierServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SearchOverviewAsync_ReturnsExistingPurchaseAndPaymentFacts()
+    {
+        var supplier = await _sut.CreateAsync(ValidRequest());
+        var purchaseDate = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc);
+        var paymentDate = purchaseDate.AddDays(2);
+        _fixture.Context.Purchases.Add(new Purchase
+        {
+            PurchaseNumber = "PUR-TEST-001",
+            SupplierId = supplier.Id,
+            PurchaseDateUtc = purchaseDate,
+            GrandTotal = 500m,
+            OutstandingAmount = 300m,
+        });
+        _fixture.Context.SupplierPayments.Add(new SupplierPayment
+        {
+            SupplierId = supplier.Id,
+            Amount = 200m,
+            PaymentDateUtc = paymentDate,
+        });
+        supplier.OutstandingBalance = 300m;
+        await _fixture.Context.SaveChangesAsync();
+
+        var overview = Assert.Single(await _sut.SearchOverviewAsync(
+            new SupplierSearchQuery { SearchText = supplier.SupplierCode }, _ownerId));
+
+        Assert.Equal(500m, overview.TotalPurchases);
+        Assert.Equal(purchaseDate, overview.LastPurchaseDateUtc);
+        Assert.Equal(paymentDate, overview.LastPaymentDateUtc);
+        Assert.Equal(300m, overview.OutstandingBalance);
+    }
+
+    [Fact]
     public async Task SearchAsync_Throws_WhenReaderLacksPermission()
     {
         var cashier = await _fixture.SeedCashierAsync();

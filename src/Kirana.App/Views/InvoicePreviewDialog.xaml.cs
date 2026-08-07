@@ -9,13 +9,24 @@ namespace Kirana.App.Views;
 /// The user closes explicitly via "Close" once done (or without ever printing at all).</summary>
 public sealed partial class InvoicePreviewDialog : ContentDialog
 {
+    private readonly int _automaticPrintCopies;
     public InvoicePreviewViewModel ViewModel { get; }
 
-    public InvoicePreviewDialog(InvoicePreviewViewModel viewModel)
+    public InvoicePreviewDialog(InvoicePreviewViewModel viewModel, int automaticPrintCopies = 0)
     {
         ViewModel = viewModel;
+        _automaticPrintCopies = Math.Clamp(automaticPrintCopies, 0, 2);
         InitializeComponent();
         PrimaryButtonClick += OnPrimaryButtonClick;
+        Loaded += OnLoaded;
+    }
+
+    private async void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        for (var copy = 0; copy < _automaticPrintCopies; copy++)
+        {
+            await ViewModel.PrintCommand.ExecuteAsync(null);
+        }
     }
 
     private async void OnPrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)

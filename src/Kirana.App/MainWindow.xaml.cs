@@ -1,9 +1,12 @@
 using Kirana.App.Views;
+using Kirana.App.Interaction;
 using Kirana.Application.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 
 namespace Kirana.App;
 
@@ -39,6 +42,7 @@ public sealed partial class MainWindow : Window
         RootFrame.AddHandler(UIElement.PointerPressedEvent, (PointerEventHandler)((_, _) => _session.Touch()), handledEventsToo: true);
         RootFrame.AddHandler(UIElement.PointerMovedEvent, (PointerEventHandler)((_, _) => _session.Touch()), handledEventsToo: true);
         RootFrame.AddHandler(UIElement.KeyDownEvent, (KeyEventHandler)((_, _) => _session.Touch()), handledEventsToo: true);
+        RootFrame.AddHandler(UIElement.PointerMovedEvent, (PointerEventHandler)UpdateActionCursor, handledEventsToo: true);
 
         _idleCheckTimer = new DispatcherTimer { Interval = IdleCheckInterval };
         _idleCheckTimer.Tick += OnIdleCheckTick;
@@ -77,5 +81,26 @@ public sealed partial class MainWindow : Window
         {
             RootFrame.Navigate(typeof(PosShellPage));
         }
+    }
+
+    private static void UpdateActionCursor(object sender, PointerRoutedEventArgs e)
+    {
+        if (FindActionableElement(e.OriginalSource as DependencyObject) is { } element)
+        {
+            ActionCursor.ApplyHandCursor(element);
+        }
+    }
+
+    private static UIElement? FindActionableElement(DependencyObject? source)
+    {
+        for (var current = source; current is not null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is ButtonBase or NavigationViewItem or MenuFlyoutItem || ActionCursor.GetIsActionable(current))
+            {
+                return current as UIElement;
+            }
+        }
+
+        return null;
     }
 }

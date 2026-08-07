@@ -23,7 +23,13 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("AutoFocusScannerInput")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("AutoLockMinutes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("AutoPrintReceipt")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("AutomaticBackupEnabled")
@@ -39,11 +45,38 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Property<int>("BackupRetentionCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("BarcodeScannerEnabled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DefaultExportFormat")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DefaultPrinterName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("EnableSoundOnScan")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("InvoicePrinterName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastHardwareMaintenanceUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("OpenCashDrawerAfterCashPayment")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("PrintDuplicateCopy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReceiptPaperSize")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ReceiptPrinterName")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("RequirePinForLargeDiscount")
@@ -53,6 +86,9 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("RequirePinForReprint")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ScannerTimeoutMilliseconds")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ThemeMode")

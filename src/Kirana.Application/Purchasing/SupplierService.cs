@@ -114,6 +114,52 @@ public sealed class SupplierService(
         return await suppliers.OrderBy(s => s.Name).Take(query.MaxResults).ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<SupplierOverview>> SearchOverviewAsync(
+        SupplierSearchQuery query, int? performedByUserId, CancellationToken cancellationToken = default)
+    {
+        await permissionEnforcer.EnsureHasPermissionAsync(performedByUserId, PermissionKeys.PurchasesManage, cancellationToken);
+
+        var suppliers = db.Suppliers.AsNoTracking().AsQueryable();
+        if (!query.IncludeInactive)
+        {
+            suppliers = suppliers.Where(s => s.IsActive);
+        }
+
+        var text = query.SearchText?.Trim();
+        if (!string.IsNullOrEmpty(text))
+        {
+            var likeText = $"%{text}%";
+            suppliers = suppliers.Where(s =>
+                s.SupplierCode == text ||
+                EF.Functions.Like(s.Name, likeText) ||
+                (s.Phone != null && EF.Functions.Like(s.Phone, likeText)));
+        }
+
+        return await suppliers
+            .OrderBy(s => s.Name)
+            .Take(query.MaxResults)
+            .Select(s => new SupplierOverview
+            {
+                Id = s.Id,
+                SupplierCode = s.SupplierCode,
+                Name = s.Name,
+                ContactPerson = s.ContactPerson,
+                Phone = s.Phone,
+                OutstandingBalance = s.OutstandingBalance,
+                IsActive = s.IsActive,
+                LastPurchaseDateUtc = s.Purchases
+                    .OrderByDescending(p => p.PurchaseDateUtc)
+                    .Select(p => (DateTime?)p.PurchaseDateUtc)
+                    .FirstOrDefault(),
+                LastPaymentDateUtc = s.Payments
+                    .OrderByDescending(p => p.PaymentDateUtc)
+                    .Select(p => (DateTime?)p.PaymentDateUtc)
+                    .FirstOrDefault(),
+                TotalPurchases = s.Purchases.Sum(p => (decimal?)p.GrandTotal) ?? 0m,
+            })
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<SupplierLedgerEntry>> GetLedgerAsync(
         int supplierId, int? performedByUserId, CancellationToken cancellationToken = default)
     {

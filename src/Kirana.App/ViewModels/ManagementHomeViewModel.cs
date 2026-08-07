@@ -5,6 +5,7 @@ using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
 using Kirana.Application.Backup;
 using Kirana.Application.Inventories;
+using Kirana.Application.Hardware;
 using Kirana.Application.Printing;
 using Kirana.Application.Promotions;
 using Kirana.Application.Reports;
@@ -25,7 +26,8 @@ public sealed partial class ManagementHomeViewModel(
     ISalesReportService salesReportService,
     IProductReportService productReportService,
     IBackupService backupService,
-    IPrinterDiscoveryService printerDiscovery,
+    IHardwareMonitor hardwareMonitor,
+    IHardwareSettingsService hardwareSettingsService,
     IPromotionService promotionService,
     ManagementSession session) : ObservableObject
 {
@@ -49,6 +51,9 @@ public sealed partial class ManagementHomeViewModel(
     [ObservableProperty] private string _lastBackupText = "No backup recorded";
     [ObservableProperty] private string _printerStatusText = "Checking…";
     [ObservableProperty] private string _defaultPrinterText = "—";
+    [ObservableProperty] private HardwareStatus _printerHardwareStatus = HardwareStatus.Unknown;
+    [ObservableProperty] private HardwareStatus _scannerHardwareStatus = HardwareStatus.Unknown;
+    [ObservableProperty] private string _scannerStatusText = "Checking…";
     [ObservableProperty] private string _runningPromotionsText = "0";
     [ObservableProperty] private string _promotionsEndingTodayText = "0";
     [ObservableProperty] private string _topPromotionText = "No promotion sales today";
@@ -295,19 +300,30 @@ public sealed partial class ManagementHomeViewModel(
 
         try
         {
-            var printers = printerDiscovery.GetInstalledPrinterNames();
-            PrinterStatusText = printers.Count switch
-            {
-                0 => "No printer detected",
-                1 => "1 printer available",
-                _ => $"{printers.Count} printers available",
-            };
-            DefaultPrinterText = printerDiscovery.GetDefaultPrinterName() ?? "No default printer";
+            var settings = await hardwareSettingsService.GetAsync();
+            var devices = await hardwareMonitor.GetSnapshotAsync();
+            var printers = devices.Where(x =>
+                x.Type is HardwareType.Printer or HardwareType.ThermalPrinter
+                && x.Capabilities.HasFlag(HardwareCapability.PrintReceipt)).ToList();
+            var printer = printers.FirstOrDefault(x => string.Equals(x.FriendlyName, settings.ReceiptPrinterName, StringComparison.OrdinalIgnoreCase))
+                ?? printers.FirstOrDefault(x => x.IsDefault) ?? printers.FirstOrDefault();
+            PrinterHardwareStatus = printer?.Status ?? HardwareStatus.Disconnected;
+            PrinterStatusText = printer is null ? "No physical receipt printer detected" : $"{printers.Count} receipt printer(s) available";
+            DefaultPrinterText = printer?.FriendlyName ?? "Open Hardware Settings";
+
+            var scanners = devices.Where(x => x.Type is HardwareType.BarcodeScanner or HardwareType.UsbHidScanner
+                or HardwareType.BluetoothHidScanner or HardwareType.VirtualScanner).ToList();
+            var scanner = scanners.FirstOrDefault(x => x.Status == HardwareStatus.Connected) ?? scanners.FirstOrDefault();
+            ScannerHardwareStatus = !settings.BarcodeScannerEnabled ? HardwareStatus.Offline : scanner?.Status ?? HardwareStatus.Unknown;
+            ScannerStatusText = !settings.BarcodeScannerEnabled ? "Scanner input disabled" : scanner?.FriendlyName ?? "No scanner detected";
         }
         catch
         {
+            PrinterHardwareStatus = HardwareStatus.Error;
+            ScannerHardwareStatus = HardwareStatus.Error;
             PrinterStatusText = "Printer status unavailable";
-            DefaultPrinterText = "Check Windows printer settings";
+            DefaultPrinterText = "Check Hardware Settings";
+            ScannerStatusText = "Scanner status unavailable";
         }
     }
 

@@ -24,6 +24,8 @@ public sealed partial class ManagementShellPage : Page
 {
     private readonly ManagementSession _session;
     private readonly ThemeService _themeService;
+    private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private string? _initialDestination;
 
     public ManagementShellPage()
     {
@@ -34,6 +36,7 @@ public sealed partial class ManagementShellPage : Page
 
         ApplyPermissionsToPane();
         UpdateThemeIcon();
+        _clockTimer.Tick += (_, _) => UpdateClock();
 
         // Keeping the back button in sync here means hosted pages never have to think about it.
         ContentFrame.Navigated += (_, _) =>
@@ -43,6 +46,7 @@ public sealed partial class ManagementShellPage : Page
         };
 
         Loaded += OnLoaded;
+        Unloaded += (_, _) => _clockTimer.Stop();
     }
 
     /// <summary>Keeps the pane highlight on the section a drill-down screen belongs to, so going
@@ -68,6 +72,9 @@ public sealed partial class ManagementShellPage : Page
             var t when t == typeof(AuditLogPage) => "Audit",
             var t when t == typeof(ReportsHubPage) => "Reports",
             var t when t == typeof(SettingsPage) => "Settings",
+            var t when t == typeof(DeviceStatusPage) => "DeviceStatus",
+            var t when t == typeof(HardwareSettingsPage) => "HardwareSettings",
+            var t when t == typeof(HardwareDiagnosticsPage) => "HardwareDiagnostics",
             var t when t == typeof(BackupManagerPage) => "BackupManager",
             var t when t == typeof(RestorePage) => "Restore",
             var t when t == typeof(ExportCenterPage) => "ExportCenter",
@@ -89,6 +96,8 @@ public sealed partial class ManagementShellPage : Page
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
+        UpdateClock();
+        _clockTimer.Start();
         UserNameText.Text = _session.CurrentUser?.FullName ?? "Signed in";
         UserRoleText.Text = _session.CurrentUser?.Role?.Name ?? string.Empty;
 
@@ -98,9 +107,26 @@ public sealed partial class ManagementShellPage : Page
 
         if (ContentFrame.Content is null)
         {
-            Nav.SelectedItem = Nav.MenuItems.OfType<NavigationViewItem>().First();
-            ContentFrame.Navigate(typeof(ManagementHomePage));
+            if (_initialDestination == "HardwareSettings")
+            {
+                ContentFrame.Navigate(typeof(HardwareSettingsPage));
+            }
+            else if (_initialDestination == "DeviceStatus")
+            {
+                ContentFrame.Navigate(typeof(DeviceStatusPage));
+            }
+            else
+            {
+                Nav.SelectedItem = Nav.MenuItems.OfType<NavigationViewItem>().First();
+                ContentFrame.Navigate(typeof(ManagementHomePage));
+            }
         }
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        _initialDestination = e.Parameter as string;
     }
 
     /// <summary>Hides nav entries the current user has no permission for.</summary>
@@ -120,6 +146,9 @@ public sealed partial class ManagementShellPage : Page
         SetVisible(NavAudit, _session.HasPermission(PermissionKeys.AuditLogView));
         SetVisible(NavReports, _session.HasPermission(PermissionKeys.ReportsView));
         SetVisible(NavSettings, _session.HasPermission(PermissionKeys.SettingsChange));
+        SetVisible(NavDeviceStatus, _session.HasPermission(PermissionKeys.HardwareView));
+        SetVisible(NavHardwareSettings, _session.HasPermission(PermissionKeys.HardwareManage));
+        SetVisible(NavHardwareDiagnostics, _session.HasPermission(PermissionKeys.HardwareManage));
 
         // Backup, restore and database maintenance all share the one "dangerous data operation"
         // permission, which is Owner-only by default. The Export Center is deliberately looser: it
@@ -142,7 +171,10 @@ public sealed partial class ManagementShellPage : Page
         SetVisible(NavAdminHeader, NavUsers.Visibility == Visibility.Visible
             || NavAudit.Visibility == Visibility.Visible
             || NavReports.Visibility == Visibility.Visible
-            || NavSettings.Visibility == Visibility.Visible);
+            || NavSettings.Visibility == Visibility.Visible
+            || NavDeviceStatus.Visibility == Visibility.Visible
+            || NavHardwareSettings.Visibility == Visibility.Visible
+            || NavHardwareDiagnostics.Visibility == Visibility.Visible);
 
         SetVisible(NavDataHeader, NavBackupManager.Visibility == Visibility.Visible
             || NavRestore.Visibility == Visibility.Visible
@@ -184,6 +216,9 @@ public sealed partial class ManagementShellPage : Page
             "Audit" => typeof(AuditLogPage),
             "Reports" => typeof(ReportsHubPage),
             "Settings" => typeof(SettingsPage),
+            "DeviceStatus" => typeof(DeviceStatusPage),
+            "HardwareSettings" => typeof(HardwareSettingsPage),
+            "HardwareDiagnostics" => typeof(HardwareDiagnosticsPage),
             "BackupManager" => typeof(BackupManagerPage),
             "Restore" => typeof(RestorePage),
             "ExportCenter" => typeof(ExportCenterPage),
@@ -227,5 +262,15 @@ public sealed partial class ManagementShellPage : Page
     {
         App.Services.GetRequiredService<IAuthenticationService>().LockAndReturnToBilling();
         Frame.Navigate(typeof(PosShellPage));
+    }
+
+    private void OnBackToBillingClick(object sender, RoutedEventArgs e) =>
+        App.RootFrame?.Navigate(typeof(PosShellPage));
+
+    private void UpdateClock()
+    {
+        var now = DateTime.Now;
+        CurrentDayDateText.Text = now.ToString("dddd, dd MMM yyyy");
+        CurrentTimeText.Text = now.ToString("hh:mm:ss tt");
     }
 }

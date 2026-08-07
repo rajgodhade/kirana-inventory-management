@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Kirana.Application.Authentication;
 using Kirana.Application.Customers;
+using Kirana.Application.Reports;
 using Kirana.Domain.Entities;
 
 namespace Kirana.App.ViewModels;
@@ -40,6 +41,13 @@ public sealed partial class CustomerLedgerViewModel(
     private string _notes = string.Empty;
 
     [ObservableProperty]
+    private string _gstin = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LifetimeSalesDisplay))]
+    private decimal _lifetimeSales;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(OutstandingDisplay))]
     [NotifyPropertyChangedFor(nameof(HasOutstanding))]
     private decimal _outstandingBalance;
@@ -53,6 +61,8 @@ public sealed partial class CustomerLedgerViewModel(
     public string OutstandingDisplay => $"₹{OutstandingBalance:0.00}";
 
     public bool HasOutstanding => OutstandingBalance > 0;
+
+    public string LifetimeSalesDisplay => $"₹{LifetimeSales:0.00}";
 
     public ObservableCollection<CustomerLedgerRowViewModel> Entries { get; } = [];
 
@@ -71,6 +81,7 @@ public sealed partial class CustomerLedgerViewModel(
 
             CustomerName = customer.Name;
             CustomerCode = customer.CustomerCode;
+            Gstin = customer.Gstin ?? "Not provided";
             Phone = customer.Phone ?? "—";
             Address = customer.Address ?? "—";
             Notes = customer.Notes ?? string.Empty;
@@ -131,6 +142,8 @@ public sealed partial class CustomerLedgerViewModel(
                 CreditText = creditPortion > 0 ? $"₹{creditPortion:0.00} on Udhaar" : "Fully paid",
             });
         }
+
+        LifetimeSales = sales.Sum(sale => sale.GrandTotal);
     }
 
     private async Task LoadRepaymentsAsync()
@@ -182,4 +195,14 @@ public sealed partial class CustomerLedgerViewModel(
     }
 
     private static string FormatDate(DateTime utc) => utc.ToLocalTime().ToString("dd-MMM-yyyy hh:mm tt");
+
+    public ReportExportData BuildLedgerExportData() => new()
+    {
+        Title = $"Customer Ledger - {CustomerName}",
+        Subtitle = $"{CustomerCode} · Closing balance {OutstandingDisplay}",
+        Columns = ["Date", "Type", "Reference", "Debit", "Credit", "Balance", "Notes"],
+        Rows = Entries.Select(entry => (IReadOnlyList<string>)
+        [entry.DateText, entry.EntryType, entry.Reference, entry.DebitText, entry.CreditText,
+         entry.RunningBalanceText, entry.Notes]).ToList(),
+    };
 }

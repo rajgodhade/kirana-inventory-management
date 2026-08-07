@@ -7,57 +7,34 @@ using Kirana.Domain.Entities;
 
 namespace Kirana.App.ViewModels;
 
-/// <summary>
-/// Backs the Customers management page (PRD §30-31). Master data comes from
-/// <see cref="ICustomerService"/>; the outstanding figures shown on this screen come from
-/// <see cref="ICustomerCreditService"/>, which enforces <see cref="PermissionKeys.CustomersManage"/>
-/// server-side — <see cref="CanManageCustomers"/> only drives what the UI offers.
-/// </summary>
+/// <summary>Management-facing customer and Udhaar overview. The list is a read-only projection;
+/// all payment, audit, and balance rules remain in <see cref="ICustomerCreditService"/>.</summary>
 public sealed partial class CustomersViewModel(
     ICustomerService customerService,
     ICustomerCreditService creditService,
     ManagementSession session) : ObservableObject
 {
-    [ObservableProperty]
-    private string _searchText = string.Empty;
+    private readonly List<CustomerRowViewModel> _allCustomers = [];
 
-    [ObservableProperty]
-    private bool _showInactive;
-
-    [ObservableProperty]
-    private bool _showOnlyOutstanding;
-
-    [ObservableProperty]
-    private string? _errorMessage;
-
-    [ObservableProperty]
-    private bool _isBusy;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalOutstandingDisplay))]
-    private decimal _totalOutstanding;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(OutstandingCustomerCountDisplay))]
-    private int _outstandingCustomerCount;
+    [ObservableProperty] private string _searchText = string.Empty;
+    [ObservableProperty] private bool _outstandingOnly;
+    [ObservableProperty] private string _selectedStatusFilter = "All customers";
+    [ObservableProperty] private string _selectedSortOption = "Name";
+    [ObservableProperty] private string? _errorMessage;
+    [ObservableProperty] private bool _isBusy;
+    [ObservableProperty] private string _totalCustomersText = "0";
+    [ObservableProperty] private decimal _totalOutstanding;
+    [ObservableProperty] private string _overdueCustomersText = "0";
+    [ObservableProperty] private string _newCustomersThisMonthText = "0";
 
     public bool CanManageCustomers => session.HasPermission(PermissionKeys.CustomersManage);
-
     public int? CurrentUserId => session.CurrentUser?.Id;
-
     public ObservableCollection<CustomerRowViewModel> Customers { get; } = [];
+    public IReadOnlyList<string> StatusFilterOptions { get; } = ["All customers", "Active", "Inactive", "Overdue"];
+    public IReadOnlyList<string> SortOptions { get; } = ["Name", "Outstanding", "Last purchase"];
+    public bool HasResults => Customers.Count > 0;
 
-    public string TotalOutstandingDisplay => TotalOutstanding.ToString("0.00");
-
-    public string OutstandingCustomerCountDisplay => OutstandingCustomerCount == 1
-        ? "1 customer owes"
-        : $"{OutstandingCustomerCount} customers owe";
-
-    public async Task InitializeAsync()
-    {
-        await SearchAsync();
-        await RefreshOutstandingSummaryAsync();
-    }
+    public async Task InitializeAsync() => await SearchAsync();
 
     [RelayCommand]
     public async Task SearchAsync()
@@ -66,26 +43,48 @@ public sealed partial class CustomersViewModel(
         IsBusy = true;
         try
         {
-            var results = await customerService.SearchAsync(new CustomerSearchQuery
+            var results = await creditService.SearchOverviewAsync(new CustomerSearchQuery
             {
                 SearchText = SearchText,
-                IncludeInactive = ShowInactive,
-                MaxResults = 200,
-            });
+                IncludeInactive = true,
+                MaxResults = 1000,
+            }, CurrentUserId);
+
+            _allCustomers.Clear();
+            _allCustomers.AddRange(results.Select(ToRow));
+            UpdateSummary();
+
+            IEnumerable<CustomerRowViewModel> filtered = _allCustomers;
+            filtered = SelectedStatusFilter switch
+            {
+                "Active" => filtered.Where(x => x.IsActive),
+                "Inactive" => filtered.Where(x => !x.IsActive),
+                "Overdue" => filtered.Where(x => x.IsOverdue),
+                _ => filtered,
+            };
+            if (OutstandingOnly)
+            {
+                filtered = filtered.Where(x => x.HasOutstanding);
+            }
+
+            filtered = SelectedSortOption switch
+            {
+                "Outstanding" => filtered.OrderByDescending(x => x.OutstandingBalance).ThenBy(x => x.Name),
+                "Last purchase" => filtered.OrderByDescending(x => x.LastPurchaseDateUtc).ThenBy(x => x.Name),
+                _ => filtered.OrderBy(x => x.Name),
+            };
 
             Customers.Clear();
-            foreach (var customer in results)
+            foreach (var customer in filtered)
             {
-                if (ShowOnlyOutstanding && customer.CreditBalance <= 0)
-                {
-                    continue;
-                }
-
-                Customers.Add(ToRow(customer));
+                Customers.Add(customer);
             }
+            OnPropertyChanged(nameof(HasResults));
         }
         catch (Exception ex)
         {
+            Customers.Clear();
+            OnPropertyChanged(nameof(HasResults));
             ErrorMessage = ex.Message;
         }
         finally
@@ -94,48 +93,57 @@ public sealed partial class CustomersViewModel(
         }
     }
 
-    /// <summary>Totals for the Outstanding Summary strip. Derived from the credit ledger rather than
-    /// the denormalized balances, so it stays correct even if a balance were ever to drift.</summary>
-    public async Task RefreshOutstandingSummaryAsync()
-    {
-        if (!CanManageCustomers)
-        {
-            TotalOutstanding = 0;
-            OutstandingCustomerCount = 0;
-            return;
-        }
-
-        try
-        {
-            var summary = await creditService.GetOutstandingSummaryAsync(CurrentUserId);
-            TotalOutstanding = summary.Sum(s => s.OutstandingAmount);
-            OutstandingCustomerCount = summary.Count;
-        }
-        catch (UnauthorizedAccessException)
-        {
-            TotalOutstanding = 0;
-            OutstandingCustomerCount = 0;
-        }
-    }
-
     public Task<Customer> CreateCustomerAsync(CreateCustomerRequest request) => customerService.CreateAsync(request);
-
-    public Task<Customer> UpdateCustomerAsync(int customerId, UpdateCustomerRequest request) =>
-        customerService.UpdateAsync(customerId, request);
-
-    public Task<Customer> SetActiveAsync(int customerId, bool isActive) =>
-        customerService.SetActiveAsync(customerId, isActive, CurrentUserId);
-
+    public Task<Customer> UpdateCustomerAsync(int customerId, UpdateCustomerRequest request) => customerService.UpdateAsync(customerId, request);
+    public Task<Customer> SetActiveAsync(int customerId, bool isActive) => customerService.SetActiveAsync(customerId, isActive, CurrentUserId);
     public Task<Customer?> GetCustomerAsync(int customerId) => customerService.GetByIdAsync(customerId);
 
-    private static CustomerRowViewModel ToRow(Customer customer) => new()
+    public async Task ShowAllAsync()
+    {
+        OutstandingOnly = false;
+        SelectedStatusFilter = "All customers";
+        await SearchAsync();
+    }
+
+    public async Task ShowOutstandingAsync()
+    {
+        OutstandingOnly = true;
+        SelectedStatusFilter = "All customers";
+        await SearchAsync();
+    }
+
+    public async Task ShowOverdueAsync()
+    {
+        OutstandingOnly = false;
+        SelectedStatusFilter = "Overdue";
+        await SearchAsync();
+    }
+
+    private void UpdateSummary()
+    {
+        TotalCustomersText = _allCustomers.Count.ToString("N0");
+        TotalOutstanding = _allCustomers.Where(x => x.IsActive).Sum(x => x.OutstandingBalance);
+        OverdueCustomersText = _allCustomers.Count(x => x.IsActive && x.IsOverdue).ToString("N0");
+        var monthStart = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+        NewCustomersThisMonthText = _allCustomers.Count(x => x.CreatedAtUtc >= monthStart).ToString("N0");
+    }
+
+    private CustomerRowViewModel ToRow(CustomerOverview customer) => new()
     {
         Id = customer.Id,
         CustomerCode = customer.CustomerCode,
         Name = customer.Name,
         Phone = customer.Phone,
         Address = customer.Address,
-        CreditBalance = customer.CreditBalance,
+        Gstin = customer.Gstin,
+        Notes = customer.Notes,
+        OutstandingBalance = customer.OutstandingBalance,
         IsActive = customer.IsActive,
+        CanManageCustomers = CanManageCustomers,
+        CreatedAtUtc = customer.CreatedAtUtc,
+        OldestOpenCreditDateUtc = customer.OldestOpenCreditDateUtc,
+        LastPurchaseDateUtc = customer.LastPurchaseDateUtc,
+        LastPaymentDateUtc = customer.LastPaymentDateUtc,
+        LifetimePurchaseValue = customer.LifetimePurchaseValue,
     };
 }

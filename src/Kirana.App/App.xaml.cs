@@ -3,6 +3,8 @@ using Kirana.Application.Authentication;
 using Kirana.Application.Backup;
 using Kirana.Application.Expenses;
 using Kirana.Application.Printing;
+using Kirana.Application.Hardware;
+using Kirana.App.Hardware;
 using Kirana.Application.Setup;
 using Kirana.App.Printing;
 using Kirana.App.Theming;
@@ -52,6 +54,11 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddApplication();
                 services.AddInfrastructure();
                 services.AddSingleton<IPrinterDiscoveryService, WindowsPrinterDiscoveryService>();
+                services.AddSingleton<IPrinterService, WindowsPrinterService>();
+                services.AddSingleton<IScannerService, WindowsScannerService>();
+                services.AddSingleton<IDeviceDiscoveryService, WindowsDeviceDiscovery>();
+                services.AddSingleton<IDeviceManager, WindowsDeviceManager>();
+                services.AddSingleton<IHardwareMonitor, HardwareMonitor>();
                 services.AddSingleton<ThemeService>();
             })
             .UseSerilog()
@@ -119,6 +126,15 @@ public partial class App : Microsoft.UI.Xaml.Application
         _mainWindow.NavigateToInitialPage(setupCompleted);
         _mainWindow.Activate();
         ApplyMinimumWindowSize(_mainWindow);
+
+        try
+        {
+            await Services.GetRequiredService<IHardwareMonitor>().StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Hardware monitoring could not be started; billing remains available.");
+        }
 
         if (setupCompleted)
         {
