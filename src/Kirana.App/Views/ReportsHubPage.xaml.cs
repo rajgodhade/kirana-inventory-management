@@ -49,6 +49,7 @@ public sealed partial class ReportsHubPage : Page
             nameof(CustomersTab) => CustomersTab.EnsureLoadedAsync(),
             nameof(SuppliersTab) => SuppliersTab.EnsureLoadedAsync(),
             nameof(ExpensesTab) => ExpensesTab.EnsureLoadedAsync(),
+            nameof(PromotionsTab) => PromotionsTab.EnsureLoadedAsync(),
             nameof(ProfitTab) => ProfitTab.EnsureLoadedAsync(),
             _ => Task.CompletedTask,
         };

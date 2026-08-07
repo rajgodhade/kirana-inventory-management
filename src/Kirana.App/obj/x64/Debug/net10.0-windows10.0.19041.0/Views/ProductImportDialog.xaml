@@ -35,8 +35,8 @@
                 <TextBlock Text="Import Products" Style="{ThemeResource TitleTextBlockStyle}" />
                 <TextBlock Text="Review every change before products are saved." Style="{StaticResource CaptionTextStyle}" />
             </StackPanel>
-            <Button x:ConnectionId='2' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
-                                             AutomationProperties.Name="Close import wizard">
+            <Button x:ConnectionId='2' Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
+                                             AutomationProperties.Name="Close dialog">
                 <FontIcon Glyph="&#xE711;" FontSize="14" />
             </Button>
         </Grid>

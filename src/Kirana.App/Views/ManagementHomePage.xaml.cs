@@ -2,8 +2,12 @@ using Kirana.App.Theming;
 using Kirana.App.ViewModels;
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.Backup;
 using Kirana.Application.Inventories;
+using Kirana.Application.Hardware;
 using Kirana.Application.Printing;
+using Kirana.Application.Reports;
+using Kirana.Application.Promotions;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +26,13 @@ public sealed partial class ManagementHomePage : Page
         ViewModel = new ManagementHomeViewModel(
             services.GetRequiredService<IKiranaDbContext>(),
             services.GetRequiredService<IInventoryService>(),
+            services.GetRequiredService<IDashboardService>(),
+            services.GetRequiredService<ISalesReportService>(),
+            services.GetRequiredService<IProductReportService>(),
+            services.GetRequiredService<IBackupService>(),
+            services.GetRequiredService<IHardwareMonitor>(),
+            services.GetRequiredService<IHardwareSettingsService>(),
+            services.GetRequiredService<IPromotionService>(),
             services.GetRequiredService<ManagementSession>());
 
         InitializeComponent();
@@ -32,6 +43,32 @@ public sealed partial class ManagementHomePage : Page
     {
         // Returns to billing without locking — the session stays open so the user can come back.
         App.RootFrame?.Navigate(typeof(PosShellPage));
+    }
+
+    private void OnDashboardDestinationClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is not string destination)
+        {
+            return;
+        }
+
+        var pageType = destination switch
+        {
+            "Products" => typeof(ProductsPage),
+            "Promotions" => typeof(PromotionsPage),
+            "Customers" => typeof(CustomersPage),
+            "Purchases" => typeof(PurchasesPage),
+            "PurchaseEntry" => typeof(PurchaseEntryPage),
+            "Expenses" => typeof(ExpensesPage),
+            "Reports" => typeof(ReportsHubPage),
+            "Backup" => typeof(BackupManagerPage),
+            _ => null,
+        };
+
+        if (pageType is not null && Frame?.CurrentSourcePageType != pageType)
+        {
+            Frame?.Navigate(pageType);
+        }
     }
 
     /// <summary>

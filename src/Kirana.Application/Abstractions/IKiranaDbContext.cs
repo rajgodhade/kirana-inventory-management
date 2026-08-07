@@ -51,6 +51,12 @@ public interface IKiranaDbContext
     DbSet<Expense> Expenses { get; }
 
     DbSet<BackupRecord> BackupRecords { get; }
+    DbSet<Promotion> Promotions { get; }
+    DbSet<PromotionSchedule> PromotionSchedules { get; }
+    DbSet<PromotionScope> PromotionScopes { get; }
+    DbSet<PromotionTarget> PromotionTargets { get; }
+    DbSet<PromotionRule> PromotionRules { get; }
+    DbSet<SaleItemPromotion> SaleItemPromotions { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

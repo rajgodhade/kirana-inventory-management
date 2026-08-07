@@ -217,6 +217,66 @@ public sealed class CustomerCreditService(
             .ToList();
     }
 
+    public async Task<IReadOnlyList<CustomerOverview>> SearchOverviewAsync(
+        CustomerSearchQuery query, int? performedByUserId, CancellationToken cancellationToken = default)
+    {
+        await permissionEnforcer.EnsureHasPermissionAsync(performedByUserId, PermissionKeys.CustomersManage, cancellationToken);
+
+        var customers = db.Customers.AsNoTracking().AsQueryable();
+        if (!query.IncludeInactive)
+        {
+            customers = customers.Where(c => c.IsActive);
+        }
+
+        var text = query.SearchText?.Trim();
+        if (!string.IsNullOrEmpty(text))
+        {
+            var likeText = $"%{text}%";
+            customers = customers.Where(c =>
+                c.CustomerCode == text ||
+                EF.Functions.Like(c.Name, likeText) ||
+                (c.Phone != null && EF.Functions.Like(c.Phone, likeText)));
+        }
+
+        return await customers
+            .OrderBy(c => c.Name)
+            .Take(query.MaxResults)
+            .Select(c => new CustomerOverview
+            {
+                Id = c.Id,
+                CustomerCode = c.CustomerCode,
+                Name = c.Name,
+                Phone = c.Phone,
+                Address = c.Address,
+                Gstin = c.Gstin,
+                Notes = c.Notes,
+                IsActive = c.IsActive,
+                CreatedAtUtc = c.CreatedAtUtc,
+                OutstandingBalance = db.CustomerCredits
+                    .Where(credit => credit.CustomerId == c.Id)
+                    .Sum(credit => (decimal?)credit.RemainingAmount) ?? 0m,
+                OldestOpenCreditDateUtc = db.CustomerCredits
+                    .Where(credit => credit.CustomerId == c.Id && credit.RemainingAmount > 0)
+                    .OrderBy(credit => credit.DateUtc)
+                    .Select(credit => (DateTime?)credit.DateUtc)
+                    .FirstOrDefault(),
+                LastPurchaseDateUtc = db.Sales
+                    .Where(sale => sale.CustomerId == c.Id)
+                    .OrderByDescending(sale => sale.SaleDateUtc)
+                    .Select(sale => (DateTime?)sale.SaleDateUtc)
+                    .FirstOrDefault(),
+                LastPaymentDateUtc = db.CreditPayments
+                    .Where(payment => payment.CustomerId == c.Id)
+                    .OrderByDescending(payment => payment.PaymentDateUtc)
+                    .Select(payment => (DateTime?)payment.PaymentDateUtc)
+                    .FirstOrDefault(),
+                LifetimePurchaseValue = db.Sales
+                    .Where(sale => sale.CustomerId == c.Id)
+                    .Sum(sale => (decimal?)sale.GrandTotal) ?? 0m,
+            })
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<CustomerCredit>> GetOpenCreditsAsync(
         int customerId, int? performedByUserId, CancellationToken cancellationToken = default)
     {

@@ -6,7 +6,9 @@ using Kirana.Application.Barcodes;
 using Kirana.Application.Billing;
 using Kirana.Application.Customers;
 using Kirana.Application.Printing;
+using Kirana.Application.Hardware;
 using Kirana.Application.Products;
+using Kirana.Application.Promotions;
 using Kirana.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -18,6 +20,14 @@ namespace Kirana.App.Views;
 public sealed partial class PosShellPage : Page
 {
     public PosShellViewModel ViewModel { get; }
+    public DeviceStatusViewModel DeviceStatus { get; }
+    private readonly IScannerService _scannerService;
+    private readonly IHardwareSettingsService _hardwareSettingsService;
+    private readonly IReceiptHardwareGuard _receiptHardwareGuard;
+    private readonly IHardwareMonitor _hardwareMonitor;
+    private bool _scannerEnabled = true;
+    private bool _scannerSoundEnabled = true;
+    private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
 
     // Suggestions query fires ~180ms after the user stops typing rather than on every keystroke —
     // long enough that a real barcode scanner's whole burst-plus-Enter (a few ms per PRD §18) has
@@ -27,20 +37,56 @@ public sealed partial class PosShellPage : Page
     public PosShellPage()
     {
         var services = App.Services;
+        _scannerService = services.GetRequiredService<IScannerService>();
+        _hardwareSettingsService = services.GetRequiredService<IHardwareSettingsService>();
+        _receiptHardwareGuard = services.GetRequiredService<IReceiptHardwareGuard>();
+        _hardwareMonitor = services.GetRequiredService<IHardwareMonitor>();
+        DeviceStatus = new DeviceStatusViewModel(
+            _hardwareMonitor, _hardwareSettingsService);
+        _hardwareMonitor.StatusChanged += OnHardwareStatusChanged;
+        Unloaded += (_, _) =>
+        {
+            _hardwareMonitor.StatusChanged -= OnHardwareStatusChanged;
+            _clockTimer.Stop();
+        };
         ViewModel = new PosShellViewModel(
             services.GetRequiredService<IProductService>(),
             services.GetRequiredService<IBarcodeLookupService>(),
             services.GetRequiredService<IHeldBillService>(),
             services.GetRequiredService<ICustomerService>(),
+            services.GetRequiredService<IPromotionEngine>(),
             services.GetRequiredService<IKiranaDbContext>(),
             services.GetRequiredService<ManagementSession>());
 
         InitializeComponent();
+        _clockTimer.Tick += (_, _) => UpdateClock();
         Loaded += async (_, _) =>
         {
             UpdateThemeIcon();
+            UpdateClock();
+            _clockTimer.Start();
+            var hardwareSettings = new HardwareSettings();
+            try
+            {
+                hardwareSettings = await _hardwareSettingsService.GetAsync();
+            }
+            catch (Exception ex)
+            {
+                HardwareWarningBar.Message = $"Hardware settings could not be loaded: {ex.Message}. Billing remains available.";
+                HardwareWarningBar.IsOpen = true;
+            }
+            _scannerEnabled = hardwareSettings.BarcodeScannerEnabled;
+            _scannerSoundEnabled = hardwareSettings.EnableSoundOnScan;
+            ViewModel.ConfigureScannerTiming(hardwareSettings.ScannerTimeoutMilliseconds);
+            ViewModel.ScannerBuffer.BarcodeScanned += OnScannerObserved;
             await ViewModel.InitializeAsync();
-            ScanSearchBox.Focus(FocusState.Programmatic);
+            await DeviceStatus.RefreshAsync();
+            if (hardwareSettings.AutoFocusScannerInput) ScanSearchBox.Focus(FocusState.Programmatic);
+            if (!_scannerEnabled)
+            {
+                HardwareWarningBar.Message = "Scanner input is disabled. Manual product search remains available.";
+                HardwareWarningBar.IsOpen = true;
+            }
         };
 
         _suggestionDebounce.Tick += async (_, _) =>
@@ -138,6 +184,13 @@ public sealed partial class PosShellPage : Page
         ToolTipService.SetToolTip(ThemeIcon, themeService.IsEffectivelyDark ? "Switch to light" : "Switch to dark");
     }
 
+    private void UpdateClock()
+    {
+        var now = DateTime.Now;
+        CurrentDayDateText.Text = now.ToString("dddd, dd MMM yyyy");
+        CurrentTimeText.Text = now.ToString("hh:mm tt");
+    }
+
     private async void OnDashboardClick(object sender, RoutedEventArgs e)
     {
         var authService = App.Services.GetRequiredService<IAuthenticationService>();
@@ -203,8 +256,10 @@ public sealed partial class PosShellPage : Page
         ScanSearchBox.Focus(FocusState.Programmatic);
     }
 
-    private void OnCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args) =>
-        ViewModel.ScannerBuffer.OnCharacter(args.Character, DateTimeOffset.UtcNow);
+    private void OnCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args)
+    {
+        if (_scannerEnabled) ViewModel.ScannerBuffer.OnCharacter(args.Character, DateTimeOffset.UtcNow);
+    }
 
     private async void OnScanSearchKeyDown(object sender, KeyRoutedEventArgs e)
     {
@@ -225,7 +280,7 @@ public sealed partial class PosShellPage : Page
 
         // A recognized scan has already been added to the cart via the buffer's BarcodeScanned
         // event — falling through to the manual search here would add the same product twice.
-        var handledAsScan = ViewModel.ScannerBuffer.OnEnterPressed(DateTimeOffset.UtcNow);
+        var handledAsScan = _scannerEnabled && ViewModel.ScannerBuffer.OnEnterPressed(DateTimeOffset.UtcNow);
 
         var text = ScanSearchBox.Text;
         ScanSearchBox.Text = string.Empty;
@@ -267,6 +322,7 @@ public sealed partial class PosShellPage : Page
         if (dialog.Confirmed)
         {
             ViewModel.SelectedCustomer = dialog.SelectedCustomer;
+            await ViewModel.RefreshPromotionsAsync();
         }
 
         ScanSearchBox.Focus(FocusState.Programmatic);
@@ -374,6 +430,8 @@ public sealed partial class PosShellPage : Page
             return;
         }
 
+        await ViewModel.RefreshPromotionsAsync();
+
         await ViewModel.HoldCurrentBillAsync();
         ScanSearchBox.Focus(FocusState.Programmatic);
     }
@@ -477,13 +535,26 @@ public sealed partial class PosShellPage : Page
     {
         var invoicePrintService = App.Services.GetRequiredService<IInvoicePrintService>();
 
+        HardwareSettings hardwareSettings;
+        try { hardwareSettings = await _hardwareSettingsService.GetAsync(); }
+        catch { hardwareSettings = new HardwareSettings(); }
+        var printerReadiness = await _receiptHardwareGuard.CheckAvailabilityAsync();
+        if (!printerReadiness.Succeeded)
+        {
+            HardwareWarningBar.Message = $"Sale completed. {printerReadiness.Message} You can print the saved invoice later.";
+            HardwareWarningBar.IsOpen = true;
+        }
+
         try
         {
             var document = await invoicePrintService.GetInvoiceDocumentAsync(sale.Id);
             var previewViewModel = new InvoicePreviewViewModel(
                 document, ViewModel.DefaultInvoiceFormat, ViewModel.CashierUserId, isReprint: false, invoicePrintService);
 
-            var dialog = new InvoicePreviewDialog(previewViewModel).Themed(XamlRoot);
+            var automaticCopies = printerReadiness.Succeeded && hardwareSettings.AutoPrintReceipt
+                ? hardwareSettings.PrintDuplicateCopy ? 2 : 1
+                : 0;
+            var dialog = new InvoicePreviewDialog(previewViewModel, automaticCopies).Themed(XamlRoot);
             dialog.Title = $"Sale Completed — Invoice {sale.InvoiceNumber} — ₹{sale.GrandTotal:0.00}";
             await ShowModalAsync(dialog);
         }
@@ -501,5 +572,40 @@ public sealed partial class PosShellPage : Page
             errorDialog.Themed(XamlRoot);
             await ShowModalAsync(errorDialog);
         }
+    }
+
+    private void OnScannerObserved(string barcode)
+    {
+        _scannerService.ReportSuccessfulScan(barcode);
+        if (_scannerSoundEnabled) ElementSoundPlayer.Play(ElementSoundKind.Invoke);
+        _ = DispatcherQueue.TryEnqueue(async () => await DeviceStatus.RefreshAsync());
+    }
+
+    private void OnHardwareStatusChanged(HardwareStatusChangedEventArgs change)
+    {
+        _ = DispatcherQueue.TryEnqueue(async () =>
+        {
+            HardwareWarningBar.Severity = change.CurrentStatus == HardwareStatus.Connected
+                ? InfoBarSeverity.Success
+                : InfoBarSeverity.Warning;
+            HardwareWarningBar.Message = $"{change.Device.FriendlyName}: {change.CurrentStatus}.";
+            HardwareWarningBar.IsOpen = true;
+            await DeviceStatus.RefreshAsync();
+        });
+    }
+
+    private async void OnHardwareStatusClick(object sender, RoutedEventArgs e)
+    {
+        var session = App.Services.GetRequiredService<ManagementSession>();
+        if (session.CurrentUser is null)
+        {
+            var authService = App.Services.GetRequiredService<IAuthenticationService>();
+            var dialog = new ManagementLoginDialog(authService).Themed(XamlRoot);
+            await ShowModalAsync(dialog);
+            if (!dialog.Unlocked) return;
+        }
+
+        Frame.Navigate(typeof(ManagementShellPage),
+            session.HasPermission(PermissionKeys.HardwareManage) ? "HardwareSettings" : "DeviceStatus");
     }
 }

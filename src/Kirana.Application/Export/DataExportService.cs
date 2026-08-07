@@ -17,6 +17,7 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
         ExportDataset.Inventory => PermissionKeys.InventoryManage,
         ExportDataset.Sales => PermissionKeys.ReportsView,
         ExportDataset.Expenses => PermissionKeys.ExpensesManage,
+        ExportDataset.Promotions => PermissionKeys.PromotionsView,
         _ => throw new ArgumentOutOfRangeException(nameof(dataset)),
     };
 
@@ -42,7 +43,28 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
             ExportDataset.Sales => await BuildSalesAsync(fromUtc, toUtc, cancellationToken),
             ExportDataset.Purchases => await BuildPurchasesAsync(fromUtc, toUtc, cancellationToken),
             ExportDataset.Expenses => await BuildExpensesAsync(fromUtc, toUtc, cancellationToken),
+            ExportDataset.Promotions => await BuildPromotionsAsync(cancellationToken),
             _ => throw new ArgumentOutOfRangeException(nameof(dataset)),
+        };
+    }
+
+    private async Task<ReportExportData> BuildPromotionsAsync(CancellationToken cancellationToken)
+    {
+        var promotions = await db.Promotions.AsNoTracking().Include(x => x.Schedule)
+            .Include(x => x.Scope).ThenInclude(x => x!.Targets).OrderBy(x => x.PromotionName).ToListAsync(cancellationToken);
+        return new ReportExportData
+        {
+            Title = "Promotions",
+            Subtitle = $"{promotions.Count} promotion(s) - exported {Now()}",
+            Columns = ["Code", "Name", "Type", "Scope", "Value", "Start UTC", "End UTC", "Status", "Priority", "Stacking", "Usage", "Active"],
+            Rows = promotions.Select(x => (IReadOnlyList<string>)
+            [
+                x.PromotionCode, x.PromotionName, x.PromotionType.ToString(), x.Scope?.ScopeType.ToString() ?? string.Empty,
+                x.PromotionType == PromotionType.Percentage ? NumberOrBlank(x.Percentage) : x.PromotionType == PromotionType.FlatAmount ? NumberOrBlank(x.FlatAmount) : NumberOrBlank(x.FixedPrice),
+                x.Schedule?.StartAtUtc.ToString("O") ?? string.Empty, x.Schedule?.EndAtUtc.ToString("O") ?? string.Empty,
+                x.Status.ToString(), x.Priority.ToString(CultureInfo.InvariantCulture), Bool(x.AllowStacking),
+                x.MaximumUsage is { } maximum ? $"{x.CurrentUsage}/{maximum}" : x.CurrentUsage.ToString(CultureInfo.InvariantCulture), Bool(x.IsActive),
+            ]).ToList(),
         };
     }
 

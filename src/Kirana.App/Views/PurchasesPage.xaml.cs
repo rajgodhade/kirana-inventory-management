@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 
 namespace Kirana.App.Views;
 
@@ -83,32 +82,10 @@ public sealed partial class PurchasesPage : Page
         Frame.Navigate(typeof(PurchaseEntryPage));
     }
 
-    // ================================ ROW HOVER / DOUBLE-CLICK ================================
+    // ================================ ROW DOUBLE-CLICK ================================
     // A zebra-striped row already paints its own opaque background, which would hide
     // ListViewItem's own built-in hover visual (it sits behind the DataTemplate content) — so the
     // hover tint is applied directly to this Grid instead, restoring the affordance explicitly.
-
-    private static readonly SolidColorBrush TransparentBrush = new(Microsoft.UI.Colors.Transparent);
-    // Keep purchase rows calm in both themes: this is a hover affordance, not a selection state.
-    private static readonly SolidColorBrush HoverBrush = new(Windows.UI.Color.FromArgb(255, 240, 253, 250));
-
-    private void OnRowPointerEntered(object sender, PointerRoutedEventArgs e)
-    {
-        if (sender is not Grid grid)
-        {
-            return;
-        }
-
-        grid.Background = HoverBrush;
-    }
-
-    private void OnRowPointerExited(object sender, PointerRoutedEventArgs e)
-    {
-        if (sender is Grid grid)
-        {
-            grid.Background = TransparentBrush;
-        }
-    }
 
     private async void OnRowDoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {

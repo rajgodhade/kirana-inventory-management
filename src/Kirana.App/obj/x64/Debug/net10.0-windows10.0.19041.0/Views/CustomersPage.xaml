@@ -1,190 +1,205 @@
 ﻿<Page x:ConnectionId='1'
     x:Class="Kirana.App.Views.CustomersPage"
+    x:Name="RootPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:interaction="using:Kirana.App.Interaction"
     xmlns:vm="using:Kirana.App.ViewModels">
 
     <Grid Background="{ThemeResource PageBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Page heading + the one number that matters most on this screen. The shell supplies the
-             app bar, so there is no local header/back button. -->
-        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}" ColumnSpacing="24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
                 <TextBlock Text="Customers &amp; Udhaar" Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Text="Customer records, credit balances and repayments."
-                           Style="{StaticResource PageSubtitleTextStyle}" />
+                <TextBlock Text="Customer records, credit balances and repayment history." Style="{StaticResource PageSubtitleTextStyle}" />
             </StackPanel>
-
-            <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}" Padding="16,10"
-                    Background="{ThemeResource DangerSubtleBrush}" BorderThickness="0">
-                <StackPanel Spacing="1">
-                    <TextBlock Text="Total Outstanding Udhaar" Style="{StaticResource MetricLabelTextStyle}" />
-                    <TextBlock Style="{StaticResource MetricTextStyle}" Foreground="{ThemeResource DangerBrush}" FontSize="24">
-                        <Run x:ConnectionId='24'                                                                                                              />
-                    </TextBlock>
-                    <TextBlock x:ConnectionId='23'                                                                       
-                               Style="{StaticResource CaptionTextStyle}" />
-                </StackPanel>
-            </Border>
         </Grid>
 
-        <!-- Toolbar -->
-        <Grid Grid.Row="1" Padding="{StaticResource ToolbarPadding}" ColumnSpacing="8">
+        <!-- A compact commercial snapshot. The cards only change the current view. -->
+        <Grid Grid.Row="1" Padding="24,0,24,16" ColumnSpacing="{StaticResource SpacingL}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" MinWidth="210" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-
-            <TextBox x:ConnectionId='18' Grid.Column="0" PlaceholderText="Search Customer ID / phone / name…"
-                                                                                                                                        
-                                                      >
-                <TextBox.Resources>
-                    <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
-                </TextBox.Resources>
-            </TextBox>
-
-            <Button x:ConnectionId='19' Grid.Column="1"                       AutomationProperties.Name="Search customers">
-                <FontIcon Glyph="&#xE721;" FontSize="14" />
+            <Button x:ConnectionId='36' Grid.Column="0"                             Padding="0" Background="Transparent" BorderThickness="0"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                    AutomationProperties.Name="Show all customers">
+                <Border Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelBlueBrush}" BorderBrush="{ThemeResource PastelBlueBrush}">
+                    <Grid ColumnSpacing="14"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource KpiIconChipStyle}" Background="{ThemeResource SurfaceBrush}" Opacity="0.65" />
+                        <FontIcon Glyph="&#xE77B;" FontSize="16" VerticalAlignment="Top" Margin="0,10,0,0" HorizontalAlignment="Center" Foreground="{ThemeResource PastelBlueOnBrush}" />
+                        <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="TOTAL CUSTOMERS" Style="{StaticResource KpiLabelTextStyle}" Foreground="{ThemeResource PastelBlueOnBrush}" />
+                            <TextBlock x:ConnectionId='43'                                                           Style="{StaticResource KpiValueTextStyle}" Foreground="{ThemeResource PastelBlueOnBrush}" />
+                            <TextBlock Text="customer records" Style="{StaticResource KpiCaptionTextStyle}" Foreground="{ThemeResource PastelBlueOnBrush}" /></StackPanel>
+                    </Grid>
+                </Border>
             </Button>
-
-            <CheckBox x:ConnectionId='20' Grid.Column="2" Content="Show inactive" VerticalAlignment="Center" Margin="8,0,0,0"
-                                                                              
-                                                                            />
-
-            <CheckBox x:ConnectionId='21' Grid.Column="3" Content="Only with Udhaar" VerticalAlignment="Center"
-                                                                                     
-                                                                            />
-
-            <Button x:ConnectionId='22' Grid.Column="5" Style="{StaticResource AccentButtonStyle}"                           >
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Glyph="&#xE710;" FontSize="14" />
-                    <TextBlock Text="Add Customer" />
-                </StackPanel>
+            <Button x:ConnectionId='37' Grid.Column="1"                                     Padding="0" Background="Transparent" BorderThickness="0"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                    AutomationProperties.Name="Show customers with outstanding Udhaar">
+                <Border Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}" BorderBrush="{ThemeResource PastelAmberBrush}">
+                    <Grid ColumnSpacing="14"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource KpiIconChipStyle}" Background="{ThemeResource SurfaceBrush}" Opacity="0.65" />
+                        <FontIcon Glyph="&#xE77B;" FontSize="16" VerticalAlignment="Top" Margin="0,10,0,0" HorizontalAlignment="Center" Foreground="{ThemeResource PastelAmberOnBrush}" />
+                        <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="OUTSTANDING UDHAAR" Style="{StaticResource KpiLabelTextStyle}" Foreground="{ThemeResource PastelAmberOnBrush}" />
+                            <TextBlock x:ConnectionId='42'                                                                                                       Style="{StaticResource KpiValueTextStyle}" Foreground="{ThemeResource PastelAmberOnBrush}" />
+                            <TextBlock Text="currently owed by customers" Style="{StaticResource KpiCaptionTextStyle}" Foreground="{ThemeResource PastelAmberOnBrush}" /></StackPanel>
+                    </Grid>
+                </Border>
+            </Button>
+            <Button x:ConnectionId='38' Grid.Column="2"                                 Padding="0" Background="Transparent" BorderThickness="0"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                    AutomationProperties.Name="Show overdue customers">
+                <Border Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelRoseBrush}" BorderBrush="{ThemeResource PastelRoseBrush}">
+                    <Grid ColumnSpacing="14"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource KpiIconChipStyle}" Background="{ThemeResource SurfaceBrush}" Opacity="0.65" />
+                        <FontIcon Glyph="&#xE7BA;" FontSize="16" VerticalAlignment="Top" Margin="0,10,0,0" HorizontalAlignment="Center" Foreground="{ThemeResource PastelRoseOnBrush}" />
+                        <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="OVERDUE CUSTOMERS" Style="{StaticResource KpiLabelTextStyle}" Foreground="{ThemeResource PastelRoseOnBrush}" />
+                            <TextBlock x:ConnectionId='41'                                                             Style="{StaticResource KpiValueTextStyle}" Foreground="{ThemeResource PastelRoseOnBrush}" />
+                            <TextBlock Text="Udhaar open for 30+ days" Style="{StaticResource KpiCaptionTextStyle}" Foreground="{ThemeResource PastelRoseOnBrush}" /></StackPanel>
+                    </Grid>
+                </Border>
+            </Button>
+            <Button x:ConnectionId='39' Grid.Column="3"                             Padding="0" Background="Transparent" BorderThickness="0"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                    AutomationProperties.Name="Show all customers">
+                <Border Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelVioletBrush}" BorderBrush="{ThemeResource PastelVioletBrush}">
+                    <Grid ColumnSpacing="14"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource KpiIconChipStyle}" Background="{ThemeResource SurfaceBrush}" Opacity="0.65" />
+                        <FontIcon Glyph="&#xE710;" FontSize="16" VerticalAlignment="Top" Margin="0,10,0,0" HorizontalAlignment="Center" Foreground="{ThemeResource PastelVioletOnBrush}" />
+                        <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="NEW THIS MONTH" Style="{StaticResource KpiLabelTextStyle}" Foreground="{ThemeResource PastelVioletOnBrush}" />
+                            <TextBlock x:ConnectionId='40'                                                                  Style="{StaticResource KpiValueTextStyle}" Foreground="{ThemeResource PastelVioletOnBrush}" />
+                            <TextBlock Text="customers added this month" Style="{StaticResource KpiCaptionTextStyle}" Foreground="{ThemeResource PastelVioletOnBrush}" /></StackPanel>
+                    </Grid>
+                </Border>
             </Button>
         </Grid>
 
-        <!-- Results -->
-        <Grid Grid.Row="2" Margin="24,0,24,24">
-            <Border Style="{StaticResource CardBorderStyle}" Padding="0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
+        <Border Grid.Row="2" Style="{StaticResource FilterBarStyle}" Margin="24,0,24,16">
+            <Grid ColumnSpacing="{StaticResource SpacingS}" RowSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="280" /><ColumnDefinition Width="148" /><ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="142" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox x:ConnectionId='31' PlaceholderText="Search name / mobile / customer ID..."                                                                                       
+                                                                                        CornerRadius="{StaticResource RadiusMedium}"
+                         AutomationProperties.Name="Search customers" />
+                <ComboBox x:ConnectionId='32' x:Name="StatusFilterBox" Grid.Column="1"                                                                                                                         
+                                                             CornerRadius="{StaticResource RadiusMedium}" AutomationProperties.Name="Filter customer status" />
+                <CheckBox x:ConnectionId='33' Grid.Column="2" Content="Outstanding only"                                                            
+                                                                                VerticalAlignment="Center" />
+                <ComboBox x:ConnectionId='34' x:Name="SortFilterBox" Grid.Column="3"                                                                                                               
+                                                             CornerRadius="{StaticResource RadiusMedium}" AutomationProperties.Name="Sort customers" />
+                <Button x:ConnectionId='35' Grid.Column="5" Content="Add Customer" Style="{StaticResource AccentButtonStyle}" Padding="12,7"
+                                                                                                     />
+            </Grid>
+        </Border>
 
-                    <Grid Grid.Row="0" Padding="14,10" ColumnSpacing="16"
-                          Background="{ThemeResource SurfaceAltBrush}"
-                          BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+        <Grid Grid.Row="3" Margin="24,0,24,24">
+            <Border Style="{StaticResource ElevatedCardStyle}" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Padding="12,10" ColumnSpacing="12" Background="{ThemeResource SurfaceAltBrush}"
+                          CornerRadius="16,16,0,0" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" MinWidth="200" />
-                            <ColumnDefinition Width="140" />
-                            <ColumnDefinition Width="130" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="Auto" MinWidth="210" />
+                            <ColumnDefinition Width="*" MinWidth="220" /><ColumnDefinition Width="160" /><ColumnDefinition Width="112" />
+                            <ColumnDefinition Width="112" /><ColumnDefinition Width="122" /><ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="86" /><ColumnDefinition Width="274" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="CUSTOMER" Style="{StaticResource ColumnHeaderTextStyle}" />
-                        <TextBlock Grid.Column="1" Text="PHONE" Style="{StaticResource ColumnHeaderTextStyle}" />
-                        <TextBlock Grid.Column="2" Text="UDHAAR" Style="{StaticResource ColumnHeaderTextStyle}"
-                                   HorizontalAlignment="Right" />
-                        <TextBlock Grid.Column="3" Text="STATUS" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Text="CUSTOMER" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="1" Text="CONTACT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="2" Text="LAST PURCHASE" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="3" Text="LAST PAYMENT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="4" Text="LIFETIME SALES" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="5" Text="OUTSTANDING" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="6" Text="STATUS" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="7" Text="ACTIONS" Style="{StaticResource ColumnHeaderTextStyle}" />
                     </Grid>
 
-                    <ListView x:ConnectionId='3' Grid.Row="1"                                            SelectionMode="None">
+                    <StackPanel x:ConnectionId='3' Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10"
+                                                                                                                                                    >
+                        <FontIcon Glyph="&#xE77B;" FontSize="36" Foreground="{ThemeResource TextTertiaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="No customers found." Style="{StaticResource CardTitleTextStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Text="Try changing the filters, or add a new customer." Style="{StaticResource CaptionTextStyle}" HorizontalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+                            <Button x:ConnectionId='30' Content="Add Customer" Style="{StaticResource AccentButtonStyle}"                                                                              />
+                            <Button Content="Import Customers" IsEnabled="False" ToolTipService.ToolTip="Customer import is not available yet." />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <ListView x:ConnectionId='4' Grid.Row="1"                                            SelectionMode="None" TabNavigation="Once"
+                                                                                                                                           >
                         <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                <Setter Property="MinHeight" Value="0" />
-                            </Style>
+                            <Style TargetType="ListViewItem"><Setter Property="Padding" Value="0" /><Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="MinHeight" Value="0" /><Setter Property="UseSystemFocusVisuals" Value="True" /></Style>
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate                                     >
-                                <Grid x:ConnectionId='5' Padding="14,12" ColumnSpacing="16"
-                                      BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" MinWidth="200" />
-                                        <ColumnDefinition Width="140" />
-                                        <ColumnDefinition Width="130" />
-                                        <ColumnDefinition Width="80" />
-                                        <ColumnDefinition Width="Auto" MinWidth="210" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock x:ConnectionId='16'                      Style="{StaticResource CardTitleTextStyle}" TextWrapping="Wrap" />
-                                        <TextBlock x:ConnectionId='17'                              Style="{StaticResource CodeTextStyle}" />
-                                    </StackPanel>
-
-                                    <TextBlock x:ConnectionId='6' Grid.Column="1"                       Style="{StaticResource SecondaryTextStyle}"
-                                               VerticalAlignment="Center" />
-
-                                    <!-- Two TextBlocks rather than a brush converter: {ThemeResource}
-                                         in XAML resolves against the element's theme, a converter
-                                         reaching into app resources would not. -->
-                                    <TextBlock x:ConnectionId='7' Grid.Column="2" Style="{StaticResource AmountTextStyle}" VerticalAlignment="Center"
-                                               Foreground="{ThemeResource DangerBrush}"
-                                                                                                                                                      >
-                                        <Run x:ConnectionId='15'                                                                                               />
-                                    </TextBlock>
-                                    <TextBlock x:ConnectionId='8' Grid.Column="2" Text="—" Style="{StaticResource SecondaryTextStyle}"
-                                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                                                                                                                              />
-
-                                    <Border x:ConnectionId='9' Grid.Column="3" Style="{StaticResource BadgeBorderStyle}"
-                                            Background="{ThemeResource SuccessSubtleBrush}"
-                                                                                                                                             >
-                                        <TextBlock Text="Active" Style="{StaticResource BadgeTextStyle}"
-                                                   Foreground="{ThemeResource SuccessBrush}" />
-                                    </Border>
-                                    <Border x:ConnectionId='10' Grid.Column="3" Style="{StaticResource BadgeBorderStyle}"
-                                            Background="{ThemeResource SurfaceAltBrush}"
-                                                                                                                                                    >
-                                        <TextBlock Text="Inactive" Style="{StaticResource BadgeTextStyle}"
-                                                   Foreground="{ThemeResource TextTertiaryBrush}" />
-                                    </Border>
-
-                                    <!-- Two primary actions inline; the rarer, riskier one lives in an
-                                         overflow menu. Keeps the row narrow enough that actions never
-                                         clip at small window widths. -->
-                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6"
-                                                VerticalAlignment="Center" HorizontalAlignment="Right">
-                                        <Button x:ConnectionId='11' Content="Ledger"                                      />
-                                        <Button x:ConnectionId='12' Content="Edit"                                    />
-                                        <Button Padding="9,5" AutomationProperties.Name="More actions">
-                                            <FontIcon Glyph="&#xE712;" FontSize="13" />
-                                            <Button.Flyout>
-                                                <MenuFlyout>
-                                                    <MenuFlyoutItem x:ConnectionId='13' Text="Deactivate"                                           
-                                                                                                                                                                      />
-                                                    <MenuFlyoutItem x:ConnectionId='14' Text="Reactivate"                                           
-                                                                                                                                                                             />
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
+                                <!-- Opaque base deliberately prevents the ListView hover fill: row navigation is signalled by cursor/focus only. -->
+                                <Border x:ConnectionId='6' Background="{ThemeResource SurfaceBrush}" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+                                    <Grid x:ConnectionId='7' Padding="12,11" ColumnSpacing="12"                                            
+                                          interaction:ActionCursor.IsActionable="True"                                          >
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" MinWidth="220" /><ColumnDefinition Width="160" /><ColumnDefinition Width="112" />
+                                            <ColumnDefinition Width="112" /><ColumnDefinition Width="122" /><ColumnDefinition Width="130" />
+                                            <ColumnDefinition Width="86" /><ColumnDefinition Width="274" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                            <Border Width="32" Height="32" CornerRadius="{StaticResource RadiusPill}" Background="{ThemeResource PastelVioletBrush}">
+                                                <TextBlock x:ConnectionId='29'                         FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource PastelVioletOnBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <StackPanel Spacing="2" VerticalAlignment="Center"><TextBlock x:ConnectionId='26'                      Style="{StaticResource CardTitleTextStyle}" TextTrimming="CharacterEllipsis" />
+                                                <StackPanel Orientation="Horizontal" Spacing="6"><TextBlock x:ConnectionId='27'                              Style="{StaticResource CodeTextStyle}" />
+                                                    <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource PastelVioletBrush}" Padding="6,2"><TextBlock x:ConnectionId='28'                             Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource PastelVioletOnBrush}" /></Border></StackPanel></StackPanel>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center"><TextBlock x:ConnectionId='25'                           Style="{StaticResource BodyTextStyle}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="Mobile" Style="{StaticResource CaptionTextStyle}" /></StackPanel>
+                                        <TextBlock x:ConnectionId='8' Grid.Column="2"                                  Style="{StaticResource SecondaryTextStyle}" VerticalAlignment="Center" />
+                                        <TextBlock x:ConnectionId='9' Grid.Column="3"                                 Style="{StaticResource SecondaryTextStyle}" VerticalAlignment="Center" />
+                                        <TextBlock x:ConnectionId='10' Grid.Column="4"                                                                                     Style="{StaticResource AmountTextStyle}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                                        <Border x:ConnectionId='11' Grid.Column="5" Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource SuccessSubtleBrush}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                                                                                                  ><TextBlock Text="₹0.00 · Paid" Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource SuccessBrush}" /></Border>
+                                        <Border x:ConnectionId='12' Grid.Column="5" Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource WarningSubtleBrush}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                                                                                                         ><TextBlock x:ConnectionId='24'                                                                                  Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource WarningBrush}" /></Border>
+                                        <Border x:ConnectionId='13' Grid.Column="5" Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource DangerSubtleBrush}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                                                                                                     ><TextBlock x:ConnectionId='23'                                                                                  Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource DangerBrush}" /></Border>
+                                        <Border x:ConnectionId='14' Grid.Column="6" Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource SuccessSubtleBrush}" VerticalAlignment="Center"
+                                                                                                                                    ><TextBlock Text="Active" Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource SuccessBrush}" /></Border>
+                                        <Border x:ConnectionId='15' Grid.Column="6" Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource SurfaceAltBrush}" VerticalAlignment="Center"
+                                                                                                                                           ><TextBlock Text="Inactive" Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource TextSecondaryBrush}" /></Border>
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <Button x:ConnectionId='16' Content="Ledger"                                      Padding="9,5" Height="32" MinWidth="0" CornerRadius="{StaticResource RadiusMedium}" />
+                                            <Button x:ConnectionId='17' Content="Receive"                                              Padding="9,5" Height="32" MinWidth="0" CornerRadius="{StaticResource RadiusMedium}"
+                                                                                           />
+                                            <Button x:ConnectionId='18'                Padding="8,5" Width="34" Height="32" MinWidth="0" CornerRadius="{StaticResource RadiusMedium}" AutomationProperties.Name="More customer actions"><FontIcon Glyph="&#xE712;" FontSize="15" />
+                                                <Button.Flyout><MenuFlyout Placement="Bottom">
+                                                    <MenuFlyoutItem x:ConnectionId='19' Text="Edit"                                    IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManageCustomers}" />
+                                                    <MenuFlyoutItem x:ConnectionId='20' Text="Purchase History"                                      />
+                                                    <MenuFlyoutItem x:ConnectionId='21' Text="Deactivate"                                            IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManageCustomers}"
+                                                                                                                                                         />
+                                                    <MenuFlyoutItem x:ConnectionId='22' Text="Reactivate"                                            IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManageCustomers}"
+                                                                                                                                                                />
+                                                    <MenuFlyoutSeparator />
+                                                    <MenuFlyoutItem Text="Export Ledger" IsEnabled="False" ToolTipService.ToolTip="Use Export Center to export customer data." />
+                                                    <MenuFlyoutItem Text="Delete" IsEnabled="False" ToolTipService.ToolTip="Customer deletion is not supported." />
+                                                </MenuFlyout></Button.Flyout>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
                 </Grid>
             </Border>
-
-            <InfoBar x:ConnectionId='2'                                                                                                        
-                     Severity="Error"                                                       
-                     VerticalAlignment="Top" Margin="0,0,0,8" />
+            <InfoBar x:ConnectionId='2'                                                                                                         Severity="Error"
+                                                                            VerticalAlignment="Top" Margin="0,0,0,8" />
         </Grid>
     </Grid>
 </Page>

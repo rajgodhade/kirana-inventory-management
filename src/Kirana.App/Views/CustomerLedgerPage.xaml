@@ -12,9 +12,17 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
             <StackPanel Spacing="2">
                 <TextBlock Text="Customer Details" Style="{StaticResource PageTitleTextStyle}" />
                 <TextBlock Text="Profile, ledger, purchase history and repayments." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Button Content="Print" Click="OnPrintLedgerClick" />
+                <Button Content="Export">
+                    <Button.Flyout><MenuFlyout><MenuFlyoutItem Text="Export Excel" Click="OnExportExcelClick" />
+                        <MenuFlyoutItem Text="Export PDF" Click="OnExportPdfClick" /></MenuFlyout></Button.Flyout>
+                </Button>
             </StackPanel>
         </Grid>
 
@@ -36,12 +44,17 @@
                     <TextBlock FontSize="12" Opacity="0.8">
                         <Run Text="Address:" /><Run Text=" " /><Run Text="{x:Bind ViewModel.Address, Mode=OneWay}" />
                     </TextBlock>
+                    <TextBlock FontSize="12" Opacity="0.8">
+                        <Run Text="GSTIN:" /><Run Text=" " /><Run Text="{x:Bind ViewModel.Gstin, Mode=OneWay}" />
+                    </TextBlock>
                 </StackPanel>
                 <TextBlock Text="{x:Bind ViewModel.Notes, Mode=OneWay}" FontSize="12" Opacity="0.7" TextWrapping="Wrap"
                            Visibility="{x:Bind ViewModel.Notes, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}" />
             </StackPanel>
 
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="3">
+                <TextBlock Text="Lifetime Sales" FontSize="11" Opacity="0.7" HorizontalAlignment="Right" />
+                <TextBlock Text="{x:Bind ViewModel.LifetimeSalesDisplay, Mode=OneWay}" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Right" />
                 <TextBlock Text="Outstanding Udhaar" FontSize="11" Opacity="0.7" HorizontalAlignment="Right" />
                 <TextBlock Text="{x:Bind ViewModel.OutstandingDisplay, Mode=OneWay}"
                            FontSize="26" FontWeight="SemiBold" HorizontalAlignment="Right" />

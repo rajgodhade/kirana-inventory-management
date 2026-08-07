@@ -7,6 +7,7 @@ public sealed class CartTotals
     public required IReadOnlyList<CartLineResult> Lines { get; init; }
     public decimal SubTotal { get; init; }
     public decimal ItemDiscountTotal { get; init; }
+    public decimal PromotionDiscountTotal { get; init; }
     public decimal BillDiscountPercent { get; init; }
     public decimal BillDiscountAmount { get; init; }
     public decimal TaxableTotal { get; init; }

@@ -7,6 +7,7 @@ public sealed class CartLineResult
     public required CartLine Line { get; init; }
     public decimal GrossAmount { get; init; }
     public decimal DiscountAmount { get; init; }
+    public decimal PromotionDiscountAmount { get; init; }
     public decimal TaxableAmount { get; init; }
     public decimal GstAmount { get; init; }
     public decimal LineTotal { get; init; }

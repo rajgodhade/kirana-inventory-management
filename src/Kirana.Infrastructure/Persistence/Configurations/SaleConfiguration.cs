@@ -16,6 +16,7 @@ public sealed class SaleConfiguration : IEntityTypeConfiguration<Sale>
 
         builder.Property(s => s.SubTotal).HasPrecision(18, 2);
         builder.Property(s => s.ItemDiscountTotal).HasPrecision(18, 2);
+        builder.Property(s => s.PromotionDiscountTotal).HasPrecision(18, 2);
         builder.Property(s => s.BillDiscountPercent).HasPrecision(5, 2);
         builder.Property(s => s.BillDiscountAmount).HasPrecision(18, 2);
         builder.Property(s => s.TaxableTotal).HasPrecision(18, 2);
@@ -59,6 +60,7 @@ public sealed class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
         builder.Property(i => i.UnitPriceSnapshot).HasPrecision(18, 2);
         builder.Property(i => i.DiscountPercent).HasPrecision(5, 2);
         builder.Property(i => i.DiscountAmount).HasPrecision(18, 2);
+        builder.Property(i => i.PromotionDiscountAmount).HasPrecision(18, 2);
         builder.Property(i => i.GstRatePercentSnapshot).HasPrecision(5, 2);
         builder.Property(i => i.TaxableAmount).HasPrecision(18, 2);
         builder.Property(i => i.GstAmount).HasPrecision(18, 2);

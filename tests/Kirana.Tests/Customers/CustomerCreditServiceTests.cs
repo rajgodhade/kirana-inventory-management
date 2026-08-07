@@ -128,6 +128,25 @@ public class CustomerCreditServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CustomerOverview_UsesExistingSalesCreditsAndRepayments()
+    {
+        var customer = await SeedCustomerAsync("Overview Customer");
+        var product = await SeedProductAsync(price: 100);
+        await SellOnCreditAsync(customer, product, quantity: 3, creditAmount: 300);
+        await RepayAsync(customer, 100);
+
+        var row = Assert.Single(await _sut.SearchOverviewAsync(
+            new CustomerSearchQuery { SearchText = "Overview Customer" }, _ownerId));
+
+        Assert.Equal(customer.Id, row.Id);
+        Assert.Equal(300m, row.LifetimePurchaseValue);
+        Assert.Equal(200m, row.OutstandingBalance);
+        Assert.NotNull(row.LastPurchaseDateUtc);
+        Assert.NotNull(row.LastPaymentDateUtc);
+        Assert.NotNull(row.OldestOpenCreditDateUtc);
+    }
+
+    [Fact]
     public async Task CreditSale_RequiresCustomer()
     {
         var product = await SeedProductAsync();

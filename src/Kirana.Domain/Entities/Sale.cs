@@ -21,6 +21,7 @@ public class Sale : Entity
 
     public decimal SubTotal { get; set; }
     public decimal ItemDiscountTotal { get; set; }
+    public decimal PromotionDiscountTotal { get; set; }
     public decimal BillDiscountPercent { get; set; }
     public decimal BillDiscountAmount { get; set; }
     public decimal TaxableTotal { get; set; }

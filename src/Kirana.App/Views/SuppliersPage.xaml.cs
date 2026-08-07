@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 
 namespace Kirana.App.Views;
 
@@ -45,7 +46,20 @@ public sealed partial class SuppliersPage : Page
         }
     }
 
-    private async void OnShowInactiveChanged(object sender, RoutedEventArgs e) => await ViewModel.SearchAsync();
+    private async void OnFilterChanged(object sender, RoutedEventArgs e) => await ViewModel.SearchAsync();
+
+    private async void OnAllSuppliersClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.OutstandingOnly = false;
+        ViewModel.SelectedStatusFilter = "All suppliers";
+        await ViewModel.SearchAsync();
+    }
+
+    private async void OnActiveSuppliersClick(object sender, RoutedEventArgs e) => await ViewModel.ShowActiveAsync();
+
+    private async void OnOutstandingSuppliersClick(object sender, RoutedEventArgs e) => await ViewModel.ShowOutstandingAsync();
+
+    private async void OnOverdueSuppliersClick(object sender, RoutedEventArgs e) => await ViewModel.ShowOverdueAsync();
 
     private async void OnAddSupplierClick(object sender, RoutedEventArgs e)
     {
@@ -62,7 +76,7 @@ public sealed partial class SuppliersPage : Page
 
     private async void OnEditClick(object sender, RoutedEventArgs e)
     {
-        if (!ViewModel.CanManagePurchases || (sender as Button)?.Tag is not SupplierRowViewModel row)
+        if (!ViewModel.CanManagePurchases || (sender as FrameworkElement)?.Tag is not SupplierRowViewModel row)
         {
             return;
         }
@@ -81,7 +95,7 @@ public sealed partial class SuppliersPage : Page
 
     private async void OnToggleActiveClick(object sender, RoutedEventArgs e)
     {
-        if (!ViewModel.CanManagePurchases || (sender as Button)?.Tag is not SupplierRowViewModel row)
+        if (!ViewModel.CanManagePurchases || (sender as FrameworkElement)?.Tag is not SupplierRowViewModel row)
         {
             return;
         }
@@ -92,11 +106,52 @@ public sealed partial class SuppliersPage : Page
 
     private void OnLedgerClick(object sender, RoutedEventArgs e)
     {
-        if ((sender as Button)?.Tag is not SupplierRowViewModel row)
+        if ((sender as FrameworkElement)?.Tag is not SupplierRowViewModel row)
         {
             return;
         }
 
         Frame.Navigate(typeof(SupplierLedgerPage), row.Id);
+    }
+
+    private async void OnPayClick(object sender, RoutedEventArgs e)
+    {
+        if (!ViewModel.CanManagePurchases || (sender as FrameworkElement)?.Tag is not SupplierRowViewModel row)
+        {
+            return;
+        }
+
+        var services = App.Services;
+        var paymentViewModel = new SupplierLedgerViewModel(
+            row.Id,
+            services.GetRequiredService<ISupplierService>(),
+            services.GetRequiredService<IPurchaseService>(),
+            services.GetRequiredService<ManagementSession>());
+        var dialog = new SupplierPaymentDialog(paymentViewModel).Themed(XamlRoot);
+        await dialog.ShowAsync();
+        await ViewModel.SearchAsync();
+    }
+
+    private void OnSupplierRowTapped(object sender, TappedRoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is not SupplierRowViewModel row || IsInsideButton(e.OriginalSource as DependencyObject))
+        {
+            return;
+        }
+
+        Frame.Navigate(typeof(SupplierLedgerPage), row.Id);
+    }
+
+    private static bool IsInsideButton(DependencyObject? source)
+    {
+        for (var current = source; current is not null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is Button)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

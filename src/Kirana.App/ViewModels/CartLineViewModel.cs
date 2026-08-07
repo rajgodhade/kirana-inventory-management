@@ -55,6 +55,18 @@ public sealed partial class CartLineViewModel : ObservableObject
     [ObservableProperty]
     private decimal _lineTotal;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPromotion))]
+    private decimal _promotionDiscountAmount;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPromotion))]
+    private string _promotionText = string.Empty;
+
+    public decimal PromotionBeforeTaxDiscountAmount { get; set; }
+    public decimal PromotionAfterTaxDiscountAmount { get; set; }
+    public bool HasPromotion => PromotionDiscountAmount > 0 && PromotionText.Length > 0;
+
     public decimal Quantity => decimal.TryParse(QuantityText, out var v) ? v : 0;
 
     public decimal DiscountPercent => decimal.TryParse(DiscountPercentText, out var v) ? v : 0;

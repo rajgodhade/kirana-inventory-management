@@ -32,4 +32,19 @@ public class AppSettings : Entity
     /// <summary>Preferred file format ("Csv" or "Excel") pre-selected by the Export Center; each
     /// export screen still lets the user pick a different format for a single export.</summary>
     public string DefaultExportFormat { get; set; } = "Csv";
+
+    // Hardware preferences. Device discovery remains runtime-only; these fields persist operator
+    // choices without coupling the database to transient Windows device identifiers.
+    public string? DefaultPrinterName { get; set; }
+    public string? ReceiptPrinterName { get; set; }
+    public string? InvoicePrinterName { get; set; }
+    public PrinterPaperSize ReceiptPaperSize { get; set; } = PrinterPaperSize.Thermal80mm;
+    public bool AutoPrintReceipt { get; set; }
+    public bool PrintDuplicateCopy { get; set; }
+    public bool OpenCashDrawerAfterCashPayment { get; set; }
+    public bool BarcodeScannerEnabled { get; set; } = true;
+    public bool EnableSoundOnScan { get; set; } = true;
+    public bool AutoFocusScannerInput { get; set; } = true;
+    public int ScannerTimeoutMilliseconds { get; set; } = 40;
+    public DateTime? LastHardwareMaintenanceUtc { get; set; }
 }

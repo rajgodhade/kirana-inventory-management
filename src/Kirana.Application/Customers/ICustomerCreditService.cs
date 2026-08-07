@@ -27,6 +27,12 @@ public interface ICustomerCreditService
     /// <summary>Every customer who currently owes something, largest first.</summary>
     Task<IReadOnlyList<CustomerOutstandingSummary>> GetOutstandingSummaryAsync(int? performedByUserId, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Read-only customer rows enriched with the existing sales and repayment history needed by
+    /// the management list. Financial access remains permission-gated just like the ledger.
+    /// </summary>
+    Task<IReadOnlyList<CustomerOverview>> SearchOverviewAsync(CustomerSearchQuery query, int? performedByUserId, CancellationToken cancellationToken = default);
+
     /// <summary>The customer's still-unsettled credits, oldest first — what a repayment will be
     /// applied to.</summary>
     Task<IReadOnlyList<CustomerCredit>> GetOpenCreditsAsync(int customerId, int? performedByUserId, CancellationToken cancellationToken = default);

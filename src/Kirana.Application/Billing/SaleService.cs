@@ -1,12 +1,14 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.Promotions;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kirana.Application.Billing;
 
 public sealed class SaleService(
-    IKiranaDbContext db, ISequenceGenerator sequenceGenerator, IAuditLogger auditLogger, IPermissionEnforcer permissionEnforcer)
+    IKiranaDbContext db, ISequenceGenerator sequenceGenerator, IAuditLogger auditLogger, IPermissionEnforcer permissionEnforcer,
+    IPromotionEngine? promotionEngine = null)
     : ISaleService
 {
     /// <summary>Item/bill discounts at or below this don't need manager authorization (PRD §10).</summary>
@@ -93,6 +95,22 @@ public sealed class SaleService(
         var store = await db.Stores.FirstOrDefaultAsync(cancellationToken);
         var isGstEnabled = store?.IsGstEnabled ?? false;
 
+        var promotionResults = promotionEngine is null
+            ? new Dictionary<int, PromotionLineResult>()
+            : (await promotionEngine.EvaluateCartAsync(new PromotionCartContext
+            {
+                Lines = request.Lines.Select(line => new PromotionLineContext
+                {
+                    ProductId = line.ProductId,
+                    Quantity = line.Quantity,
+                    UnitPrice = line.UnitPriceOverride ?? products[line.ProductId].SellingPrice,
+                }).ToList(),
+                BillAmount = request.Lines.Sum(line =>
+                    line.Quantity * (line.UnitPriceOverride ?? products[line.ProductId].SellingPrice)),
+                CustomerId = request.CustomerId,
+                AtUtc = DateTime.UtcNow,
+            }, cancellationToken)).ToDictionary(x => x.ProductId);
+
         var cartLines = request.Lines.Select(line =>
         {
             var product = products[line.ProductId];
@@ -104,6 +122,12 @@ public sealed class SaleService(
                 IsTaxInclusive = product.IsTaxInclusive,
                 GstRatePercent = product.GstRatePercent ?? 0,
                 DiscountPercent = line.DiscountPercent,
+                PromotionBeforeTaxDiscountAmount = promotionResults.TryGetValue(line.ProductId, out var result)
+                    ? result.AppliedPromotions.Where(x => x.CalculationMode == DiscountCalculationMode.BeforeTax).Sum(x => x.DiscountAmount)
+                    : 0,
+                PromotionAfterTaxDiscountAmount = promotionResults.TryGetValue(line.ProductId, out result)
+                    ? result.AppliedPromotions.Where(x => x.CalculationMode == DiscountCalculationMode.AfterTax).Sum(x => x.DiscountAmount)
+                    : 0,
             };
         }).ToList();
 
@@ -156,6 +180,7 @@ public sealed class SaleService(
             CashierUserId = request.CashierUserId,
             SubTotal = totals.SubTotal,
             ItemDiscountTotal = totals.ItemDiscountTotal,
+            PromotionDiscountTotal = totals.PromotionDiscountTotal,
             BillDiscountPercent = totals.BillDiscountPercent,
             BillDiscountAmount = totals.BillDiscountAmount,
             TaxableTotal = totals.TaxableTotal,
@@ -186,10 +211,28 @@ public sealed class SaleService(
                 MrpSnapshot = product.Mrp,
                 DiscountPercent = lineResult.Line.DiscountPercent,
                 DiscountAmount = lineResult.DiscountAmount,
+                PromotionDiscountAmount = lineResult.PromotionDiscountAmount,
                 TaxableAmount = lineResult.TaxableAmount,
                 GstAmount = lineResult.GstAmount,
                 LineTotal = lineResult.LineTotal,
             });
+
+            var saleItem = sale.Items.Last();
+            if (promotionResults.TryGetValue(product.Id, out var appliedResult))
+            {
+                foreach (var applied in appliedResult.AppliedPromotions)
+                {
+                    saleItem.Promotions.Add(new SaleItemPromotion
+                    {
+                        PromotionId = applied.PromotionId,
+                        PromotionCodeSnapshot = applied.PromotionCode,
+                        PromotionNameSnapshot = applied.PromotionName,
+                        PromotionTypeSnapshot = applied.PromotionType,
+                        CalculationModeSnapshot = applied.CalculationMode,
+                        DiscountAmount = applied.DiscountAmount,
+                    });
+                }
+            }
 
             var inventory = product.Inventory!;
             var previousQuantity = inventory.QuantityOnHand;
@@ -241,6 +284,20 @@ public sealed class SaleService(
 
         db.Sales.Add(sale);
 
+        var appliedPromotionIds = promotionResults.Values.SelectMany(x => x.AppliedPromotions)
+            .Select(x => x.PromotionId).Distinct().ToList();
+        if (appliedPromotionIds.Count > 0)
+        {
+            var appliedPromotions = await db.Promotions.Include(x => x.Schedule)
+                .Where(x => appliedPromotionIds.Contains(x.Id)).ToListAsync(cancellationToken);
+            foreach (var promotion in appliedPromotions)
+            {
+                promotion.CurrentUsage++;
+                promotion.Status = PromotionStatusCalculator.Calculate(promotion, DateTime.UtcNow);
+                promotion.UpdatedAtUtc = DateTime.UtcNow;
+            }
+        }
+
         await db.SaveChangesAsync(cancellationToken);
 
         await auditLogger.RecordAsync(
@@ -261,12 +318,19 @@ public sealed class SaleService(
                 reason: $"Selling price overridden on invoice {invoiceNumber}", cancellationToken: cancellationToken);
         }
 
+        foreach (var applied in promotionResults.Values.SelectMany(x => x.AppliedPromotions).DistinctBy(x => x.PromotionId))
+        {
+            await auditLogger.RecordAsync(request.CashierUserId, "PromotionApplied", nameof(Promotion), applied.PromotionId.ToString(),
+                newValue: $"{applied.PromotionCode} on {invoiceNumber} - ₹{applied.DiscountAmount:0.00}", cancellationToken: cancellationToken);
+        }
+
         return sale;
     }
 
     public Task<Sale?> GetByIdAsync(int saleId, CancellationToken cancellationToken = default) =>
         db.Sales
             .Include(s => s.Items)
+            .ThenInclude(i => i.Promotions)
             .Include(s => s.Payments)
             .Include(s => s.Customer)
             .Include(s => s.CashierUser)
@@ -275,6 +339,7 @@ public sealed class SaleService(
     public Task<Sale?> GetByInvoiceNumberAsync(string invoiceNumber, CancellationToken cancellationToken = default) =>
         db.Sales
             .Include(s => s.Items)
+            .ThenInclude(i => i.Promotions)
             .Include(s => s.Payments)
             .Include(s => s.Customer)
             .Include(s => s.CashierUser)

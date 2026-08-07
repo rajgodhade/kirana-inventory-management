@@ -212,6 +212,11 @@ public static class InvoiceElementRenderer
             detailParts.Add($"Disc {line.DiscountPercent:0.##}%");
         }
 
+        if (line.HasPromotion)
+        {
+            detailParts.Add($"Offer: {line.PromotionText} (-₹{line.PromotionDiscountAmount:0.00})");
+        }
+
         if (line.GstRatePercent > 0)
         {
             detailParts.Add($"GST {line.GstRatePercent:0.##}%");
@@ -247,7 +252,7 @@ public static class InvoiceElementRenderer
         var grid = BuildA4Grid();
         var values = new[]
         {
-            line.ProductName,
+            line.HasPromotion ? $"{line.ProductName}\nOffer: {line.PromotionText}" : line.ProductName,
             line.HsnCode ?? "-",
             $"{line.Quantity:0.###} {line.Unit}",
             line.Mrp > 0 ? $"₹{line.Mrp:0.##}" : "-",
@@ -290,6 +295,12 @@ public static class InvoiceElementRenderer
         if (document.ItemDiscountTotal > 0)
         {
             panel.Children.Add(BuildAmountRow("Item Discount", -document.ItemDiscountTotal, isCompact));
+        }
+
+
+        if (document.PromotionDiscountTotal > 0)
+        {
+            panel.Children.Add(BuildAmountRow("Promotion Savings", -document.PromotionDiscountTotal, isCompact));
         }
 
         if (document.BillDiscountAmount > 0)

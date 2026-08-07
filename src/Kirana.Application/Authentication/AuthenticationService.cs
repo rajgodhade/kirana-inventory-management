@@ -13,10 +13,31 @@ public sealed class AuthenticationService(
     private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
     private const int MaxFailedAttempts = 5;
 
+    /// <summary>
+    /// Which stored secret(s) an attempt is allowed to match.
+    /// </summary>
+    private enum SecretKind
+    {
+        Pin,
+        Password,
+
+        /// <summary>
+        /// The caller can't tell which one the user typed, so try the PIN and then the password
+        /// as a single logical attempt.
+        /// </summary>
+        PinOrPassword,
+    }
+
+    public async Task<AuthResult> LoginAsync(string username, string secret, CancellationToken cancellationToken = default)
+    {
+        var user = await FindUserAsync(u => u.Username == username, cancellationToken);
+        return await AuthenticateAsync(user, secret, SecretKind.PinOrPassword, cancellationToken);
+    }
+
     public async Task<AuthResult> LoginWithPasswordAsync(string username, string password, CancellationToken cancellationToken = default)
     {
         var user = await FindUserAsync(u => u.Username == username, cancellationToken);
-        return await AuthenticateAsync(user, password, isPin: false, cancellationToken);
+        return await AuthenticateAsync(user, password, SecretKind.Password, cancellationToken);
     }
 
     public async Task<AuthResult> LoginWithUsernameAndPinAsync(string username, string pin, CancellationToken cancellationToken = default)
@@ -27,7 +48,7 @@ public sealed class AuthenticationService(
         }
 
         var user = await FindUserAsync(u => u.Username == username, cancellationToken);
-        return await AuthenticateAsync(user, pin, isPin: true, cancellationToken);
+        return await AuthenticateAsync(user, pin, SecretKind.Pin, cancellationToken);
     }
 
     public async Task<AuthResult> LoginWithPinAsync(string pin, CancellationToken cancellationToken = default)
@@ -45,7 +66,7 @@ public sealed class AuthenticationService(
             return AuthResult.Fail("Incorrect PIN.");
         }
 
-        return await AuthenticateAsync(user, pin, isPin: true, cancellationToken);
+        return await AuthenticateAsync(user, pin, SecretKind.Pin, cancellationToken);
     }
 
     public async Task<AuthResult> AuthorizeAsync(string pin, string requiredPermission, CancellationToken cancellationToken = default)
@@ -135,7 +156,12 @@ public sealed class AuthenticationService(
         return users.FirstOrDefault(predicate);
     }
 
-    private async Task<AuthResult> AuthenticateAsync(User? user, string secret, bool isPin, CancellationToken cancellationToken)
+    /// <summary>
+    /// The single place where a management login is decided. Every exit path here counts as
+    /// exactly one attempt: at most one <see cref="User.FailedLoginAttempts"/> increment and at
+    /// most one audit entry, however many stored secrets were compared.
+    /// </summary>
+    private async Task<AuthResult> AuthenticateAsync(User? user, string secret, SecretKind kind, CancellationToken cancellationToken)
     {
         if (user is null)
         {
@@ -147,12 +173,23 @@ public sealed class AuthenticationService(
             return AuthResult.Fail(lockedMessage);
         }
 
-        var storedHash = isPin ? user.PinHash : user.PasswordHash;
-        var isValid = storedHash is not null && passwordHasher.Verify(secret, storedHash);
+        // The PIN is tried first so that a numeric secret resolves the cheap way, but a password
+        // that happens to look like a PIN still gets its chance on the same attempt.
+        var matchedPin = kind is SecretKind.Pin or SecretKind.PinOrPassword
+            && user.PinHash is not null
+            && passwordHasher.Verify(secret, user.PinHash);
+
+        var isValid = matchedPin
+            || (kind is SecretKind.Password or SecretKind.PinOrPassword
+                && user.PasswordHash is not null
+                && passwordHasher.Verify(secret, user.PasswordHash));
 
         if (!isValid)
         {
-            if (isPin)
+            // Only the dedicated PIN entry points feed the shared PIN throttle. A PinOrPassword
+            // attempt is ambiguous — counting it would let a numeric password trip the global
+            // PIN lockout — so it is governed by this user's own lockout counter below.
+            if (kind is SecretKind.Pin)
             {
                 session.RecordFailedPinAttempt();
             }
@@ -168,7 +205,7 @@ public sealed class AuthenticationService(
             return AuthResult.Fail("Invalid credentials.");
         }
 
-        if (isPin)
+        if (matchedPin)
         {
             session.ResetFailedPinAttempts();
         }

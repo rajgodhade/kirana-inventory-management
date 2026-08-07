@@ -48,6 +48,12 @@ public sealed class KiranaDbContext(DbContextOptions<KiranaDbContext> options)
     public DbSet<Expense> Expenses => Set<Expense>();
 
     public DbSet<BackupRecord> BackupRecords => Set<BackupRecord>();
+    public DbSet<Promotion> Promotions => Set<Promotion>();
+    public DbSet<PromotionSchedule> PromotionSchedules => Set<PromotionSchedule>();
+    public DbSet<PromotionScope> PromotionScopes => Set<PromotionScope>();
+    public DbSet<PromotionTarget> PromotionTargets => Set<PromotionTarget>();
+    public DbSet<PromotionRule> PromotionRules => Set<PromotionRule>();
+    public DbSet<SaleItemPromotion> SaleItemPromotions => Set<SaleItemPromotion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -2,6 +2,7 @@ using Kirana.App.Theming;
 using Kirana.App.ViewModels;
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.Hardware;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -18,6 +19,7 @@ public sealed partial class SettingsPage : Page
     private bool _isLoadingThemeChoice;
 
     public SettingsViewModel ViewModel { get; }
+    public DeviceStatusViewModel DeviceStatus { get; }
 
     public SettingsPage()
     {
@@ -26,6 +28,9 @@ public sealed partial class SettingsPage : Page
             services.GetRequiredService<IKiranaDbContext>(),
             services.GetRequiredService<IAppPaths>(),
             services.GetRequiredService<ManagementSession>());
+        DeviceStatus = new DeviceStatusViewModel(
+            services.GetRequiredService<IHardwareMonitor>(),
+            services.GetRequiredService<IHardwareSettingsService>());
         _themeService = services.GetRequiredService<ThemeService>();
 
         InitializeComponent();
@@ -44,6 +49,7 @@ public sealed partial class SettingsPage : Page
         _isLoadingThemeChoice = false;
 
         await ViewModel.InitializeAsync();
+        await DeviceStatus.RefreshAsync();
     }
 
     private async void OnThemeChoiceChanged(object sender, SelectionChangedEventArgs e)

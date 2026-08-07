@@ -1,0 +1,100 @@
+<Page
+    x:Class="Kirana.App.Views.HardwareSettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Kirana.App.Views.Controls">
+    <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+        <Grid Padding="{StaticResource PageHeaderPadding}" ColumnSpacing="12">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <StackPanel Spacing="2">
+                <TextBlock Text="Hardware Settings" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Configure printers and keyboard-wedge barcode scanners without coupling them to Billing."
+                           Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
+            <Button Grid.Column="1" Content="Refresh devices" Command="{x:Bind ViewModel.RefreshCommand}" />
+            <Button Grid.Column="2" Content="Save settings" Style="{StaticResource AccentButtonStyle}"
+                    Command="{x:Bind ViewModel.SaveCommand}" IsEnabled="{x:Bind ViewModel.CanManage}" />
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Padding="24,0,24,24" Spacing="16" MaxWidth="1080" HorizontalAlignment="Left">
+                <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                         Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                <InfoBar IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                         Severity="Success" Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
+
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <controls:DeviceStatusWidget Title="Receipt printer" Glyph="&#xE749;"
+                        Detail="{x:Bind ViewModel.DeviceStatus.PrinterDetail, Mode=OneWay}"
+                        Status="{x:Bind ViewModel.DeviceStatus.PrinterStatus, Mode=OneWay}" />
+                    <controls:DeviceStatusWidget Grid.Column="1" Title="Barcode scanner" Glyph="&#xE8BD;"
+                        Detail="{x:Bind ViewModel.DeviceStatus.ScannerDetail, Mode=OneWay}"
+                        Status="{x:Bind ViewModel.DeviceStatus.ScannerStatus, Mode=OneWay}" />
+                </Grid>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <StackPanel><TextBlock Text="Printer Management" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="Installed Windows print queues are detected automatically. Test print is sent directly to the selected receipt printer."
+                                       Style="{StaticResource PageSubtitleTextStyle}" TextWrapping="Wrap" /></StackPanel>
+                        <Grid ColumnSpacing="12" RowSpacing="12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <ComboBox Header="App default printer" ItemsSource="{x:Bind ViewModel.Printers}" SelectedItem="{x:Bind ViewModel.SelectedDefaultPrinter, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                            <ComboBox Grid.Column="1" Header="Receipt printer" PlaceholderText="No physical receipt printer detected" ItemsSource="{x:Bind ViewModel.ReceiptPrinters}" SelectedItem="{x:Bind ViewModel.SelectedReceiptPrinter, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                            <ComboBox Grid.Column="2" Header="Invoice printer" ItemsSource="{x:Bind ViewModel.Printers}" SelectedItem="{x:Bind ViewModel.SelectedInvoicePrinter, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                            <ComboBox Grid.Row="1" Header="Receipt paper" ItemsSource="{x:Bind ViewModel.PaperSizes}" SelectedItem="{x:Bind ViewModel.SelectedPaperSize, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                            <Button Grid.Row="1" Grid.Column="1" Content="Print sample receipt" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                    Command="{x:Bind ViewModel.TestPrintCommand}" IsEnabled="{x:Bind ViewModel.CanTestPrint, Mode=OneWay}" />
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="28">
+                            <ToggleSwitch Header="Auto print receipt" IsOn="{x:Bind ViewModel.AutoPrintReceipt, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.CanManage}" />
+                            <ToggleSwitch Header="Print duplicate copy" IsOn="{x:Bind ViewModel.PrintDuplicateCopy, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.CanManage}" />
+                            <ToggleSwitch Header="Open cash drawer after cash payment (future)" IsOn="{x:Bind ViewModel.OpenCashDrawerAfterCashPayment, Mode=TwoWay}" IsEnabled="False" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="20">
+                    <StackPanel Spacing="14">
+                        <StackPanel><TextBlock Text="Barcode Scanner" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="USB and Bluetooth keyboard-wedge scanners share the same transport-neutral input pipeline."
+                                       Style="{StaticResource PageSubtitleTextStyle}" /></StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="28">
+                            <ToggleSwitch Header="Enable barcode scanner" IsOn="{x:Bind ViewModel.BarcodeScannerEnabled, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.CanManage}" />
+                            <ToggleSwitch Header="Sound on scan" IsOn="{x:Bind ViewModel.EnableSoundOnScan, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.CanManage}" />
+                            <ToggleSwitch Header="Auto focus scan field" IsOn="{x:Bind ViewModel.AutoFocusScannerInput, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.CanManage}" />
+                        </StackPanel>
+                        <TextBox Header="Scanner timeout / maximum inter-key delay (ms)" Width="300" HorizontalAlignment="Left"
+                                 Text="{x:Bind ViewModel.ScannerTimeoutText, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.CanManage}" />
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBox x:Name="ScannerTestBox" Header="Test scanner" PlaceholderText="Focus here, scan a barcode, then press Enter"
+                                     Text="{x:Bind ViewModel.ScannerTestInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnScannerTestKeyDown" />
+                            <Button Grid.Column="1" Content="Test lookup" VerticalAlignment="Bottom" Command="{x:Bind ViewModel.TestScannerCommand}"
+                                    IsEnabled="{x:Bind ViewModel.CanManage}" />
+                        </Grid>
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="2*" /></Grid.ColumnDefinitions>
+                            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="12"><StackPanel><TextBlock Text="RAW DATA" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.RawScanData, Mode=OneWay}" /></StackPanel></Border>
+                            <Border Grid.Column="1" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="10" Padding="12"><StackPanel><TextBlock Text="DETECTED BARCODE" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.DetectedBarcode, Mode=OneWay}" /></StackPanel></Border>
+                            <Border Grid.Column="2" Background="{ThemeResource PastelBlueBrush}" CornerRadius="10" Padding="12"><StackPanel><TextBlock Text="PRODUCT LOOKUP" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.LookupResult, Mode=OneWay}" TextWrapping="Wrap" /></StackPanel></Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="20" Opacity="0.72">
+                    <StackPanel Spacing="8"><TextBlock Text="Future device adapters" Style="{StaticResource SectionTitleTextStyle}" />
+                        <TextBlock Text="Cash drawer · Customer display · Electronic scale · Payment terminal · Mobile/WebSocket scanner · QR payment device"
+                                   TextWrapping="Wrap" Style="{StaticResource PageSubtitleTextStyle}" />
+                        <TextBlock Text="Architecture prepared; no hardware-specific behavior is enabled until an adapter is installed." Style="{StaticResource CaptionTextStyle}" /></StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

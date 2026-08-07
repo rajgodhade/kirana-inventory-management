@@ -13,6 +13,8 @@ public sealed partial class CreditPaymentDialog : ContentDialog
     /// a print dialog from inside this one would nest ContentDialogs and kill the app.</summary>
     public CreditPayment? RecordedPayment { get; private set; }
 
+    public bool ShouldPrintReceipt => PrintReceiptCheck.IsChecked == true;
+
     public CreditPaymentDialog(CustomerLedgerViewModel viewModel)
     {
         _viewModel = viewModel;
