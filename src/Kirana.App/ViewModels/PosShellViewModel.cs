@@ -10,6 +10,7 @@ using Kirana.Application.Products;
 using Kirana.Application.Promotions;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Kirana.Application.Taxation;
 
 namespace Kirana.App.ViewModels;
 
@@ -25,6 +26,7 @@ public sealed partial class PosShellViewModel(
     IHeldBillService heldBillService,
     ICustomerService customerService,
     IPromotionEngine promotionEngine,
+    IGstCalculationService gstCalculationService,
     IKiranaDbContext db,
     ManagementSession session) : ObservableObject
 {
@@ -452,7 +454,7 @@ public sealed partial class PosShellViewModel(
                 Mrp = product.Mrp,
                 UnitPriceText = product.SellingPrice.ToString("0.##"),
                 GstRatePercent = product.GstRatePercent ?? 0,
-                IsTaxInclusive = product.IsTaxInclusive,
+                PricingType = product.PricingType,
                 QuantityText = "1",
             });
         }
@@ -483,7 +485,7 @@ public sealed partial class PosShellViewModel(
             ProductId = l.ProductId,
             Quantity = l.Quantity,
             UnitPrice = l.UnitPrice,
-            IsTaxInclusive = l.IsTaxInclusive,
+            PricingType = l.PricingType,
             GstRatePercent = l.GstRatePercent,
             DiscountPercent = l.DiscountPercent,
             PromotionBeforeTaxDiscountAmount = l.PromotionBeforeTaxDiscountAmount,
@@ -500,7 +502,7 @@ public sealed partial class PosShellViewModel(
         CartTotals totals;
         try
         {
-            totals = CartPricingCalculator.Calculate(cartLines, BillDiscountPercent, IsGstEnabledForStore);
+            totals = gstCalculationService.CalculateSales(cartLines, BillDiscountPercent, IsGstEnabledForStore);
         }
         catch (ArgumentException ex)
         {
@@ -677,7 +679,7 @@ public sealed partial class PosShellViewModel(
                 Mrp = product.Mrp,
                 UnitPriceText = product.SellingPrice.ToString("0.##"),
                 GstRatePercent = product.GstRatePercent ?? 0,
-                IsTaxInclusive = product.IsTaxInclusive,
+                PricingType = product.PricingType,
                 QuantityText = item.Quantity.ToString("0.###"),
                 DiscountPercentText = item.DiscountPercent.ToString("0.##"),
             });

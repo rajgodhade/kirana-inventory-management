@@ -27,8 +27,8 @@
             <TextBlock Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}">
                 <Run Text="Payment — " /><Run x:ConnectionId='3'                                               />
             </TextBlock>
-            <Button x:ConnectionId='2' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
-                                             AutomationProperties.Name="Close payment dialog">
+            <Button x:ConnectionId='2' Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
+                                             AutomationProperties.Name="Close dialog">
                 <FontIcon Glyph="&#xE711;" FontSize="14" />
             </Button>
         </Grid>

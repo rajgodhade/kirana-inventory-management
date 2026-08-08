@@ -13,8 +13,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="Bill Discount" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
-            <Button Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
-                    Click="OnCloseIconClick" AutomationProperties.Name="Close">
+            <Button Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
+                    Click="OnCloseIconClick" AutomationProperties.Name="Close dialog">
                 <FontIcon Glyph="&#xE711;" FontSize="14" />
             </Button>
         </Grid>

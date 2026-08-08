@@ -199,6 +199,12 @@ public sealed partial class PurchasesViewModel(
         ToDateFilter = null;
     }
 
+    public void ClearDateFilters()
+    {
+        FromDateFilter = null;
+        ToDateFilter = null;
+    }
+
     public Task<Purchase?> GetPurchaseAsync(int purchaseId) => purchaseService.GetByIdAsync(purchaseId, CurrentUserId);
 
     public async Task<bool> RecordPaymentAsync(int purchaseId, int supplierId, decimal amount, PaymentMethod method, string? referenceNumber)

@@ -95,11 +95,12 @@ public sealed partial class PromotionEditViewModel(
     IPromotionService promotionService, ICategoryService categoryService, IBrandService brandService,
     IProductService productService, ManagementSession session, int? promotionId = null) : ObservableObject
 {
-    private readonly List<Product> _allProducts = [];
+    private readonly List<Brand> _allBrands = [];
+    private readonly List<PromotionProductTargetViewModel> _allProducts = [];
     public bool IsEdit => promotionId is not null;
     public ObservableCollection<Category> Categories { get; } = [];
     public ObservableCollection<Brand> Brands { get; } = [];
-    public ObservableCollection<Product> Products { get; } = [];
+    public ObservableCollection<PromotionProductTargetViewModel> Products { get; } = [];
     public IReadOnlyList<PromotionScopeType> ScopeTypes { get; } = Enum.GetValues<PromotionScopeType>();
     public IReadOnlyList<PromotionType> PromotionTypes { get; } = Enum.GetValues<PromotionType>();
     public IReadOnlyList<DiscountCalculationMode> CalculationModes { get; } = Enum.GetValues<DiscountCalculationMode>();
@@ -143,8 +144,13 @@ public sealed partial class PromotionEditViewModel(
     public async Task LoadAsync()
     {
         foreach (var item in await categoryService.GetAllAsync()) Categories.Add(item);
-        foreach (var item in await brandService.GetAllAsync()) Brands.Add(item);
-        foreach (var item in await productService.SearchAsync(new ProductSearchQuery { MaxResults = 1000 })) { _allProducts.Add(item); Products.Add(item); }
+        foreach (var item in await brandService.GetAllAsync()) { _allBrands.Add(item); Brands.Add(item); }
+        foreach (var item in await productService.SearchAsync(new ProductSearchQuery { MaxResults = 1000 }))
+        {
+            var row = new PromotionProductTargetViewModel(item);
+            _allProducts.Add(row);
+            Products.Add(row);
+        }
         if (promotionId is not { } id) { UpdatePreview(); return; }
         var promotion = await promotionService.GetByIdAsync(id, session.CurrentUser?.Id) ?? throw new InvalidOperationException("Promotion not found.");
         PromotionName = promotion.PromotionName; PromotionCode = promotion.PromotionCode; Description = promotion.Description ?? string.Empty;
@@ -171,6 +177,17 @@ public sealed partial class PromotionEditViewModel(
             Products.Add(product);
     }
 
+    public void FilterBrands(string? text)
+    {
+        var query = text?.Trim();
+        Brands.Clear();
+        foreach (var brand in _allBrands.Where(x => string.IsNullOrEmpty(query)
+            || x.Name.Contains(query, StringComparison.OrdinalIgnoreCase)))
+        {
+            Brands.Add(brand);
+        }
+    }
+
     public async Task SaveAsync(IReadOnlyList<int> targetIds)
     {
         ErrorMessage = null;
@@ -191,8 +208,30 @@ public sealed partial class PromotionEditViewModel(
             var current = ParseDecimal(PreviewPriceText) ?? 0;
             var preview = promotionService.Preview(request, current);
             PreviewCurrentText = $"₹{preview.CurrentPrice:N2}"; PreviewFinalText = $"₹{preview.FinalPrice:N2}"; PreviewSavingsText = $"Save ₹{preview.Savings:N2}";
+            UpdateProductPreviews(request);
         }
-        catch { PreviewFinalText = "—"; PreviewSavingsText = "Enter valid discount values"; }
+        catch
+        {
+            PreviewFinalText = "—";
+            PreviewSavingsText = "Enter valid discount values";
+            foreach (var product in _allProducts) product.SetInvalidPreview();
+        }
+    }
+
+    private void UpdateProductPreviews(SavePromotionRequest request)
+    {
+        foreach (var product in _allProducts)
+        {
+            try
+            {
+                var preview = promotionService.Preview(request, product.SellingPrice);
+                product.SetPromotionPrice(preview.FinalPrice, preview.Savings);
+            }
+            catch
+            {
+                product.SetInvalidPreview();
+            }
+        }
     }
 
     private SavePromotionRequest BuildRequest(IReadOnlyList<int> targetIds)
@@ -215,4 +254,31 @@ public sealed partial class PromotionEditViewModel(
     }
 
     private static decimal? ParseDecimal(string text) => decimal.TryParse(text, out var value) ? value : null;
+}
+
+public sealed partial class PromotionProductTargetViewModel(Product product) : ObservableObject
+{
+    public int Id => product.Id;
+    public string Name => product.Name;
+    public string ProductCode => product.ProductCode;
+    public string? Sku => product.Sku;
+    public decimal Mrp => product.Mrp;
+    public decimal SellingPrice => product.SellingPrice;
+    public string MrpText => $"MRP ₹{Mrp:N2}";
+    public string SellingPriceText => $"Selling ₹{SellingPrice:N2}";
+
+    [ObservableProperty] private string _promotionPriceText = $"Promo ₹{product.SellingPrice:N2}";
+    [ObservableProperty] private string _savingText = string.Empty;
+
+    public void SetPromotionPrice(decimal finalPrice, decimal saving)
+    {
+        PromotionPriceText = $"Promo ₹{finalPrice:N2}";
+        SavingText = saving > 0 ? $"Save ₹{saving:N2}" : "No saving";
+    }
+
+    public void SetInvalidPreview()
+    {
+        PromotionPriceText = "Promo —";
+        SavingText = "Check discount";
+    }
 }

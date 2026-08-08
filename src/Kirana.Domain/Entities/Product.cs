@@ -1,4 +1,5 @@
 using Kirana.Domain.Common;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Kirana.Domain.Entities;
 
@@ -34,7 +35,16 @@ public class Product : Entity
     public decimal? DefaultDiscountPercent { get; set; }
     public decimal? GstRatePercent { get; set; }
     public string? HsnCode { get; set; }
-    public bool IsTaxInclusive { get; set; }
+    public PricingType PricingType { get; set; } = PricingType.Inclusive;
+
+    /// <summary>Compatibility bridge for older application callers. EF persists
+    /// <see cref="PricingType"/>; new code should use that property directly.</summary>
+    [NotMapped]
+    public bool IsTaxInclusive
+    {
+        get => PricingType == PricingType.Inclusive;
+        set => PricingType = value ? PricingType.Inclusive : PricingType.Exclusive;
+    }
 
     public bool IsActive { get; set; } = true;
     public bool TracksBatches { get; set; }

@@ -29,7 +29,8 @@ public sealed partial class CartLineViewModel : ObservableObject
     public bool HasMrp => Mrp > 0;
 
     public decimal GstRatePercent { get; init; }
-    public bool IsTaxInclusive { get; init; }
+    public PricingType PricingType { get; init; } = PricingType.Inclusive;
+    public string PricingTypeLabel => PricingType == PricingType.Inclusive ? "GST Included" : "GST Extra";
 
     [ObservableProperty]
     private string _quantityText = "1";

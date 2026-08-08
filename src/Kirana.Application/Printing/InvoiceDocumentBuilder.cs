@@ -1,8 +1,9 @@
 using Kirana.Domain.Entities;
+using Kirana.Application.Taxation;
 
 namespace Kirana.Application.Printing;
 
-public sealed class InvoiceDocumentBuilder : IInvoiceDocumentBuilder
+public sealed class InvoiceDocumentBuilder(IGstCalculationService? gstCalculationService = null) : IInvoiceDocumentBuilder
 {
     public InvoiceDocument Build(Sale sale, Store store)
     {
@@ -21,21 +22,37 @@ public sealed class InvoiceDocumentBuilder : IInvoiceDocumentBuilder
             PromotionDiscountAmount = item.PromotionDiscountAmount,
             PromotionText = string.Join(" + ", item.Promotions.Select(x => x.PromotionNameSnapshot)),
             GstRatePercent = item.GstRatePercentSnapshot,
+            PricingType = item.IsTaxInclusiveSnapshot ? PricingType.Inclusive : PricingType.Exclusive,
             TaxableAmount = item.TaxableAmount,
             GstAmount = item.GstAmount,
             LineTotal = item.LineTotal,
         }).ToList();
 
-        var gstGroups = sale.Items
-            .GroupBy(item => item.GstRatePercentSnapshot)
-            .Where(g => g.Key != 0)
-            .Select(g => new InvoiceGstGroup
+        var snapshots = sale.Items.Select(item => new GstSnapshotLine
+        {
+            TransactionId = sale.Id,
+            RatePercent = item.GstRatePercentSnapshot,
+            TaxableAmount = item.TaxableAmount,
+            GstAmount = item.GstAmount,
+            PricingType = item.IsTaxInclusiveSnapshot ? PricingType.Inclusive : PricingType.Exclusive,
+        }).ToList();
+        var calculator = gstCalculationService ?? GstCalculationService.Shared;
+        calculator.ValidateStored(snapshots, new GstStoredTotals
+        {
+            TaxableTotal = sale.TaxableTotal,
+            GstTotal = sale.TaxTotal,
+            RoundOffAmount = sale.RoundOffAmount,
+            GrandTotal = sale.GrandTotal,
+        }, $"invoice {sale.InvoiceNumber}");
+
+        var gstGroups = calculator.SummarizeStored(snapshots)
+            .Select(group => new InvoiceGstGroup
             {
-                RatePercent = g.Key,
-                TaxableAmount = g.Sum(i => i.TaxableAmount),
-                GstAmount = g.Sum(i => i.GstAmount),
+                RatePercent = group.RatePercent,
+                TaxableAmount = group.TaxableAmount,
+                GstAmount = group.GstAmount,
+                PricingType = group.PricingType,
             })
-            .OrderBy(g => g.RatePercent)
             .ToList();
 
         // Compared against what was actually charged for the whole bill (GrandTotal), not summed

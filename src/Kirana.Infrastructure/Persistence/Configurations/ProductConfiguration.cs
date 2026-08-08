@@ -29,6 +29,7 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.WholesalePrice).HasPrecision(18, 2);
         builder.Property(p => p.DefaultDiscountPercent).HasPrecision(5, 2);
         builder.Property(p => p.GstRatePercent).HasPrecision(5, 2);
+        builder.Property(p => p.PricingType).HasConversion<string>().HasMaxLength(20).HasDefaultValue(PricingType.Inclusive);
         builder.Property(p => p.MinimumStock).HasPrecision(18, 3);
         builder.Property(p => p.ReorderQuantity).HasPrecision(18, 3);
 

@@ -5,22 +5,25 @@
     PrimaryButtonText="Print"
     CloseButtonText="Close"
     DefaultButton="Primary">
+    <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMaxWidth">1080</x:Double>
+    </ContentDialog.Resources>
 
     <ContentDialog.Title>
-        <Grid ColumnSpacing="8">
+        <Grid ColumnSpacing="8" Width="{x:Bind ViewModel.DialogContentWidth, Mode=OneWay}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="Invoice Preview" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
-            <Button Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
-                    Click="OnCloseIconClick" AutomationProperties.Name="Close">
+            <Button Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
+                    Click="OnCloseIconClick" AutomationProperties.Name="Close dialog">
                 <FontIcon Glyph="&#xE711;" FontSize="14" />
             </Button>
         </Grid>
     </ContentDialog.Title>
 
-    <StackPanel Spacing="10" MinWidth="420">
+    <StackPanel Spacing="10" Width="{x:Bind ViewModel.DialogContentWidth, Mode=OneWay}">
 
         <ComboBox Header="Format" ItemsSource="{x:Bind ViewModel.AvailableFormats}"
                   SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}" />
@@ -36,7 +39,9 @@
              easy to miss on a bill that's cut off mid-list, especially for someone who isn't
              already expecting a preview to scroll. VerticalScrollBarVisibility="Visible" keeps the
              track permanently on-screen instead of only appearing on hover/drag. -->
-        <ScrollViewer MaxHeight="480" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"
+        <ScrollViewer Width="{x:Bind ViewModel.PreviewViewportWidth, Mode=OneWay}"
+                      MaxHeight="{x:Bind ViewModel.PreviewViewportMaxHeight, Mode=OneWay}"
+                      VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"
                       Background="{ThemeResource LayerFillColorDefaultBrush}">
             <ContentControl Content="{x:Bind ViewModel.PreviewElement, Mode=OneWay}" HorizontalContentAlignment="Center" />
         </ScrollViewer>

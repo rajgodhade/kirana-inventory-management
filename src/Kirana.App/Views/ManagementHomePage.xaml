@@ -284,7 +284,7 @@
 
             <!-- Recent invoices -->
             <StackPanel Spacing="10">
-                <Grid><TextBlock Text="Recent invoices" Style="{StaticResource SectionTitleTextStyle}" /><Button Content="View all" Tag="Reports" Click="OnDashboardDestinationClick" HorizontalAlignment="Right" Visibility="{x:Bind ViewModel.CanSeeReports, Converter={StaticResource BoolToVisibilityConverter}}" /></Grid>
+                <Grid><TextBlock Text="Recent invoices" Style="{StaticResource SectionTitleTextStyle}" /><Button Content="View all invoices" Tag="Invoices" Click="OnDashboardDestinationClick" HorizontalAlignment="Right" /></Grid>
                 <Border Style="{StaticResource DashboardPanelStyle}" Padding="0">
                     <StackPanel>
                         <Grid Padding="16,11" Background="{ThemeResource SurfaceAltBrush}" ColumnSpacing="14">

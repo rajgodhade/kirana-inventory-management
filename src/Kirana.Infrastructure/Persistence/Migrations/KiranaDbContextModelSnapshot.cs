@@ -767,9 +767,6 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsTaxInclusive")
-                        .HasColumnType("INTEGER");
-
                     b.Property<decimal>("MinimumStock")
                         .HasPrecision(18, 3)
                         .HasColumnType("TEXT");
@@ -787,6 +784,13 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("PricingType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Inclusive");
 
                     b.Property<decimal>("PurchasePrice")
                         .HasPrecision(18, 2)

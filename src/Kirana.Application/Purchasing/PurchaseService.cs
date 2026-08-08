@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Kirana.Application.Purchasing;
 
 public sealed class PurchaseService(
-    IKiranaDbContext db, ISequenceGenerator sequenceGenerator, IAuditLogger auditLogger, IPermissionEnforcer permissionEnforcer)
+    IKiranaDbContext db, ISequenceGenerator sequenceGenerator, IAuditLogger auditLogger, IPermissionEnforcer permissionEnforcer,
+    IPurchaseGstCalculationService? gstCalculationService = null)
     : IPurchaseService
 {
     private const decimal AmountTolerance = 0.02m;
@@ -78,13 +79,13 @@ public sealed class PurchaseService(
                 ProductId = line.ProductId,
                 Quantity = line.Quantity,
                 UnitPrice = line.UnitPrice,
-                IsTaxInclusive = product.IsTaxInclusive,
+                PricingType = line.PricingType ?? product.PricingType,
                 GstRatePercent = product.GstRatePercent ?? 0,
                 DiscountPercent = line.DiscountPercent,
             };
         }).ToList();
 
-        var totals = PurchasePricingCalculator.Calculate(purchaseLines);
+        var totals = (gstCalculationService ?? PurchaseGstCalculationService.Shared).Calculate(purchaseLines);
 
         if (request.AmountPaid > totals.GrandTotal + AmountTolerance)
         {
@@ -128,7 +129,7 @@ public sealed class PurchaseService(
                 SkuSnapshot = product.Sku,
                 HsnCodeSnapshot = product.HsnCode,
                 UnitSnapshot = product.Unit.ToString(),
-                IsTaxInclusiveSnapshot = product.IsTaxInclusive,
+                IsTaxInclusiveSnapshot = lineResult.Line.PricingType == PricingType.Inclusive,
                 GstRatePercentSnapshot = product.GstRatePercent ?? 0,
                 Quantity = lineResult.Line.Quantity,
                 PurchasePriceSnapshot = lineResult.Line.UnitPrice,

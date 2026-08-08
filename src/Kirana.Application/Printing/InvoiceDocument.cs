@@ -64,5 +64,6 @@ public sealed class InvoiceDocument
     public decimal TotalSavings { get; init; }
 
     public bool HasGst => TaxTotal != 0;
+    public bool HasGstSummary => GstGroups.Count != 0;
     public bool HasSavings => TotalSavings > 0;
 }

@@ -17,19 +17,19 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <ComboBox x:ConnectionId='38' Grid.Column="0"                                                        
+                <ComboBox x:ConnectionId='42' Grid.Column="0"                                                        
                                                                                                       
                           HorizontalAlignment="Stretch"                                        />
 
-                <CalendarDatePicker x:ConnectionId='39' Grid.Column="1" Header="From"                                                             
+                <CalendarDatePicker x:ConnectionId='43' Grid.Column="1" Header="From"                                                             
                                                                                                                                                                   
                                                                       />
 
-                <CalendarDatePicker x:ConnectionId='40' Grid.Column="2" Header="To"                                                           
+                <CalendarDatePicker x:ConnectionId='44' Grid.Column="2" Header="To"                                                           
                                                                                                                                                                   
                                                                       />
 
-                <Button x:ConnectionId='41' Grid.Column="4"                        VerticalAlignment="Bottom">
+                <Button x:ConnectionId='45' Grid.Column="4"                        VerticalAlignment="Bottom">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE72C;" FontSize="14" />
                         <TextBlock Text="Refresh" />
@@ -44,14 +44,14 @@
                     <Button.Flyout>
                         <MenuFlyout>
                             <MenuFlyoutSubItem Text="Sales Summary">
-                                <MenuFlyoutItem x:ConnectionId='45' Text="CSV"                               />
-                                <MenuFlyoutItem x:ConnectionId='46' Text="Excel"                                 />
-                                <MenuFlyoutItem x:ConnectionId='47' Text="PDF"                               />
+                                <MenuFlyoutItem x:ConnectionId='49' Text="CSV"                               />
+                                <MenuFlyoutItem x:ConnectionId='50' Text="Excel"                                 />
+                                <MenuFlyoutItem x:ConnectionId='51' Text="PDF"                               />
                             </MenuFlyoutSubItem>
                             <MenuFlyoutSubItem Text="GST Report">
-                                <MenuFlyoutItem x:ConnectionId='42' Text="CSV"                             />
-                                <MenuFlyoutItem x:ConnectionId='43' Text="Excel"                               />
-                                <MenuFlyoutItem x:ConnectionId='44' Text="PDF"                             />
+                                <MenuFlyoutItem x:ConnectionId='46' Text="CSV"                             />
+                                <MenuFlyoutItem x:ConnectionId='47' Text="Excel"                               />
+                                <MenuFlyoutItem x:ConnectionId='48' Text="PDF"                             />
                             </MenuFlyoutSubItem>
                         </MenuFlyout>
                     </Button.Flyout>
@@ -74,80 +74,80 @@
                 <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Gross Sales" Style="{StaticResource MetricLabelTextStyle}" />
-                        <TextBlock x:ConnectionId='37'                                                       Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock x:ConnectionId='41'                                                       Style="{StaticResource MetricTextStyle}" FontSize="20" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Returns" Style="{StaticResource MetricLabelTextStyle}" />
-                        <TextBlock x:ConnectionId='36'                                                    Style="{StaticResource MetricTextStyle}" FontSize="20"
+                        <TextBlock x:ConnectionId='40'                                                    Style="{StaticResource MetricTextStyle}" FontSize="20"
                                    Foreground="{ThemeResource DangerBrush}" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Net Sales" Style="{StaticResource MetricLabelTextStyle}" />
-                        <TextBlock x:ConnectionId='35'                                                     Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock x:ConnectionId='39'                                                     Style="{StaticResource MetricTextStyle}" FontSize="20" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="GST Collected" Style="{StaticResource MetricLabelTextStyle}" />
-                        <TextBlock x:ConnectionId='34'                                                         Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock x:ConnectionId='38'                                                         Style="{StaticResource MetricTextStyle}" FontSize="20" />
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Item Discounts" Style="{StaticResource MetricLabelTextStyle}" />
-                        <TextBlock x:ConnectionId='33'                                                          Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock x:ConnectionId='37'                                                          Style="{StaticResource MetricTextStyle}" FontSize="20" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Bill Discounts" Style="{StaticResource MetricLabelTextStyle}" />
-                        <TextBlock x:ConnectionId='32'                                                          Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock x:ConnectionId='36'                                                          Style="{StaticResource MetricTextStyle}" FontSize="20" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Total Discounts" Style="{StaticResource MetricLabelTextStyle}" />
-                        <TextBlock x:ConnectionId='31'                                                           Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock x:ConnectionId='35'                                                           Style="{StaticResource MetricTextStyle}" FontSize="20" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Items Sold" Style="{StaticResource MetricLabelTextStyle}" />
-                        <TextBlock x:ConnectionId='30'                                                      Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock x:ConnectionId='34'                                                      Style="{StaticResource MetricTextStyle}" FontSize="20" />
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Number of Bills" Style="{StaticResource MetricLabelTextStyle}" />
-                        <TextBlock x:ConnectionId='29'                                                      Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock x:ConnectionId='33'                                                      Style="{StaticResource MetricTextStyle}" FontSize="20" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Average Bill Value" Style="{StaticResource MetricLabelTextStyle}" />
-                        <TextBlock x:ConnectionId='28'                                                             Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock x:ConnectionId='32'                                                             Style="{StaticResource MetricTextStyle}" FontSize="20" />
                     </StackPanel>
                 </Border>
             </Grid>
 
             <TextBlock Text="Payment Method Breakdown" Style="{StaticResource SectionTitleTextStyle}" />
             <Border Style="{StaticResource CardBorderStyle}">
-                <ItemsControl x:ConnectionId='23'                                                >
+                <ItemsControl x:ConnectionId='27'                                                >
                     <ItemsControl.ItemTemplate>
                         <DataTemplate                                     >
-                            <Grid x:ConnectionId='25' Margin="0,0,0,8" ColumnSpacing="12">
+                            <Grid x:ConnectionId='29' Margin="0,0,0,8" ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock x:ConnectionId='26' Grid.Column="0"                        Style="{StaticResource BodyTextStyle}" />
-                                <TextBlock x:ConnectionId='27' Grid.Column="1"                                                                      Style="{StaticResource BodyTextStyle}" />
+                                <TextBlock x:ConnectionId='30' Grid.Column="0"                        Style="{StaticResource BodyTextStyle}" />
+                                <TextBlock x:ConnectionId='31' Grid.Column="1"                                                                      Style="{StaticResource BodyTextStyle}" />
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -171,26 +171,41 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Spacing="4">
                                 <TextBlock Text="Taxable Amount" Style="{StaticResource MetricLabelTextStyle}" />
-                                <TextBlock x:ConnectionId='22'                                                         Style="{StaticResource MetricTextStyle}" FontSize="16" />
+                                <TextBlock x:ConnectionId='26'                                                         Style="{StaticResource MetricTextStyle}" FontSize="16" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Spacing="4">
                                 <TextBlock Text="GST Collected" Style="{StaticResource MetricLabelTextStyle}" />
-                                <TextBlock x:ConnectionId='21'                                                     Style="{StaticResource MetricTextStyle}" FontSize="16" />
+                                <TextBlock x:ConnectionId='25'                                                     Style="{StaticResource MetricTextStyle}" FontSize="16" />
                             </StackPanel>
                         </Grid>
-                        <ItemsControl x:ConnectionId='13'                                                >
+                        <Grid ColumnSpacing="8" Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="105" /><ColumnDefinition Width="48" /><ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="62" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="TREATMENT" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="1" Text="RATE" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="2" Text="TAXABLE" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="3" Text="CGST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="4" Text="SGST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="5" Text="GST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="6" Text="BILLS" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <ItemsControl x:ConnectionId='15'                                                >
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate                                  >
-                                    <Grid x:ConnectionId='15' Margin="0,4,0,0" ColumnSpacing="8">
+                                    <Grid x:ConnectionId='17' Margin="0,4,0,0" ColumnSpacing="8">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="60" /><ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="105" /><ColumnDefinition Width="48" /><ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="62" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Style="{StaticResource CaptionTextStyle}"><Run x:ConnectionId='20'                             /><Run Text="%" /></TextBlock>
-                                        <TextBlock x:ConnectionId='16' Grid.Column="1"                                                                             Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock x:ConnectionId='17' Grid.Column="2"                                                                    Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock x:ConnectionId='18' Grid.Column="3"                                                                    Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock x:ConnectionId='19' Grid.Column="4"                                                                         Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:ConnectionId='18' Grid.Column="0"                              Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="1" Style="{StaticResource CaptionTextStyle}"><Run x:ConnectionId='24'                             /><Run Text="%" /></TextBlock>
+                                        <TextBlock x:ConnectionId='19' Grid.Column="2"                                                                             Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:ConnectionId='20' Grid.Column="3"                                                                    Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:ConnectionId='21' Grid.Column="4"                                                                    Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:ConnectionId='22' Grid.Column="5"                                                                         Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:ConnectionId='23' Grid.Column="6"                              Style="{StaticResource CaptionTextStyle}" HorizontalAlignment="Right" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -207,26 +222,41 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Spacing="4">
                                 <TextBlock Text="Taxable Amount" Style="{StaticResource MetricLabelTextStyle}" />
-                                <TextBlock x:ConnectionId='12'                                                            Style="{StaticResource MetricTextStyle}" FontSize="16" />
+                                <TextBlock x:ConnectionId='14'                                                            Style="{StaticResource MetricTextStyle}" FontSize="16" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Spacing="4">
                                 <TextBlock Text="GST Paid" Style="{StaticResource MetricLabelTextStyle}" />
-                                <TextBlock x:ConnectionId='11'                                                        Style="{StaticResource MetricTextStyle}" FontSize="16" />
+                                <TextBlock x:ConnectionId='13'                                                        Style="{StaticResource MetricTextStyle}" FontSize="16" />
                             </StackPanel>
+                        </Grid>
+                        <Grid ColumnSpacing="8" Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="105" /><ColumnDefinition Width="48" /><ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="62" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="TREATMENT" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="1" Text="RATE" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="2" Text="TAXABLE" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="3" Text="CGST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="4" Text="SGST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="5" Text="GST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="6" Text="BILLS" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right"/>
                         </Grid>
                         <ItemsControl x:ConnectionId='3'                                                   >
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate                                  >
                                     <Grid x:ConnectionId='5' Margin="0,4,0,0" ColumnSpacing="8">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="60" /><ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="105" /><ColumnDefinition Width="48" /><ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="62" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Style="{StaticResource CaptionTextStyle}"><Run x:ConnectionId='10'                             /><Run Text="%" /></TextBlock>
-                                        <TextBlock x:ConnectionId='6' Grid.Column="1"                                                                             Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock x:ConnectionId='7' Grid.Column="2"                                                                    Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:ConnectionId='6' Grid.Column="0"                              Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="1" Style="{StaticResource CaptionTextStyle}"><Run x:ConnectionId='12'                             /><Run Text="%" /></TextBlock>
+                                        <TextBlock x:ConnectionId='7' Grid.Column="2"                                                                             Style="{StaticResource CaptionTextStyle}" />
                                         <TextBlock x:ConnectionId='8' Grid.Column="3"                                                                    Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock x:ConnectionId='9' Grid.Column="4"                                                                         Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:ConnectionId='9' Grid.Column="4"                                                                    Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:ConnectionId='10' Grid.Column="5"                                                                         Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:ConnectionId='11' Grid.Column="6"                              Style="{StaticResource CaptionTextStyle}" HorizontalAlignment="Right" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

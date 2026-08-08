@@ -13,8 +13,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="DialogTitleText" Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
-            <Button Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
-                    Click="OnCloseIconClick" AutomationProperties.Name="Close">
+            <Button Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
+                    Click="OnCloseIconClick" AutomationProperties.Name="Close dialog">
                 <FontIcon Glyph="&#xE711;" FontSize="14" />
             </Button>
         </Grid>
@@ -94,9 +94,16 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" Header="Wholesale price" Text="{x:Bind ViewModel.WholesalePriceText, Mode=TwoWay}" />
-                <TextBox Grid.Column="1" Header="Default discount %" Text="{x:Bind ViewModel.DefaultDiscountPercentText, Mode=TwoWay}" />
-                <TextBox Grid.Column="2" Header="GST rate %" Text="{x:Bind ViewModel.GstRatePercentText, Mode=TwoWay}" />
+                <TextBox Grid.Column="1" Header="GST rate %" PlaceholderText="0, 5, 12, 18, or 28"
+                         Text="{x:Bind ViewModel.GstRatePercentText, Mode=TwoWay}" />
+                <ComboBox Grid.Column="2" Header="Pricing type"
+                          ItemsSource="{x:Bind ViewModel.PricingTypes}"
+                          SelectedItem="{x:Bind ViewModel.SelectedPricingType, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch" />
             </Grid>
+
+            <TextBlock Text="{x:Bind ViewModel.PricingTypeHelpText, Mode=OneWay}"
+                       Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" Margin="0,-4,0,0" />
 
             <Grid ColumnSpacing="8">
                 <Grid.ColumnDefinitions>
@@ -104,8 +111,7 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" Header="HSN code" Text="{x:Bind ViewModel.HsnCode, Mode=TwoWay}" />
-                <CheckBox Grid.Column="1" Content="Price is tax-inclusive" VerticalAlignment="Bottom"
-                          IsChecked="{x:Bind ViewModel.IsTaxInclusive, Mode=TwoWay}" />
+                <TextBox Grid.Column="1" Header="Default discount %" Text="{x:Bind ViewModel.DefaultDiscountPercentText, Mode=TwoWay}" />
             </Grid>
 
             <TextBlock Text="Inventory" FontWeight="SemiBold" Margin="0,8,0,0" />

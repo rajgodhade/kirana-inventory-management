@@ -11,6 +11,8 @@ namespace Kirana.App.Views;
 
 public sealed partial class PromotionEditDialog : ContentDialog
 {
+    private bool _scopeControlsReady;
+
     public PromotionEditViewModel ViewModel { get; }
     public PromotionEditDialog(int? promotionId)
     {
@@ -28,6 +30,10 @@ public sealed partial class PromotionEditDialog : ContentDialog
         try
         {
             await ViewModel.LoadAsync();
+            SetScopeRadio(ViewModel.SelectedScopeType);
+            UpdateScopeTargetVisibility(ViewModel.SelectedScopeType);
+            _scopeControlsReady = true;
+
             foreach (var id in ViewModel.ExistingTargetIds)
             {
                 object? item = ViewModel.SelectedScopeType switch
@@ -55,7 +61,7 @@ public sealed partial class PromotionEditDialog : ContentDialog
             {
                 PromotionScopeType.Category => CategoryTargets.SelectedItems.OfType<Category>().Select(x => x.Id).ToList(),
                 PromotionScopeType.Brand => BrandTargets.SelectedItems.OfType<Brand>().Select(x => x.Id).ToList(),
-                PromotionScopeType.Product => ProductTargets.SelectedItems.OfType<Product>().Select(x => x.Id).ToList(),
+                PromotionScopeType.Product => ProductTargets.SelectedItems.OfType<PromotionProductTargetViewModel>().Select(x => x.Id).ToList(),
                 _ => [],
             };
             await ViewModel.SaveAsync(ids);
@@ -64,7 +70,69 @@ public sealed partial class PromotionEditDialog : ContentDialog
         finally { deferral.Complete(); }
     }
 
-    private void OnPreviewInputChanged(object sender, TextChangedEventArgs e) => ViewModel.UpdatePreview();
+    private void OnPreviewInputChanged(object sender, TextChangedEventArgs e)
+    {
+        if (ReferenceEquals(sender, PreviewPriceInput)) ViewModel.PreviewPriceText = PreviewPriceInput.Text;
+        else if (ReferenceEquals(sender, PercentageInput)) ViewModel.PercentageText = PercentageInput.Text;
+        else if (ReferenceEquals(sender, FlatAmountInput)) ViewModel.FlatAmountText = FlatAmountInput.Text;
+        else if (ReferenceEquals(sender, FixedPriceInput)) ViewModel.FixedPriceText = FixedPriceInput.Text;
+        else if (ReferenceEquals(sender, MaximumDiscountInput)) ViewModel.MaximumDiscountText = MaximumDiscountInput.Text;
+
+        ViewModel.UpdatePreview();
+    }
+
+    private void OnPreviewSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ComboBox { SelectedItem: PromotionType promotionType })
+        {
+            ViewModel.SelectedPromotionType = promotionType;
+        }
+        else if (sender is ComboBox { SelectedItem: DiscountCalculationMode calculationMode })
+        {
+            ViewModel.SelectedCalculationMode = calculationMode;
+        }
+
+        ViewModel.UpdatePreview();
+    }
+    private void OnBrandSearchChanged(object sender, TextChangedEventArgs e) => ViewModel.FilterBrands((sender as TextBox)?.Text);
     private void OnProductSearchChanged(object sender, TextChangedEventArgs e) => ViewModel.FilterProducts((sender as TextBox)?.Text);
+
+    private void OnScopeRadioChecked(object sender, RoutedEventArgs e)
+    {
+        if (!_scopeControlsReady || sender is not RadioButton { Tag: string value }
+            || !Enum.TryParse<PromotionScopeType>(value, out var scope))
+        {
+            return;
+        }
+
+        ViewModel.SelectedScopeType = scope;
+        UpdateScopeTargetVisibility(scope);
+    }
+
+    private void SetScopeRadio(PromotionScopeType scope)
+    {
+        switch (scope)
+        {
+            case PromotionScopeType.Category:
+                CategoryScopeRadio.IsChecked = true;
+                break;
+            case PromotionScopeType.Brand:
+                BrandScopeRadio.IsChecked = true;
+                break;
+            case PromotionScopeType.Product:
+                ProductScopeRadio.IsChecked = true;
+                break;
+            default:
+                EntireStoreScopeRadio.IsChecked = true;
+                break;
+        }
+    }
+
+    private void UpdateScopeTargetVisibility(PromotionScopeType scope)
+    {
+        CategoryTargets.Visibility = scope == PromotionScopeType.Category ? Visibility.Visible : Visibility.Collapsed;
+        BrandTargetsPanel.Visibility = scope == PromotionScopeType.Brand ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void OnCloseClick(object sender, RoutedEventArgs e) => Hide();
 }

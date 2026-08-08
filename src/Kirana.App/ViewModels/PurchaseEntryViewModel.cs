@@ -225,7 +225,7 @@ public sealed partial class PurchaseEntryViewModel(
                 SupportsDecimalQuantity = product.Unit.SupportsDecimalQuantity(),
                 TracksBatches = product.TracksBatches,
                 GstRatePercent = product.GstRatePercent ?? 0,
-                IsTaxInclusive = product.IsTaxInclusive,
+                PricingType = product.PricingType,
                 QuantityText = "1",
                 UnitPriceText = product.PurchasePrice.ToString("0.##"),
             });
@@ -260,7 +260,7 @@ public sealed partial class PurchaseEntryViewModel(
             ProductId = l.ProductId,
             Quantity = l.Quantity,
             UnitPrice = l.UnitPrice,
-            IsTaxInclusive = l.IsTaxInclusive,
+            PricingType = l.PricingType,
             GstRatePercent = l.GstRatePercent,
             DiscountPercent = l.DiscountPercent,
         }).ToList();
@@ -332,6 +332,7 @@ public sealed partial class PurchaseEntryViewModel(
                     Quantity = l.Quantity,
                     UnitPrice = l.UnitPrice,
                     DiscountPercent = l.DiscountPercent,
+                    PricingType = l.PricingType,
                     BatchNumber = string.IsNullOrWhiteSpace(l.BatchNumberText) ? null : l.BatchNumberText,
                     ExpiryDate = l.ExpiryDate,
                 }).ToList(),

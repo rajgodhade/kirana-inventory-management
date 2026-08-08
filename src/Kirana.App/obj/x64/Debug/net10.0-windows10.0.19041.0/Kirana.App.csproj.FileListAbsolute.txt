@@ -1021,3 +1021,95 @@ D:\New folder\app\kirana-inventory-management\src\Kirana.App\bin\x64\Debug\net10
 D:\New folder\app\kirana-inventory-management\src\Kirana.App\bin\x64\Debug\net10.0-windows10.0.19041.0\Views\DeviceStatusPage.xbf
 D:\New folder\app\kirana-inventory-management\src\Kirana.App\bin\x64\Debug\net10.0-windows10.0.19041.0\Views\HardwareDiagnosticsPage.xbf
 D:\New folder\app\kirana-inventory-management\src\Kirana.App\bin\x64\Debug\net10.0-windows10.0.19041.0\Views\HardwareSettingsPage.xbf
+D:\New folder\app\kirana-inventory-management\src\Kirana.App\obj\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoiceDetailsPage.g.i.cs
+D:\New folder\app\kirana-inventory-management\src\Kirana.App\obj\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoiceDetailsPage.g.cs
+D:\New folder\app\kirana-inventory-management\src\Kirana.App\obj\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoicesPage.g.i.cs
+D:\New folder\app\kirana-inventory-management\src\Kirana.App\obj\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoicesPage.g.cs
+D:\New folder\app\kirana-inventory-management\src\Kirana.App\obj\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoiceDetailsPage.xaml
+D:\New folder\app\kirana-inventory-management\src\Kirana.App\obj\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoicesPage.xaml
+D:\New folder\app\kirana-inventory-management\src\Kirana.App\obj\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoiceDetailsPage.xbf
+D:\New folder\app\kirana-inventory-management\src\Kirana.App\obj\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoicesPage.xbf
+D:\New folder\app\kirana-inventory-management\src\Kirana.App\bin\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoiceDetailsPage.xbf
+D:\New folder\app\kirana-inventory-management\src\Kirana.App\bin\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoicesPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\App.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\MainWindow.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Themes\ChartTemplates.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Themes\DesignTokens.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\AuditLogPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\BackupManagerPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\BarcodeLabelDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\BarcodeScanTestPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\BatchManagementDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\BillDiscountDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\BrandManagementDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\CategoryManagementDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\Controls\DeviceStatusWidget.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\CreditPaymentDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\CustomerEditDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\CustomerLedgerPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\CustomerPickerDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\CustomersPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\DatabaseMaintenancePage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\DeviceStatusPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ExpenseCategoriesPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ExpenseDetailsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ExpenseEditDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ExpensesPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ExportCenterPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\HardwareDiagnosticsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\HardwareSettingsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\HeldBillsDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoiceDetailsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoicePreviewDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\InvoicesPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ManagementHomePage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ManagementLoginDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ManagementShellPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ManagerAuthorizationDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\NewPurchaseReturnPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\NewSalesReturnPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\PaymentDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\PosShellPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ProductEditDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ProductImportDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ProductsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\PromotionEditDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\PromotionsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\PurchaseDetailsDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\PurchaseEntryPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\PurchasePaymentDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\PurchaseReturnDetailsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\PurchaseReturnsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\PurchasesPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ReportsHubPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\Reports\CustomerReportView.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\Reports\DashboardView.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\Reports\ExpenseReportView.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\Reports\InventoryReportView.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\Reports\ProductReportView.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\Reports\ProfitReportView.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\Reports\PromotionReportView.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\Reports\SalesReportView.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\Reports\SupplierReportView.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ReprintInvoiceDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\ResetPasswordDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\RestorePage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\SalesReturnDetailsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\SalesReturnsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\SetPinDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\SettingsPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\SetupWizardPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\StockAdjustmentDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\SupplierEditDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\SupplierLedgerPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\SupplierPaymentDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\SupplierPickerDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\SuppliersPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\UserEditDialog.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Views\UserManagementPage.xbf
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Kirana.App.exe
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Kirana.App.deps.json
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Kirana.App.runtimeconfig.json
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Kirana.App.dll
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\Kirana.App.pdb
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0-windows10.0.19041.0\resources.pri

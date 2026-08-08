@@ -178,19 +178,34 @@
                                 <TextBlock Text="{x:Bind ViewModel.SalesGstText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="16" />
                             </StackPanel>
                         </Grid>
+                        <Grid ColumnSpacing="8" Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="105" /><ColumnDefinition Width="48" /><ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="62" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="TREATMENT" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="1" Text="RATE" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="2" Text="TAXABLE" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="3" Text="CGST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="4" Text="SGST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="5" Text="GST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="6" Text="BILLS" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right"/>
+                        </Grid>
                         <ItemsControl ItemsSource="{x:Bind ViewModel.SalesGstByRate}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="rpt:GstRateBreakdown">
                                     <Grid Margin="0,4,0,0" ColumnSpacing="8">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="60" /><ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="105" /><ColumnDefinition Width="48" /><ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="62" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Style="{StaticResource CaptionTextStyle}"><Run Text="{x:Bind RatePercent}" /><Run Text="%" /></TextBlock>
-                                        <TextBlock Grid.Column="1" Text="{x:Bind TaxableAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock Grid.Column="2" Text="{x:Bind Cgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock Grid.Column="3" Text="{x:Bind Sgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock Grid.Column="4" Text="{x:Bind TaxAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="0" Text="{x:Bind GstTreatment}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="1" Style="{StaticResource CaptionTextStyle}"><Run Text="{x:Bind RatePercent}" /><Run Text="%" /></TextBlock>
+                                        <TextBlock Grid.Column="2" Text="{x:Bind TaxableAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="3" Text="{x:Bind Cgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="4" Text="{x:Bind Sgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="5" Text="{x:Bind TaxAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="6" Text="{x:Bind InvoiceCount}" Style="{StaticResource CaptionTextStyle}" HorizontalAlignment="Right" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -214,19 +229,34 @@
                                 <TextBlock Text="{x:Bind ViewModel.PurchaseGstText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="16" />
                             </StackPanel>
                         </Grid>
+                        <Grid ColumnSpacing="8" Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="105" /><ColumnDefinition Width="48" /><ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="62" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="TREATMENT" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="1" Text="RATE" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="2" Text="TAXABLE" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="3" Text="CGST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="4" Text="SGST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="5" Text="GST" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                            <TextBlock Grid.Column="6" Text="BILLS" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right"/>
+                        </Grid>
                         <ItemsControl ItemsSource="{x:Bind ViewModel.PurchaseGstByRate}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="rpt:GstRateBreakdown">
                                     <Grid Margin="0,4,0,0" ColumnSpacing="8">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="60" /><ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="105" /><ColumnDefinition Width="48" /><ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="62" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Style="{StaticResource CaptionTextStyle}"><Run Text="{x:Bind RatePercent}" /><Run Text="%" /></TextBlock>
-                                        <TextBlock Grid.Column="1" Text="{x:Bind TaxableAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock Grid.Column="2" Text="{x:Bind Cgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock Grid.Column="3" Text="{x:Bind Sgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
-                                        <TextBlock Grid.Column="4" Text="{x:Bind TaxAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="0" Text="{x:Bind GstTreatment}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="1" Style="{StaticResource CaptionTextStyle}"><Run Text="{x:Bind RatePercent}" /><Run Text="%" /></TextBlock>
+                                        <TextBlock Grid.Column="2" Text="{x:Bind TaxableAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="3" Text="{x:Bind Cgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="4" Text="{x:Bind Sgst, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="5" Text="{x:Bind TaxAmount, Converter={StaticResource CurrencyConverter}}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Grid.Column="6" Text="{x:Bind InvoiceCount}" Style="{StaticResource CaptionTextStyle}" HorizontalAlignment="Right" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

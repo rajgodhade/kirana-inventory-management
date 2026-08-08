@@ -190,7 +190,8 @@
                                 <ColumnDefinition Width="60" />
                                 <ColumnDefinition Width="74" />
                                 <ColumnDefinition Width="56" />
-                                <ColumnDefinition Width="122" />
+                                <ColumnDefinition Width="108" />
+                                <ColumnDefinition Width="112" />
                                 <ColumnDefinition Width="90" />
                                 <ColumnDefinition Width="36" />
                             </Grid.ColumnDefinitions>
@@ -198,8 +199,9 @@
                             <TextBlock Grid.Column="1" Text="QTY" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
                             <TextBlock Grid.Column="2" Text="PRICE" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
                             <TextBlock Grid.Column="3" Text="DISC %" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="4" Text="BATCH / EXPIRY" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="5" Text="TOTAL" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
+                            <TextBlock Grid.Column="4" Text="GST PRICING" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="5" Text="BATCH / EXPIRY" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="6" Text="TOTAL" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
                         </Grid>
 
                         <StackPanel Grid.Row="1" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -227,7 +229,8 @@
                                             <ColumnDefinition Width="60" />
                                             <ColumnDefinition Width="74" />
                                             <ColumnDefinition Width="56" />
-                                            <ColumnDefinition Width="122" />
+                                            <ColumnDefinition Width="108" />
+                                            <ColumnDefinition Width="112" />
                                             <ColumnDefinition Width="90" />
                                             <ColumnDefinition Width="36" />
                                         </Grid.ColumnDefinitions>
@@ -257,6 +260,14 @@
                                                  TextChanged="OnLineFieldTextChanged" LostFocus="OnLineFieldLostFocus"
                                                  AutomationProperties.Name="Discount percent" />
 
+                                        <ComboBox Grid.Column="4" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                  MinWidth="0" Padding="8,5"
+                                                  ItemsSource="{x:Bind PricingTypes}"
+                                                  SelectedItem="{x:Bind PricingType, Mode=TwoWay}"
+                                                  SelectionChanged="OnPricingTypeChanged" Tag="{x:Bind}"
+                                                  AutomationProperties.Name="GST pricing type"
+                                                  ToolTipService.ToolTip="Inclusive: GST is contained in price. Exclusive: GST is added." />
+
                                         <!-- Batch and expiry are stacked in one cell: they belong to the
                                              same batch record, and as two separate columns the row could
                                              not fit the card at a 1440px window — the Line Total column
@@ -265,7 +276,7 @@
                                              CalendarDatePicker (not DatePicker) because it is one compact
                                              field with a calendar flyout, where DatePicker's three inline
                                              day/month/year spinners need ~250px on their own. -->
-                                        <StackPanel Grid.Column="4" Spacing="4" VerticalAlignment="Center"
+                                        <StackPanel Grid.Column="5" Spacing="4" VerticalAlignment="Center"
                                                     Visibility="{x:Bind TracksBatches, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <TextBox Style="{StaticResource LineInputStyle}"
                                                      PlaceholderText="Batch #"
@@ -278,11 +289,11 @@
                                                                 AutomationProperties.Name="Expiry date" />
                                         </StackPanel>
 
-                                        <TextBlock Grid.Column="5" Style="{StaticResource AmountTextStyle}"
+                                        <TextBlock Grid.Column="6" Style="{StaticResource AmountTextStyle}"
                                                    VerticalAlignment="Center" HorizontalAlignment="Right"
                                                    Text="{x:Bind LineTotal, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
 
-                                        <Button Grid.Column="6" Click="OnRemoveLineClick" Tag="{x:Bind}"
+                                        <Button Grid.Column="7" Click="OnRemoveLineClick" Tag="{x:Bind}"
                                                 VerticalAlignment="Center" Padding="8,6" MinWidth="0"
                                                 Background="Transparent" BorderThickness="0"
                                                 CornerRadius="{StaticResource RadiusMedium}"

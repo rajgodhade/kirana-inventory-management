@@ -110,6 +110,8 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <TextBox Grid.Column="0" PlaceholderText="Search purchase # / supplier invoice #…"
@@ -147,13 +149,21 @@
                           IsChecked="{x:Bind ViewModel.OutstandingOnly, Mode=TwoWay}"
                           Checked="OnOutstandingOnlyChanged" Unchecked="OnOutstandingOnlyChanged" />
 
-                <Button Grid.Column="7" Click="OnRefreshClick" VerticalAlignment="Center"
+                <Button Grid.Column="7" Content="Clear dates" Click="OnClearDateFiltersClick"
+                        VerticalAlignment="Center" CornerRadius="{StaticResource RadiusMedium}" Padding="10,7"
+                        AutomationProperties.Name="Clear purchase date filters" />
+
+                <Button Grid.Column="8" Content="Clear filters" Click="OnClearFiltersClick"
+                        VerticalAlignment="Center" CornerRadius="{StaticResource RadiusMedium}" Padding="10,7"
+                        AutomationProperties.Name="Clear purchase table filters" />
+
+                <Button Grid.Column="9" Click="OnRefreshClick" VerticalAlignment="Center"
                         CornerRadius="{StaticResource RadiusMedium}" Padding="8,7"
                         AutomationProperties.Name="Refresh purchases" ToolTipService.ToolTip="Refresh">
                     <FontIcon Glyph="&#xE72C;" FontSize="13" />
                 </Button>
 
-                <Button Grid.Column="8" Content="New Purchase" Style="{StaticResource AccentButtonStyle}"
+                <Button Grid.Column="10" Content="New Purchase" Style="{StaticResource AccentButtonStyle}"
                         CornerRadius="{StaticResource RadiusMedium}" Padding="12,7" FontSize="13"
                         Click="OnNewPurchaseClick" IsEnabled="{x:Bind ViewModel.CanManagePurchases}" />
             </Grid>

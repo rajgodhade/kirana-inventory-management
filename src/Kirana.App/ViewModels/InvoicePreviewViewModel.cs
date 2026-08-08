@@ -23,6 +23,9 @@ public sealed partial class InvoicePreviewViewModel : ObservableObject
     public IReadOnlyList<InvoiceFormat> AvailableFormats { get; } = Enum.GetValues<InvoiceFormat>();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DialogContentWidth))]
+    [NotifyPropertyChangedFor(nameof(PreviewViewportWidth))]
+    [NotifyPropertyChangedFor(nameof(PreviewViewportMaxHeight))]
     private InvoiceFormat _selectedFormat;
 
     [ObservableProperty]
@@ -49,6 +52,10 @@ public sealed partial class InvoicePreviewViewModel : ObservableObject
         _selectedFormat = initialFormat;
         RebuildPreview();
     }
+
+    public double DialogContentWidth => SelectedFormat == InvoiceFormat.A4 ? 980 : 460;
+    public double PreviewViewportWidth => SelectedFormat == InvoiceFormat.A4 ? 940 : 430;
+    public double PreviewViewportMaxHeight => SelectedFormat == InvoiceFormat.A4 ? 640 : 480;
 
     partial void OnSelectedFormatChanged(InvoiceFormat value) => RebuildPreview();
 

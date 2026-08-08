@@ -2,10 +2,12 @@ using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Kirana.Application.Taxation;
 
 namespace Kirana.Application.Reports;
 
-public sealed class SalesReportService(IKiranaDbContext db, IPermissionEnforcer permissionEnforcer) : ISalesReportService
+public sealed class SalesReportService(
+    IKiranaDbContext db, IPermissionEnforcer permissionEnforcer, IGstCalculationService? gstCalculationService = null) : ISalesReportService
 {
     public async Task<SalesReportSummary> GetSummaryAsync(
         ReportDateRange range, ReportFilter? filter, int? performedByUserId, CancellationToken cancellationToken = default)
@@ -60,33 +62,32 @@ public sealed class SalesReportService(IKiranaDbContext db, IPermissionEnforcer 
     {
         await permissionEnforcer.EnsureHasPermissionAsync(performedByUserId, PermissionKeys.ReportsView, cancellationToken);
 
-        var salesByRate = await db.SaleItems.AsNoTracking()
+        var salesSnapshots = await db.SaleItems.AsNoTracking()
             .Where(i => i.Sale.Status == SaleStatus.Completed && i.Sale.SaleDateUtc >= range.StartUtc && i.Sale.SaleDateUtc < range.EndUtc)
-            .GroupBy(i => i.GstRatePercentSnapshot)
-            .Select(g => new { Rate = g.Key, Taxable = g.Sum(x => x.TaxableAmount), Tax = g.Sum(x => x.GstAmount) })
-            .OrderBy(g => g.Rate)
+            .Select(i => new GstSnapshotLine { TransactionId = i.SaleId, RatePercent = i.GstRatePercentSnapshot, TaxableAmount = i.TaxableAmount, GstAmount = i.GstAmount, PricingType = i.IsTaxInclusiveSnapshot ? PricingType.Inclusive : PricingType.Exclusive })
             .ToListAsync(cancellationToken);
 
-        var purchasesByRate = await db.PurchaseItems.AsNoTracking()
+        var purchaseSnapshots = await db.PurchaseItems.AsNoTracking()
             .Where(i => i.Purchase.PurchaseDateUtc >= range.StartUtc && i.Purchase.PurchaseDateUtc < range.EndUtc)
-            .GroupBy(i => i.GstRatePercentSnapshot)
-            .Select(g => new { Rate = g.Key, Taxable = g.Sum(x => x.TaxableAmount), Tax = g.Sum(x => x.GstAmount) })
-            .OrderBy(g => g.Rate)
+            .Select(i => new GstSnapshotLine { TransactionId = i.PurchaseId, RatePercent = i.GstRatePercentSnapshot, TaxableAmount = i.TaxableAmount, GstAmount = i.GstAmount, PricingType = i.IsTaxInclusiveSnapshot ? PricingType.Inclusive : PricingType.Exclusive })
             .ToListAsync(cancellationToken);
 
-        static GstRateBreakdown ToBreakdown(decimal rate, decimal taxable, decimal tax) => new()
+        static GstRateBreakdown ToBreakdown(GstSlabSummary slab) => new()
         {
-            RatePercent = rate,
-            TaxableAmount = taxable,
-            TaxAmount = tax,
+            RatePercent = slab.RatePercent,
+            TaxableAmount = slab.TaxableAmount,
+            TaxAmount = slab.GstAmount,
+            InvoiceCount = slab.InvoiceCount,
+            PricingType = slab.PricingType,
             // Split evenly assuming intra-state — see the GstReport class doc for why.
-            Cgst = Math.Round(tax / 2m, 2),
-            Sgst = tax - Math.Round(tax / 2m, 2),
+            Cgst = Math.Round(slab.GstAmount / 2m, 2),
+            Sgst = slab.GstAmount - Math.Round(slab.GstAmount / 2m, 2),
             Igst = 0m,
         };
 
-        var salesBreakdown = salesByRate.Select(r => ToBreakdown(r.Rate, r.Taxable, r.Tax)).ToList();
-        var purchaseBreakdown = purchasesByRate.Select(r => ToBreakdown(r.Rate, r.Taxable, r.Tax)).ToList();
+        var calculator = gstCalculationService ?? GstCalculationService.Shared;
+        var salesBreakdown = calculator.SummarizeStored(salesSnapshots).Select(ToBreakdown).ToList();
+        var purchaseBreakdown = calculator.SummarizeStored(purchaseSnapshots).Select(ToBreakdown).ToList();
 
         return new GstReport
         {

@@ -284,7 +284,7 @@
 
             <!-- Recent invoices -->
             <StackPanel Spacing="10">
-                <Grid><TextBlock Text="Recent invoices" Style="{StaticResource SectionTitleTextStyle}" /><Button x:ConnectionId='19' Content="View all" Tag="Reports"                                     HorizontalAlignment="Right"                                                                                                     /></Grid>
+                <Grid><TextBlock Text="Recent invoices" Style="{StaticResource SectionTitleTextStyle}" /><Button x:ConnectionId='19' Content="View all invoices" Tag="Invoices"                                     HorizontalAlignment="Right" /></Grid>
                 <Border Style="{StaticResource DashboardPanelStyle}" Padding="0">
                     <StackPanel>
                         <Grid Padding="16,11" Background="{ThemeResource SurfaceAltBrush}" ColumnSpacing="14">

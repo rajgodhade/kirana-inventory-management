@@ -92,7 +92,7 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
                 p.WholesalePrice,
                 p.GstRatePercent,
                 p.HsnCode,
-                p.IsTaxInclusive,
+                p.PricingType,
                 p.MinimumStock,
                 p.ReorderQuantity,
                 p.IsActive,
@@ -109,7 +109,7 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
             [
                 "Product Code", "Name", "SKU", "Barcode", "Category", "Brand", "Unit",
                 "Purchase Price", "MRP", "Selling Price", "Wholesale Price", "GST %", "HSN Code",
-                "Tax Inclusive", "Stock On Hand", "Minimum Stock", "Reorder Quantity", "Active",
+                "Pricing Type", "Stock On Hand", "Minimum Stock", "Reorder Quantity", "Active",
             ],
             Rows = products.Select(p => (IReadOnlyList<string>)
             [
@@ -117,7 +117,7 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
                 CategoryName(p.CategoryName), BrandName(p.BrandName), p.Unit.ToString(),
                 canViewCost ? Number(p.PurchasePrice) : string.Empty,
                 Number(p.Mrp), Number(p.SellingPrice), NumberOrBlank(p.WholesalePrice),
-                NumberOrBlank(p.GstRatePercent), p.HsnCode ?? string.Empty, Bool(p.IsTaxInclusive),
+                NumberOrBlank(p.GstRatePercent), p.HsnCode ?? string.Empty, p.PricingType.ToString(),
                 Number(p.QuantityOnHand), Number(p.MinimumStock), Number(p.ReorderQuantity), Bool(p.IsActive),
             ]).ToList(),
         };
