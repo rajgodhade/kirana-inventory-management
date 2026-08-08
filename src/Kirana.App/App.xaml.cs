@@ -8,6 +8,7 @@ using Kirana.App.Hardware;
 using Kirana.Application.Setup;
 using Kirana.App.Printing;
 using Kirana.App.Theming;
+using Kirana.App.Services;
 using Kirana.Infrastructure;
 using Kirana.Infrastructure.Persistence;
 using Kirana.Infrastructure.Storage;
@@ -60,6 +61,7 @@ public partial class App : Microsoft.UI.Xaml.Application
                 services.AddSingleton<IDeviceManager, WindowsDeviceManager>();
                 services.AddSingleton<IHardwareMonitor, HardwareMonitor>();
                 services.AddSingleton<ThemeService>();
+                services.AddSingleton<InvoiceRefreshNotifier>();
             })
             .UseSerilog()
             .Build();

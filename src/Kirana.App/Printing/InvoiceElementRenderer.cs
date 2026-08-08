@@ -239,7 +239,15 @@ public static class InvoiceElementRenderer
         var grid = BuildA4Grid();
         for (var i = 0; i < A4Columns.Length; i++)
         {
-            var cell = new TextBlock { Text = A4Columns[i].Header, FontWeight = FontWeights.SemiBold, FontSize = 12 };
+            var isNumeric = i is 2 or 3 or 4 or 5 or 6 or 7;
+            var cell = new TextBlock
+            {
+                Text = A4Columns[i].Header,
+                FontWeight = FontWeights.SemiBold,
+                FontSize = 12,
+                HorizontalAlignment = isNumeric ? HorizontalAlignment.Right : HorizontalAlignment.Left,
+                TextAlignment = isNumeric ? TextAlignment.Right : TextAlignment.Left,
+            };
             Grid.SetColumn(cell, i);
             grid.Children.Add(cell);
         }
@@ -264,7 +272,15 @@ public static class InvoiceElementRenderer
 
         for (var i = 0; i < values.Length; i++)
         {
-            var cell = new TextBlock { Text = values[i], FontSize = 11, TextWrapping = TextWrapping.Wrap };
+            var isNumeric = i is 2 or 3 or 4 or 5 or 6 or 7;
+            var cell = new TextBlock
+            {
+                Text = values[i],
+                FontSize = 11,
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = isNumeric ? HorizontalAlignment.Right : HorizontalAlignment.Left,
+                TextAlignment = isNumeric ? TextAlignment.Right : TextAlignment.Left,
+            };
             Grid.SetColumn(cell, i);
             grid.Children.Add(cell);
         }
@@ -308,9 +324,9 @@ public static class InvoiceElementRenderer
             panel.Children.Add(BuildAmountRow($"Bill Discount ({document.BillDiscountPercent:0.##}%)", -document.BillDiscountAmount, isCompact));
         }
 
-        foreach (var group in document.GstGroups)
+        if (document.HasGstSummary)
         {
-            panel.Children.Add(BuildAmountRow($"GST @ {group.RatePercent:0.##}% (on ₹{group.TaxableAmount:0.00})", group.GstAmount, isCompact));
+            panel.Children.Add(BuildGstSummary(document, isCompact));
         }
 
         if (document.RoundOffAmount != 0)
@@ -326,6 +342,42 @@ public static class InvoiceElementRenderer
             panel.Children.Add(BuildAmountRow("You Saved", document.TotalSavings, isCompact, emphasize: true, brush: SavingsBrush));
         }
 
+        return panel;
+    }
+
+    private static FrameworkElement BuildGstSummary(InvoiceDocument document, bool isCompact)
+    {
+        var panel = new StackPanel { Spacing = 2, Margin = new Thickness(0, 5, 0, 4) };
+        panel.Children.Add(new TextBlock
+        {
+            Text = "GST Summary",
+            FontSize = isCompact ? 11 : 13,
+            FontWeight = FontWeights.SemiBold,
+        });
+
+        Grid Row(string rate, string taxable, string gst, bool header = false)
+        {
+            var row = new Grid { ColumnSpacing = 8 };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(isCompact ? 110 : 150) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            var size = isCompact ? 9d : 11d;
+            var weight = header ? FontWeights.SemiBold : FontWeights.Normal;
+            var rateText = new TextBlock { Text = rate, FontSize = size, FontWeight = weight };
+            var taxableText = new TextBlock { Text = taxable, FontSize = size, FontWeight = weight, HorizontalAlignment = HorizontalAlignment.Right };
+            var gstText = new TextBlock { Text = gst, FontSize = size, FontWeight = weight, HorizontalAlignment = HorizontalAlignment.Right };
+            Grid.SetColumn(taxableText, 1);
+            Grid.SetColumn(gstText, 2);
+            row.Children.Add(rateText);
+            row.Children.Add(taxableText);
+            row.Children.Add(gstText);
+            return row;
+        }
+
+        panel.Children.Add(Row("GST Treatment", "Taxable", "GST", header: true));
+        foreach (var group in document.GstGroups)
+            panel.Children.Add(Row($"{group.GstTreatment} ({group.RatePercent:0.##}%)", $"₹{group.TaxableAmount:0.00}", $"₹{group.GstAmount:0.00}"));
+        panel.Children.Add(BuildAmountRow("Total GST", document.TaxTotal, isCompact, emphasize: true));
         return panel;
     }
 

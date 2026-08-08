@@ -285,6 +285,12 @@ public sealed partial class ManagementHomeViewModel(
         }
     }
 
+    public async Task RefreshRecentInvoicesAsync()
+    {
+        await LoadRecentActivityAsync();
+        OnPropertyChanged(nameof(HasRecentActivity));
+    }
+
     private async Task LoadBackupAndDeviceStatusAsync()
     {
         if (CanManageBackups)

@@ -68,26 +68,26 @@
                         </Border>
 
                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                            <TextBlock x:ConnectionId='49'                                                           
+                            <TextBlock x:ConnectionId='50'                                                           
                                        Style="{StaticResource SectionTitleTextStyle}" FontSize="15"
                                        TextTrimming="CharacterEllipsis" />
                             <StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock x:ConnectionId='50'                                                        
+                                <TextBlock x:ConnectionId='51'                                                        
                                            Style="{StaticResource CodeTextStyle}" VerticalAlignment="Center"
                                                                                                                                                           />
-                                <StackPanel x:ConnectionId='51' Orientation="Horizontal" Spacing="4"
-                                                                                                                                                               >
-                                    <TextBlock Text="GST" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
-                                    <TextBlock x:ConnectionId='55'                                                     
-                                               Style="{StaticResource CodeTextStyle}" VerticalAlignment="Center" />
-                                </StackPanel>
                                 <StackPanel x:ConnectionId='52' Orientation="Horizontal" Spacing="4"
                                                                                                                                                                >
+                                    <TextBlock Text="GST" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                                    <TextBlock x:ConnectionId='56'                                                     
+                                               Style="{StaticResource CodeTextStyle}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <StackPanel x:ConnectionId='53' Orientation="Horizontal" Spacing="4"
+                                                                                                                                                               >
                                     <FontIcon Glyph="&#xE717;" FontSize="10" Foreground="{ThemeResource TextTertiaryBrush}" />
-                                    <TextBlock x:ConnectionId='54'                                                     
+                                    <TextBlock x:ConnectionId='55'                                                     
                                                Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
                                 </StackPanel>
-                                <TextBlock x:ConnectionId='53' Text="No supplier selected yet — press F4 or click Select Supplier."
+                                <TextBlock x:ConnectionId='54' Text="No supplier selected yet — press F4 or click Select Supplier."
                                            Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center"
                                                                                                                                                                  />
                             </StackPanel>
@@ -95,25 +95,25 @@
 
                         <!-- Outstanding is the one number that changes how a shopkeeper negotiates
                              this purchase, so it sits on the supplier card itself. -->
-                        <Border x:ConnectionId='45' Grid.Column="2" Style="{StaticResource BadgeBorderStyle}" Padding="12,6"
+                        <Border x:ConnectionId='46' Grid.Column="2" Style="{StaticResource BadgeBorderStyle}" Padding="12,6"
                                 CornerRadius="{StaticResource RadiusMedium}"
                                 Background="{ThemeResource PastelAmberBrush}" VerticalAlignment="Center"
                                                                                                                                               >
                             <StackPanel Spacing="0">
                                 <TextBlock Text="OUTSTANDING" Style="{StaticResource ColumnHeaderTextStyle}"
                                            Foreground="{ThemeResource PastelAmberOnBrush}" />
-                                <TextBlock x:ConnectionId='48'                                                                                                        
+                                <TextBlock x:ConnectionId='49'                                                                                                        
                                            FontSize="15" FontWeight="Bold"
                                            Foreground="{ThemeResource PastelAmberOnBrush}" />
                             </StackPanel>
                         </Border>
 
-                        <Button x:ConnectionId='46' Grid.Column="3"                         VerticalAlignment="Center"
+                        <Button x:ConnectionId='47' Grid.Column="3"                         VerticalAlignment="Center"
                                 CornerRadius="{StaticResource RadiusMedium}" Padding="14,8"
                                 AutomationProperties.Name="Select Supplier (F4)">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE8B7;" FontSize="13" />
-                                <TextBlock x:ConnectionId='47'                                                            />
+                                <TextBlock x:ConnectionId='48'                                                            />
                                 <TextBlock Text="F4" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -129,32 +129,32 @@
                             <ColumnDefinition Width="200" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBox x:ConnectionId='35' x:Name="ScanSearchBox" Grid.Column="0" FontSize="15" Padding="14,10"
+                        <TextBox x:ConnectionId='36' x:Name="ScanSearchBox" Grid.Column="0" FontSize="15" Padding="14,10"
                                  CornerRadius="{StaticResource RadiusMedium}"
                                  PlaceholderText="Scan barcode, or type Product ID / SKU / name  (F2)"
                                                                                                       
                                                                       
                                  AutomationProperties.Name="Scan or search product" />
 
-                        <Popup x:ConnectionId='36' x:Name="SuggestionsPopup" Grid.Column="0" HorizontalOffset="0" VerticalOffset="52"
+                        <Popup x:ConnectionId='37' x:Name="SuggestionsPopup" Grid.Column="0" HorizontalOffset="0" VerticalOffset="52"
                                IsLightDismissEnabled="False"                                                        >
                             <Border Style="{StaticResource ElevatedCardStyle}" Width="520" MaxHeight="360" Padding="4">
-                                <ListView x:ConnectionId='38' x:Name="SuggestionsList"                                                   
+                                <ListView x:ConnectionId='39' x:Name="SuggestionsList"                                                   
                                           SelectionMode="Single" IsItemClickEnabled="True"                                  >
                                     <ListView.ItemTemplate>
                                         <DataTemplate                         >
-                                            <Grid x:ConnectionId='40' ColumnSpacing="12" Padding="8,6"                                          >
+                                            <Grid x:ConnectionId='41' ColumnSpacing="12" Padding="8,6"                                          >
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Grid.Column="0" Spacing="1">
-                                                    <TextBlock x:ConnectionId='42'                      Style="{StaticResource BodyTextStyle}" />
+                                                    <TextBlock x:ConnectionId='43'                      Style="{StaticResource BodyTextStyle}" />
                                                     <TextBlock Style="{StaticResource CaptionTextStyle}">
-                                                        <Run x:ConnectionId='43'                             /><Run Text="  ·  " /><Run x:ConnectionId='44'                     />
+                                                        <Run x:ConnectionId='44'                             /><Run Text="  ·  " /><Run x:ConnectionId='45'                     />
                                                     </TextBlock>
                                                 </StackPanel>
-                                                <TextBlock x:ConnectionId='41' Grid.Column="1"                                                                            
+                                                <TextBlock x:ConnectionId='42' Grid.Column="1"                                                                            
                                                            Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center" />
                                             </Grid>
                                         </DataTemplate>
@@ -163,7 +163,7 @@
                             </Border>
                         </Popup>
 
-                        <TextBox x:ConnectionId='37' Grid.Column="1" PlaceholderText="Supplier Invoice #" Header="Supplier Invoice #"
+                        <TextBox x:ConnectionId='38' Grid.Column="1" PlaceholderText="Supplier Invoice #" Header="Supplier Invoice #"
                                  CornerRadius="{StaticResource RadiusMedium}"
                                                                                               />
                     </Grid>
@@ -190,7 +190,8 @@
                                 <ColumnDefinition Width="60" />
                                 <ColumnDefinition Width="74" />
                                 <ColumnDefinition Width="56" />
-                                <ColumnDefinition Width="122" />
+                                <ColumnDefinition Width="108" />
+                                <ColumnDefinition Width="112" />
                                 <ColumnDefinition Width="90" />
                                 <ColumnDefinition Width="36" />
                             </Grid.ColumnDefinitions>
@@ -198,8 +199,9 @@
                             <TextBlock Grid.Column="1" Text="QTY" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
                             <TextBlock Grid.Column="2" Text="PRICE" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
                             <TextBlock Grid.Column="3" Text="DISC %" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="4" Text="BATCH / EXPIRY" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="5" Text="TOTAL" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
+                            <TextBlock Grid.Column="4" Text="GST PRICING" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="5" Text="BATCH / EXPIRY" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="6" Text="TOTAL" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
                         </Grid>
 
                         <StackPanel x:ConnectionId='21' Grid.Row="1" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -227,14 +229,15 @@
                                             <ColumnDefinition Width="60" />
                                             <ColumnDefinition Width="74" />
                                             <ColumnDefinition Width="56" />
-                                            <ColumnDefinition Width="122" />
+                                            <ColumnDefinition Width="108" />
+                                            <ColumnDefinition Width="112" />
                                             <ColumnDefinition Width="90" />
                                             <ColumnDefinition Width="36" />
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                                            <TextBlock x:ConnectionId='33'                             Style="{StaticResource CardTitleTextStyle}" TextWrapping="Wrap" />
-                                            <TextBlock x:ConnectionId='34'                             Style="{StaticResource CodeTextStyle}" />
+                                            <TextBlock x:ConnectionId='34'                             Style="{StaticResource CardTitleTextStyle}" TextWrapping="Wrap" />
+                                            <TextBlock x:ConnectionId='35'                             Style="{StaticResource CodeTextStyle}" />
                                         </StackPanel>
 
                                         <!-- UpdateSourceTrigger=PropertyChanged is REQUIRED: a TwoWay
@@ -257,6 +260,14 @@
                                                                                                                       
                                                  AutomationProperties.Name="Discount percent" />
 
+                                        <ComboBox x:ConnectionId='28' Grid.Column="4" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                  MinWidth="0" Padding="8,5"
+                                                                                     
+                                                                                                  
+                                                                                                        
+                                                  AutomationProperties.Name="GST pricing type"
+                                                  ToolTipService.ToolTip="Inclusive: GST is contained in price. Exclusive: GST is added." />
+
                                         <!-- Batch and expiry are stacked in one cell: they belong to the
                                              same batch record, and as two separate columns the row could
                                              not fit the card at a 1440px window — the Line Total column
@@ -265,24 +276,24 @@
                                              CalendarDatePicker (not DatePicker) because it is one compact
                                              field with a calendar flyout, where DatePicker's three inline
                                              day/month/year spinners need ~250px on their own. -->
-                                        <StackPanel x:ConnectionId='28' Grid.Column="4" Spacing="4" VerticalAlignment="Center"
+                                        <StackPanel x:ConnectionId='29' Grid.Column="5" Spacing="4" VerticalAlignment="Center"
                                                                                                                                              >
-                                            <TextBox x:ConnectionId='31' Style="{StaticResource LineInputStyle}"
+                                            <TextBox x:ConnectionId='32' Style="{StaticResource LineInputStyle}"
                                                      PlaceholderText="Batch #"
                                                                                                  
                                                      AutomationProperties.Name="Batch number" />
-                                            <CalendarDatePicker x:ConnectionId='32' HorizontalAlignment="Stretch"
+                                            <CalendarDatePicker x:ConnectionId='33' HorizontalAlignment="Stretch"
                                                                 CornerRadius="{StaticResource RadiusMedium}"
                                                                 PlaceholderText="Expiry"
                                                                                                              
                                                                 AutomationProperties.Name="Expiry date" />
                                         </StackPanel>
 
-                                        <TextBlock x:ConnectionId='29' Grid.Column="5" Style="{StaticResource AmountTextStyle}"
+                                        <TextBlock x:ConnectionId='30' Grid.Column="6" Style="{StaticResource AmountTextStyle}"
                                                    VerticalAlignment="Center" HorizontalAlignment="Right"
                                                                                                                                         />
 
-                                        <Button x:ConnectionId='30' Grid.Column="6"                                         
+                                        <Button x:ConnectionId='31' Grid.Column="7"                                         
                                                 VerticalAlignment="Center" Padding="8,6" MinWidth="0"
                                                 Background="Transparent" BorderThickness="0"
                                                 CornerRadius="{StaticResource RadiusMedium}"

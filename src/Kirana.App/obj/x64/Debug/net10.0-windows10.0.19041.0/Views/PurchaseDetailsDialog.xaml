@@ -12,8 +12,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock x:ConnectionId='2' x:Name="DialogTitleText" Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
-            <Button x:ConnectionId='3' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
-                                             AutomationProperties.Name="Close">
+            <Button x:ConnectionId='3' Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
+                                             AutomationProperties.Name="Close dialog">
                 <FontIcon Glyph="&#xE711;" FontSize="14" />
             </Button>
         </Grid>

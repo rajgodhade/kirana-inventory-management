@@ -3,12 +3,13 @@ using Kirana.Application.Authentication;
 using Kirana.Application.Promotions;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Kirana.Application.Taxation;
 
 namespace Kirana.Application.Billing;
 
 public sealed class SaleService(
     IKiranaDbContext db, ISequenceGenerator sequenceGenerator, IAuditLogger auditLogger, IPermissionEnforcer permissionEnforcer,
-    IPromotionEngine? promotionEngine = null)
+    IPromotionEngine? promotionEngine = null, IGstCalculationService? gstCalculationService = null)
     : ISaleService
 {
     /// <summary>Item/bill discounts at or below this don't need manager authorization (PRD §10).</summary>
@@ -119,7 +120,7 @@ public sealed class SaleService(
                 ProductId = line.ProductId,
                 Quantity = line.Quantity,
                 UnitPrice = line.UnitPriceOverride ?? product.SellingPrice,
-                IsTaxInclusive = product.IsTaxInclusive,
+                PricingType = product.PricingType,
                 GstRatePercent = product.GstRatePercent ?? 0,
                 DiscountPercent = line.DiscountPercent,
                 PromotionBeforeTaxDiscountAmount = promotionResults.TryGetValue(line.ProductId, out var result)
@@ -131,7 +132,8 @@ public sealed class SaleService(
             };
         }).ToList();
 
-        var totals = CartPricingCalculator.Calculate(cartLines, request.BillDiscountPercent, isGstEnabled);
+        var totals = (gstCalculationService ?? GstCalculationService.Shared)
+            .CalculateSales(cartLines, request.BillDiscountPercent, isGstEnabled);
 
         var paymentsTotal = request.Payments.Sum(p => p.Amount);
         if (Math.Abs(paymentsTotal - totals.GrandTotal) > PaymentAmountTolerance)
@@ -204,7 +206,7 @@ public sealed class SaleService(
                 SkuSnapshot = product.Sku,
                 HsnCodeSnapshot = product.HsnCode,
                 UnitSnapshot = product.Unit.ToString(),
-                IsTaxInclusiveSnapshot = product.IsTaxInclusive,
+                IsTaxInclusiveSnapshot = lineResult.Line.PricingType == PricingType.Inclusive,
                 GstRatePercentSnapshot = product.GstRatePercent ?? 0,
                 Quantity = lineResult.Line.Quantity,
                 UnitPriceSnapshot = lineResult.Line.UnitPrice,

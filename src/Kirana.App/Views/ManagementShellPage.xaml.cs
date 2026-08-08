@@ -59,6 +59,7 @@ public sealed partial class ManagementShellPage : Page
             var t when t == typeof(ProductsPage) => "Products",
             var t when t == typeof(PromotionsPage) => "Promotions",
             var t when t == typeof(BarcodeScanTestPage) => "Barcodes",
+            var t when t == typeof(InvoicesPage) || t == typeof(InvoiceDetailsPage) => "Invoices",
             var t when t == typeof(CustomersPage) || t == typeof(CustomerLedgerPage) => "Customers",
             var t when t == typeof(SuppliersPage) || t == typeof(SupplierLedgerPage) => "Suppliers",
             var t when t == typeof(PurchasesPage) || t == typeof(PurchaseEntryPage) => "Purchases",
@@ -132,6 +133,7 @@ public sealed partial class ManagementShellPage : Page
     /// <summary>Hides nav entries the current user has no permission for.</summary>
     private void ApplyPermissionsToPane()
     {
+        SetVisible(NavInvoices, _session.IsUnlocked);
         SetVisible(NavCustomers, _session.HasPermission(PermissionKeys.CustomersManage));
         SetVisible(NavPromotions, _session.HasPermission(PermissionKeys.PromotionsView));
         SetVisible(NavSuppliers, _session.HasPermission(PermissionKeys.PurchasesManage));
@@ -161,6 +163,7 @@ public sealed partial class ManagementShellPage : Page
 
         // A group header with nothing under it reads as a broken pane, so drop it too.
         SetVisible(NavTradeHeader, NavCustomers.Visibility == Visibility.Visible
+            || NavInvoices.Visibility == Visibility.Visible
             || NavSuppliers.Visibility == Visibility.Visible
             || NavPurchases.Visibility == Visibility.Visible);
 
@@ -202,6 +205,7 @@ public sealed partial class ManagementShellPage : Page
 
         var target = tag switch
         {
+            "Invoices" => typeof(InvoicesPage),
             "Home" => typeof(ManagementHomePage),
             "Products" => typeof(ProductsPage),
             "Promotions" => typeof(PromotionsPage),

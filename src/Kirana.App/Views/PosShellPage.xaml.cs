@@ -1,4 +1,5 @@
 using Kirana.App.Theming;
+using Kirana.App.Services;
 using Kirana.App.ViewModels;
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
@@ -9,6 +10,7 @@ using Kirana.Application.Printing;
 using Kirana.Application.Hardware;
 using Kirana.Application.Products;
 using Kirana.Application.Promotions;
+using Kirana.Application.Taxation;
 using Kirana.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -55,6 +57,7 @@ public sealed partial class PosShellPage : Page
             services.GetRequiredService<IHeldBillService>(),
             services.GetRequiredService<ICustomerService>(),
             services.GetRequiredService<IPromotionEngine>(),
+            services.GetRequiredService<IGstCalculationService>(),
             services.GetRequiredService<IKiranaDbContext>(),
             services.GetRequiredService<ManagementSession>());
 
@@ -524,6 +527,7 @@ public sealed partial class PosShellPage : Page
 
         if (paymentViewModel.CompletedSale is { } sale)
         {
+            App.Services.GetRequiredService<InvoiceRefreshNotifier>().NotifyInvoicesChanged();
             await ShowSaleCompletedDialogAsync(sale);
             ViewModel.ClearCart();
         }

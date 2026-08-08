@@ -1,3 +1,5 @@
+using Kirana.Domain.Entities;
+
 namespace Kirana.App.ViewModels;
 
 /// <summary>Flattened, permission-aware row for the products list (PRD §12-14, §26).</summary>
@@ -16,6 +18,9 @@ public sealed class ProductRowViewModel
     public decimal? Mrp { get; init; }
     public decimal? PurchasePrice { get; init; }
     public bool ShowPurchasePrice { get; init; }
+    public PricingType PricingType { get; init; } = PricingType.Inclusive;
+    public string PricingTypeLabel => PricingType == PricingType.Inclusive ? "GST Included" : "GST Extra";
+    public bool IsGstInclusive => PricingType == PricingType.Inclusive;
 
     public decimal Stock { get; init; }
     public bool IsActive { get; init; }

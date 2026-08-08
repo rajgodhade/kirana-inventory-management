@@ -5,29 +5,32 @@
     PrimaryButtonText="Print"
     CloseButtonText="Close"
     DefaultButton="Primary">
+    <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMaxWidth">1080</x:Double>
+    </ContentDialog.Resources>
 
     <ContentDialog.Title>
-        <Grid ColumnSpacing="8">
+        <Grid x:ConnectionId='2' ColumnSpacing="8"                                                           >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="Invoice Preview" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
-            <Button x:ConnectionId='2' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
-                                             AutomationProperties.Name="Close">
+            <Button x:ConnectionId='3' Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
+                                             AutomationProperties.Name="Close dialog">
                 <FontIcon Glyph="&#xE711;" FontSize="14" />
             </Button>
         </Grid>
     </ContentDialog.Title>
 
-    <StackPanel Spacing="10" MinWidth="420">
+    <StackPanel x:ConnectionId='4' Spacing="10"                                                           >
 
-        <ComboBox x:ConnectionId='3' Header="Format"                                                  
+        <ComboBox x:ConnectionId='5' Header="Format"                                                  
                                                                                 />
 
-        <InfoBar x:ConnectionId='4'                                                                                                        
+        <InfoBar x:ConnectionId='6'                                                                                                        
                  Severity="Error"                                                        />
-        <InfoBar x:ConnectionId='5'                                                                                                         
+        <InfoBar x:ConnectionId='7'                                                                                                         
                  Severity="Success"                                                         />
 
         <!-- Scrolling itself already worked here (confirmed via UIA ScrollPattern — a 22-line bill
@@ -36,12 +39,14 @@
              easy to miss on a bill that's cut off mid-list, especially for someone who isn't
              already expecting a preview to scroll. VerticalScrollBarVisibility="Visible" keeps the
              track permanently on-screen instead of only appearing on hover/drag. -->
-        <ScrollViewer MaxHeight="480" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"
+        <ScrollViewer x:ConnectionId='8'                                                             
+                                                                                          
+                      VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"
                       Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <ContentControl x:ConnectionId='7'                                                          HorizontalContentAlignment="Center" />
+            <ContentControl x:ConnectionId='10'                                                          HorizontalContentAlignment="Center" />
         </ScrollViewer>
 
-        <ProgressRing x:ConnectionId='6'                                                       HorizontalAlignment="Center" />
+        <ProgressRing x:ConnectionId='9'                                                       HorizontalAlignment="Center" />
     </StackPanel>
 </ContentDialog>
 

@@ -158,6 +158,7 @@ public sealed partial class ProductsViewModel(
             Mrp = product.Mrp,
             PurchasePrice = CanViewPurchasePrice ? product.PurchasePrice : null,
             ShowPurchasePrice = CanViewPurchasePrice,
+            PricingType = product.PricingType,
             Stock = stock,
             IsActive = product.IsActive,
             TracksBatches = product.TracksBatches,

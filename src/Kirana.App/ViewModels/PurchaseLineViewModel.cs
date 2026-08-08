@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Kirana.Domain.Entities;
 
 namespace Kirana.App.ViewModels;
 
@@ -15,7 +16,13 @@ public sealed partial class PurchaseLineViewModel : ObservableObject
     public required bool SupportsDecimalQuantity { get; init; }
     public required bool TracksBatches { get; init; }
     public decimal GstRatePercent { get; init; }
-    public bool IsTaxInclusive { get; init; }
+    public IReadOnlyList<PricingType> PricingTypes { get; } = Enum.GetValues<PricingType>();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PricingTypeLabel))]
+    private PricingType _pricingType = PricingType.Inclusive;
+
+    public string PricingTypeLabel => PricingType == PricingType.Inclusive ? "GST Included" : "GST Extra";
 
     [ObservableProperty]
     private string _quantityText = "1";

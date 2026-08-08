@@ -70,6 +70,18 @@ public sealed partial class PurchasesPage : Page
     private async void OnDateFilterChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args) =>
         await ViewModel.SearchAsync();
 
+    private async void OnClearDateFiltersClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ClearDateFilters();
+        await ViewModel.SearchAsync();
+    }
+
+    private async void OnClearFiltersClick(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ClearFilters();
+        await ViewModel.SearchAsync();
+    }
+
     private async void OnRefreshClick(object sender, RoutedEventArgs e) => await ViewModel.SearchAsync();
 
     private void OnNewPurchaseClick(object sender, RoutedEventArgs e)

@@ -101,6 +101,33 @@ public class ProductServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CreateAsync_DefaultsPricingTypeToGstInclusive()
+    {
+        var product = await _sut.CreateAsync(ValidRequest());
+
+        Assert.Equal(PricingType.Inclusive, product.PricingType);
+        Assert.True(product.IsTaxInclusive);
+    }
+
+    [Fact]
+    public async Task CreateAsync_RejectsNonStandardGstSlab()
+    {
+        var request = new CreateProductRequest
+        {
+            Name = "Invalid GST Product",
+            Sku = "GST-7",
+            PurchasePrice = 80,
+            Mrp = 110,
+            SellingPrice = 100,
+            GstRatePercent = 7,
+            PerformedByUserId = _ownerId,
+        };
+
+        var error = await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateAsync(request));
+        Assert.Contains("0%, 5%, 12%, 18%, or 28%", error.Message);
+    }
+
+    [Fact]
     public async Task CreateAsync_Throws_OnDuplicateSku()
     {
         await _sut.CreateAsync(ValidRequest("First", "DUP-SKU", "BAR-1"));

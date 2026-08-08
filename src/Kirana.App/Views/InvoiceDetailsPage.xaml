@@ -1,0 +1,33 @@
+<Page x:Class="Kirana.App.Views.InvoiceDetailsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Background="{ThemeResource PageBackgroundBrush}" Padding="24" Spacing="16">
+        <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <StackPanel Spacing="2"><TextBlock Text="Invoice Details" Style="{StaticResource PageTitleTextStyle}"/><TextBlock x:Name="SubtitleText" Style="{StaticResource PageSubtitleTextStyle}"/></StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"><Button Content="Print receipt" Click="OnPrintReceiptClick"/><Button Content="Print GST invoice" Click="OnPrintGstClick"/><Button Content="Return items" Click="OnReturnClick"/></StackPanel>
+        </Grid>
+        <Border Style="{StaticResource ElevatedCardStyle}"><Grid x:Name="SummaryGrid" ColumnSpacing="20"/></Border>
+        <Border Style="{StaticResource ElevatedCardStyle}" Padding="0"><StackPanel><TextBlock Text="Products" Style="{StaticResource SectionTitleTextStyle}" Padding="16,14,16,8"/><Grid Padding="16,9" Background="{ThemeResource SurfaceAltBrush}" ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="72"/><ColumnDefinition Width="82"/><ColumnDefinition Width="86"/><ColumnDefinition Width="115"/><ColumnDefinition Width="105"/><ColumnDefinition Width="82"/><ColumnDefinition Width="90"/><ColumnDefinition Width="96"/></Grid.ColumnDefinitions><TextBlock Text="PRODUCT" Style="{StaticResource ColumnHeaderTextStyle}"/><TextBlock Grid.Column="1" Text="QTY" Style="{StaticResource ColumnHeaderTextStyle}"/><TextBlock Grid.Column="2" Text="PRICE" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" TextAlignment="Right"/><TextBlock Grid.Column="3" Text="DISCOUNT" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" TextAlignment="Right"/><TextBlock Grid.Column="4" Text="PROMOTION" Style="{StaticResource ColumnHeaderTextStyle}"/><TextBlock Grid.Column="5" Text="PRICING TYPE" Style="{StaticResource ColumnHeaderTextStyle}"/><TextBlock Grid.Column="6" Text="TAXABLE" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" TextAlignment="Right"/><TextBlock Grid.Column="7" Text="GST" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" TextAlignment="Right"/><TextBlock Grid.Column="8" Text="TOTAL" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" TextAlignment="Right"/></Grid><StackPanel x:Name="ProductsPanel"/></StackPanel></Border>
+        <Grid ColumnSpacing="16"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Border Style="{StaticResource ElevatedCardStyle}"><StackPanel Spacing="10"><TextBlock Text="Totals" Style="{StaticResource SectionTitleTextStyle}"/><Grid x:Name="TotalsPanel" RowSpacing="8" ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions></Grid></StackPanel></Border><Border Grid.Column="1" Style="{StaticResource ElevatedCardStyle}"><StackPanel Spacing="10"><TextBlock Text="Payments" Style="{StaticResource SectionTitleTextStyle}"/><StackPanel x:Name="PaymentsPanel" Spacing="8"/></StackPanel></Border></Grid>
+        <Border Style="{StaticResource ElevatedCardStyle}">
+            <StackPanel Spacing="8">
+                <TextBlock Text="GST Summary" Style="{StaticResource SectionTitleTextStyle}"/>
+                <Grid ColumnSpacing="16" Padding="0,4">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="GST TREATMENT" Style="{StaticResource ColumnHeaderTextStyle}"/>
+                    <TextBlock Grid.Column="1" Text="TAXABLE AMOUNT" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right"/>
+                    <TextBlock Grid.Column="2" Text="GST AMOUNT" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right"/>
+                </Grid>
+                <StackPanel x:Name="GstSummaryPanel"/>
+                <Grid ColumnSpacing="16" Padding="0,8,0,0">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="Total GST" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="TotalGstText" Grid.Column="2" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+        <Border Style="{StaticResource ElevatedCardStyle}"><StackPanel Spacing="8"><TextBlock Text="Timeline &amp; Audit History" Style="{StaticResource SectionTitleTextStyle}"/><StackPanel x:Name="TimelinePanel"/></StackPanel></Border>
+        <InfoBar x:Name="ErrorBar" IsOpen="False" Severity="Error" />
+    </StackPanel></ScrollViewer>
+</Page>

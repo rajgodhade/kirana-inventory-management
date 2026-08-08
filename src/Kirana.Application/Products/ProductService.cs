@@ -3,6 +3,7 @@ using Kirana.Application.Authentication;
 using Kirana.Application.Barcodes;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Kirana.Application.Taxation;
 
 namespace Kirana.Application.Products;
 
@@ -18,6 +19,7 @@ public sealed class ProductService(
     public async Task<Product> CreateAsync(CreateProductRequest request, CancellationToken cancellationToken = default)
     {
         await permissionEnforcer.EnsureHasPermissionAsync(request.PerformedByUserId, PermissionKeys.ProductsEdit, cancellationToken);
+        EnsurePricingType(request.PricingType);
 
         await ValidateAsync(request.Name, request.CategoryId, request.BrandId, request.PurchasePrice, request.Mrp,
             request.SellingPrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
@@ -42,7 +44,7 @@ public sealed class ProductService(
             DefaultDiscountPercent = request.DefaultDiscountPercent,
             GstRatePercent = request.GstRatePercent,
             HsnCode = request.HsnCode,
-            IsTaxInclusive = request.IsTaxInclusive,
+            PricingType = request.PricingType,
             TracksBatches = request.TracksBatches,
             MinimumStock = request.MinimumStock,
             ReorderQuantity = request.ReorderQuantity,
@@ -80,6 +82,7 @@ public sealed class ProductService(
     public async Task<Product> UpdateAsync(int productId, UpdateProductRequest request, CancellationToken cancellationToken = default)
     {
         await permissionEnforcer.EnsureHasPermissionAsync(request.PerformedByUserId, PermissionKeys.ProductsEdit, cancellationToken);
+        EnsurePricingType(request.PricingType);
 
         var product = await db.Products.FirstOrDefaultAsync(p => p.Id == productId, cancellationToken)
             ?? throw new InvalidOperationException("Product not found.");
@@ -107,7 +110,7 @@ public sealed class ProductService(
         product.DefaultDiscountPercent = request.DefaultDiscountPercent;
         product.GstRatePercent = request.GstRatePercent;
         product.HsnCode = request.HsnCode;
-        product.IsTaxInclusive = request.IsTaxInclusive;
+        product.PricingType = request.PricingType;
         product.TracksBatches = request.TracksBatches;
         product.MinimumStock = request.MinimumStock;
         product.ReorderQuantity = request.ReorderQuantity;
@@ -249,10 +252,9 @@ public sealed class ProductService(
             throw new ArgumentException("Prices cannot be negative.");
         }
 
-        if (gstRatePercent is < 0 or > 100)
-        {
-            throw new ArgumentException("GST rate must be between 0 and 100.");
-        }
+        if (gstRatePercent is { } gstRate && !GstRatePolicy.IsSupported(gstRate))
+            throw new ArgumentException("GST rate must be one of 0%, 5%, 12%, 18%, or 28%.");
+
 
         if (minimumStock < 0 || reorderQuantity < 0)
         {
@@ -286,6 +288,12 @@ public sealed class ProductService(
             barcodeService.ValidateFormat(normalizedBarcode);
             await barcodeService.EnsureAvailableAsync(normalizedBarcode, excludingProductId, cancellationToken);
         }
+    }
+
+    private static void EnsurePricingType(PricingType pricingType)
+    {
+        if (!Enum.IsDefined(pricingType))
+            throw new ArgumentException("Pricing Type must be GST Inclusive or GST Exclusive.");
     }
 
     private static string? Normalize(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

@@ -27,8 +27,8 @@
             <TextBlock Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}">
                 <Run Text="Payment — " /><Run Text="{x:Bind ViewModel.CustomerDisplayText}" />
             </TextBlock>
-            <Button Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
-                    Click="OnCloseIconClick" AutomationProperties.Name="Close payment dialog">
+            <Button Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
+                    Click="OnCloseIconClick" AutomationProperties.Name="Close dialog">
                 <FontIcon Glyph="&#xE711;" FontSize="14" />
             </Button>
         </Grid>

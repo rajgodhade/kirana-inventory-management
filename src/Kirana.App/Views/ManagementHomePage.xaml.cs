@@ -1,4 +1,5 @@
 using Kirana.App.Theming;
+using Kirana.App.Services;
 using Kirana.App.ViewModels;
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
@@ -18,11 +19,13 @@ namespace Kirana.App.Views;
 
 public sealed partial class ManagementHomePage : Page
 {
+    private readonly InvoiceRefreshNotifier _refreshNotifier;
     public ManagementHomeViewModel ViewModel { get; }
 
     public ManagementHomePage()
     {
         var services = App.Services;
+        _refreshNotifier = services.GetRequiredService<InvoiceRefreshNotifier>();
         ViewModel = new ManagementHomeViewModel(
             services.GetRequiredService<IKiranaDbContext>(),
             services.GetRequiredService<IInventoryService>(),
@@ -36,8 +39,20 @@ public sealed partial class ManagementHomePage : Page
             services.GetRequiredService<ManagementSession>());
 
         InitializeComponent();
-        Loaded += async (_, _) => await ViewModel.InitializeAsync();
+        Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
     }
+
+    private async void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        _refreshNotifier.InvoicesChanged += OnInvoicesChanged;
+        await ViewModel.InitializeAsync();
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e) => _refreshNotifier.InvoicesChanged -= OnInvoicesChanged;
+
+    private void OnInvoicesChanged(object? sender, EventArgs e) =>
+        _ = DispatcherQueue.TryEnqueue(async () => await ViewModel.RefreshRecentInvoicesAsync());
 
     private void OnBackToBillingClick(object sender, RoutedEventArgs e)
     {
@@ -57,6 +72,7 @@ public sealed partial class ManagementHomePage : Page
             "Products" => typeof(ProductsPage),
             "Promotions" => typeof(PromotionsPage),
             "Customers" => typeof(CustomersPage),
+            "Invoices" => typeof(InvoicesPage),
             "Purchases" => typeof(PurchasesPage),
             "PurchaseEntry" => typeof(PurchaseEntryPage),
             "Expenses" => typeof(ExpensesPage),

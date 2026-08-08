@@ -14,7 +14,7 @@
     </ContentDialog.Resources>
 
     <ContentDialog.Title>
-        <Grid ColumnSpacing="12">
+        <Grid ColumnSpacing="12" Width="900">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -39,19 +39,88 @@
 
             <Border Style="{StaticResource CardBorderStyle}"><StackPanel Spacing="10"><TextBlock Text="General" Style="{StaticResource SectionTitleTextStyle}" /><Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="110" /></Grid.ColumnDefinitions><TextBox Header="Promotion name *" Text="{x:Bind ViewModel.PromotionName, Mode=TwoWay}" /><TextBox Grid.Column="1" Header="Code *" Text="{x:Bind ViewModel.PromotionCode, Mode=TwoWay}" CharacterCasing="Upper" /><TextBox Grid.Column="2" Header="Priority" Text="{x:Bind ViewModel.PriorityText, Mode=TwoWay}" /></Grid><TextBox Header="Description" Text="{x:Bind ViewModel.Description, Mode=TwoWay}" AcceptsReturn="True" MaxHeight="80" /><ComboBox Header="Selection mode" ItemsSource="{x:Bind ViewModel.PriorityModes}" SelectedItem="{x:Bind ViewModel.SelectedPriorityMode, Mode=TwoWay}" HorizontalAlignment="Stretch" /></StackPanel></Border>
 
-            <Border Style="{StaticResource CardBorderStyle}"><StackPanel Spacing="10"><TextBlock Text="Schedule" Style="{StaticResource SectionTitleTextStyle}" /><Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><CalendarDatePicker Header="Start date" Date="{x:Bind ViewModel.StartDate, Mode=TwoWay}" HorizontalAlignment="Stretch" /><TimePicker Grid.Column="1" Header="Start time" Time="{x:Bind ViewModel.StartTime, Mode=TwoWay}" ClockIdentifier="12HourClock" /><CalendarDatePicker Grid.Column="2" Header="End date" Date="{x:Bind ViewModel.EndDate, Mode=TwoWay}" HorizontalAlignment="Stretch" /><TimePicker Grid.Column="3" Header="End time" Time="{x:Bind ViewModel.EndTime, Mode=TwoWay}" ClockIdentifier="12HourClock" /></Grid><TextBlock Text="Times are saved against this computer's timezone and evaluated in UTC." Style="{StaticResource CaptionTextStyle}" /></StackPanel></Border>
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Schedule" Style="{StaticResource SectionTitleTextStyle}" />
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Start" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="280" />
+                                </Grid.ColumnDefinitions>
+                                <CalendarDatePicker Header="Date" Date="{x:Bind ViewModel.StartDate, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                                <TimePicker Grid.Column="1" Header="Time" Time="{x:Bind ViewModel.StartTime, Mode=TwoWay}" ClockIdentifier="12HourClock" HorizontalAlignment="Stretch" MinWidth="280" />
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Text="End" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="280" />
+                                </Grid.ColumnDefinitions>
+                                <CalendarDatePicker Header="Date" Date="{x:Bind ViewModel.EndDate, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                                <TimePicker Grid.Column="1" Header="Time" Time="{x:Bind ViewModel.EndTime, Mode=TwoWay}" ClockIdentifier="12HourClock" HorizontalAlignment="Stretch" MinWidth="280" />
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Text="Times are saved against this computer's timezone and evaluated in UTC." Style="{StaticResource CaptionTextStyle}" />
+                </StackPanel>
+            </Border>
 
-            <Border Style="{StaticResource CardBorderStyle}"><StackPanel Spacing="10"><TextBlock Text="Scope" Style="{StaticResource SectionTitleTextStyle}" /><RadioButtons ItemsSource="{x:Bind ViewModel.ScopeTypes}" SelectedItem="{x:Bind ViewModel.SelectedScopeType, Mode=TwoWay}" MaxColumns="4" />
-                <ListView x:Name="CategoryTargets" Header="Select categories" ItemsSource="{x:Bind ViewModel.Categories}" SelectionMode="Multiple" MaxHeight="150" DisplayMemberPath="Name" Visibility="{x:Bind ViewModel.IsCategoryScope, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <ListView x:Name="BrandTargets" Header="Select brands" ItemsSource="{x:Bind ViewModel.Brands}" SelectionMode="Multiple" MaxHeight="150" DisplayMemberPath="Name" Visibility="{x:Bind ViewModel.IsBrandScope, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <StackPanel Visibility="{x:Bind ViewModel.IsProductScope, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Spacing="6"><TextBox PlaceholderText="Search products by name, code or SKU…" TextChanged="OnProductSearchChanged" /><ListView x:Name="ProductTargets" Header="Select products" ItemsSource="{x:Bind ViewModel.Products}" SelectionMode="Multiple" MaxHeight="200" DisplayMemberPath="Name" /></StackPanel>
+            <Border Style="{StaticResource CardBorderStyle}"><StackPanel Spacing="10"><TextBlock Text="Scope" Style="{StaticResource SectionTitleTextStyle}" />
+                <!-- Explicit controls avoid the WinUI RadioButtons enum SelectedItem crash path. -->
+                <StackPanel Orientation="Horizontal" Spacing="28">
+                    <RadioButton x:Name="EntireStoreScopeRadio" GroupName="PromotionScope" Content="Entire store" Tag="EntireStore" Checked="OnScopeRadioChecked" />
+                    <RadioButton x:Name="CategoryScopeRadio" GroupName="PromotionScope" Content="Category" Tag="Category" Checked="OnScopeRadioChecked" />
+                    <RadioButton x:Name="BrandScopeRadio" GroupName="PromotionScope" Content="Brand" Tag="Brand" Checked="OnScopeRadioChecked" />
+                    <RadioButton x:Name="ProductScopeRadio" GroupName="PromotionScope" Content="Product" Tag="Product" Checked="OnScopeRadioChecked" />
+                </StackPanel>
+                <ListView x:Name="CategoryTargets" Header="Select categories" ItemsSource="{x:Bind ViewModel.Categories}" SelectionMode="Multiple" MaxHeight="150" DisplayMemberPath="Name" Visibility="Collapsed" />
+                <StackPanel x:Name="BrandTargetsPanel" Visibility="Collapsed" Spacing="6">
+                    <TextBox x:Name="BrandSearchBox" PlaceholderText="Search brands" TextChanged="OnBrandSearchChanged" />
+                    <ListView x:Name="BrandTargets" Header="Select brands" ItemsSource="{x:Bind ViewModel.Brands}" SelectionMode="Multiple" MaxHeight="150" DisplayMemberPath="Name" />
+                </StackPanel>
+                <StackPanel Visibility="{x:Bind ViewModel.IsProductScope, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Spacing="6">
+                    <TextBox PlaceholderText="Search products by name, code or SKU..." TextChanged="OnProductSearchChanged" />
+                    <ListView x:Name="ProductTargets" Header="Select products" ItemsSource="{x:Bind ViewModel.Products}" SelectionMode="Multiple" MaxHeight="240">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnSpacing="16" Padding="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding ProductCode}" Style="{StaticResource CaptionTextStyle}" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{Binding MrpText}" VerticalAlignment="Center" Foreground="{ThemeResource TextSecondaryBrush}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding SellingPriceText}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                    <StackPanel Grid.Column="3" VerticalAlignment="Center" MinWidth="120">
+                                        <TextBlock Text="{Binding PromotionPriceText}" FontWeight="Bold" Foreground="{ThemeResource PastelGreenOnBrush}" HorizontalAlignment="Right" />
+                                        <TextBlock Text="{Binding SavingText}" Style="{StaticResource CaptionTextStyle}" HorizontalAlignment="Right" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
             </StackPanel></Border>
 
-            <Border Style="{StaticResource CardBorderStyle}"><StackPanel Spacing="10"><TextBlock Text="Discount" Style="{StaticResource SectionTitleTextStyle}" /><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="220" /><ColumnDefinition Width="*" /><ColumnDefinition Width="220" /></Grid.ColumnDefinitions><ComboBox Header="Discount type" ItemsSource="{x:Bind ViewModel.PromotionTypes}" SelectedItem="{x:Bind ViewModel.SelectedPromotionType, Mode=TwoWay}" HorizontalAlignment="Stretch" /><TextBox Grid.Column="1" Header="Percentage" Text="{x:Bind ViewModel.PercentageText, Mode=TwoWay}" TextChanged="OnPreviewInputChanged" Visibility="{x:Bind ViewModel.IsPercentage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" /><TextBox Grid.Column="1" Header="Flat amount per unit" Text="{x:Bind ViewModel.FlatAmountText, Mode=TwoWay}" TextChanged="OnPreviewInputChanged" Visibility="{x:Bind ViewModel.IsFlatAmount, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" /><TextBox Grid.Column="1" Header="Fixed selling price" Text="{x:Bind ViewModel.FixedPriceText, Mode=TwoWay}" TextChanged="OnPreviewInputChanged" Visibility="{x:Bind ViewModel.IsFixedPrice, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" /><ComboBox Grid.Column="2" Header="Tax calculation" ItemsSource="{x:Bind ViewModel.CalculationModes}" SelectedItem="{x:Bind ViewModel.SelectedCalculationMode, Mode=TwoWay}" HorizontalAlignment="Stretch" /></Grid></StackPanel></Border>
+            <Border Style="{StaticResource CardBorderStyle}"><StackPanel Spacing="10"><TextBlock Text="Discount" Style="{StaticResource SectionTitleTextStyle}" /><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="220" /><ColumnDefinition Width="*" /><ColumnDefinition Width="220" /></Grid.ColumnDefinitions><ComboBox Header="Discount type" ItemsSource="{x:Bind ViewModel.PromotionTypes}" SelectedItem="{x:Bind ViewModel.SelectedPromotionType, Mode=TwoWay}" SelectionChanged="OnPreviewSelectionChanged" HorizontalAlignment="Stretch" /><TextBox x:Name="PercentageInput" Grid.Column="1" Header="Percentage" Text="{x:Bind ViewModel.PercentageText, Mode=TwoWay}" TextChanged="OnPreviewInputChanged" Visibility="{x:Bind ViewModel.IsPercentage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" /><TextBox x:Name="FlatAmountInput" Grid.Column="1" Header="Flat amount per unit" Text="{x:Bind ViewModel.FlatAmountText, Mode=TwoWay}" TextChanged="OnPreviewInputChanged" Visibility="{x:Bind ViewModel.IsFlatAmount, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" /><TextBox x:Name="FixedPriceInput" Grid.Column="1" Header="Fixed selling price" Text="{x:Bind ViewModel.FixedPriceText, Mode=TwoWay}" TextChanged="OnPreviewInputChanged" Visibility="{x:Bind ViewModel.IsFixedPrice, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" /><ComboBox Grid.Column="2" Header="Tax calculation" ItemsSource="{x:Bind ViewModel.CalculationModes}" SelectedItem="{x:Bind ViewModel.SelectedCalculationMode, Mode=TwoWay}" SelectionChanged="OnPreviewSelectionChanged" HorizontalAlignment="Stretch" /></Grid></StackPanel></Border>
 
-            <Border Style="{StaticResource CardBorderStyle}"><StackPanel Spacing="10"><TextBlock Text="Conditions" Style="{StaticResource SectionTitleTextStyle}" /><Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><TextBox Header="Minimum quantity" Text="{x:Bind ViewModel.MinimumQuantityText, Mode=TwoWay}" /><TextBox Grid.Column="1" Header="Minimum bill" Text="{x:Bind ViewModel.MinimumBillText, Mode=TwoWay}" /><TextBox Grid.Column="2" Header="Maximum discount" Text="{x:Bind ViewModel.MaximumDiscountText, Mode=TwoWay}" TextChanged="OnPreviewInputChanged" /><TextBox Grid.Column="3" Header="Maximum usage" Text="{x:Bind ViewModel.MaximumUsageText, Mode=TwoWay}" /></Grid><StackPanel Orientation="Horizontal" Spacing="24"><CheckBox Content="Allow stacking" IsChecked="{x:Bind ViewModel.AllowStacking, Mode=TwoWay}" /><CheckBox Content="Activate after saving" IsChecked="{x:Bind ViewModel.ActivateImmediately, Mode=TwoWay}" /></StackPanel></StackPanel></Border>
+            <Border Style="{StaticResource CardBorderStyle}"><StackPanel Spacing="10"><TextBlock Text="Conditions" Style="{StaticResource SectionTitleTextStyle}" /><Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><TextBox Header="Minimum quantity" Text="{x:Bind ViewModel.MinimumQuantityText, Mode=TwoWay}" /><TextBox Grid.Column="1" Header="Minimum bill" Text="{x:Bind ViewModel.MinimumBillText, Mode=TwoWay}" /><TextBox x:Name="MaximumDiscountInput" Grid.Column="2" Header="Maximum discount" Text="{x:Bind ViewModel.MaximumDiscountText, Mode=TwoWay}" TextChanged="OnPreviewInputChanged" /><TextBox Grid.Column="3" Header="Maximum usage" Text="{x:Bind ViewModel.MaximumUsageText, Mode=TwoWay}" /></Grid><StackPanel Orientation="Horizontal" Spacing="24"><CheckBox Content="Allow stacking" IsChecked="{x:Bind ViewModel.AllowStacking, Mode=TwoWay}" /><CheckBox Content="Activate after saving" IsChecked="{x:Bind ViewModel.ActivateImmediately, Mode=TwoWay}" /></StackPanel></StackPanel></Border>
 
-            <Border Background="{ThemeResource PastelGreenBrush}" BorderBrush="{ThemeResource PastelGreenBrush}" BorderThickness="1" CornerRadius="14" Padding="18"><Grid ColumnSpacing="16"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Live preview" Style="{StaticResource SectionTitleTextStyle}" /><TextBox Header="Current selling price" Width="180" HorizontalAlignment="Left" Text="{x:Bind ViewModel.PreviewPriceText, Mode=TwoWay}" TextChanged="OnPreviewInputChanged" /></StackPanel><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="CURRENT" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.PreviewCurrentText, Mode=OneWay}" FontSize="20" FontWeight="SemiBold" /></StackPanel><FontIcon Grid.Column="2" Glyph="&#xE76C;" VerticalAlignment="Center" /><StackPanel Grid.Column="3" VerticalAlignment="Center"><TextBlock Text="FINAL PRICE" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.PreviewFinalText, Mode=OneWay}" FontSize="26" FontWeight="Bold" Foreground="{ThemeResource PastelGreenOnBrush}" /><TextBlock Text="{x:Bind ViewModel.PreviewSavingsText, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource PastelGreenOnBrush}" /></StackPanel></Grid></Border>
+            <Border Background="{ThemeResource PastelGreenBrush}" BorderBrush="{ThemeResource PastelGreenBrush}" BorderThickness="1" CornerRadius="14" Padding="18"><Grid ColumnSpacing="16"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Live preview" Style="{StaticResource SectionTitleTextStyle}" /><TextBox x:Name="PreviewPriceInput" Header="Current selling price" Width="180" HorizontalAlignment="Left" Text="{x:Bind ViewModel.PreviewPriceText, Mode=TwoWay}" TextChanged="OnPreviewInputChanged" /></StackPanel><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="CURRENT" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.PreviewCurrentText, Mode=OneWay}" FontSize="20" FontWeight="SemiBold" /></StackPanel><FontIcon Grid.Column="2" Glyph="&#xE76C;" VerticalAlignment="Center" /><StackPanel Grid.Column="3" VerticalAlignment="Center"><TextBlock Text="FINAL PRICE" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.PreviewFinalText, Mode=OneWay}" FontSize="26" FontWeight="Bold" Foreground="{ThemeResource PastelGreenOnBrush}" /><TextBlock Text="{x:Bind ViewModel.PreviewSavingsText, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource PastelGreenOnBrush}" /></StackPanel></Grid></Border>
         </StackPanel>
     </ScrollViewer>
 </ContentDialog>

@@ -166,6 +166,14 @@ public sealed partial class PurchaseEntryPage : Page
         }
     }
 
+    private void OnPricingTypeChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if ((sender as ComboBox)?.Tag is PurchaseLineViewModel)
+        {
+            ViewModel.RecalculateTotals();
+        }
+    }
+
     private void OnLineFieldLostFocus(object sender, RoutedEventArgs e)
     {
         if ((sender as TextBox)?.Tag is PurchaseLineViewModel line)

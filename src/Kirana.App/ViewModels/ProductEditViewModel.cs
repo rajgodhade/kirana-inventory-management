@@ -23,6 +23,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
     public bool IsEditMode { get; }
     public bool ShowPurchasePrice { get; }
     public IReadOnlyList<UnitOfMeasure> Units { get; } = Enum.GetValues<UnitOfMeasure>();
+    public IReadOnlyList<PricingType> PricingTypes { get; } = Enum.GetValues<PricingType>();
 
     public System.Collections.ObjectModel.ObservableCollection<Category> Categories => _owner.Categories;
     public System.Collections.ObjectModel.ObservableCollection<Brand> Brands => _owner.Brands;
@@ -80,7 +81,12 @@ public sealed partial class ProductEditViewModel : ObservableObject
     private string? _hsnCode;
 
     [ObservableProperty]
-    private bool _isTaxInclusive;
+    [NotifyPropertyChangedFor(nameof(PricingTypeHelpText))]
+    private PricingType _selectedPricingType = PricingType.Inclusive;
+
+    public string PricingTypeHelpText => SelectedPricingType == PricingType.Inclusive
+        ? "The selling price already includes GST."
+        : "GST will be added during billing.";
 
     [ObservableProperty]
     private string _minimumStockText = "0";
@@ -145,7 +151,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
         DefaultDiscountPercentText = existing.DefaultDiscountPercent?.ToString("0.##");
         GstRatePercentText = existing.GstRatePercent?.ToString("0.##");
         HsnCode = existing.HsnCode;
-        IsTaxInclusive = existing.IsTaxInclusive;
+        SelectedPricingType = existing.PricingType;
         MinimumStockText = existing.MinimumStock.ToString("0.###");
         ReorderQuantityText = existing.ReorderQuantity.ToString("0.###");
         TracksBatches = existing.TracksBatches;
@@ -285,7 +291,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
                     DefaultDiscountPercent = discountPercent,
                     GstRatePercent = gstRatePercent,
                     HsnCode = HsnCode,
-                    IsTaxInclusive = IsTaxInclusive,
+                    PricingType = SelectedPricingType,
                     TracksBatches = TracksBatches,
                     MinimumStock = minimumStock,
                     ReorderQuantity = reorderQuantity,
@@ -316,7 +322,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
                     DefaultDiscountPercent = discountPercent,
                     GstRatePercent = gstRatePercent,
                     HsnCode = HsnCode,
-                    IsTaxInclusive = IsTaxInclusive,
+                    PricingType = SelectedPricingType,
                     TracksBatches = TracksBatches,
                     MinimumStock = minimumStock,
                     ReorderQuantity = reorderQuantity,

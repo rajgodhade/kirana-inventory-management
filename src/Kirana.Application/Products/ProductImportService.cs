@@ -2,6 +2,7 @@ using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
 using Kirana.Application.Barcodes;
 using Kirana.Domain.Entities;
+using Kirana.Application.Taxation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kirana.Application.Products;
@@ -36,14 +37,18 @@ public sealed class ProductImportService(
         ("GST %", ["gst", "gstpercent", "gstrate", "gstratepercent", "tax", "taxpercent"]),
         ("HSN Code", ["hsncode", "hsn"]),
         ("Tax Inclusive", ["taxinclusive", "istaxinclusive", "priceistaxinclusive", "inclusive"]),
+        ("Pricing Type", ["pricingtype", "gstpricingtype", "taxpricingtype"]),
         ("Track Batches", ["trackbatches", "tracksbatches", "batch", "batches", "trackexpiry"]),
         ("Minimum Stock", ["minimumstock", "minstock", "minimum"]),
         ("Reorder Quantity", ["reorderquantity", "reorderqty", "reorder"]),
         ("Opening Stock", ["openingstock", "opening", "stock", "quantity", "qty"]),
     ];
 
+    private static readonly (string Canonical, string[] Aliases)[] TemplateColumns =
+        ColumnAliases.Where(c => c.Canonical != "Tax Inclusive").ToArray();
+
     public IReadOnlyList<ProductImportColumn> Columns { get; } =
-        ColumnAliases.Select(c => new ProductImportColumn(c.Canonical, c.Aliases[0])).ToList();
+        TemplateColumns.Select(c => new ProductImportColumn(c.Canonical, c.Aliases[0])).ToList();
 
     public async Task<ProductImportPreview> BuildPreviewAsync(
         Stream fileStream, string fileName, int? performedByUserId, CancellationToken cancellationToken = default)
@@ -170,6 +175,7 @@ public sealed class ProductImportService(
         var wholesale = ParseOptionalDecimal(raw, "Wholesale Price", errors);
         var defaultDiscount = ParseOptionalDecimal(raw, "Default Discount %", errors);
         var gst = ParseOptionalDecimal(raw, "GST %", errors);
+        var pricingType = ParsePricingType(Get(raw, "Pricing Type"), Get(raw, "Tax Inclusive"), errors);
         var minimumStock = ParseDecimal(raw, "Minimum Stock", errors, out _);
         var reorderQuantity = ParseDecimal(raw, "Reorder Quantity", errors, out _);
         var openingStock = ParseDecimal(raw, "Opening Stock", errors, out _);
@@ -184,10 +190,8 @@ public sealed class ProductImportService(
             errors.Add("Prices cannot be negative.");
         }
 
-        if (gst is < 0 or > 100)
-        {
-            errors.Add("GST % must be between 0 and 100.");
-        }
+        if (gst is { } gstRate && !GstRatePolicy.IsSupported(gstRate))
+            errors.Add("GST % must be one of 0, 5, 12, 18, or 28.");
 
         if (defaultDiscount is < 0 or > 100)
         {
@@ -308,7 +312,7 @@ public sealed class ProductImportService(
                 DefaultDiscountPercent = defaultDiscount,
                 GstRatePercent = gst,
                 HsnCode = NullIfBlank(Get(raw, "HSN Code")),
-                IsTaxInclusive = ParseBool(Get(raw, "Tax Inclusive")),
+                PricingType = pricingType,
                 TracksBatches = ParseBool(Get(raw, "Track Batches")),
                 MinimumStock = minimumStock,
                 ReorderQuantity = reorderQuantity,
@@ -469,7 +473,7 @@ public sealed class ProductImportService(
         product.DefaultDiscountPercent = request.DefaultDiscountPercent;
         product.GstRatePercent = request.GstRatePercent;
         product.HsnCode = request.HsnCode;
-        product.IsTaxInclusive = request.IsTaxInclusive;
+        product.PricingType = request.PricingType;
         product.TracksBatches = request.TracksBatches;
         product.MinimumStock = request.MinimumStock;
         product.ReorderQuantity = request.ReorderQuantity;
@@ -477,14 +481,31 @@ public sealed class ProductImportService(
 
     public string BuildCsvTemplate()
     {
-        var header = string.Join(",", ColumnAliases.Select(c => Escape(c.Canonical)));
+        var header = string.Join(",", TemplateColumns.Select(c => Escape(c.Canonical)));
         var example = string.Join(",", new[]
         {
             "Tata Salt 1kg", "TATA-SALT-1KG", "", "Iodised salt", "Grocery", "Tata", "Piece",
-            "18", "25", "22", "", "", "5", "25010010", "No", "No", "10", "20", "100",
+            "18", "25", "22", "", "", "5", "25010010", "Inclusive", "No", "10", "20", "100",
         }.Select(Escape));
 
         return header + "\r\n" + example + "\r\n";
+    }
+
+    private static PricingType ParsePricingType(string? pricingTypeText, string? legacyTaxInclusiveText, List<string> errors)
+    {
+        if (string.IsNullOrWhiteSpace(pricingTypeText))
+        {
+            // Backward compatible templates with the legacy column retain their explicit value;
+            // files with neither column use the retail-safe Inclusive default.
+            return string.IsNullOrWhiteSpace(legacyTaxInclusiveText) || ParseBool(legacyTaxInclusiveText)
+                ? PricingType.Inclusive
+                : PricingType.Exclusive;
+        }
+
+        if (pricingTypeText.Trim().Equals("Inclusive", StringComparison.OrdinalIgnoreCase)) return PricingType.Inclusive;
+        if (pricingTypeText.Trim().Equals("Exclusive", StringComparison.OrdinalIgnoreCase)) return PricingType.Exclusive;
+        errors.Add("Pricing Type must be Inclusive or Exclusive.");
+        return PricingType.Inclusive;
     }
 
     // --- parsing helpers ---------------------------------------------------------------------

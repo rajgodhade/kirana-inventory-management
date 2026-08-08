@@ -325,6 +325,22 @@
         <Setter Property="Foreground" Value="{ThemeResource TextSecondaryBrush}" />
     </Style>
 
+    <!--
+        Dotted leader joining a label to its amount in a totals block, the way a printed bill
+        rules the gap. A zero-length dash with a round cap renders as a dot rather than a tick,
+        so the run reads as evenly spaced points; the gap is a multiple of StrokeThickness.
+    -->
+    <Style x:Key="TotalsLeaderLineStyle" TargetType="Line">
+        <Setter Property="X1" Value="0" />
+        <Setter Property="X2" Value="1" />
+        <Setter Property="Stretch" Value="Fill" />
+        <Setter Property="Stroke" Value="{ThemeResource TextTertiaryBrush}" />
+        <Setter Property="StrokeThickness" Value="1.5" />
+        <Setter Property="StrokeDashCap" Value="Round" />
+        <Setter Property="StrokeDashArray" Value="0,2.4" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
     <!-- ================================ SURFACES ================================ -->
     <Style x:Key="CardBorderStyle" TargetType="Border">
         <Setter Property="Background" Value="{ThemeResource SurfaceBrush}" />
@@ -357,13 +373,16 @@
     <!-- Shared title-bar close affordance for every ContentDialog. The host dialog still owns the
          click handler, so this style never changes validation, cancel, or cleanup behavior. -->
     <Style x:Key="DialogCloseButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="40" />
-        <Setter Property="Height" Value="40" />
+        <Setter Property="Width" Value="34" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="MinWidth" Value="34" />
+        <Setter Property="MinHeight" Value="34" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Foreground" Value="{ThemeResource TextSecondaryBrush}" />
-        <Setter Property="CornerRadius" Value="{StaticResource RadiusPill}" />
+        <Setter Property="Background" Value="#FEE2E2" />
+        <Setter Property="BorderBrush" Value="#FECACA" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="#B91C1C" />
+        <Setter Property="CornerRadius" Value="4" />
         <Setter Property="HorizontalAlignment" Value="Right" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>

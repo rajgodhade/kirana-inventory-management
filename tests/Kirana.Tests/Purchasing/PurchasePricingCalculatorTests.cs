@@ -1,4 +1,5 @@
 using Kirana.Application.Purchasing;
+using Kirana.Domain.Entities;
 
 namespace Kirana.Tests.Purchasing;
 
@@ -45,6 +46,38 @@ public class PurchasePricingCalculatorTests
         Assert.Equal(100m, totals.TaxableTotal);
         Assert.Equal(18m, totals.TaxTotal);
         Assert.Equal(118m, totals.GrandTotal);
+    }
+
+    [Fact]
+    public void Calculate_DefaultPricingType_IsInclusive()
+    {
+        var totals = PurchasePricingCalculator.Calculate([new PurchaseLine
+        {
+            ProductId = 1,
+            Quantity = 1m,
+            UnitPrice = 435m,
+            GstRatePercent = 5m,
+        }]);
+
+        var line = Assert.Single(totals.Lines);
+        Assert.Equal(PricingType.Inclusive, line.Line.PricingType);
+        Assert.Equal(414.29m, line.TaxableAmount);
+        Assert.Equal(20.71m, line.GstAmount);
+        Assert.Equal(435m, line.LineTotal);
+    }
+
+    [Fact]
+    public void Calculate_MixedInclusiveAndExclusiveSupplierPrices()
+    {
+        var totals = PurchasePricingCalculator.Calculate([
+            new PurchaseLine { ProductId = 1, Quantity = 1m, UnitPrice = 105m, GstRatePercent = 5m },
+            new PurchaseLine { ProductId = 2, Quantity = 1m, UnitPrice = 100m, GstRatePercent = 5m, PricingType = PricingType.Exclusive },
+        ]);
+
+        Assert.Equal(100m, totals.Lines[0].TaxableAmount);
+        Assert.Equal(5m, totals.Lines[0].GstAmount);
+        Assert.Equal(100m, totals.Lines[1].TaxableAmount);
+        Assert.Equal(5m, totals.Lines[1].GstAmount);
     }
 
     [Fact]

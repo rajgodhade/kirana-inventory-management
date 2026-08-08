@@ -1,3 +1,5 @@
+using Kirana.Domain.Entities;
+
 namespace Kirana.Application.Purchasing;
 
 /// <summary>One requested purchase line. GST rate/tax-inclusive flag always come from the
@@ -9,6 +11,7 @@ public sealed class PurchaseLineInput
     public required decimal Quantity { get; init; }
     public required decimal UnitPrice { get; init; }
     public decimal DiscountPercent { get; init; }
+    public PricingType? PricingType { get; init; }
 
     /// <summary>Batch/expiry data captured at purchase time (PRD §27) — only meaningful when the
     /// product tracks batches; ignored otherwise.</summary>

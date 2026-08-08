@@ -1,3 +1,5 @@
+using Kirana.Domain.Entities;
+
 namespace Kirana.Application.Printing;
 
 /// <summary>One printed invoice line, built only from <c>SaleItem</c>'s historical snapshot
@@ -19,6 +21,8 @@ public sealed class InvoiceLine
     public string PromotionText { get; init; } = string.Empty;
     public bool HasPromotion => PromotionDiscountAmount > 0 && PromotionText.Length > 0;
     public decimal GstRatePercent { get; init; }
+    public PricingType PricingType { get; init; } = PricingType.Inclusive;
+    public string GstTreatment => PricingType == PricingType.Inclusive ? "GST Included" : "GST Added";
     public decimal TaxableAmount { get; init; }
     public decimal GstAmount { get; init; }
     public decimal LineTotal { get; init; }

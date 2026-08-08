@@ -8,6 +8,7 @@ namespace Kirana.Application.Products;
 /// </summary>
 public sealed class UpdateProductRequest
 {
+    private PricingType _pricingType = PricingType.Inclusive;
     public required string Name { get; init; }
     public string? Sku { get; init; }
     public string? Barcode { get; init; }
@@ -24,7 +25,8 @@ public sealed class UpdateProductRequest
     public decimal? DefaultDiscountPercent { get; init; }
     public decimal? GstRatePercent { get; init; }
     public string? HsnCode { get; init; }
-    public bool IsTaxInclusive { get; init; }
+    public PricingType PricingType { get => _pricingType; init => _pricingType = value; }
+    public bool IsTaxInclusive { get => _pricingType == PricingType.Inclusive; init => _pricingType = value ? PricingType.Inclusive : PricingType.Exclusive; }
 
     public bool TracksBatches { get; init; }
     public decimal MinimumStock { get; init; }

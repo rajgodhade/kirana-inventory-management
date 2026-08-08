@@ -13,8 +13,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock x:ConnectionId='2' x:Name="DialogTitleText" Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
-            <Button x:ConnectionId='3' Grid.Column="1" Padding="6" Background="Transparent" BorderThickness="0"
-                                             AutomationProperties.Name="Close">
+            <Button x:ConnectionId='3' Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
+                                             AutomationProperties.Name="Close dialog">
                 <FontIcon Glyph="&#xE711;" FontSize="14" />
             </Button>
         </Grid>
@@ -30,7 +30,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBox x:ConnectionId='25' Grid.Column="0" Header="SKU"                                            />
+                <TextBox x:ConnectionId='26' Grid.Column="0" Header="SKU"                                            />
                 <StackPanel Grid.Column="1" Spacing="4">
                     <TextBlock Text="Barcode" />
                     <Grid ColumnSpacing="4">
@@ -38,8 +38,8 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox x:ConnectionId='26' Grid.Column="0"                                                PlaceholderText="Scan or type…" />
-                        <Button x:ConnectionId='27' Grid.Column="1" Content="Generate"                                                    
+                        <TextBox x:ConnectionId='27' Grid.Column="0"                                                PlaceholderText="Scan or type…" />
+                        <Button x:ConnectionId='28' Grid.Column="1" Content="Generate"                                                    
                                                                                                                                                  />
                     </Grid>
                 </StackPanel>
@@ -50,8 +50,8 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Image x:ConnectionId='23' Grid.Column="0"                                                              Width="180" Height="60" Stretch="Fill" />
-                <TextBlock x:ConnectionId='24' Grid.Column="1"                                                          VerticalAlignment="Center" Opacity="0.8" FontSize="12" TextWrapping="Wrap" />
+                <Image x:ConnectionId='24' Grid.Column="0"                                                              Width="180" Height="60" Stretch="Fill" />
+                <TextBlock x:ConnectionId='25' Grid.Column="1"                                                          VerticalAlignment="Center" Opacity="0.8" FontSize="12" TextWrapping="Wrap" />
             </Grid>
 
             <TextBox x:ConnectionId='6' Header="Description"                                                    AcceptsReturn="True" />
@@ -62,13 +62,13 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <ComboBox x:ConnectionId='20' Grid.Column="0" Header="Category" PlaceholderText="(none)"
+                <ComboBox x:ConnectionId='21' Grid.Column="0" Header="Category" PlaceholderText="(none)"
                                                                       DisplayMemberPath="Name"
                                                                                           HorizontalAlignment="Stretch" />
-                <ComboBox x:ConnectionId='21' Grid.Column="1" Header="Brand" PlaceholderText="(none)"
+                <ComboBox x:ConnectionId='22' Grid.Column="1" Header="Brand" PlaceholderText="(none)"
                                                                   DisplayMemberPath="Name"
                                                                                        HorizontalAlignment="Stretch" />
-                <ComboBox x:ConnectionId='22' Grid.Column="2" Header="Unit"
+                <ComboBox x:ConnectionId='23' Grid.Column="2" Header="Unit"
                                                                 
                                                                                       HorizontalAlignment="Stretch" />
             </Grid>
@@ -80,11 +80,11 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBox x:ConnectionId='17' Grid.Column="0" Header="Purchase price"
+                <TextBox x:ConnectionId='18' Grid.Column="0" Header="Purchase price"
                                                                                                                                 
                                                                                   />
-                <TextBox x:ConnectionId='18' Grid.Column="1" Header="MRP *"                                                />
-                <TextBox x:ConnectionId='19' Grid.Column="2" Header="Selling price *"                                                         />
+                <TextBox x:ConnectionId='19' Grid.Column="1" Header="MRP *"                                                />
+                <TextBox x:ConnectionId='20' Grid.Column="2" Header="Selling price *"                                                         />
             </Grid>
 
             <Grid ColumnSpacing="8">
@@ -93,19 +93,25 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBox x:ConnectionId='14' Grid.Column="0" Header="Wholesale price"                                                           />
-                <TextBox x:ConnectionId='15' Grid.Column="1" Header="Default discount %"                                                                   />
-                <TextBox x:ConnectionId='16' Grid.Column="2" Header="GST rate %"                                                           />
+                <TextBox x:ConnectionId='15' Grid.Column="0" Header="Wholesale price"                                                           />
+                <TextBox x:ConnectionId='16' Grid.Column="1" Header="GST rate %" PlaceholderText="0, 5, 12, 18, or 28"
+                                                                                   />
+                <ComboBox x:ConnectionId='17' Grid.Column="2" Header="Pricing type"
+                                                                       
+                                                                                            
+                          HorizontalAlignment="Stretch" />
             </Grid>
+
+            <TextBlock x:ConnectionId='7'                                                           
+                       Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" Margin="0,-4,0,0" />
 
             <Grid ColumnSpacing="8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBox x:ConnectionId='12' Grid.Column="0" Header="HSN code"                                                />
-                <CheckBox x:ConnectionId='13' Grid.Column="1" Content="Price is tax-inclusive" VerticalAlignment="Bottom"
-                                                                                     />
+                <TextBox x:ConnectionId='13' Grid.Column="0" Header="HSN code"                                                />
+                <TextBox x:ConnectionId='14' Grid.Column="1" Header="Default discount %"                                                                   />
             </Grid>
 
             <TextBlock Text="Inventory" FontWeight="SemiBold" Margin="0,8,0,0" />
@@ -115,15 +121,15 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBox x:ConnectionId='9' Grid.Column="0"                                                                                                                     />
-                <TextBox x:ConnectionId='10' Grid.Column="1"                                                                                                                           />
-                <TextBox x:ConnectionId='11' Grid.Column="2"                                                                                                                    
+                <TextBox x:ConnectionId='10' Grid.Column="0"                                                                                                                     />
+                <TextBox x:ConnectionId='11' Grid.Column="1"                                                                                                                           />
+                <TextBox x:ConnectionId='12' Grid.Column="2"                                                                                                                    
                                                                                                                     />
             </Grid>
 
-            <CheckBox x:ConnectionId='7' Content="Track batches / expiry for this product"                                                           />
+            <CheckBox x:ConnectionId='8' Content="Track batches / expiry for this product"                                                           />
 
-            <InfoBar x:ConnectionId='8'                                                                                                        
+            <InfoBar x:ConnectionId='9'                                                                                                        
                      Severity="Error"                                                        />
         </StackPanel>
     </ScrollViewer>

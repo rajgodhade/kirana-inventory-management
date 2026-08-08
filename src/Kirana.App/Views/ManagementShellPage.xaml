@@ -119,6 +119,10 @@
 
                 <muxc:NavigationViewItemHeader x:Name="NavTradeHeader" Content="Trade" />
 
+                <muxc:NavigationViewItem x:Name="NavInvoices" Content="Invoices" Tag="Invoices">
+                    <muxc:NavigationViewItem.Icon><FontIcon Glyph="&#xE9D5;" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
                 <muxc:NavigationViewItem x:Name="NavCustomers" Content="Customers &amp; Udhaar" Tag="Customers">
                     <muxc:NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE77B;" />

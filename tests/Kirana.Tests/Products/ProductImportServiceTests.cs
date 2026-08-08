@@ -49,6 +49,42 @@ public class ProductImportServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task ImportWithoutPricingType_DefaultsToInclusive()
+    {
+        var preview = await PreviewAsync("Tata Salt,TATA-1,,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        await _sut.CommitAsync(preview, _ownerId);
+
+        var product = await _fixture.Context.Products.SingleAsync();
+        Assert.Equal(PricingType.Inclusive, product.PricingType);
+    }
+
+    [Fact]
+    public async Task ImportAcceptsExplicitExclusivePricingType()
+    {
+        const string header = Header + ",Pricing Type";
+        var csv = header + "\r\nTata Salt,TATA-1,,Grocery,Tata,Piece,18,25,22,5,10,20,100,Exclusive\r\n";
+        await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
+
+        var preview = await _sut.BuildPreviewAsync(stream, "products.csv", _ownerId);
+        await _sut.CommitAsync(preview, _ownerId);
+
+        Assert.Equal(PricingType.Exclusive, (await _fixture.Context.Products.SingleAsync()).PricingType);
+    }
+
+    [Fact]
+    public async Task ImportRejectsUnknownPricingType()
+    {
+        const string header = Header + ",Pricing Type";
+        var csv = header + "\r\nTata Salt,TATA-1,,Grocery,Tata,Piece,18,25,22,5,10,20,100,AddedSometimes\r\n";
+        await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
+
+        var preview = await _sut.BuildPreviewAsync(stream, "products.csv", _ownerId);
+
+        Assert.Contains(preview.Rows.Single().Errors, e => e.Contains("Pricing Type"));
+    }
+
+    [Fact]
     public async Task BuildPreviewAsync_WritesNothing()
     {
         await PreviewAsync("Tata Salt,TATA-1,,Grocery,Tata,Piece,18,25,22,5,10,20,100");

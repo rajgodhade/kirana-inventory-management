@@ -97,10 +97,10 @@ public sealed class PromotionServiceAndBillingTests : IDisposable
     }
 
     [Fact]
-    public void AfterTaxPromotion_ReducesPayableWithoutReducingTax()
+    public void LegacyAfterTaxPromotion_IsAppliedBeforeGst()
     {
-        var totals = CartPricingCalculator.Calculate([new CartLine { ProductId = 1, Quantity = 1, UnitPrice = 100, IsTaxInclusive = false, GstRatePercent = 10, PromotionAfterTaxDiscountAmount = 10 }], 0, true);
-        Assert.Equal(10, totals.GstTotal); Assert.Equal(100, totals.GrandTotal); Assert.Equal(10, totals.PromotionDiscountTotal);
+        var totals = CartPricingCalculator.Calculate([new CartLine { ProductId = 1, Quantity = 1, UnitPrice = 100, IsTaxInclusive = false, GstRatePercent = 18, PromotionAfterTaxDiscountAmount = 10 }], 0, true);
+        Assert.Equal(16.20m, totals.GstTotal); Assert.Equal(106, totals.GrandTotal); Assert.Equal(10, totals.PromotionDiscountTotal);
     }
 
     [Fact]

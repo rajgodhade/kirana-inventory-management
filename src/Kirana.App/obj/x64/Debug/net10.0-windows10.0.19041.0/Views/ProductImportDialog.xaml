@@ -29,7 +29,7 @@
     </ContentDialog.Resources>
 
     <ContentDialog.Title>
-        <Grid ColumnSpacing="8">
+        <Grid ColumnSpacing="8" MinWidth="980">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
             <StackPanel Spacing="2">
                 <TextBlock Text="Import Products" Style="{ThemeResource TitleTextBlockStyle}" />

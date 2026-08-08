@@ -1,3 +1,5 @@
+using Kirana.Domain.Entities;
+
 namespace Kirana.Application.Printing;
 
 /// <summary>One row of the printed GST breakdown table — all invoice lines sharing the same
@@ -8,4 +10,6 @@ public sealed class InvoiceGstGroup
     public decimal RatePercent { get; init; }
     public decimal TaxableAmount { get; init; }
     public decimal GstAmount { get; init; }
+    public PricingType PricingType { get; init; } = PricingType.Inclusive;
+    public string GstTreatment => PricingType == PricingType.Inclusive ? "GST Included" : "GST Added";
 }

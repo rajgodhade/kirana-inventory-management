@@ -15,6 +15,7 @@ using Kirana.Application.Purchasing;
 using Kirana.Application.Reports;
 using Kirana.Application.Returns;
 using Kirana.Application.Setup;
+using Kirana.Application.Taxation;
 using Kirana.Application.Users;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,7 +41,10 @@ public static class DependencyInjection
         services.AddScoped<IBarcodeLookupService, BarcodeLookupService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<ICustomerCreditService, CustomerCreditService>();
+        services.AddSingleton<IGstCalculationService, GstCalculationService>();
+        services.AddSingleton<IPurchaseGstCalculationService, PurchaseGstCalculationService>();
         services.AddScoped<ISaleService, SaleService>();
+        services.AddScoped<IInvoiceService, InvoiceService>();
         services.AddScoped<IPromotionService, PromotionService>();
         services.AddScoped<IPromotionEngine, PromotionEngine>();
         services.AddScoped<IHeldBillService, HeldBillService>();

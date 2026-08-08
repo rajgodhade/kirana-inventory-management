@@ -18,3 +18,7 @@ D:\New folder\app\kirana-inventory-management\src\Kirana.Infrastructure\obj\x64\
 D:\New folder\app\kirana-inventory-management\src\Kirana.Infrastructure\obj\x64\Debug\net10.0\Kirana.Infrastructure.pdb
 D:\New folder\app\kirana-inventory-management\src\Kirana.Infrastructure\obj\x64\Debug\net10.0\Kirana.Infrastructure.genruntimeconfig.cache
 D:\New folder\app\kirana-inventory-management\src\Kirana.Infrastructure\obj\x64\Debug\net10.0\ref\Kirana.Infrastructure.dll
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0\Kirana.Infrastructure.deps.json
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0\Kirana.Infrastructure.runtimeconfig.json
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0\Kirana.Infrastructure.dll
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0\Kirana.Infrastructure.pdb

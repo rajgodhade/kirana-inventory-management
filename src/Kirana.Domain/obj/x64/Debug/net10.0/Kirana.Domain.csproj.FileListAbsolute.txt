@@ -10,3 +10,6 @@ D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\x64\Debug\ne
 D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\x64\Debug\net10.0\refint\Kirana.Domain.dll
 D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\x64\Debug\net10.0\Kirana.Domain.pdb
 D:\New folder\app\kirana-inventory-management\src\Kirana.Domain\obj\x64\Debug\net10.0\ref\Kirana.Domain.dll
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0\Kirana.Domain.deps.json
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0\Kirana.Domain.dll
+C:\Users\DELL\AppData\Local\Temp\claude\d--New-folder-app-kirana-inventory-management\33962e27-0ce9-467c-a24d-23b794da5f7f\scratchpad\vbuild\x64\Debug\net10.0\Kirana.Domain.pdb

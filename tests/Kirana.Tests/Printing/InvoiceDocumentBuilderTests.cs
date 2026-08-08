@@ -100,14 +100,17 @@ public class InvoiceDocumentBuilderTests
     }
 
     [Fact]
-    public void Build_ExcludesZeroRateLines_FromGstGroups()
+    public void Build_IncludesZeroRateLines_InGstSummary()
     {
         var sale = MakeSale();
         sale.Items.Add(MakeItem(gstRate: 0, taxable: 40, gst: 0, lineTotal: 40));
 
         var document = _sut.Build(sale, MakeStore());
 
-        Assert.Empty(document.GstGroups);
+        var zeroRate = Assert.Single(document.GstGroups);
+        Assert.Equal(0m, zeroRate.RatePercent);
+        Assert.Equal(40m, zeroRate.TaxableAmount);
+        Assert.Equal(0m, zeroRate.GstAmount);
     }
 
     [Fact]

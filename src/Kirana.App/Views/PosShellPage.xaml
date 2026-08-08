@@ -316,6 +316,12 @@
                                     <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind ProductName}" Style="{StaticResource CardTitleTextStyle}" TextWrapping="Wrap" />
                                         <TextBlock Text="{x:Bind ProductCode}" Style="{StaticResource CodeTextStyle}" />
+                                        <Border Background="{ThemeResource SurfaceAltBrush}" CornerRadius="10" Padding="7,3"
+                                                HorizontalAlignment="Left"
+                                                ToolTipService.ToolTip="GST treatment for this item">
+                                            <TextBlock Text="{x:Bind PricingTypeLabel}" FontSize="10" FontWeight="SemiBold"
+                                                       Foreground="{ThemeResource TextSecondaryBrush}" />
+                                        </Border>
                                         <Border Background="{ThemeResource PastelGreenBrush}" CornerRadius="10" Padding="7,3"
                                                 HorizontalAlignment="Left"
                                                 Visibility="{x:Bind HasPromotion, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">

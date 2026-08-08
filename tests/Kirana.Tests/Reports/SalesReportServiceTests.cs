@@ -174,6 +174,7 @@ public class SalesReportServiceTests : IDisposable
         Assert.Equal(12m, bucket.RatePercent);
         Assert.Equal(100m, bucket.TaxableAmount);
         Assert.Equal(12m, bucket.TaxAmount);
+        Assert.Equal(1, bucket.InvoiceCount);
     }
 
     [Fact]

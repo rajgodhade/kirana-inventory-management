@@ -1,3 +1,5 @@
+using Kirana.Domain.Entities;
+
 namespace Kirana.Application.Reports;
 
 /// <summary>Filters shared by the Sales, Product and Inventory report screens (PRD §51 "Search &amp;
@@ -49,6 +51,9 @@ public sealed class GstRateBreakdown
     public decimal Cgst { get; init; }
     public decimal Sgst { get; init; }
     public decimal Igst { get; init; }
+    public int InvoiceCount { get; init; }
+    public PricingType PricingType { get; init; } = PricingType.Inclusive;
+    public string GstTreatment => PricingType == PricingType.Inclusive ? "GST Included" : "GST Added";
 }
 
 /// <summary>
