@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Navigation;
 
 namespace Kirana.App.Views;
 
@@ -30,6 +31,19 @@ public sealed partial class NewPurchaseReturnPage : Page
             await ViewModel.SearchAsync();
             Bindings.Update();
         };
+    }
+
+    // Arriving from the Purchases list's "Return" action passes the purchase id directly — skip
+    // "1 · Find the purchase" entirely and load straight into "2 · Product" for that purchase.
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+
+        if (e.Parameter is int purchaseId)
+        {
+            await ViewModel.SelectPurchaseAsync(purchaseId);
+            Bindings.Update();
+        }
     }
 
     private void OnSearchTextChanged(object sender, TextChangedEventArgs e)

@@ -180,11 +180,14 @@ public sealed partial class PurchasesPage : Page
 
     private void OnCreateReturnClick(object sender, RoutedEventArgs e)
     {
-        if (!ViewModel.CanManagePurchases || (sender as FrameworkElement)?.Tag is not PurchaseRowViewModel)
+        if (!ViewModel.CanManagePurchases || (sender as FrameworkElement)?.Tag is not PurchaseRowViewModel row)
         {
             return;
         }
 
-        Frame.Navigate(typeof(NewPurchaseReturnPage));
+        // Passing the purchase id lets the return page skip straight to "2 · Product" with this
+        // purchase's own lines already loaded, instead of landing on an empty search box the
+        // cashier would have to re-type the same purchase number into.
+        Frame.Navigate(typeof(NewPurchaseReturnPage), row.Id);
     }
 }

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Infrastructure\\Kirana.Infrastructure.csproj": {}
+    "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Infrastructure\\Kirana.Infrastructure.csproj": {}
   },
   "projects": {
-    "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Application\\Kirana.Application.csproj": {
+    "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Application\\Kirana.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Application\\Kirana.Application.csproj",
+        "projectUniqueName": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Application\\Kirana.Application.csproj",
         "projectName": "Kirana.Application",
-        "projectPath": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Application\\Kirana.Application.csproj",
-        "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Application\\obj\\",
+        "projectPath": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Application\\Kirana.Application.csproj",
+        "packagesPath": "C:\\Users\\rajgo\\.nuget\\packages\\",
+        "outputPath": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Application\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\rajgo\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -27,8 +27,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Domain\\Kirana.Domain.csproj": {
-                "projectPath": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Domain\\Kirana.Domain.csproj"
+              "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Domain\\Kirana.Domain.csproj": {
+                "projectPath": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Domain\\Kirana.Domain.csproj"
               }
             }
           }
@@ -353,17 +353,17 @@
         }
       }
     },
-    "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Domain\\Kirana.Domain.csproj": {
+    "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Domain\\Kirana.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Domain\\Kirana.Domain.csproj",
+        "projectUniqueName": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Domain\\Kirana.Domain.csproj",
         "projectName": "Kirana.Domain",
-        "projectPath": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Domain\\Kirana.Domain.csproj",
-        "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Domain\\obj\\",
+        "projectPath": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Domain\\Kirana.Domain.csproj",
+        "packagesPath": "C:\\Users\\rajgo\\.nuget\\packages\\",
+        "outputPath": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\rajgo\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -688,17 +688,17 @@
         }
       }
     },
-    "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Infrastructure\\Kirana.Infrastructure.csproj": {
+    "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Infrastructure\\Kirana.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Infrastructure\\Kirana.Infrastructure.csproj",
+        "projectUniqueName": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Infrastructure\\Kirana.Infrastructure.csproj",
         "projectName": "Kirana.Infrastructure",
-        "projectPath": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Infrastructure\\Kirana.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
-        "outputPath": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Infrastructure\\obj\\",
+        "projectPath": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Infrastructure\\Kirana.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\rajgo\\.nuget\\packages\\",
+        "outputPath": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\rajgo\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -711,11 +711,11 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Application\\Kirana.Application.csproj": {
-                "projectPath": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Application\\Kirana.Application.csproj"
+              "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Application\\Kirana.Application.csproj": {
+                "projectPath": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Application\\Kirana.Application.csproj"
               },
-              "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Domain\\Kirana.Domain.csproj": {
-                "projectPath": "D:\\New folder\\app\\kirana-inventory-management\\src\\Kirana.Domain\\Kirana.Domain.csproj"
+              "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Domain\\Kirana.Domain.csproj": {
+                "projectPath": "F:\\Raj\\My Project\\Inventory-management\\app\\src\\Kirana.Domain\\Kirana.Domain.csproj"
               }
             }
           }

@@ -128,6 +128,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         _mainWindow.NavigateToInitialPage(setupCompleted);
         _mainWindow.Activate();
         ApplyMinimumWindowSize(_mainWindow);
+        ApplyApplicationIcon(_mainWindow);
 
         try
         {
@@ -167,6 +168,39 @@ public partial class App : Microsoft.UI.Xaml.Application
         catch
         {
             // Best-effort only — an unset minimum just means very small windows can clip content.
+        }
+    }
+
+    /// <summary>
+    /// Sets the window's own icon (title bar + taskbar button) at runtime. The <c>ApplicationIcon</c>
+    /// MSBuild property in the csproj embeds the same .ico as the .exe's Win32 resource, which is
+    /// what Explorer/shortcuts/Start Menu show before the app is even running — but for an
+    /// unpackaged WinUI 3 app (no Package.appxmanifest here, see <c>WindowsPackageType=None</c>),
+    /// the running window's own taskbar/title-bar icon has to be set explicitly via
+    /// <see cref="Microsoft.UI.Windowing.AppWindow.SetIcon"/> too, or it falls back to a generic
+    /// icon while the app is open. Reads the .ico from the build output next to the .exe (marked
+    /// CopyToOutputDirectory in the csproj) rather than a packaged URI, since this deployment model
+    /// has no package to resolve ms-appx:// against.
+    /// </summary>
+    private static void ApplyApplicationIcon(Window window)
+    {
+        try
+        {
+            var iconPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon", "AppIcon.ico");
+            if (!System.IO.File.Exists(iconPath))
+            {
+                return;
+            }
+
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+            var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+            appWindow.SetIcon(iconPath);
+        }
+        catch
+        {
+            // Best-effort only — the .exe's embedded Win32 resource icon (ApplicationIcon in the
+            // csproj) still covers Explorer/shortcuts/Start Menu even if this runtime call fails.
         }
     }
 

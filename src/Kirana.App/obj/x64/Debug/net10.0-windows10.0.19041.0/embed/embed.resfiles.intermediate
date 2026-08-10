@@ -11,6 +11,7 @@ Views\BillDiscountDialog.xbf
 Views\BrandManagementDialog.xbf
 Views\CategoryManagementDialog.xbf
 Views\Controls\DeviceStatusWidget.xbf
+Views\Controls\HeaderBranding.xbf
 Views\CreditPaymentDialog.xbf
 Views\CustomerEditDialog.xbf
 Views\CustomerLedgerPage.xbf

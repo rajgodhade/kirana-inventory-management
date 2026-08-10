@@ -1,0 +1,153 @@
+﻿<Page x:ConnectionId='1'
+    x:Class="Kirana.App.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Kirana.App.Views.Controls">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Settings" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Appearance, security and store preferences." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Padding="24,0,24,24" Spacing="16" MaxWidth="560" HorizontalAlignment="Left">
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Device Status" Style="{StaticResource SectionTitleTextStyle}" />
+                        <controls:DeviceStatusWidget x:ConnectionId='23' Title="Receipt printer" Glyph="&#xE749;"
+                                                                                     
+                                                                                      />
+                        <controls:DeviceStatusWidget x:ConnectionId='24' Title="Barcode scanner" Glyph="&#xE8BD;"
+                                                                                     
+                                                                                      />
+                    </StackPanel>
+                </Border>
+
+                <!-- Appearance. Unlike the other settings this is a per-install display preference,
+                     so it is deliberately not gated behind the settings permission. -->
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Appearance" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="Choose how Kirana looks. Light is the default; dark is easier on the eyes in a dim shop."
+                                       Style="{StaticResource PageSubtitleTextStyle}" />
+                        </StackPanel>
+
+                        <RadioButtons x:ConnectionId='22' x:Name="ThemeChoice" SelectedIndex="0"                                        >
+                            <x:String>Light</x:String>
+                            <x:String>Dark</x:String>
+                            <x:String>Use Windows setting</x:String>
+                        </RadioButtons>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Dashboard Security" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="Automatically lock the Dashboard and return to Billing after a period of inactivity."
+                                       Style="{StaticResource PageSubtitleTextStyle}" />
+                        </StackPanel>
+
+                        <ComboBox x:ConnectionId='17' Header="Inactivity auto-lock"                                                 
+                                                                                                       
+                                                                                   HorizontalAlignment="Stretch" />
+
+                        <TextBox x:ConnectionId='18' Header="Custom duration (minutes)"                                                         
+                                                                                                                                                    
+                                                                                  />
+
+                        <Button x:ConnectionId='19' Content="Save" Style="{StaticResource AccentButtonStyle}"                                         
+                                                                                 HorizontalAlignment="Left" />
+
+                        <InfoBar x:ConnectionId='20'                                                                                                        
+                                 Severity="Error"                                                        />
+                        <InfoBar x:ConnectionId='21'                                                                                                         
+                                 Severity="Success"                                                         />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Billing Authorization" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Style="{StaticResource PageSubtitleTextStyle}" TextWrapping="Wrap"
+                                       Text="Owner-only. Turn off a manager PIN prompt for stores where the Owner runs billing alone — each change saves immediately." />
+                        </StackPanel>
+
+                        <ToggleSwitch x:ConnectionId='12' Header="Require PIN to change selling price at billing"
+                                                                                                       
+                                                                                       />
+
+                        <ToggleSwitch x:ConnectionId='13' Header="Require PIN to approve large discounts at billing"
+                                                                                                       
+                                                                                       />
+
+                        <ToggleSwitch x:ConnectionId='14' Header="Require PIN to reprint an invoice"
+                                                                                                 
+                                                                                       />
+
+                        <InfoBar x:ConnectionId='15'                                                                                                                 
+                                 Severity="Error"                                                                 />
+                        <InfoBar x:ConnectionId='16'                                                                                                                  
+                                 Severity="Success"                                                                  />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Backup &amp; Export" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Style="{StaticResource PageSubtitleTextStyle}" TextWrapping="Wrap"
+                                       Text="Where backups are kept, how often they are taken automatically, and how many to keep. Each change saves immediately." />
+                        </StackPanel>
+
+                        <ToggleSwitch x:ConnectionId='2' Header="Take backups automatically"
+                                                                                                   
+                                                                                       />
+
+                        <ComboBox x:ConnectionId='3' Header="Automatic backup frequency"                                                        
+                                                                                                         
+                                                                                   HorizontalAlignment="Stretch" />
+
+                        <TextBox x:ConnectionId='4' Header="Backup folder" IsReadOnly="True"
+                                                                                       
+                                                                                                 />
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:ConnectionId='10' Content="Choose folder…"                                  
+                                                                                     />
+                            <Button x:ConnectionId='11' Content="Use default"                                                           
+                                                                                     />
+                        </StackPanel>
+
+                        <TextBox x:ConnectionId='5' Header="Backups to keep"
+                                                                                                                                
+                                                                                  />
+                        <Button x:ConnectionId='6' Content="Save retention"                                                  
+                                                                                 HorizontalAlignment="Left" />
+
+                        <ComboBox x:ConnectionId='7' Header="Preferred export format"                                                     
+                                                                                                    
+                                                                                   HorizontalAlignment="Stretch" />
+
+                        <InfoBar x:ConnectionId='8'                                                                                                                      
+                                 Severity="Error"                                                                      />
+                        <InfoBar x:ConnectionId='9'                                                                                                                       
+                                 Severity="Success"                                                                       />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
+

@@ -2,7 +2,8 @@
     x:Class="Kirana.App.Views.ManagementShellPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:muxc="using:Microsoft.UI.Xaml.Controls">
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:controls="using:Kirana.App.Views.Controls">
 
     <Grid Background="{ThemeResource PageBackgroundBrush}">
         <Grid.RowDefinitions>
@@ -76,6 +77,11 @@
                     <TextBlock Text="Lock" />
                 </StackPanel>
             </Button>
+
+            <!-- Spans every column so it centers against the header's full width, independent of
+                 how wide the store-info block or the session-action buttons are — same control the
+                 POS shell header uses, so both stay in sync automatically. -->
+            <controls:HeaderBranding Grid.Column="0" Grid.ColumnSpan="8" />
         </Grid>
 
         <muxc:NavigationView x:ConnectionId='2'
