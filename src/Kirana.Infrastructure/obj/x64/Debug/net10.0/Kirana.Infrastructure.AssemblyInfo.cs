@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Kirana.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b40445c9a3ecaedc514d18899c66a315df8ea720")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+97b4be252a72831c3e705609eb2cc318686f2a4d")]
 [assembly: System.Reflection.AssemblyProductAttribute("Kirana.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Kirana.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

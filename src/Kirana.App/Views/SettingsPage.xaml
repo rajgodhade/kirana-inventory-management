@@ -37,6 +37,55 @@
                 <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
                     <StackPanel Spacing="12">
                         <StackPanel Spacing="2">
+                            <TextBlock Text="Cloud Backup" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Style="{StaticResource PageSubtitleTextStyle}" TextWrapping="Wrap"
+                                       Text="Keep validated .kbak backups in your own Google Drive or OneDrive. Cloud backup never blocks billing or changes live data." />
+                        </StackPanel>
+                        <ComboBox Header="Provider" ItemsSource="{x:Bind ViewModel.CloudProviderOptions}"
+                                  SelectedItem="{x:Bind ViewModel.CloudProvider, Mode=TwoWay}"
+                                  IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                        <Border Background="{ThemeResource SuccessSubtleBrush}" CornerRadius="10" Padding="12"
+                                Visibility="{x:Bind ViewModel.CloudIsConnected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <FontIcon Glyph="&#xE73E;" Foreground="{ThemeResource SuccessBrush}" FontSize="18" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Text="Google Drive connected" FontWeight="SemiBold" Foreground="{ThemeResource SuccessBrush}" />
+                                    <TextBlock Text="{x:Bind ViewModel.CloudAccountDisplay, Mode=OneWay}" Style="{StaticResource PageSubtitleTextStyle}" />
+                                    <TextBlock Text="{x:Bind ViewModel.LastCloudBackupText, Mode=OneWay}" Style="{StaticResource PageSubtitleTextStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Background="{ThemeResource WarningSubtleBrush}" CornerRadius="10" Padding="12"
+                                Visibility="{x:Bind ViewModel.CloudIsDisconnected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="&#xE783;" Foreground="{ThemeResource WarningBrush}" FontSize="17" />
+                                <TextBlock Text="No cloud account connected" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Connect Google Drive" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.ConnectCloudCommand}"
+                                    IsEnabled="{x:Bind ViewModel.CanChangeSettings}"
+                                    Visibility="{x:Bind ViewModel.CloudIsDisconnected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <Button Content="Disconnect" Command="{x:Bind ViewModel.DisconnectCloudCommand}" IsEnabled="{x:Bind ViewModel.CanChangeSettings}"
+                                    Visibility="{x:Bind ViewModel.CloudIsConnected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <Button Content="Backup now" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.BackupToCloudCommand}" IsEnabled="{x:Bind ViewModel.CloudIsConnected, Mode=OneWay}" />
+                            <Button Content="View cloud backups" Command="{x:Bind ViewModel.ViewCloudBackupsCommand}" IsEnabled="{x:Bind ViewModel.CloudIsConnected, Mode=OneWay}" />
+                        </StackPanel>
+                        <ToggleSwitch Header="Enable automatic cloud backup" IsOn="{x:Bind ViewModel.CloudAutomaticBackupEnabled, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox Header="Frequency" Width="160" ItemsSource="{x:Bind ViewModel.BackupFrequencyOptions}" SelectedItem="{x:Bind ViewModel.CloudBackupFrequency, Mode=TwoWay}" />
+                            <TextBox Header="Time" Width="120" Text="{x:Bind ViewModel.CloudBackupTime, Mode=TwoWay}" />
+                            <TextBox Header="Keep" Width="90" Text="{x:Bind ViewModel.CloudBackupRetentionText, Mode=TwoWay}" />
+                        </StackPanel>
+                        <InfoBar IsOpen="{x:Bind ViewModel.CloudBackupErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}" Severity="Error" Message="{x:Bind ViewModel.CloudBackupErrorMessage, Mode=OneWay}" />
+                        <InfoBar IsOpen="{x:Bind ViewModel.CloudBackupStatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}" Severity="Success" Message="{x:Bind ViewModel.CloudBackupStatusMessage, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
                             <TextBlock Text="Appearance" Style="{StaticResource SectionTitleTextStyle}" />
                             <TextBlock Text="Choose how Kirana looks. Light is the default; dark is easier on the eyes in a dim shop."
                                        Style="{StaticResource PageSubtitleTextStyle}" />

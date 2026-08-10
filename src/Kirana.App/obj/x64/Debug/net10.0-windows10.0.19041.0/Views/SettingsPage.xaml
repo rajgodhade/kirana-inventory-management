@@ -23,10 +23,10 @@
                 <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
                     <StackPanel Spacing="10">
                         <TextBlock Text="Device Status" Style="{StaticResource SectionTitleTextStyle}" />
-                        <controls:DeviceStatusWidget x:ConnectionId='23' Title="Receipt printer" Glyph="&#xE749;"
+                        <controls:DeviceStatusWidget x:ConnectionId='38' Title="Receipt printer" Glyph="&#xE749;"
                                                                                      
                                                                                       />
-                        <controls:DeviceStatusWidget x:ConnectionId='24' Title="Barcode scanner" Glyph="&#xE8BD;"
+                        <controls:DeviceStatusWidget x:ConnectionId='39' Title="Barcode scanner" Glyph="&#xE8BD;"
                                                                                      
                                                                                       />
                     </StackPanel>
@@ -34,6 +34,55 @@
 
                 <!-- Appearance. Unlike the other settings this is a per-install display preference,
                      so it is deliberately not gated behind the settings permission. -->
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Cloud Backup" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Style="{StaticResource PageSubtitleTextStyle}" TextWrapping="Wrap"
+                                       Text="Keep validated .kbak backups in your own Google Drive or OneDrive. Cloud backup never blocks billing or changes live data." />
+                        </StackPanel>
+                        <ComboBox x:ConnectionId='23' Header="Provider"                                                      
+                                                                                              
+                                                                                   />
+                        <Border x:ConnectionId='24' Background="{ThemeResource SuccessSubtleBrush}" CornerRadius="10" Padding="12"
+                                                                                                                                                   >
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <FontIcon Glyph="&#xE73E;" Foreground="{ThemeResource SuccessBrush}" FontSize="18" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Text="Google Drive connected" FontWeight="SemiBold" Foreground="{ThemeResource SuccessBrush}" />
+                                    <TextBlock x:ConnectionId='36'                                                            Style="{StaticResource PageSubtitleTextStyle}" />
+                                    <TextBlock x:ConnectionId='37'                                                            Style="{StaticResource PageSubtitleTextStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border x:ConnectionId='25' Background="{ThemeResource WarningSubtleBrush}" CornerRadius="10" Padding="12"
+                                                                                                                                                      >
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="&#xE783;" Foreground="{ThemeResource WarningBrush}" FontSize="17" />
+                                <TextBlock Text="No cloud account connected" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:ConnectionId='32' Content="Connect Google Drive" Style="{StaticResource AccentButtonStyle}"                                                 
+                                                                                    
+                                                                                                                                                           />
+                            <Button x:ConnectionId='33' Content="Disconnect"                                                                                                     
+                                                                                                                                                        />
+                            <Button x:ConnectionId='34' Content="Backup now" Style="{StaticResource AccentButtonStyle}"                                                                                                                />
+                            <Button x:ConnectionId='35' Content="View cloud backups"                                                                                                                   />
+                        </StackPanel>
+                        <ToggleSwitch x:ConnectionId='26' Header="Enable automatic cloud backup"                                                                                                                     />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox x:ConnectionId='29' Header="Frequency" Width="160"                                                                                                                             />
+                            <TextBox x:ConnectionId='30' Header="Time" Width="120"                                                        />
+                            <TextBox x:ConnectionId='31' Header="Keep" Width="90"                                                                 />
+                        </StackPanel>
+                        <InfoBar x:ConnectionId='27'                                                                                                                    Severity="Error"                                                                   />
+                        <InfoBar x:ConnectionId='28'                                                                                                                     Severity="Success"                                                                    />
+                    </StackPanel>
+                </Border>
+
                 <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
                     <StackPanel Spacing="12">
                         <StackPanel Spacing="2">

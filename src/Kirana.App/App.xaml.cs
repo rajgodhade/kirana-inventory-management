@@ -71,11 +71,13 @@ public partial class App : Microsoft.UI.Xaml.Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
+        Log.Information("Startup: applying database migrations.");
         using (var scope = Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<KiranaDbContext>();
             await db.Database.MigrateAsync();
         }
+        Log.Information("Startup: database migrations complete.");
 
         bool setupCompleted;
         using (var scope = Services.CreateScope())
@@ -110,7 +112,15 @@ public partial class App : Microsoft.UI.Xaml.Application
             }
         }
 
+        Log.Information("Startup: creating MainWindow.");
         _mainWindow = new MainWindow();
+        Log.Information("Startup: MainWindow created; activating.");
+
+        // Activate first so WinUI has created the native HWND/AppWindow before ThemeService touches
+        // AppWindow.TitleBar. Accessing the title bar on an unactivated unpackaged WinUI window can
+        // leave CoreMessaging spinning with no visible window on some Windows/runtime builds.
+        _mainWindow.Activate();
+        Log.Information("Startup: MainWindow activated.");
 
         // Applied before the window is shown so the app never flashes the wrong theme on launch.
         // Appearance is never worth failing a launch over: OnLaunched is async void, so an escaping
@@ -118,15 +128,18 @@ public partial class App : Microsoft.UI.Xaml.Application
         // app with no UI. Fall back to the default theme instead.
         try
         {
+            Log.Information("Startup: applying theme.");
             await Services.GetRequiredService<ThemeService>().InitializeAsync(_mainWindow.RootElement, _mainWindow);
+            Log.Information("Startup: theme applied.");
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Could not apply the saved theme; continuing with the default appearance.");
         }
 
+        Log.Information("Startup: navigating to initial page.");
         _mainWindow.NavigateToInitialPage(setupCompleted);
-        _mainWindow.Activate();
+        Log.Information("Startup: initial page navigation complete.");
         ApplyMinimumWindowSize(_mainWindow);
         ApplyApplicationIcon(_mainWindow);
 

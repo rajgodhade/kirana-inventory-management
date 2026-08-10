@@ -48,6 +48,24 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Property<bool>("BarcodeScannerEnabled")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("CloudAutomaticBackupEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CloudBackupFrequency")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CloudBackupProvider")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CloudBackupRetentionCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CloudBackupTime")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
@@ -65,6 +83,9 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("LastHardwareMaintenanceUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastCloudBackupUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("OpenCashDrawerAfterCashPayment")

@@ -1,8 +1,10 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Backup;
+using Kirana.Application.CloudBackup;
 using Kirana.Application.Maintenance;
 using Kirana.Application.Restore;
 using Kirana.Infrastructure.Backup;
+using Kirana.Infrastructure.CloudBackup;
 using Kirana.Infrastructure.Barcodes;
 using Kirana.Infrastructure.Maintenance;
 using Kirana.Infrastructure.Persistence;
@@ -36,6 +38,11 @@ public static class DependencyInjection
         // than in the Application layer alongside their interfaces.
         services.AddScoped<IBackupService, SqliteBackupService>();
         services.AddScoped<IRestoreService, SqliteRestoreService>();
+        services.AddSingleton<ICloudTokenStore, WindowsCloudTokenStore>();
+        services.AddSingleton(new HttpClient());
+        services.AddSingleton<ICloudBackupProvider, GoogleDriveBackupProvider>();
+        services.AddSingleton<ICloudBackupProvider, OneDriveBackupProvider>();
+        services.AddScoped<ICloudBackupService, CloudBackupService>();
         services.AddScoped<IDatabaseMaintenanceService, SqliteDatabaseMaintenanceService>();
 
         return services;
