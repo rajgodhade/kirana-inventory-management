@@ -9,6 +9,7 @@ Views\BarcodeScanTestPage.xbf
 Views\BatchManagementDialog.xbf
 Views\BillDiscountDialog.xbf
 Views\BrandManagementDialog.xbf
+Views\CashRegisterPage.xbf
 Views\CategoryManagementDialog.xbf
 Views\Controls\DeviceStatusWidget.xbf
 Views\Controls\HeaderBranding.xbf

@@ -92,9 +92,31 @@ public sealed partial class SettingsViewModel(
     [ObservableProperty] private string? _cloudBackupStatusMessage;
     [ObservableProperty] private string? _cloudBackupErrorMessage;
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCloudBackups))]
+    [NotifyPropertyChangedFor(nameof(HasNoCloudBackups))]
+    [NotifyPropertyChangedFor(nameof(CloudBackupCountText))]
+    private IReadOnlyList<CloudBackupListItem> _cloudBackups = [];
+    [ObservableProperty] private bool _showCloudBackups;
+    [ObservableProperty] private bool _isCloudBackupListLoading;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanStartCloudBackup))]
+    [NotifyPropertyChangedFor(nameof(CanManageCloudConnection))]
+    [NotifyPropertyChangedFor(nameof(CanViewCloudBackups))]
+    [NotifyPropertyChangedFor(nameof(CloudBackupButtonText))]
+    private bool _isCloudBackupRunning;
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CloudIsDisconnected))]
+    [NotifyPropertyChangedFor(nameof(CanStartCloudBackup))]
+    [NotifyPropertyChangedFor(nameof(CanViewCloudBackups))]
     private bool _cloudIsConnected;
     public bool CloudIsDisconnected => !CloudIsConnected;
+    public bool CanStartCloudBackup => CloudIsConnected && !IsCloudBackupRunning;
+    public bool CanManageCloudConnection => CanChangeSettings && !IsCloudBackupRunning;
+    public bool CanViewCloudBackups => CloudIsConnected && !IsCloudBackupRunning;
+    public string CloudBackupButtonText => IsCloudBackupRunning ? "Uploading..." : "Backup now";
+    public bool HasCloudBackups => CloudBackups.Count > 0;
+    public bool HasNoCloudBackups => ShowCloudBackups && !IsCloudBackupListLoading && CloudBackups.Count == 0;
+    public string CloudBackupCountText => CloudBackups.Count == 1 ? "1 backup" : $"{CloudBackups.Count} backups";
     public string CloudAccountDisplay => string.IsNullOrWhiteSpace(CloudBackupAccount)
         ? "Reconnect once to display the account email"
         : $"Connected account: {CloudBackupAccount}";
@@ -126,22 +148,54 @@ public sealed partial class SettingsViewModel(
     [RelayCommand]
     private async Task BackupToCloudAsync()
     {
+        if (IsCloudBackupRunning) return;
+
         CloudBackupErrorMessage = null;
-        var result = await cloudBackupService.BackupNowAsync(session.CurrentUser?.Id);
-        if (!result.Succeeded) { CloudBackupErrorMessage = result.ErrorMessage; return; }
-        await RefreshCloudAsync();
-        CloudBackupStatusMessage = "Cloud backup completed successfully.";
+        CloudBackupStatusMessage = null;
+        IsCloudBackupRunning = true;
+        try
+        {
+            var result = await cloudBackupService.BackupNowAsync(session.CurrentUser?.Id);
+            if (!result.Succeeded) { CloudBackupErrorMessage = result.ErrorMessage; return; }
+            await RefreshCloudAsync();
+            CloudBackupStatusMessage = "Cloud backup completed successfully.";
+        }
+        finally
+        {
+            IsCloudBackupRunning = false;
+        }
     }
 
     [RelayCommand]
     private async Task ViewCloudBackupsAsync()
     {
         CloudBackupErrorMessage = null;
-        var backups = await cloudBackupService.ListBackupsAsync();
-        CloudBackupStatusMessage = backups.Count == 0
-            ? "No cloud backups are available yet."
-            : $"{backups.Count} cloud backup(s) available.";
+        CloudBackupStatusMessage = null;
+        ShowCloudBackups = true;
+        IsCloudBackupListLoading = true;
+        OnPropertyChanged(nameof(HasNoCloudBackups));
+        try
+        {
+            var backups = await cloudBackupService.ListBackupsAsync();
+            CloudBackups = backups.Select(backup => new CloudBackupListItem(
+                backup.FileName,
+                backup.CreatedAtUtc == DateTime.MinValue ? "Upload time unavailable" : backup.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt"),
+                FormatFileSize(backup.SizeBytes))).ToList();
+        }
+        finally
+        {
+            IsCloudBackupListLoading = false;
+            OnPropertyChanged(nameof(HasNoCloudBackups));
+        }
     }
+
+    private static string FormatFileSize(long bytes) => bytes switch
+    {
+        >= 1024L * 1024L => $"{bytes / (1024d * 1024d):0.0} MB",
+        >= 1024L => $"{bytes / 1024d:0.0} KB",
+        > 0 => $"{bytes} bytes",
+        _ => "Size unavailable",
+    };
 
     public async Task RefreshCloudAsync()
     {
@@ -342,3 +396,5 @@ public sealed partial class SettingsViewModel(
         return true;
     }
 }
+
+public sealed record CloudBackupListItem(string FileName, string UploadedAtText, string SizeText);

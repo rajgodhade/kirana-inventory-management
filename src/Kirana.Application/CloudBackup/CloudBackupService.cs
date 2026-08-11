@@ -54,7 +54,13 @@ public sealed class CloudBackupService(
 
     public Task<bool> IsConnectedAsync(CancellationToken cancellationToken = default) => CurrentProvider?.IsConnectedAsync(cancellationToken) ?? Task.FromResult(false);
     public Task<CloudAccountInfo?> GetAccountInfoAsync(CancellationToken cancellationToken = default) => CurrentProvider?.GetAccountInfoAsync(cancellationToken) ?? Task.FromResult<CloudAccountInfo?>(null);
-    public Task<IReadOnlyList<CloudBackupEntry>> ListBackupsAsync(CancellationToken cancellationToken = default) => CurrentProvider?.ListBackupsAsync(string.Empty, cancellationToken) ?? Task.FromResult<IReadOnlyList<CloudBackupEntry>>([]);
+    public async Task<IReadOnlyList<CloudBackupEntry>> ListBackupsAsync(CancellationToken cancellationToken = default)
+    {
+        var provider = CurrentProvider;
+        if (provider is null) return [];
+        var store = await db.Stores.AsNoTracking().Select(s => s.Name).FirstOrDefaultAsync(cancellationToken) ?? "Store";
+        return await provider.ListBackupsAsync(store, cancellationToken);
+    }
 
     public async Task<CloudOperationResult> BackupNowAsync(int? performedByUserId, CancellationToken cancellationToken = default)
     {

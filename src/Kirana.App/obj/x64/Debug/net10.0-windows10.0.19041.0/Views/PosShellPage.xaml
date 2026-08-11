@@ -82,6 +82,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Width="32" Height="32" CornerRadius="{StaticResource RadiusMedium}"
@@ -91,24 +92,33 @@
             </Border>
 
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0">
-                <TextBlock x:ConnectionId='74'                                                  FontSize="14" FontWeight="SemiBold"
+                <TextBlock x:ConnectionId='77'                                                  FontSize="14" FontWeight="SemiBold"
                            Foreground="{ThemeResource TextPrimaryBrush}" />
                 <TextBlock Text="Billing" Style="{StaticResource CaptionTextStyle}" />
             </StackPanel>
 
-            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0">
-                <TextBlock x:ConnectionId='72' x:Name="CurrentDayDateText" Style="{StaticResource SecondaryTextStyle}"
+            <Border x:ConnectionId='69' x:Name="RegisterStatusBadge" Grid.Column="2" Padding="10,5" CornerRadius="12"
+                    Background="{ThemeResource SurfaceAltBrush}" VerticalAlignment="Center"
+                    ToolTipService.ToolTip="Cash register status">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Ellipse x:ConnectionId='75' x:Name="RegisterStatusDot" Width="7" Height="7" Fill="{ThemeResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                    <TextBlock x:ConnectionId='76' x:Name="RegisterStatusText" Text="Register status" Style="{StaticResource CaptionTextStyle}" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,8,0">
+                <TextBlock x:ConnectionId='73' x:Name="CurrentDayDateText" Style="{StaticResource SecondaryTextStyle}"
                            HorizontalAlignment="Right" />
-                <TextBlock x:ConnectionId='73' x:Name="CurrentTimeText" Style="{StaticResource CaptionTextStyle}"
+                <TextBlock x:ConnectionId='74' x:Name="CurrentTimeText" Style="{StaticResource CaptionTextStyle}"
                            HorizontalAlignment="Right" />
             </StackPanel>
 
-            <Button x:ConnectionId='69' Grid.Column="3"                            VerticalAlignment="Center"
+            <Button x:ConnectionId='70' Grid.Column="4"                            VerticalAlignment="Center"
                     AutomationProperties.Name="Toggle light and dark theme">
-                <FontIcon x:ConnectionId='71' x:Name="ThemeIcon" Glyph="&#xE706;" FontSize="15" />
+                <FontIcon x:ConnectionId='72' x:Name="ThemeIcon" Glyph="&#xE706;" FontSize="15" />
             </Button>
 
-            <Button x:ConnectionId='70' Grid.Column="4"                          VerticalAlignment="Center"
+            <Button x:ConnectionId='71' Grid.Column="5"                          VerticalAlignment="Center"
                     AutomationProperties.Name="Open management dashboard">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE72E;" FontSize="14" />
@@ -119,7 +129,7 @@
             <!-- Spans every column so it centers against the header's full width, not just
                  whatever space is left between the store-info block and the toolbar buttons —
                  the left/right controls' widths can never pull this off-center. -->
-            <controls:HeaderBranding Grid.Column="0" Grid.ColumnSpan="5" />
+            <controls:HeaderBranding Grid.Column="0" Grid.ColumnSpan="6" />
         </Grid>
 
         <!-- Billing tabs: several customers can be part-way through a bill at once. -->

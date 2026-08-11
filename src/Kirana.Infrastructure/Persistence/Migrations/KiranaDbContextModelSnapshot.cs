@@ -259,6 +259,102 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.ToTable("Brands");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.CashMovement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("OccurredAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PerformedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RegisterSessionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OperationId")
+                        .IsUnique();
+
+                    b.HasIndex("PerformedByUserId");
+
+                    b.HasIndex("RegisterSessionId", "OccurredAtUtc");
+
+                    b.ToTable("CashMovements");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.CashRegisterSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("ActualCash").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<int>("BillCount").HasColumnType("INTEGER");
+                    b.Property<DateTime>("BusinessDate").HasColumnType("TEXT");
+                    b.Property<decimal>("CardSales").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<decimal>("CashCreditRepayments").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<decimal>("CashIn").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<decimal>("CashOut").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<decimal>("CashRefunds").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<decimal>("CashSales").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<DateTime?>("ClosedAtUtc").HasColumnType("TEXT");
+                    b.Property<int?>("ClosedByUserId").HasColumnType("INTEGER");
+                    b.Property<DateTime>("CreatedAtUtc").HasColumnType("TEXT");
+                    b.Property<decimal>("CustomerCreditSales").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<decimal>("ExpectedCash").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<decimal>("OpeningCash").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<DateTime>("OpenedAtUtc").HasColumnType("TEXT");
+                    b.Property<int>("OpenedByUserId").HasColumnType("INTEGER");
+                    b.Property<string>("RegisterName").IsRequired().HasMaxLength(80).HasColumnType("TEXT");
+                    b.Property<string>("Status").IsRequired().HasMaxLength(20).HasColumnType("TEXT");
+                    b.Property<int>("StoreId").HasColumnType("INTEGER");
+                    b.Property<decimal>("SupplierCashPayments").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<decimal>("TotalReturns").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<decimal>("TotalSales").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<decimal>("UpiSales").HasPrecision(18, 2).HasColumnType("TEXT");
+                    b.Property<DateTime?>("UpdatedAtUtc").HasColumnType("TEXT");
+                    b.Property<decimal?>("Variance").HasPrecision(18, 2).HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+                    b.HasIndex("BusinessDate");
+                    b.HasIndex("ClosedByUserId");
+                    b.HasIndex("OpenedAtUtc");
+                    b.HasIndex("OpenedByUserId");
+                    b.HasIndex("StoreId", "Status");
+                    b.HasIndex("StoreId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_CashRegisterSessions_StoreId_Open")
+                        .HasFilter("Status = 'Open'");
+                    b.ToTable("CashRegisterSessions");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -2290,6 +2386,48 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("CreatedByUser");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.CashMovement", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.User", "PerformedByUser")
+                        .WithMany()
+                        .HasForeignKey("PerformedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Kirana.Domain.Entities.CashRegisterSession", "RegisterSession")
+                        .WithMany("Movements")
+                        .HasForeignKey("RegisterSessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PerformedByUser");
+                    b.Navigation("RegisterSession");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.CashRegisterSession", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.User", "ClosedByUser")
+                        .WithMany()
+                        .HasForeignKey("ClosedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Kirana.Domain.Entities.User", "OpenedByUser")
+                        .WithMany()
+                        .HasForeignKey("OpenedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Kirana.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ClosedByUser");
+                    b.Navigation("OpenedByUser");
+                    b.Navigation("Store");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.CreditPayment", b =>
                 {
                     b.HasOne("Kirana.Domain.Entities.Customer", "Customer")
@@ -2835,6 +2973,11 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Products");
 
                     b.Navigation("PromotionTargets");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.CashRegisterSession", b =>
+                {
+                    b.Navigation("Movements");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.CreditPayment", b =>

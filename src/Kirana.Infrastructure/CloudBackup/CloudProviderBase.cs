@@ -116,19 +116,62 @@ public sealed class GoogleDriveBackupProvider(ICloudTokenStore tokenStore, HttpC
 
     public override async Task<bool> IsConnectedAsync(CancellationToken cancellationToken = default) => await GetTokenAsync(cancellationToken) is not null;
 
+    public override async Task<IReadOnlyList<CloudBackupEntry>> ListBackupsAsync(string storeName, CancellationToken cancellationToken = default)
+    {
+        var token = await GetTokenAsync(cancellationToken);
+        if (token?.access_token is null) return [];
+
+        var results = new List<CloudBackupEntry>();
+        string? pageToken = null;
+        do
+        {
+            var q = Uri.EscapeDataString("name contains '.kbak' and trashed = false");
+            var page = string.IsNullOrWhiteSpace(pageToken) ? string.Empty : $"&pageToken={Uri.EscapeDataString(pageToken)}";
+            using var request = new HttpRequestMessage(HttpMethod.Get,
+                $"{Root}/files?q={q}&orderBy=createdTime%20desc&pageSize=1000&fields=nextPageToken,files(id,name,size,createdTime){page}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.access_token);
+            using var response = await httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode) return [];
+
+            var files = await response.Content.ReadFromJsonAsync<GoogleFiles>(cancellationToken: cancellationToken);
+            results.AddRange((files?.files ?? [])
+                .Where(file => !string.IsNullOrWhiteSpace(file.name) && file.name.EndsWith(".kbak", StringComparison.OrdinalIgnoreCase))
+                .Select(file => new CloudBackupEntry(
+                    file.name!,
+                    file.createdTime?.UtcDateTime ?? DateTime.MinValue,
+                    long.TryParse(file.size, out var size) ? size : 0,
+                    string.IsNullOrWhiteSpace(storeName) ? "Store" : storeName,
+                    "Google Drive")));
+            pageToken = files?.nextPageToken;
+        }
+        while (!string.IsNullOrWhiteSpace(pageToken));
+
+        return results;
+    }
+
     public override async Task<CloudOperationResult> UploadBackupAsync(string filePath, string storeName, CancellationToken cancellationToken = default)
     {
         var token = await GetTokenAsync(cancellationToken); if (token is null) return CloudOperationResult.Failed("Google Drive authorization has expired. Reconnect the account.");
         var folder = await EnsureFolderAsync(storeName, token.access_token!, cancellationToken);
         if (folder is null) return CloudOperationResult.Failed("Could not create the VyaparOS backup folder in Google Drive.");
-        using var content = new MultipartFormDataContent();
-        var metadata = new StringContent(JsonSerializer.Serialize(new { name = Path.GetFileName(filePath), parents = new[] { folder } }), Encoding.UTF8, "application/json");
-        content.Add(metadata, "metadata");
-        content.Add(new StreamContent(File.OpenRead(filePath)), "file", Path.GetFileName(filePath));
-        using var request = new HttpRequestMessage(HttpMethod.Post, "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart") { Content = content };
+        // Google Drive's multipart upload protocol is multipart/related, not HTML-style
+        // multipart/form-data. The first part is JSON metadata and the second is the raw file.
+        using var content = new MultipartContent("related");
+        using var metadata = new StringContent(
+            JsonSerializer.Serialize(new { name = Path.GetFileName(filePath), parents = new[] { folder } }),
+            Encoding.UTF8,
+            "application/json");
+        using var fileStream = File.OpenRead(filePath);
+        using var fileContent = new StreamContent(fileStream);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        content.Add(metadata);
+        content.Add(fileContent);
+        using var request = new HttpRequestMessage(HttpMethod.Post, "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name") { Content = content };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.access_token);
-        var response = await httpClient.SendAsync(request, cancellationToken);
-        return response.IsSuccessStatusCode ? CloudOperationResult.Success() : CloudOperationResult.Failed("Google Drive upload failed. Check your connection and try again.");
+        using var response = await httpClient.SendAsync(request, cancellationToken);
+        return response.IsSuccessStatusCode
+            ? CloudOperationResult.Success()
+            : CloudOperationResult.Failed(await ReadGoogleErrorAsync(response, "Google Drive upload failed", cancellationToken));
     }
 
     private async Task<string?> EnsureFolderAsync(string storeName, string accessToken, CancellationToken cancellationToken)
@@ -143,13 +186,35 @@ public sealed class GoogleDriveBackupProvider(ICloudTokenStore tokenStore, HttpC
             parent = found?.files?.FirstOrDefault()?.id;
             if (parent is null)
             {
-                using var create = new HttpRequestMessage(HttpMethod.Post, $"{Root}/files") { Content = JsonContent.Create(new { name, mimeType = "application/vnd.google-apps.folder", parents = parentId is null ? null : new[] { parentId } }) };
+                object folderMetadata = parentId is null
+                    ? new { name, mimeType = "application/vnd.google-apps.folder" }
+                    : new { name, mimeType = "application/vnd.google-apps.folder", parents = new[] { parentId } };
+                using var create = new HttpRequestMessage(HttpMethod.Post, $"{Root}/files?fields=id") { Content = JsonContent.Create(folderMetadata) };
                 create.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                 var created = await (await httpClient.SendAsync(create, cancellationToken)).Content.ReadFromJsonAsync<GoogleFile>(cancellationToken: cancellationToken); parent = created?.id;
             }
             if (parent is null) return null;
         }
         return parent;
+    }
+
+    private static async Task<string> ReadGoogleErrorAsync(HttpResponseMessage response, string fallback, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            if (document.RootElement.TryGetProperty("error", out var error) &&
+                error.TryGetProperty("message", out var message) &&
+                !string.IsNullOrWhiteSpace(message.GetString()))
+                return $"{fallback}: {message.GetString()}";
+        }
+        catch (JsonException)
+        {
+            // Return a stable, user-safe fallback when Google sends a non-JSON response.
+        }
+
+        return $"{fallback} (HTTP {(int)response.StatusCode}). Check your connection and try again.";
     }
 
     private async Task<GoogleToken?> GetTokenAsync(CancellationToken cancellationToken)
@@ -209,8 +274,14 @@ public sealed class GoogleDriveBackupProvider(ICloudTokenStore tokenStore, HttpC
     private sealed class GoogleIdentityUser { public string? email { get; set; } }
     private sealed class GoogleAbout { public GoogleUser? user { get; set; } }
     private sealed class GoogleUser { public string? emailAddress { get; set; } public string? displayName { get; set; } }
-    private sealed class GoogleFiles { public List<GoogleFile>? files { get; set; } }
-    private sealed class GoogleFile { public string? id { get; set; } }
+    private sealed class GoogleFiles { public List<GoogleFile>? files { get; set; } public string? nextPageToken { get; set; } }
+    private sealed class GoogleFile
+    {
+        public string? id { get; set; }
+        public string? name { get; set; }
+        public string? size { get; set; }
+        public DateTimeOffset? createdTime { get; set; }
+    }
 }
 
 public sealed class OneDriveBackupProvider(ICloudTokenStore tokenStore) : CloudProviderBase(tokenStore)

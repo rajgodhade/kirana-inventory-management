@@ -1,5 +1,6 @@
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Kirana.Application.Abstractions;
 
@@ -57,6 +58,10 @@ public interface IKiranaDbContext
     DbSet<PromotionTarget> PromotionTargets { get; }
     DbSet<PromotionRule> PromotionRules { get; }
     DbSet<SaleItemPromotion> SaleItemPromotions { get; }
+    DbSet<CashRegisterSession> CashRegisterSessions { get; }
+    DbSet<CashMovement> CashMovements { get; }
+
+    DatabaseFacade Database { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

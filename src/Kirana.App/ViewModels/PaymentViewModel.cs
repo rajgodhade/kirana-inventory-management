@@ -26,7 +26,10 @@ public sealed partial class PaymentViewModel : ObservableObject
     private readonly ISaleService _saleService;
 
     public decimal GrandTotal { get; }
-    public IReadOnlyList<PaymentMethod> AvailableMethods { get; } = Enum.GetValues<PaymentMethod>();
+    public bool CanUseCustomerCredit => _owner.SelectedCustomer is not null;
+    public IReadOnlyList<PaymentMethod> AvailableMethods => CanUseCustomerCredit
+        ? Enum.GetValues<PaymentMethod>()
+        : Enum.GetValues<PaymentMethod>().Where(method => method != PaymentMethod.CustomerCredit).ToArray();
 
     /// <summary>For the dialog's title — makes "Payment" specific to who this sale is for, instead
     /// of a bare generic label.</summary>
@@ -130,7 +133,7 @@ public sealed partial class PaymentViewModel : ObservableObject
         RecalculateRemaining();
     }
 
-    private PaymentLineViewModel CreatePaymentLine(string amountText = "0") => new()
+    private PaymentLineViewModel CreatePaymentLine(string amountText = "0") => new(CanUseCustomerCredit)
     {
         AmountText = amountText,
         // Snapshotted once per line: the customer can't change mid-dialog, and this is purely

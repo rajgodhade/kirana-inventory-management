@@ -6,6 +6,7 @@ using Kirana.Application.Authentication;
 using Kirana.Application.Barcodes;
 using Kirana.Application.Billing;
 using Kirana.Application.Customers;
+using Kirana.Application.CashRegisters;
 using Kirana.Application.Printing;
 using Kirana.Application.Hardware;
 using Kirana.Application.Products;
@@ -27,6 +28,7 @@ public sealed partial class PosShellPage : Page
     private readonly IHardwareSettingsService _hardwareSettingsService;
     private readonly IReceiptHardwareGuard _receiptHardwareGuard;
     private readonly IHardwareMonitor _hardwareMonitor;
+    private readonly ICashRegisterService _cashRegisterService;
     private bool _scannerEnabled = true;
     private bool _scannerSoundEnabled = true;
     private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
@@ -43,6 +45,7 @@ public sealed partial class PosShellPage : Page
         _hardwareSettingsService = services.GetRequiredService<IHardwareSettingsService>();
         _receiptHardwareGuard = services.GetRequiredService<IReceiptHardwareGuard>();
         _hardwareMonitor = services.GetRequiredService<IHardwareMonitor>();
+        _cashRegisterService = services.GetRequiredService<ICashRegisterService>();
         DeviceStatus = new DeviceStatusViewModel(
             _hardwareMonitor, _hardwareSettingsService);
         _hardwareMonitor.StatusChanged += OnHardwareStatusChanged;
@@ -83,6 +86,7 @@ public sealed partial class PosShellPage : Page
             ViewModel.ConfigureScannerTiming(hardwareSettings.ScannerTimeoutMilliseconds);
             ViewModel.ScannerBuffer.BarcodeScanned += OnScannerObserved;
             await ViewModel.InitializeAsync();
+            await RefreshRegisterStatusAsync();
             await DeviceStatus.RefreshAsync();
             if (hardwareSettings.AutoFocusScannerInput) ScanSearchBox.Focus(FocusState.Programmatic);
             if (!_scannerEnabled)
@@ -192,6 +196,21 @@ public sealed partial class PosShellPage : Page
         var now = DateTime.Now;
         CurrentDayDateText.Text = now.ToString("dddd, dd MMM yyyy");
         CurrentTimeText.Text = now.ToString("hh:mm tt");
+    }
+
+    private async Task RefreshRegisterStatusAsync()
+    {
+        try
+        {
+            var status = await _cashRegisterService.GetStatusAsync();
+            RegisterStatusText.Text = status.IsOpen ? "Register open" : "Register closed";
+            RegisterStatusDot.Fill = (Microsoft.UI.Xaml.Media.Brush)Microsoft.UI.Xaml.Application.Current.Resources[
+                status.IsOpen ? "SuccessBrush" : "TextSecondaryBrush"];
+        }
+        catch
+        {
+            RegisterStatusText.Text = "Register unavailable";
+        }
     }
 
     private async void OnDashboardClick(object sender, RoutedEventArgs e)

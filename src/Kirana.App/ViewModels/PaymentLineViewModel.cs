@@ -13,7 +13,14 @@ public sealed partial class PaymentLineViewModel : ObservableObject
     /// <summary>Exposed per-line (rather than once on the dialog) purely so the ComboBox inside
     /// this row's DataTemplate can bind to it with x:Bind — reaching a dialog-level property from
     /// inside a nested DataTemplate isn't reliable with this project's WinUI 3 tooling.</summary>
-    public IReadOnlyList<PaymentMethod> AvailableMethods { get; } = Enum.GetValues<PaymentMethod>();
+    public IReadOnlyList<PaymentMethod> AvailableMethods { get; }
+
+    public PaymentLineViewModel(bool allowCustomerCredit = true)
+    {
+        AvailableMethods = allowCustomerCredit
+            ? Enum.GetValues<PaymentMethod>()
+            : Enum.GetValues<PaymentMethod>().Where(method => method != PaymentMethod.CustomerCredit).ToArray();
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ChangeGiven))]

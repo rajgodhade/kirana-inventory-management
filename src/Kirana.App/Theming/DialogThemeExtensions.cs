@@ -21,4 +21,23 @@ public static class DialogThemeExtensions
         dialog.RequestedTheme = App.Services.GetRequiredService<ThemeService>().EffectiveTheme;
         return dialog;
     }
+
+    /// <summary>
+    /// Widens a dialog past WinUI's default ~548x756 cap for content-heavy dialogs (reports,
+    /// multi-section forms) that would otherwise clip instead of wrapping or scrolling.
+    ///
+    /// <see cref="ContentDialog"/>'s built-in template binds its size to the theme resources
+    /// <c>ContentDialogMaxWidth</c>/<c>ContentDialogMaxHeight</c> rather than to
+    /// <see cref="FrameworkElement.MaxWidth"/>/<see cref="FrameworkElement.MaxHeight"/>, so those
+    /// have to be overridden per-instance via <see cref="ContentDialog.Resources"/> — setting the
+    /// properties directly has no effect. This still only raises the ceiling; content taller than
+    /// <paramref name="maxHeight"/> needs its own <c>ScrollViewer</c> to avoid being clipped.
+    /// </summary>
+    public static TDialog Large<TDialog>(this TDialog dialog, double maxWidth = 760, double maxHeight = 820)
+        where TDialog : ContentDialog
+    {
+        dialog.Resources["ContentDialogMaxWidth"] = maxWidth;
+        dialog.Resources["ContentDialogMaxHeight"] = maxHeight;
+        return dialog;
+    }
 }

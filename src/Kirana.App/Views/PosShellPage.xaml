@@ -82,6 +82,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Width="32" Height="32" CornerRadius="{StaticResource RadiusMedium}"
@@ -96,19 +97,28 @@
                 <TextBlock Text="Billing" Style="{StaticResource CaptionTextStyle}" />
             </StackPanel>
 
-            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0">
+            <Border x:Name="RegisterStatusBadge" Grid.Column="2" Padding="10,5" CornerRadius="12"
+                    Background="{ThemeResource SurfaceAltBrush}" VerticalAlignment="Center"
+                    ToolTipService.ToolTip="Cash register status">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Ellipse x:Name="RegisterStatusDot" Width="7" Height="7" Fill="{ThemeResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                    <TextBlock x:Name="RegisterStatusText" Text="Register status" Style="{StaticResource CaptionTextStyle}" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,8,0">
                 <TextBlock x:Name="CurrentDayDateText" Style="{StaticResource SecondaryTextStyle}"
                            HorizontalAlignment="Right" />
                 <TextBlock x:Name="CurrentTimeText" Style="{StaticResource CaptionTextStyle}"
                            HorizontalAlignment="Right" />
             </StackPanel>
 
-            <Button Grid.Column="3" Click="OnThemeToggleClick" VerticalAlignment="Center"
+            <Button Grid.Column="4" Click="OnThemeToggleClick" VerticalAlignment="Center"
                     AutomationProperties.Name="Toggle light and dark theme">
                 <FontIcon x:Name="ThemeIcon" Glyph="&#xE706;" FontSize="15" />
             </Button>
 
-            <Button Grid.Column="4" Click="OnDashboardClick" VerticalAlignment="Center"
+            <Button Grid.Column="5" Click="OnDashboardClick" VerticalAlignment="Center"
                     AutomationProperties.Name="Open management dashboard">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE72E;" FontSize="14" />
@@ -119,7 +129,7 @@
             <!-- Spans every column so it centers against the header's full width, not just
                  whatever space is left between the store-info block and the toolbar buttons —
                  the left/right controls' widths can never pull this off-center. -->
-            <controls:HeaderBranding Grid.Column="0" Grid.ColumnSpan="5" />
+            <controls:HeaderBranding Grid.Column="0" Grid.ColumnSpan="6" />
         </Grid>
 
         <!-- Billing tabs: several customers can be part-way through a bill at once. -->
