@@ -142,7 +142,7 @@ public sealed partial class PurchasesPage : Page
             return;
         }
 
-        var dialog = new PurchasePaymentDialog(ViewModel, purchase.Id, purchase.SupplierId).Themed(XamlRoot);
+        var dialog = new PurchasePaymentDialog(ViewModel, purchase.Id, purchase.SupplierId, row).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.SearchAsync();
     }

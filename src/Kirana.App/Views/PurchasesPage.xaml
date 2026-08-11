@@ -316,9 +316,12 @@
                                                     <TextBlock Text="View" FontSize="12" />
                                                 </StackPanel>
                                             </Button>
+                                            <!-- A fully paid purchase has nothing left to record, so the action
+                                                 is hidden rather than shown disabled. -->
                                             <Button Tag="{x:Bind}" Click="OnRecordPaymentClick" Padding="9,5" MinWidth="0" Height="32"
                                                     CornerRadius="{StaticResource RadiusMedium}"
                                                     IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManagePurchases}"
+                                                    Visibility="{x:Bind HasOutstanding, Converter={StaticResource BoolToVisibilityConverter}}"
                                                     AutomationProperties.Name="Record purchase payment">
                                                 <StackPanel Orientation="Horizontal" Spacing="5">
                                                     <FontIcon Glyph="&#xE8C7;" FontSize="13" />

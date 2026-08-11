@@ -20,17 +20,57 @@
         </Grid>
     </ContentDialog.Title>
 
-    <StackPanel Spacing="10" MinWidth="360">
-        <TextBox x:Name="AmountBox" Header="Amount" PlaceholderText="0.00" />
+    <StackPanel Spacing="14" MinWidth="380">
+        <!-- Context card: which purchase this payment applies to, and where the numbers stand,
+             so the amount being typed below always has a clear "out of how much" anchor. -->
+        <Border Background="{ThemeResource SurfaceAltBrush}" CornerRadius="{StaticResource RadiusMedium}" Padding="14,12">
+            <StackPanel Spacing="8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Spacing="0">
+                        <TextBlock x:Name="PurchaseNumberText" Style="{StaticResource CardTitleTextStyle}" />
+                        <TextBlock x:Name="SupplierNameText" Style="{StaticResource CaptionTextStyle}" />
+                    </StackPanel>
+                    <Border x:Name="StatusBadgeBorder" Grid.Column="1" Style="{StaticResource BadgeBorderStyle}" VerticalAlignment="Top">
+                        <TextBlock x:Name="StatusBadgeText" Style="{StaticResource BadgeTextStyle}" />
+                    </Border>
+                </Grid>
 
-        <ComboBox x:Name="MethodBox" Header="Payment Method" SelectedIndex="0">
-            <ComboBoxItem Content="Cash" Tag="Cash" />
-            <ComboBoxItem Content="UPI" Tag="Upi" />
-            <ComboBoxItem Content="Card" Tag="Card" />
-        </ComboBox>
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <StackPanel Spacing="0">
+                        <TextBlock Text="Total" Style="{StaticResource CaptionTextStyle}" />
+                        <TextBlock x:Name="TotalText" Style="{StaticResource SecondaryTextStyle}" />
+                    </StackPanel>
+                    <StackPanel Spacing="0">
+                        <TextBlock Text="Already paid" Style="{StaticResource CaptionTextStyle}" />
+                        <TextBlock x:Name="PaidText" Style="{StaticResource SecondaryTextStyle}" />
+                    </StackPanel>
+                    <StackPanel Spacing="0">
+                        <TextBlock Text="Outstanding" Style="{StaticResource CaptionTextStyle}" />
+                        <TextBlock x:Name="OutstandingText" Style="{StaticResource SecondaryTextStyle}"
+                                   Foreground="{ThemeResource DangerBrush}" FontWeight="SemiBold" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
-        <TextBox x:Name="ReferenceBox" Header="Reference # (optional)" />
+        <StackPanel Spacing="10">
+            <TextBox x:Name="AmountBox" Header="Amount" PlaceholderText="0.00" TextChanged="OnAmountBoxTextChanged" />
+            <HyperlinkButton x:Name="PayFullButton" Content="Pay full outstanding amount" Padding="0"
+                             Click="OnPayFullClick" HorizontalAlignment="Left" />
 
-        <InfoBar x:Name="ErrorBar" IsOpen="False" Severity="Error" />
+            <ComboBox x:Name="MethodBox" Header="Payment Method" SelectedIndex="0">
+                <ComboBoxItem Content="Cash" Tag="Cash" />
+                <ComboBoxItem Content="UPI" Tag="Upi" />
+                <ComboBoxItem Content="Card" Tag="Card" />
+            </ComboBox>
+
+            <TextBox x:Name="ReferenceBox" Header="Reference # (optional)" />
+
+            <InfoBar x:Name="ErrorBar" IsOpen="False" Severity="Error" />
+        </StackPanel>
     </StackPanel>
 </ContentDialog>
