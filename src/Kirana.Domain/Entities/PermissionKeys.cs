@@ -33,6 +33,10 @@ public static class PermissionKeys
     public const string PromotionsManage = "promotions.manage";
     public const string HardwareView = "hardware.view";
     public const string HardwareManage = "hardware.manage";
+    public const string CashRegisterView = "cashregister.view";
+    public const string CashRegisterOpenClose = "cashregister.openClose";
+    public const string CashRegisterCashIn = "cashregister.cashIn";
+    public const string CashRegisterCashOut = "cashregister.cashOut";
 
     public static readonly IReadOnlyList<(string Key, string Description)> All = new[]
     {
@@ -59,6 +63,10 @@ public static class PermissionKeys
         (PromotionsManage, "Create and manage promotions"),
         (HardwareView, "View hardware status and diagnostics"),
         (HardwareManage, "Configure and test hardware devices"),
+        (CashRegisterView, "View cash register status, reports and history"),
+        (CashRegisterOpenClose, "Open and close the cash register"),
+        (CashRegisterCashIn, "Add physical cash to the register"),
+        (CashRegisterCashOut, "Remove physical cash from the register"),
     };
 
     public static readonly IReadOnlyList<string> Owner = All.Select(p => p.Key).ToArray();
@@ -69,6 +77,8 @@ public static class PermissionKeys
         BillingApplyDiscount,
         PromotionsView,
         HardwareView,
+        CashRegisterView,
+        CashRegisterOpenClose,
     };
 
     public static readonly IReadOnlyList<string> Manager = new[]
@@ -81,5 +91,6 @@ public static class PermissionKeys
         ExpensesManage,
         PromotionsView, PromotionsManage,
         HardwareView, HardwareManage,
+        CashRegisterView, CashRegisterOpenClose, CashRegisterCashIn, CashRegisterCashOut,
     };
 }

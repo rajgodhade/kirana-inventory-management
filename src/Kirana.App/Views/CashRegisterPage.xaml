@@ -1,0 +1,113 @@
+<Page
+    x:Class="Kirana.App.Views.CashRegisterPage"
+    x:Name="RootPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kirana.App.ViewModels">
+
+    <Grid Background="{ThemeResource PageBackgroundBrush}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="24,20,24,28" Spacing="16">
+                <Grid>
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Cash Register" Style="{StaticResource PageTitleTextStyle}" />
+                        <TextBlock Text="Opening cash, physical drawer movements, cashier closing and daily reports."
+                                   Style="{StaticResource PageSubtitleTextStyle}" />
+                    </StackPanel>
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Center" Click="OnRefreshClick"
+                            AutomationProperties.Name="Refresh cash register"><FontIcon Glyph="&#xE72C;" /></Button>
+                </Grid>
+
+                <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                         Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" IsClosable="True" />
+                <InfoBar IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                         Severity="Success" Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" IsClosable="True" />
+                <ProgressBar IsIndeterminate="True" Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                <Border Style="{StaticResource CardBorderStyle}"
+                        Visibility="{x:Bind ViewModel.IsOpen, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                    <Grid ColumnSpacing="24">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="360" /></Grid.ColumnDefinitions>
+                        <StackPanel Spacing="7" VerticalAlignment="Center">
+                            <Border Width="48" Height="48" CornerRadius="24" Background="{ThemeResource PastelAmberBrush}" HorizontalAlignment="Left">
+                                <FontIcon Glyph="&#xE7B8;" Foreground="{ThemeResource PastelAmberOnBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="Register is closed" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="Confirm the physical cash in the drawer once, before the register session begins."
+                                       Style="{StaticResource SecondaryTextStyle}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBox x:Name="OpeningCashBox" Header="Opening Cash" PlaceholderText="0.00"
+                                     InputScope="Number" AutomationProperties.Name="Opening cash amount" />
+                            <Button Content="Open Register" Style="{StaticResource AccentButtonStyle}" Click="OnOpenRegisterClick"
+                                    IsEnabled="{x:Bind ViewModel.CanOpenClose}" HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <StackPanel Spacing="14" Visibility="{x:Bind ViewModel.IsOpen, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <StackPanel Spacing="4">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="10" Height="10" Fill="{ThemeResource SuccessBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="REGISTER OPEN" Foreground="{ThemeResource SuccessBrush}" FontWeight="SemiBold" />
+                                </StackPanel>
+                                <TextBlock Text="{x:Bind ViewModel.RegisterName, Mode=OneWay}" Style="{StaticResource SectionTitleTextStyle}" />
+                                <TextBlock><Run Text="Opened by " /><Run Text="{x:Bind ViewModel.OpenedBy, Mode=OneWay}" /><Run Text=" · " /><Run Text="{x:Bind ViewModel.OpenedAt, Mode=OneWay}" /></TextBlock>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                <TextBlock Text="CURRENT EXPECTED CASH" Style="{StaticResource KpiLabelTextStyle}" HorizontalAlignment="Right" />
+                                <TextBlock Text="{x:Bind ViewModel.ExpectedCashText, Mode=OneWay}" FontSize="28" FontWeight="Bold" Foreground="{ThemeResource BrandPrimaryBrush}" HorizontalAlignment="Right" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelBlueBrush}"><StackPanel><TextBlock Text="OPENING CASH" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.OpeningCashText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Column="1" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelGreenBrush}"><StackPanel><TextBlock Text="CASH SALES" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashSalesText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Column="2" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelRoseBrush}"><StackPanel><TextBlock Text="CASH REFUNDS" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashRefundsText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Column="3" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelVioletBrush}"><StackPanel><TextBlock Text="UDHAAR REPAYMENTS" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashRepaymentsText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Column="4" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelGreenBrush}"><StackPanel><TextBlock Text="CASH IN" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashInText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Column="5" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}"><StackPanel><TextBlock Text="SUPPLIER PAYMENTS" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.SupplierCashPaymentsText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Column="6" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}"><StackPanel><TextBlock Text="CASH OUT" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashOutText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                    </Grid>
+
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="X Report" Click="OnXReportClick" />
+                            <Button Content="Cash In" Click="OnCashInClick" IsEnabled="{x:Bind ViewModel.CanCashIn}" />
+                            <Button Content="Cash Out" Click="OnCashOutClick" IsEnabled="{x:Bind ViewModel.CanCashOut}" />
+                            <Button Content="Close Register" Click="OnCloseRegisterClick" IsEnabled="{x:Bind ViewModel.CanOpenClose}"
+                                    Style="{StaticResource AccentButtonStyle}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="0">
+                    <Grid>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                        <TextBlock Text="Register History" Style="{StaticResource SectionTitleTextStyle}" Margin="18,16" />
+                        <Grid Grid.Row="1" Padding="16,10" Background="{ThemeResource SurfaceAltBrush}" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="110" /><ColumnDefinition Width="130" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="120" /><ColumnDefinition Width="120" /><ColumnDefinition Width="110" /><ColumnDefinition Width="90" /><ColumnDefinition Width="80" /></Grid.ColumnDefinitions>
+                            <TextBlock Text="DATE" Style="{StaticResource ColumnHeaderTextStyle}" /><TextBlock Grid.Column="1" Text="REGISTER" Style="{StaticResource ColumnHeaderTextStyle}" /><TextBlock Grid.Column="2" Text="OPENED" Style="{StaticResource ColumnHeaderTextStyle}" /><TextBlock Grid.Column="3" Text="CLOSED" Style="{StaticResource ColumnHeaderTextStyle}" /><TextBlock Grid.Column="4" Text="EXPECTED" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" /><TextBlock Grid.Column="5" Text="COUNTED" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" /><TextBlock Grid.Column="6" Text="DIFFERENCE" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" /><TextBlock Grid.Column="7" Text="STATUS" Style="{StaticResource ColumnHeaderTextStyle}" /><TextBlock Grid.Column="8" Text="REPORT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        </Grid>
+                        <ListView Grid.Row="2" ItemsSource="{x:Bind ViewModel.History}" MaxHeight="320" SelectionMode="None">
+                            <ListView.ItemContainerStyle><Style TargetType="ListViewItem"><Setter Property="Padding" Value="0" /><Setter Property="HorizontalContentAlignment" Value="Stretch" /></Style></ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate><DataTemplate x:DataType="vm:CashRegisterHistoryRowViewModel">
+                                <Grid Padding="16,11" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="110" /><ColumnDefinition Width="130" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="120" /><ColumnDefinition Width="120" /><ColumnDefinition Width="110" /><ColumnDefinition Width="90" /><ColumnDefinition Width="80" /></Grid.ColumnDefinitions>
+                                    <TextBlock Text="{x:Bind BusinessDate}" /><TextBlock Grid.Column="1" Text="{x:Bind RegisterName}" /><StackPanel Grid.Column="2"><TextBlock Text="{x:Bind OpenedBy}" /><TextBlock Text="{x:Bind OpenedAt}" Style="{StaticResource CaptionTextStyle}" /></StackPanel><StackPanel Grid.Column="3"><TextBlock Text="{x:Bind ClosedBy}" /><TextBlock Text="{x:Bind ClosedAt}" Style="{StaticResource CaptionTextStyle}" /></StackPanel><TextBlock Grid.Column="4" Text="{x:Bind Expected}" HorizontalAlignment="Right" /><TextBlock Grid.Column="5" Text="{x:Bind Actual}" HorizontalAlignment="Right" /><TextBlock Grid.Column="6" Text="{x:Bind Variance}" HorizontalAlignment="Right" /><TextBlock Grid.Column="7" Text="{x:Bind Status}" /><Button Grid.Column="8" Content="View" Tag="{x:Bind Id}" Click="OnViewZReportClick" IsEnabled="{x:Bind IsClosed}" />
+                                </Grid>
+                            </DataTemplate></ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

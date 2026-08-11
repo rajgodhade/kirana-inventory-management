@@ -18,6 +18,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Serilog;
+using System.Runtime.InteropServices;
 
 namespace Kirana.App;
 
@@ -40,9 +41,40 @@ public partial class App : Microsoft.UI.Xaml.Application
     public static Frame? RootFrame => _mainWindow?.NavigationFrame;
 
     private static MainWindow? _mainWindow;
+    private static nint _largeWindowIcon;
+    private static nint _smallWindowIcon;
+
+    private const uint ImageIcon = 1;
+    private const uint LoadFromFile = 0x0010;
+    private const uint WmSetIcon = 0x0080;
+    private const nuint IconSmall = 0;
+    private const nuint IconBig = 1;
+    private const int SmCxIcon = 11;
+    private const int SmCyIcon = 12;
+    private const int SmCxSmallIcon = 49;
+    private const int SmCySmallIcon = 50;
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern nint LoadImageW(nint instance, string name, uint type, int width, int height, uint load);
+
+    [DllImport("user32.dll")]
+    private static extern nint SendMessageW(nint window, uint message, nuint wParam, nint lParam);
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int index);
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
 
     public App()
     {
+        // Give this unpackaged desktop process a stable Shell identity. Without an explicit AUMID,
+        // Windows can group it under the generic WinUI host and keep showing that host's cached
+        // taskbar icon even though the HWND and executable both contain the Kirana icon.
+        var appIdResult = SetCurrentProcessExplicitAppUserModelID("Kirana.InventoryManagement.Desktop");
+        if (appIdResult != 0)
+            Log.Warning("Could not set the Kirana AppUserModelID. HRESULT: {HResult}", appIdResult);
+
         InitializeComponent();
 
         // Serilog must be configured before any DI service logs; resolve paths up front.
@@ -71,11 +103,13 @@ public partial class App : Microsoft.UI.Xaml.Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
+        Log.Information("Startup: applying database migrations.");
         using (var scope = Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<KiranaDbContext>();
             await db.Database.MigrateAsync();
         }
+        Log.Information("Startup: database migrations complete.");
 
         bool setupCompleted;
         using (var scope = Services.CreateScope())
@@ -110,7 +144,15 @@ public partial class App : Microsoft.UI.Xaml.Application
             }
         }
 
+        Log.Information("Startup: creating MainWindow.");
         _mainWindow = new MainWindow();
+        Log.Information("Startup: MainWindow created; activating.");
+
+        // Activate first so WinUI has created the native HWND/AppWindow before ThemeService touches
+        // AppWindow.TitleBar. Accessing the title bar on an unactivated unpackaged WinUI window can
+        // leave CoreMessaging spinning with no visible window on some Windows/runtime builds.
+        _mainWindow.Activate();
+        Log.Information("Startup: MainWindow activated.");
 
         // Applied before the window is shown so the app never flashes the wrong theme on launch.
         // Appearance is never worth failing a launch over: OnLaunched is async void, so an escaping
@@ -118,16 +160,20 @@ public partial class App : Microsoft.UI.Xaml.Application
         // app with no UI. Fall back to the default theme instead.
         try
         {
+            Log.Information("Startup: applying theme.");
             await Services.GetRequiredService<ThemeService>().InitializeAsync(_mainWindow.RootElement, _mainWindow);
+            Log.Information("Startup: theme applied.");
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Could not apply the saved theme; continuing with the default appearance.");
         }
 
+        Log.Information("Startup: navigating to initial page.");
         _mainWindow.NavigateToInitialPage(setupCompleted);
-        _mainWindow.Activate();
+        Log.Information("Startup: initial page navigation complete.");
         ApplyMinimumWindowSize(_mainWindow);
+        ApplyApplicationIcon(_mainWindow);
 
         try
         {
@@ -167,6 +213,52 @@ public partial class App : Microsoft.UI.Xaml.Application
         catch
         {
             // Best-effort only — an unset minimum just means very small windows can clip content.
+        }
+    }
+
+    /// <summary>
+    /// Sets the window's own icon (title bar + taskbar button) at runtime. The <c>ApplicationIcon</c>
+    /// MSBuild property in the csproj embeds the same .ico as the .exe's Win32 resource, which is
+    /// what Explorer/shortcuts/Start Menu show before the app is even running — but for an
+    /// unpackaged WinUI 3 app (no Package.appxmanifest here, see <c>WindowsPackageType=None</c>),
+    /// the running window's own taskbar/title-bar icon has to be set explicitly via
+    /// <see cref="Microsoft.UI.Windowing.AppWindow.SetIcon"/> too, or it falls back to a generic
+    /// icon while the app is open. Reads the .ico from the build output next to the .exe (marked
+    /// CopyToOutputDirectory in the csproj) rather than a packaged URI, since this deployment model
+    /// has no package to resolve ms-appx:// against.
+    /// </summary>
+    private static void ApplyApplicationIcon(Window window)
+    {
+        try
+        {
+            var iconPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon", "AppIcon.ico");
+            if (!System.IO.File.Exists(iconPath))
+            {
+                return;
+            }
+
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+            var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+            appWindow.SetIcon(iconPath);
+
+            // AppWindow.SetIcon is not consistently reflected by the taskbar for unpackaged
+            // WinUI 3 apps. WM_SETICON updates the native HWND used by the taskbar and Alt+Tab.
+            _largeWindowIcon = LoadImageW(0, iconPath, ImageIcon,
+                GetSystemMetrics(SmCxIcon), GetSystemMetrics(SmCyIcon), LoadFromFile);
+            _smallWindowIcon = LoadImageW(0, iconPath, ImageIcon,
+                GetSystemMetrics(SmCxSmallIcon), GetSystemMetrics(SmCySmallIcon), LoadFromFile);
+
+            if (_largeWindowIcon != 0)
+                SendMessageW(hwnd, WmSetIcon, IconBig, _largeWindowIcon);
+            if (_smallWindowIcon != 0)
+                SendMessageW(hwnd, WmSetIcon, IconSmall, _smallWindowIcon);
+        }
+        catch (Exception ex)
+        {
+            // Best-effort only — the .exe's embedded Win32 resource icon (ApplicationIcon in the
+            // csproj) still covers Explorer/shortcuts/Start Menu even if this runtime call fails.
+            Log.Warning(ex, "Could not apply the Kirana application icon to the running window.");
         }
     }
 

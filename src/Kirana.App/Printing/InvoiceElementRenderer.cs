@@ -96,7 +96,33 @@ public static class InvoiceElementRenderer
             stack.Children.Add(new TextBlock { Text = "(continued…)", FontSize = 10, Opacity = 0.6, TextAlignment = TextAlignment.Center });
         }
 
-        return stack;
+        ApplyPaperPalette(stack);
+        return new Border
+        {
+            Width = widthDip,
+            MinHeight = heightDip,
+            Background = new SolidColorBrush(Colors.White),
+            Child = stack,
+        };
+    }
+
+    /// <summary>Printed paper is always white, regardless of the application's light/dark theme.
+    /// WinUI TextBlocks otherwise inherit the app's dark-theme white foreground and become
+    /// invisible in the Windows print preview. Preserve the intentional green savings row.</summary>
+    private static void ApplyPaperPalette(DependencyObject element)
+    {
+        if (element is TextBlock text && !ReferenceEquals(text.Foreground, SavingsBrush))
+            text.Foreground = new SolidColorBrush(Colors.Black);
+
+        if (element is Panel panel)
+        {
+            foreach (var child in panel.Children)
+                ApplyPaperPalette(child);
+        }
+        else if (element is Border { Child: DependencyObject child })
+        {
+            ApplyPaperPalette(child);
+        }
     }
 
     private static FrameworkElement BuildHeader(InvoiceDocument document, bool isCompact)

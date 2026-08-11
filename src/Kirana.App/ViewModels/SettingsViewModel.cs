@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.CloudBackup;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +13,7 @@ namespace Kirana.App.ViewModels;
 /// updated in-memory immediately on save so the auto-lock monitor picks up the new value without
 /// needing a restart, while the underlying <c>AppSettings</c> row persists it across launches.</summary>
 public sealed partial class SettingsViewModel(
-    IKiranaDbContext db, IAppPaths appPaths, ManagementSession session) : ObservableObject
+    IKiranaDbContext db, IAppPaths appPaths, ManagementSession session, ICloudBackupService cloudBackupService) : ObservableObject
 {
     public bool CanChangeSettings => session.HasPermission(PermissionKeys.SettingsChange);
 
@@ -80,7 +81,137 @@ public sealed partial class SettingsViewModel(
     [ObservableProperty]
     private string? _backupSettingsStatusMessage;
 
+    public IReadOnlyList<string> CloudProviderOptions { get; } = ["Not connected", "Google Drive", "OneDrive"];
+    [ObservableProperty] private string _cloudProvider = "Not connected";
+    [ObservableProperty] private bool _cloudAutomaticBackupEnabled;
+    [ObservableProperty] private string _cloudBackupFrequency = "Daily";
+    [ObservableProperty] private string _cloudBackupTime = "23:00";
+    [ObservableProperty] private string _cloudBackupRetentionText = "30";
+    [ObservableProperty] private string? _cloudBackupAccount;
+    [ObservableProperty] private string _lastCloudBackupText = "No cloud backup yet";
+    [ObservableProperty] private string? _cloudBackupStatusMessage;
+    [ObservableProperty] private string? _cloudBackupErrorMessage;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCloudBackups))]
+    [NotifyPropertyChangedFor(nameof(HasNoCloudBackups))]
+    [NotifyPropertyChangedFor(nameof(CloudBackupCountText))]
+    private IReadOnlyList<CloudBackupListItem> _cloudBackups = [];
+    [ObservableProperty] private bool _showCloudBackups;
+    [ObservableProperty] private bool _isCloudBackupListLoading;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanStartCloudBackup))]
+    [NotifyPropertyChangedFor(nameof(CanManageCloudConnection))]
+    [NotifyPropertyChangedFor(nameof(CanViewCloudBackups))]
+    [NotifyPropertyChangedFor(nameof(CloudBackupButtonText))]
+    private bool _isCloudBackupRunning;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CloudIsDisconnected))]
+    [NotifyPropertyChangedFor(nameof(CanStartCloudBackup))]
+    [NotifyPropertyChangedFor(nameof(CanViewCloudBackups))]
+    private bool _cloudIsConnected;
+    public bool CloudIsDisconnected => !CloudIsConnected;
+    public bool CanStartCloudBackup => CloudIsConnected && !IsCloudBackupRunning;
+    public bool CanManageCloudConnection => CanChangeSettings && !IsCloudBackupRunning;
+    public bool CanViewCloudBackups => CloudIsConnected && !IsCloudBackupRunning;
+    public string CloudBackupButtonText => IsCloudBackupRunning ? "Uploading..." : "Backup now";
+    public bool HasCloudBackups => CloudBackups.Count > 0;
+    public bool HasNoCloudBackups => ShowCloudBackups && !IsCloudBackupListLoading && CloudBackups.Count == 0;
+    public string CloudBackupCountText => CloudBackups.Count == 1 ? "1 backup" : $"{CloudBackups.Count} backups";
+    public string CloudAccountDisplay => string.IsNullOrWhiteSpace(CloudBackupAccount)
+        ? "Reconnect once to display the account email"
+        : $"Connected account: {CloudBackupAccount}";
+
     private bool _isLoadingBackupSettings;
+
+    [RelayCommand]
+    private async Task ConnectCloudAsync()
+    {
+        CloudBackupErrorMessage = null;
+        var kind = CloudProvider switch { "Google Drive" => CloudBackupProviderKind.GoogleDrive, "OneDrive" => CloudBackupProviderKind.OneDrive, _ => CloudBackupProviderKind.None };
+        if (kind == CloudBackupProviderKind.None) { CloudBackupErrorMessage = "Choose Google Drive or OneDrive first."; return; }
+        var result = await cloudBackupService.ConnectAsync(kind);
+        if (!result.Succeeded) { CloudBackupErrorMessage = result.ErrorMessage; return; }
+        await RefreshCloudAsync();
+        CloudBackupStatusMessage = "Google Drive connected successfully.";
+    }
+
+    [RelayCommand]
+    private async Task DisconnectCloudAsync()
+    {
+        await cloudBackupService.DisconnectAsync();
+        CloudProvider = "Not connected";
+        CloudBackupAccount = null;
+        CloudIsConnected = false;
+        CloudBackupStatusMessage = "Cloud backup disconnected.";
+    }
+
+    [RelayCommand]
+    private async Task BackupToCloudAsync()
+    {
+        if (IsCloudBackupRunning) return;
+
+        CloudBackupErrorMessage = null;
+        CloudBackupStatusMessage = null;
+        IsCloudBackupRunning = true;
+        try
+        {
+            var result = await cloudBackupService.BackupNowAsync(session.CurrentUser?.Id);
+            if (!result.Succeeded) { CloudBackupErrorMessage = result.ErrorMessage; return; }
+            await RefreshCloudAsync();
+            CloudBackupStatusMessage = "Cloud backup completed successfully.";
+        }
+        finally
+        {
+            IsCloudBackupRunning = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ViewCloudBackupsAsync()
+    {
+        CloudBackupErrorMessage = null;
+        CloudBackupStatusMessage = null;
+        ShowCloudBackups = true;
+        IsCloudBackupListLoading = true;
+        OnPropertyChanged(nameof(HasNoCloudBackups));
+        try
+        {
+            var backups = await cloudBackupService.ListBackupsAsync();
+            CloudBackups = backups.Select(backup => new CloudBackupListItem(
+                backup.FileName,
+                backup.CreatedAtUtc == DateTime.MinValue ? "Upload time unavailable" : backup.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt"),
+                FormatFileSize(backup.SizeBytes))).ToList();
+        }
+        finally
+        {
+            IsCloudBackupListLoading = false;
+            OnPropertyChanged(nameof(HasNoCloudBackups));
+        }
+    }
+
+    private static string FormatFileSize(long bytes) => bytes switch
+    {
+        >= 1024L * 1024L => $"{bytes / (1024d * 1024d):0.0} MB",
+        >= 1024L => $"{bytes / 1024d:0.0} KB",
+        > 0 => $"{bytes} bytes",
+        _ => "Size unavailable",
+    };
+
+    public async Task RefreshCloudAsync()
+    {
+        var settings = await db.AppSettings.FirstOrDefaultAsync();
+        CloudProvider = settings?.CloudBackupProvider switch { "GoogleDrive" => "Google Drive", "OneDrive" => "OneDrive", _ => "Not connected" };
+        CloudAutomaticBackupEnabled = settings?.CloudAutomaticBackupEnabled ?? false;
+        CloudBackupFrequency = settings?.CloudBackupFrequency ?? "Daily";
+        CloudBackupTime = settings?.CloudBackupTime ?? "23:00";
+        CloudBackupRetentionText = (settings?.CloudBackupRetentionCount ?? 30).ToString();
+        LastCloudBackupText = settings?.LastCloudBackupUtc is { } last
+            ? $"Last backup: {last.ToLocalTime():dd MMM yyyy, hh:mm tt}"
+            : "No cloud backup yet";
+        CloudIsConnected = await cloudBackupService.IsConnectedAsync();
+        CloudBackupAccount = CloudIsConnected && await cloudBackupService.GetAccountInfoAsync() is { } account ? account.Email : null;
+        OnPropertyChanged(nameof(CloudAccountDisplay));
+    }
 
     partial void OnAutomaticBackupEnabledChanged(bool value) =>
         _ = SaveBackupSettingAsync(s => s.AutomaticBackupEnabled = value);
@@ -90,6 +221,15 @@ public sealed partial class SettingsViewModel(
 
     partial void OnDefaultExportFormatChanged(string value) =>
         _ = SaveBackupSettingAsync(s => s.DefaultExportFormat = value);
+
+    partial void OnCloudAutomaticBackupEnabledChanged(bool value) =>
+        _ = SaveBackupSettingAsync(s => s.CloudAutomaticBackupEnabled = value);
+
+    partial void OnCloudBackupFrequencyChanged(string value) =>
+        _ = SaveBackupSettingAsync(s => s.CloudBackupFrequency = value);
+
+    partial void OnCloudBackupTimeChanged(string value) =>
+        _ = SaveBackupSettingAsync(s => s.CloudBackupTime = value);
 
     /// <summary>Called by the page after the folder picker returns, and by the Save button next to
     /// the retention field — both write through the same immediate-save path as the toggles.</summary>
@@ -166,6 +306,7 @@ public sealed partial class SettingsViewModel(
         BackupDirectory = settings?.BackupDirectory ?? string.Empty;
         BackupRetentionText = (settings?.BackupRetentionCount ?? 14).ToString();
         DefaultExportFormat = settings?.DefaultExportFormat ?? "Csv";
+        await RefreshCloudAsync();
         _isLoadingBackupSettings = false;
     }
 
@@ -255,3 +396,5 @@ public sealed partial class SettingsViewModel(
         return true;
     }
 }
+
+public sealed record CloudBackupListItem(string FileName, string UploadedAtText, string SizeText);

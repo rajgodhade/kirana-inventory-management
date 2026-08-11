@@ -4,6 +4,7 @@ using Kirana.Application.Backup;
 using Kirana.Application.Barcodes;
 using Kirana.Application.Billing;
 using Kirana.Application.Customers;
+using Kirana.Application.CashRegisters;
 using Kirana.Application.Export;
 using Kirana.Application.Expenses;
 using Kirana.Application.Inventories;
@@ -41,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<IBarcodeLookupService, BarcodeLookupService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<ICustomerCreditService, CustomerCreditService>();
+        services.AddScoped<ICashRegisterService, CashRegisterService>();
         services.AddSingleton<IGstCalculationService, GstCalculationService>();
         services.AddSingleton<IPurchaseGstCalculationService, PurchaseGstCalculationService>();
         services.AddScoped<ISaleService, SaleService>();

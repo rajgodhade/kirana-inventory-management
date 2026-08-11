@@ -17,6 +17,15 @@ public class AppSettings : Entity
     public string? BackupDirectory { get; set; }
     public int BackupRetentionCount { get; set; } = 14;
 
+    /// <summary>Cloud backup configuration. Tokens are never stored here; providers keep them in
+    /// Windows-protected local storage.</summary>
+    public string CloudBackupProvider { get; set; } = "None";
+    public bool CloudAutomaticBackupEnabled { get; set; }
+    public string CloudBackupFrequency { get; set; } = "Daily";
+    public string CloudBackupTime { get; set; } = "23:00";
+    public int CloudBackupRetentionCount { get; set; } = 30;
+    public DateTime? LastCloudBackupUtc { get; set; }
+
     /// <summary>Whether overriding a product's selling price at the POS needs a manager/owner PIN.
     /// Defaults on; an Owner running the register alone can turn it off in Settings so billing
     /// doesn't stop to ask them to authorize their own action.</summary>

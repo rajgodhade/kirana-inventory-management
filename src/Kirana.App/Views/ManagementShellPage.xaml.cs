@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using Serilog;
 
 namespace Kirana.App.Views;
 
@@ -67,6 +68,7 @@ public sealed partial class ManagementShellPage : Page
                 || t == typeof(SalesReturnDetailsPage) => "SalesReturns",
             var t when t == typeof(PurchaseReturnsPage) || t == typeof(NewPurchaseReturnPage)
                 || t == typeof(PurchaseReturnDetailsPage) => "PurchaseReturns",
+            var t when t == typeof(CashRegisterPage) => "CashRegister",
             var t when t == typeof(ExpensesPage) || t == typeof(ExpenseDetailsPage)
                 || t == typeof(ExpenseCategoriesPage) => "Expenses",
             var t when t == typeof(UserManagementPage) => "Users",
@@ -142,6 +144,7 @@ public sealed partial class ManagementShellPage : Page
         // returns reuse the purchasing permission, and expenses reuse the expenses permission.
         SetVisible(NavSalesReturns, _session.HasPermission(PermissionKeys.SalesProcessRefund));
         SetVisible(NavPurchaseReturns, _session.HasPermission(PermissionKeys.PurchasesManage));
+        SetVisible(NavCashRegister, _session.HasPermission(PermissionKeys.CashRegisterView));
         SetVisible(NavExpenses, _session.HasPermission(PermissionKeys.ExpensesManage));
 
         SetVisible(NavUsers, _session.HasPermission(PermissionKeys.UsersManage));
@@ -169,6 +172,7 @@ public sealed partial class ManagementShellPage : Page
 
         SetVisible(NavReturnsHeader, NavSalesReturns.Visibility == Visibility.Visible
             || NavPurchaseReturns.Visibility == Visibility.Visible
+            || NavCashRegister.Visibility == Visibility.Visible
             || NavExpenses.Visibility == Visibility.Visible);
 
         SetVisible(NavAdminHeader, NavUsers.Visibility == Visibility.Visible
@@ -215,6 +219,7 @@ public sealed partial class ManagementShellPage : Page
             "Purchases" => typeof(PurchasesPage),
             "SalesReturns" => typeof(SalesReturnsPage),
             "PurchaseReturns" => typeof(PurchaseReturnsPage),
+            "CashRegister" => typeof(CashRegisterPage),
             "Expenses" => typeof(ExpensesPage),
             "Users" => typeof(UserManagementPage),
             "Audit" => typeof(AuditLogPage),
@@ -232,7 +237,20 @@ public sealed partial class ManagementShellPage : Page
 
         if (target is not null && ContentFrame.CurrentSourcePageType != target)
         {
-            ContentFrame.Navigate(target, null, new EntranceNavigationTransitionInfo());
+            try
+            {
+                ContentFrame.Navigate(target, null, new EntranceNavigationTransitionInfo());
+            }
+            catch (Exception ex)
+            {
+                // A malformed page resource should not terminate the whole POS process. Record the
+                // concrete navigation failure and return to the known-good management home page.
+                Log.Error(ex, "Could not navigate management content to {TargetPage}", target.FullName);
+                if (target != typeof(ManagementHomePage))
+                {
+                    ContentFrame.Navigate(typeof(ManagementHomePage));
+                }
+            }
         }
     }
 

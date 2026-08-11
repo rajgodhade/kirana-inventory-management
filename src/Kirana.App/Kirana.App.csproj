@@ -15,6 +15,12 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>Kirana.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Embeds AppIcon.ico as the .exe's Win32 resource icon — what Explorer, a desktop/Start Menu
+         shortcut to the .exe, and (for a packaged build) an Installed Apps entry all show before
+         the app is even running. App.xaml.cs's ApplyApplicationIcon sets the running window's own
+         taskbar/title-bar icon at runtime, since this project is unpackaged (WindowsPackageType
+         below is None, no Package.appxmanifest) and AppWindow.SetIcon needs that separate call. -->
+    <ApplicationIcon>Assets\AppIcon\AppIcon.ico</ApplicationIcon>
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <WindowsPackageType>None</WindowsPackageType>
@@ -47,6 +53,14 @@
     <ProjectReference Include="..\Kirana.Domain\Kirana.Domain.csproj" />
     <ProjectReference Include="..\Kirana.Application\Kirana.Application.csproj" />
     <ProjectReference Include="..\Kirana.Infrastructure\Kirana.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <!-- ApplicationIcon above only embeds the .ico into the .exe's own Win32 resources — it does not
+       copy the file to the output directory. App.xaml.cs's ApplyApplicationIcon needs the .ico
+       present next to the .exe at runtime (this deployment model is unpackaged, so there's no
+       ms-appx:// package URI to resolve it through instead). -->
+  <ItemGroup>
+    <None Include="Assets\AppIcon\AppIcon.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

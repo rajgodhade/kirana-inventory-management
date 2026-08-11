@@ -1,0 +1,47 @@
+﻿<ContentDialog
+    x:Class="Kirana.App.Views.ExpenseEditDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    PrimaryButtonText="Save"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary">
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:ConnectionId='2' x:Name="DialogTitleText" Grid.Column="0" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button x:ConnectionId='3' Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
+                                             AutomationProperties.Name="Close dialog">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+    </ContentDialog.Title>
+
+    <ScrollViewer MaxHeight="480">
+        <StackPanel Spacing="10" MinWidth="400">
+            <ComboBox x:ConnectionId='4' x:Name="CategoryBox" Header="Category *" HorizontalAlignment="Stretch" DisplayMemberPath="Name" />
+
+            <TextBox x:ConnectionId='5' x:Name="AmountBox" Header="Amount *" PlaceholderText="0.00" />
+
+            <!-- CalendarDatePicker, not DatePicker: its Date is DateTimeOffset? which is what a
+                 nullable binding needs (learned in Phase 6). -->
+            <CalendarDatePicker x:ConnectionId='6' x:Name="DateBox" Header="Date *" HorizontalAlignment="Stretch" />
+
+            <ComboBox x:ConnectionId='7' x:Name="MethodBox" Header="Payment method" SelectedIndex="0" HorizontalAlignment="Stretch">
+                <ComboBoxItem Content="Cash" Tag="Cash" />
+                <ComboBoxItem Content="UPI" Tag="Upi" />
+                <ComboBoxItem Content="Card" Tag="Card" />
+            </ComboBox>
+
+            <TextBox x:ConnectionId='8' x:Name="DescriptionBox" Header="Description" />
+            <TextBox x:ConnectionId='9' x:Name="ReferenceBox" Header="Reference # (optional)" />
+            <TextBox x:ConnectionId='10' x:Name="NotesBox" Header="Notes" AcceptsReturn="True" TextWrapping="Wrap" Height="70" />
+
+            <InfoBar x:ConnectionId='11' x:Name="ErrorBar" IsOpen="False" Severity="Error" />
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>
+

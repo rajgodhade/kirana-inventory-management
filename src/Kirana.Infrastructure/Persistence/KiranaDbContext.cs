@@ -54,6 +54,8 @@ public sealed class KiranaDbContext(DbContextOptions<KiranaDbContext> options)
     public DbSet<PromotionTarget> PromotionTargets => Set<PromotionTarget>();
     public DbSet<PromotionRule> PromotionRules => Set<PromotionRule>();
     public DbSet<SaleItemPromotion> SaleItemPromotions => Set<SaleItemPromotion>();
+    public DbSet<CashRegisterSession> CashRegisterSessions => Set<CashRegisterSession>();
+    public DbSet<CashMovement> CashMovements => Set<CashMovement>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

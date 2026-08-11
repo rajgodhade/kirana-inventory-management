@@ -2,17 +2,30 @@
     x:Class="Kirana.App.Views.ManagementShellPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:muxc="using:Microsoft.UI.Xaml.Controls">
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:controls="using:Kirana.App.Views.Controls">
 
     <Grid Background="{ThemeResource PageBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <!-- Dedicated strip for the centered branding, on its own row above the app bar rather than
+             overlaid on it. The app-bar's Column 1 ("*") stretches wide enough that the true header
+             center lands inside the "Back to Billing" button's bounds — unlike the POS shell's
+             simpler header, so the same ColumnSpan-overlay trick used there causes real visual
+             overlap here. A dedicated full-width row sidesteps that without touching any existing
+             app-bar control's position. -->
+        <Border Grid.Row="0" Padding="0,4" Background="{ThemeResource NavigationBackgroundBrush}"
+                BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+            <controls:HeaderBranding HorizontalAlignment="Center" />
+        </Border>
+
         <!-- App bar: store identity on the left, session actions on the right. Persistent across
              every management screen, which is the point of the shell. -->
-        <Grid Grid.Row="0" Padding="20,10" Background="{ThemeResource NavigationBackgroundBrush}"
+        <Grid Grid.Row="1" Padding="20,10" Background="{ThemeResource NavigationBackgroundBrush}"
               BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1"
               ColumnSpacing="12">
             <Grid.ColumnDefinitions>
@@ -80,7 +93,7 @@
 
         <muxc:NavigationView
             x:Name="Nav"
-            Grid.Row="1"
+            Grid.Row="2"
             PaneDisplayMode="Left"
             OpenPaneLength="228"
             IsSettingsVisible="False"
@@ -152,6 +165,12 @@
                 <muxc:NavigationViewItem x:Name="NavPurchaseReturns" Content="Purchase Returns" Tag="PurchaseReturns">
                     <muxc:NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE7B9;" />
+                    </muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:Name="NavCashRegister" Content="Cash Register" Tag="CashRegister">
+                    <muxc:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7B8;" />
                     </muxc:NavigationViewItem.Icon>
                 </muxc:NavigationViewItem>
 

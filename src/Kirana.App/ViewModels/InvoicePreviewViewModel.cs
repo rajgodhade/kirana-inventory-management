@@ -55,13 +55,15 @@ public sealed partial class InvoicePreviewViewModel : ObservableObject
 
     public double DialogContentWidth => SelectedFormat == InvoiceFormat.A4 ? 980 : 460;
     public double PreviewViewportWidth => SelectedFormat == InvoiceFormat.A4 ? 940 : 430;
-    public double PreviewViewportMaxHeight => SelectedFormat == InvoiceFormat.A4 ? 640 : 480;
+    public double PreviewViewportMaxHeight => SelectedFormat == InvoiceFormat.A4 ? 640 : 520;
+    public string CustomerSummary => string.IsNullOrWhiteSpace(Document.CustomerName) ? "Walk-in Customer" : Document.CustomerName;
 
     partial void OnSelectedFormatChanged(InvoiceFormat value) => RebuildPreview();
 
     private void RebuildPreview()
     {
-        var widthDip = InvoiceLayoutCalculator.MillimetersToDips(InvoiceLayoutCalculator.GetPageWidthMillimeters(SelectedFormat));
+        var widthDip = InvoiceLayoutCalculator.MillimetersToDips(
+            InvoiceLayoutCalculator.GetPageWidthMillimeters(SelectedFormat));
         PreviewElement = InvoiceElementRenderer.BuildFullDocumentElement(Document, SelectedFormat, widthDip);
     }
 

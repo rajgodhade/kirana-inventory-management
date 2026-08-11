@@ -1,0 +1,211 @@
+﻿<Page x:ConnectionId='1'
+    x:Class="Kirana.App.Views.SuppliersPage"
+    x:Name="RootPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kirana.App.ViewModels"
+    xmlns:interaction="using:Kirana.App.Interaction">
+
+    <Grid Background="{ThemeResource PageBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Padding="{StaticResource PageHeaderPadding}">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Suppliers" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Text="Supplier records, outstanding balances and payment history." Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Operational snapshot. Each card applies a useful filter without changing supplier data. -->
+        <Grid Grid.Row="1" Padding="24,0,24,16" ColumnSpacing="{StaticResource SpacingL}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button x:ConnectionId='36' Grid.Column="0"                             Padding="0" Background="Transparent" BorderThickness="0"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                    AutomationProperties.Name="Show all suppliers">
+                <Border Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelBlueBrush}" BorderBrush="{ThemeResource PastelBlueBrush}">
+                    <Grid ColumnSpacing="14"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource KpiIconChipStyle}" Background="{ThemeResource SurfaceBrush}" Opacity="0.65" />
+                        <FontIcon Glyph="&#xE716;" FontSize="16" VerticalAlignment="Top" Margin="0,10,0,0" HorizontalAlignment="Center" Foreground="{ThemeResource PastelBlueOnBrush}" />
+                        <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="TOTAL SUPPLIERS" Style="{StaticResource KpiLabelTextStyle}" Foreground="{ThemeResource PastelBlueOnBrush}" />
+                            <TextBlock x:ConnectionId='43'                                                           Style="{StaticResource KpiValueTextStyle}" Foreground="{ThemeResource PastelBlueOnBrush}" />
+                            <TextBlock Text="supplier records" Style="{StaticResource KpiCaptionTextStyle}" Foreground="{ThemeResource PastelBlueOnBrush}" /></StackPanel>
+                    </Grid>
+                </Border>
+            </Button>
+
+            <Button x:ConnectionId='37' Grid.Column="1"                                Padding="0" Background="Transparent" BorderThickness="0"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                    AutomationProperties.Name="Show active suppliers">
+                <Border Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelGreenBrush}" BorderBrush="{ThemeResource PastelGreenBrush}">
+                    <Grid ColumnSpacing="14"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource KpiIconChipStyle}" Background="{ThemeResource SurfaceBrush}" Opacity="0.65" />
+                        <FontIcon Glyph="&#xE73E;" FontSize="16" VerticalAlignment="Top" Margin="0,10,0,0" HorizontalAlignment="Center" Foreground="{ThemeResource PastelGreenOnBrush}" />
+                        <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="ACTIVE SUPPLIERS" Style="{StaticResource KpiLabelTextStyle}" Foreground="{ThemeResource PastelGreenOnBrush}" />
+                            <TextBlock x:ConnectionId='42'                                                            Style="{StaticResource KpiValueTextStyle}" Foreground="{ThemeResource PastelGreenOnBrush}" />
+                            <TextBlock Text="available for purchases" Style="{StaticResource KpiCaptionTextStyle}" Foreground="{ThemeResource PastelGreenOnBrush}" /></StackPanel>
+                    </Grid>
+                </Border>
+            </Button>
+
+            <Button x:ConnectionId='38' Grid.Column="2"                                     Padding="0" Background="Transparent" BorderThickness="0"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                    AutomationProperties.Name="Show suppliers with outstanding balances">
+                <Border Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}" BorderBrush="{ThemeResource PastelAmberBrush}">
+                    <Grid ColumnSpacing="14"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource KpiIconChipStyle}" Background="{ThemeResource SurfaceBrush}" Opacity="0.65" />
+                        <FontIcon Glyph="&#xE8C7;" FontSize="16" VerticalAlignment="Top" Margin="0,10,0,0" HorizontalAlignment="Center" Foreground="{ThemeResource PastelAmberOnBrush}" />
+                        <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="OUTSTANDING PAYABLE" Style="{StaticResource KpiLabelTextStyle}" Foreground="{ThemeResource PastelAmberOnBrush}" />
+                            <TextBlock x:ConnectionId='41'                                                                                                         Style="{StaticResource KpiValueTextStyle}" Foreground="{ThemeResource PastelAmberOnBrush}" />
+                            <TextBlock Text="currently owed to suppliers" Style="{StaticResource KpiCaptionTextStyle}" Foreground="{ThemeResource PastelAmberOnBrush}" /></StackPanel>
+                    </Grid>
+                </Border>
+            </Button>
+
+            <Button x:ConnectionId='39' Grid.Column="3"                                 Padding="0" Background="Transparent" BorderThickness="0"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                    AutomationProperties.Name="Show overdue suppliers">
+                <Border Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelRoseBrush}" BorderBrush="{ThemeResource PastelRoseBrush}">
+                    <Grid ColumnSpacing="14"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource KpiIconChipStyle}" Background="{ThemeResource SurfaceBrush}" Opacity="0.65" />
+                        <FontIcon Glyph="&#xE7BA;" FontSize="16" VerticalAlignment="Top" Margin="0,10,0,0" HorizontalAlignment="Center" Foreground="{ThemeResource PastelRoseOnBrush}" />
+                        <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="OVERDUE SUPPLIERS" Style="{StaticResource KpiLabelTextStyle}" Foreground="{ThemeResource PastelRoseOnBrush}" />
+                            <TextBlock x:ConnectionId='40'                                                             Style="{StaticResource KpiValueTextStyle}" Foreground="{ThemeResource PastelRoseOnBrush}" />
+                            <TextBlock Text="outstanding for 30+ days" Style="{StaticResource KpiCaptionTextStyle}" Foreground="{ThemeResource PastelRoseOnBrush}" /></StackPanel>
+                    </Grid>
+                </Border>
+            </Button>
+        </Grid>
+
+        <Border Grid.Row="2" Style="{StaticResource FilterBarStyle}" Margin="24,0,24,16">
+            <Grid ColumnSpacing="{StaticResource SpacingS}" RowSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260" /><ColumnDefinition Width="148" /><ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="142" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox x:ConnectionId='31' PlaceholderText="Search supplier / code / phoneâ€¦"                                                                                       
+                                                                                        CornerRadius="{StaticResource RadiusMedium}"
+                         AutomationProperties.Name="Search suppliers" />
+                <ComboBox x:ConnectionId='32' Grid.Column="1"                                                                                                                         
+                                                             CornerRadius="{StaticResource RadiusMedium}" AutomationProperties.Name="Filter supplier status" />
+                <CheckBox x:ConnectionId='33' Grid.Column="2" Content="Outstanding only"                                                            
+                                                                                VerticalAlignment="Center" />
+                <ComboBox x:ConnectionId='34' Grid.Column="3"                                                                                                               
+                                                             CornerRadius="{StaticResource RadiusMedium}" AutomationProperties.Name="Sort suppliers" />
+                <Button x:ConnectionId='35' Grid.Column="5" Content="Add Supplier" Style="{StaticResource AccentButtonStyle}" Padding="12,7"
+                                                                                                     />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="3" Margin="24,0,24,24">
+            <Border Style="{StaticResource ElevatedCardStyle}" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Padding="12,10" ColumnSpacing="12" Background="{ThemeResource SurfaceAltBrush}"
+                          CornerRadius="16,16,0,0" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MinWidth="220" /><ColumnDefinition Width="180" /><ColumnDefinition Width="112" />
+                            <ColumnDefinition Width="112" /><ColumnDefinition Width="116" /><ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="86" /><ColumnDefinition Width="272" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="SUPPLIER" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="1" Text="CONTACT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="2" Text="LAST PURCHASE" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="3" Text="LAST PAYMENT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="4" Text="TOTAL PURCHASES" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="5" Text="OUTSTANDING" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="6" Text="STATUS" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="7" Text="ACTIONS" Style="{StaticResource ColumnHeaderTextStyle}" />
+                    </Grid>
+
+                    <StackPanel x:ConnectionId='3' Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10"
+                                                                                                                                                    >
+                        <FontIcon Glyph="&#xE716;" FontSize="36" Foreground="{ThemeResource TextTertiaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="No suppliers found." Style="{StaticResource CardTitleTextStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Text="Try changing the filters, or add a new supplier." Style="{StaticResource CaptionTextStyle}" HorizontalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+                            <Button x:ConnectionId='30' Content="Add Supplier" Style="{StaticResource AccentButtonStyle}"                                                                              />
+                            <Button Content="Import Suppliers" IsEnabled="False" ToolTipService.ToolTip="Supplier import is not available yet." />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <ListView x:ConnectionId='4' Grid.Row="1"                                            SelectionMode="None" TabNavigation="Once"
+                                                                                                                                           >
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem"><Setter Property="Padding" Value="0" /><Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="MinHeight" Value="0" /><Setter Property="UseSystemFocusVisuals" Value="True" /></Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate                                     >
+                                <!-- Opaque white base intentionally masks ListView's built-in hover visual. -->
+                                <Border x:ConnectionId='6' Background="{ThemeResource SurfaceBrush}" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+                                    <Grid x:ConnectionId='7' Padding="12,11" ColumnSpacing="12"                                            
+                                          interaction:ActionCursor.IsActionable="True"
+                                                                                   >
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" MinWidth="220" /><ColumnDefinition Width="180" /><ColumnDefinition Width="112" />
+                                            <ColumnDefinition Width="112" /><ColumnDefinition Width="116" /><ColumnDefinition Width="130" />
+                                            <ColumnDefinition Width="86" /><ColumnDefinition Width="272" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                            <Border Width="32" Height="32" CornerRadius="{StaticResource RadiusPill}" Background="{ThemeResource PastelVioletBrush}">
+                                                <TextBlock x:ConnectionId='29'                         FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource PastelVioletOnBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <StackPanel Spacing="2" VerticalAlignment="Center"><TextBlock x:ConnectionId='27'                      Style="{StaticResource CardTitleTextStyle}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock x:ConnectionId='28'                              Style="{StaticResource CodeTextStyle}" /></StackPanel>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center"><TextBlock x:ConnectionId='25'                             Style="{StaticResource BodyTextStyle}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock x:ConnectionId='26'                           Style="{StaticResource CaptionTextStyle}" TextTrimming="CharacterEllipsis" /></StackPanel>
+                                        <TextBlock x:ConnectionId='8' Grid.Column="2"                                  Style="{StaticResource SecondaryTextStyle}" VerticalAlignment="Center" />
+                                        <TextBlock x:ConnectionId='9' Grid.Column="3"                                 Style="{StaticResource SecondaryTextStyle}" VerticalAlignment="Center" />
+                                        <TextBlock x:ConnectionId='10' Grid.Column="4"                                                                              Style="{StaticResource AmountTextStyle}" VerticalAlignment="Center" />
+                                        <Border x:ConnectionId='11' Grid.Column="5" Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource SuccessSubtleBrush}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                                                                                                  ><TextBlock Text="₹0.00 · Paid" Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource SuccessBrush}" /></Border>
+                                        <Border x:ConnectionId='12' Grid.Column="5" Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource WarningSubtleBrush}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                                                                                                         ><TextBlock Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource WarningBrush}"><Run x:ConnectionId='24'                                                                                  /></TextBlock></Border>
+                                        <Border x:ConnectionId='13' Grid.Column="5" Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource DangerSubtleBrush}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                                                                                                     ><TextBlock Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource DangerBrush}"><Run x:ConnectionId='23'                                                                                  /></TextBlock></Border>
+                                        <Border x:ConnectionId='14' Grid.Column="6" Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource SuccessSubtleBrush}" VerticalAlignment="Center"
+                                                                                                                                    ><TextBlock Text="Active" Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource SuccessBrush}" /></Border>
+                                        <Border x:ConnectionId='15' Grid.Column="6" Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource SurfaceAltBrush}" VerticalAlignment="Center"
+                                                                                                                                           ><TextBlock Text="Inactive" Style="{StaticResource BadgeTextStyle}" Foreground="{ThemeResource TextSecondaryBrush}" /></Border>
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <Button x:ConnectionId='16' Content="Ledger"                                      Padding="9,5" Height="32" MinWidth="0" CornerRadius="{StaticResource RadiusMedium}" />
+                                            <Button x:ConnectionId='17' Content="Pay"                                   Padding="9,5" Height="32" MinWidth="0" CornerRadius="{StaticResource RadiusMedium}"
+                                                    IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManagePurchases}" />
+                                            <Button x:ConnectionId='18'                Padding="8,5" Width="34" Height="32" MinWidth="0" CornerRadius="{StaticResource RadiusMedium}"
+                                                    AutomationProperties.Name="More supplier actions"><FontIcon Glyph="&#xE712;" FontSize="15" />
+                                                <Button.Flyout><MenuFlyout Placement="Bottom">
+                                                    <MenuFlyoutItem x:ConnectionId='19' Text="Edit"                                    IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManagePurchases}" />
+                                                    <MenuFlyoutItem x:ConnectionId='20' Text="Purchase History"                                      />
+                                                    <MenuFlyoutItem x:ConnectionId='21' Text="Deactivate"                                            IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManagePurchases}"
+                                                                                                                                                         />
+                                                    <MenuFlyoutItem x:ConnectionId='22' Text="Reactivate"                                            IsEnabled="{Binding ElementName=RootPage, Path=ViewModel.CanManagePurchases}"
+                                                                                                                                                                />
+                                                    <MenuFlyoutSeparator />
+                                                    <MenuFlyoutItem Text="Export Ledger" IsEnabled="False" ToolTipService.ToolTip="Use Export Center to export supplier data." />
+                                                    <MenuFlyoutItem Text="Delete" IsEnabled="False" ToolTipService.ToolTip="Supplier deletion is not supported." />
+                                                </MenuFlyout></Button.Flyout>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+            <InfoBar x:ConnectionId='2'                                                                                                         Severity="Error"
+                                                                            VerticalAlignment="Top" Margin="0,0,0,8" />
+        </Grid>
+    </Grid>
+</Page>
+

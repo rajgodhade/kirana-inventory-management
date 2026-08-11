@@ -3,6 +3,7 @@ using Kirana.App.ViewModels;
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
 using Kirana.Application.Hardware;
+using Kirana.Application.CloudBackup;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -27,7 +28,8 @@ public sealed partial class SettingsPage : Page
         ViewModel = new SettingsViewModel(
             services.GetRequiredService<IKiranaDbContext>(),
             services.GetRequiredService<IAppPaths>(),
-            services.GetRequiredService<ManagementSession>());
+            services.GetRequiredService<ManagementSession>(),
+            services.GetRequiredService<ICloudBackupService>());
         DeviceStatus = new DeviceStatusViewModel(
             services.GetRequiredService<IHardwareMonitor>(),
             services.GetRequiredService<IHardwareSettingsService>());

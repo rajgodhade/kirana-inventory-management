@@ -15,7 +15,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="Invoice Preview" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+            <TextBlock Text="Invoice Preview" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center" />
             <Button Grid.Column="1" Style="{StaticResource DialogCloseButtonStyle}"
                     Click="OnCloseIconClick" AutomationProperties.Name="Close dialog">
                 <FontIcon Glyph="&#xE711;" FontSize="14" />
@@ -24,26 +24,24 @@
     </ContentDialog.Title>
 
     <StackPanel Spacing="10" Width="{x:Bind ViewModel.DialogContentWidth, Mode=OneWay}">
-
-        <ComboBox Header="Format" ItemsSource="{x:Bind ViewModel.AvailableFormats}"
-                  SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}" />
+        <ComboBox Header="Print format" ItemsSource="{x:Bind ViewModel.AvailableFormats}"
+                  SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}"
+                  HorizontalAlignment="Left" MinWidth="175" />
 
         <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
                  Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
         <InfoBar IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
                  Severity="Success" Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
 
-        <!-- Scrolling itself already worked here (confirmed via UIA ScrollPattern — a 22-line bill
-             correctly reported VerticallyScrollable=True and scrolled on request). The real gap was
-             discoverability: WinUI's default "Auto" scrollbar is a thin, auto-hiding sliver that's
-             easy to miss on a bill that's cut off mid-list, especially for someone who isn't
-             already expecting a preview to scroll. VerticalScrollBarVisibility="Visible" keeps the
-             track permanently on-screen instead of only appearing on hover/drag. -->
         <ScrollViewer Width="{x:Bind ViewModel.PreviewViewportWidth, Mode=OneWay}"
                       MaxHeight="{x:Bind ViewModel.PreviewViewportMaxHeight, Mode=OneWay}"
-                      VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"
-                      Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <ContentControl Content="{x:Bind ViewModel.PreviewElement, Mode=OneWay}" HorizontalContentAlignment="Center" />
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Visible"
+                      HorizontalContentAlignment="Center">
+            <Border Background="#FF252525" Padding="12" CornerRadius="4">
+                <ContentControl Content="{x:Bind ViewModel.PreviewElement, Mode=OneWay}"
+                                HorizontalContentAlignment="Center" />
+            </Border>
         </ScrollViewer>
 
         <ProgressRing IsActive="{x:Bind ViewModel.IsPrinting, Mode=OneWay}" HorizontalAlignment="Center" />

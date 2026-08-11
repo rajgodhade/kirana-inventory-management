@@ -1,5 +1,8 @@
 using Kirana.Application.Printing;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Printing;
 using Windows.Graphics.Printing;
 
@@ -30,6 +33,8 @@ public sealed class InvoicePrintHelper : IDisposable
     private readonly InvoiceFormat _format;
     private readonly double _widthDip;
     private readonly List<UIElement> _printPages = [];
+    private readonly TaskCompletionSource<bool> _printCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private PrintTask? _activePrintTask;
 
     public IPrintDocumentSource PrintDocumentSource { get; }
 
@@ -62,38 +67,76 @@ public sealed class InvoicePrintHelper : IDisposable
         }
 
         await PrintManagerInterop.ShowPrintUIForWindowAsync(_hwnd);
+
+        // Showing the Windows print UI only confirms that the dialog opened; preview pagination
+        // and printing continue asynchronously afterward. Keep this helper (and its event
+        // handlers) alive until Windows reports completion/cancellation, otherwise the preview
+        // remains permanently on "Loading preview".
+        await _printCompletion.Task.WaitAsync(TimeSpan.FromMinutes(30));
     }
 
     private void OnPrintTaskRequested(PrintManager sender, PrintTaskRequestedEventArgs args)
     {
-        args.Request.CreatePrintTask($"Kirana Invoice {_document.InvoiceNumber}", sourceArgs => sourceArgs.SetSource(PrintDocumentSource));
+        _activePrintTask = args.Request.CreatePrintTask(
+            $"Kirana Invoice {_document.InvoiceNumber}",
+            sourceArgs => sourceArgs.SetSource(PrintDocumentSource));
+        if (_format == InvoiceFormat.A4)
+        {
+            _activePrintTask.Options.MediaSize = PrintMediaSize.IsoA4;
+            _activePrintTask.Options.Orientation = PrintOrientation.Portrait;
+        }
+        _activePrintTask.Completed += OnPrintTaskCompleted;
     }
+
+    private void OnPrintTaskCompleted(PrintTask sender, PrintTaskCompletedEventArgs args) =>
+        _printCompletion.TrySetResult(true);
 
     private void OnPaginate(object sender, PaginateEventArgs e)
     {
         _printPages.Clear();
 
         var options = (PrintTaskOptions)e.PrintTaskOptions;
-        var pageSize = options.GetPageDescription(0).PageSize;
+        var pageDescription = options.GetPageDescription(0);
+        var pageSize = pageDescription.PageSize;
+        var imageableRect = pageDescription.ImageableRect;
 
         var isCompact = _format != InvoiceFormat.A4;
         var reservedHeight = isCompact ? CompactReservedHeightDip : A4ReservedHeightDip;
         var lineHeight = isCompact ? CompactLineHeightDip : A4LineHeightDip;
-        var linesPerPage = Math.Max(1, (int)Math.Floor((pageSize.Height - reservedHeight) / lineHeight));
+        var availableHeight = imageableRect.Height > 0 ? imageableRect.Height : pageSize.Height;
+        var availableWidth = imageableRect.Width > 0 ? imageableRect.Width : pageSize.Width;
+        var contentWidth = Math.Min(_widthDip, availableWidth);
+        var linesPerPage = Math.Max(1, (int)Math.Floor((availableHeight - reservedHeight) / lineHeight));
 
-        var linePages = InvoiceLayoutCalculator.Chunk(_document.Lines, linesPerPage);
+        IReadOnlyList<IReadOnlyList<InvoiceLine>> linePages = InvoiceLayoutCalculator.Chunk(_document.Lines, linesPerPage);
+        if (linePages.Count == 0)
+            linePages = [Array.Empty<InvoiceLine>()];
 
         for (var i = 0; i < linePages.Count; i++)
         {
-            var page = InvoiceElementRenderer.BuildPageElement(
+            var content = InvoiceElementRenderer.BuildPageElement(
                 _document, _format, linePages[i],
                 isFirstPage: i == 0, isLastPage: i == linePages.Count - 1,
-                _widthDip, pageSize.Height);
+                contentWidth, availableHeight);
+
+            // Always hand Windows a full physical page. The selected invoice format controls the
+            // content width: A4 fills the imageable area, while 58/80mm receipts remain their real
+            // roll width and are centered when previewed through an A4-only PDF driver.
+            content.HorizontalAlignment = HorizontalAlignment.Center;
+            content.VerticalAlignment = VerticalAlignment.Top;
+            content.Margin = new Thickness(0, Math.Max(0, imageableRect.Y), 0, 0);
+            var page = new Grid
+            {
+                Width = pageSize.Width,
+                Height = pageSize.Height,
+                Background = new SolidColorBrush(Colors.White),
+            };
+            page.Children.Add(content);
 
             _printPages.Add(page);
         }
 
-        _printDocument.SetPreviewPageCount(_printPages.Count, PreviewPageCountType.Intermediate);
+        _printDocument.SetPreviewPageCount(_printPages.Count, PreviewPageCountType.Final);
     }
 
     private void OnGetPreviewPage(object sender, GetPreviewPageEventArgs e) =>
@@ -111,6 +154,8 @@ public sealed class InvoicePrintHelper : IDisposable
 
     public void Dispose()
     {
+        if (_activePrintTask is not null)
+            _activePrintTask.Completed -= OnPrintTaskCompleted;
         _printDocument.Paginate -= OnPaginate;
         _printDocument.GetPreviewPage -= OnGetPreviewPage;
         _printDocument.AddPages -= OnAddPages;

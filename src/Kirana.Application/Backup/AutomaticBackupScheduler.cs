@@ -1,10 +1,11 @@
 using Kirana.Application.Abstractions;
+using Kirana.Application.CloudBackup;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kirana.Application.Backup;
 
-public sealed class AutomaticBackupScheduler(IKiranaDbContext db, IBackupService backupService) : IAutomaticBackupScheduler
+public sealed class AutomaticBackupScheduler(IKiranaDbContext db, IBackupService backupService, ICloudBackupService? cloudBackupService = null) : IAutomaticBackupScheduler
 {
     public const string DailyFrequency = "Daily";
     public const string WeeklyFrequency = "Weekly";
@@ -40,6 +41,12 @@ public sealed class AutomaticBackupScheduler(IKiranaDbContext db, IBackupService
         var result = await backupService.CreateBackupAsync(
             BackupType.Scheduled, performedByUserId: null, notes: null, cancellationToken);
 
+        if (result.Succeeded && cloudBackupService is not null && settings.CloudAutomaticBackupEnabled && !string.Equals(settings.CloudBackupProvider, "None", StringComparison.OrdinalIgnoreCase))
+        {
+            // Cloud failure is deliberately non-blocking: the verified local backup remains the
+            // recovery point and the next scheduler tick retries the upload.
+            await cloudBackupService.UploadValidatedBackupAsync(result.FilePath!, cancellationToken);
+        }
         return new ScheduledBackupOutcome { WasDue = true, Result = result };
     }
 

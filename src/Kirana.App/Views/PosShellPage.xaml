@@ -82,6 +82,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Width="32" Height="32" CornerRadius="{StaticResource RadiusMedium}"
@@ -96,25 +97,39 @@
                 <TextBlock Text="Billing" Style="{StaticResource CaptionTextStyle}" />
             </StackPanel>
 
-            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0">
+            <Border x:Name="RegisterStatusBadge" Grid.Column="2" Padding="10,5" CornerRadius="12"
+                    Background="{ThemeResource SurfaceAltBrush}" VerticalAlignment="Center"
+                    ToolTipService.ToolTip="Cash register status">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Ellipse x:Name="RegisterStatusDot" Width="7" Height="7" Fill="{ThemeResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                    <TextBlock x:Name="RegisterStatusText" Text="Register status" Style="{StaticResource CaptionTextStyle}" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,8,0">
                 <TextBlock x:Name="CurrentDayDateText" Style="{StaticResource SecondaryTextStyle}"
                            HorizontalAlignment="Right" />
                 <TextBlock x:Name="CurrentTimeText" Style="{StaticResource CaptionTextStyle}"
                            HorizontalAlignment="Right" />
             </StackPanel>
 
-            <Button Grid.Column="3" Click="OnThemeToggleClick" VerticalAlignment="Center"
+            <Button Grid.Column="4" Click="OnThemeToggleClick" VerticalAlignment="Center"
                     AutomationProperties.Name="Toggle light and dark theme">
                 <FontIcon x:Name="ThemeIcon" Glyph="&#xE706;" FontSize="15" />
             </Button>
 
-            <Button Grid.Column="4" Click="OnDashboardClick" VerticalAlignment="Center"
+            <Button Grid.Column="5" Click="OnDashboardClick" VerticalAlignment="Center"
                     AutomationProperties.Name="Open management dashboard">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE72E;" FontSize="14" />
                     <TextBlock Text="Dashboard" />
                 </StackPanel>
             </Button>
+
+            <!-- Spans every column so it centers against the header's full width, not just
+                 whatever space is left between the store-info block and the toolbar buttons —
+                 the left/right controls' widths can never pull this off-center. -->
+            <controls:HeaderBranding Grid.Column="0" Grid.ColumnSpan="6" />
         </Grid>
 
         <!-- Billing tabs: several customers can be part-way through a bill at once. -->
@@ -383,33 +398,26 @@
             </Border>
 
             <!-- Totals -->
-            <!-- Stretches rather than sitting Top, and scrolls internally: the tab strip costs the
-                 billing area ~55px of height, which was enough to clip the Amount Payable panel off
-                 the bottom on a short window. HorizontalScrollMode MUST stay Disabled — a
-                 ScrollViewer measures its content at infinite size in any direction it can scroll,
-                 which would let the card ignore this column's width. -->
+            <!-- Stretch, with the whole breakdown+Amount Payable block as ONE top-aligned ScrollViewer
+                 (not a Grid split into a "*" scroll region + a bottom-pinned Auto footer, tried and
+                 reverted): that split forced Amount Payable to the very bottom of the full stretched
+                 height, leaving a large dead gap above it whenever the cart was short. Pure top
+                 alignment (also tried) swung the other way — on a short window the card's natural
+                 content height can exceed the space actually available for this column, and with no
+                 scroll fallback Amount Payable's value silently clipped off below the action bar.
+                 A single ScrollViewer gets both right: short content sits compact at the top with any
+                 leftover space trailing harmlessly below it, and content taller than available space
+                 scrolls instead of clipping. HorizontalScrollMode MUST stay Disabled — a ScrollViewer
+                 measures its content at infinite size in any direction it can scroll, which would let
+                 the card ignore this column's width. -->
             <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}"
                     VerticalAlignment="Stretch">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                <!-- Only the breakdown scrolls; Amount Payable is pinned to the bottom row so the
-                     number the customer is about to pay is never the thing that scrolls away. -->
-                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto"
+                <ScrollViewer VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto"
                               HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Spacing="9">
-                    <Grid ColumnSpacing="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Total items" Style="{StaticResource SecondaryTextStyle}" />
-                        <TextBlock Grid.Column="1" Style="{StaticResource BodyTextStyle}"
-                                   Text="{x:Bind ViewModel.TotalItemCount, Mode=OneWay}" />
-                    </Grid>
+                <!-- "Total items" isn't repeated here — it's already in the Amount Payable panel's
+                     "N item(s) · press F9" caption below, and cutting the duplicate row helps this
+                     card's fixed-size content comfortably fit the available height without scrolling. -->
+                <StackPanel Spacing="7">
                     <Grid ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -475,20 +483,17 @@
                         <TextBlock Grid.Column="1" Style="{StaticResource BodyTextStyle}"
                                    Text="{x:Bind ViewModel.RoundOffAmount, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
                     </Grid>
-                </StackPanel>
-                </ScrollViewer>
 
-                <StackPanel Grid.Row="1" Spacing="9">
-                    <Border BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,1,0,0" Margin="0,4,0,4" />
+                    <Border BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,1,0,0" Margin="0,2,0,2" />
 
                     <!-- The one number the customer is about to hand over money for: given its own
                          filled panel so it can't be confused with the breakdown rows above it. -->
                     <Border Background="{ThemeResource PastelTealBrush}" CornerRadius="{StaticResource RadiusLarge}"
-                            Padding="16,12">
+                            Padding="14,10">
                         <StackPanel Spacing="2">
                             <TextBlock Text="AMOUNT PAYABLE" Style="{StaticResource ColumnHeaderTextStyle}"
                                        Foreground="{ThemeResource PastelTealOnBrush}" />
-                            <TextBlock Style="{StaticResource MetricTextStyle}" FontSize="38"
+                            <TextBlock Style="{StaticResource MetricTextStyle}" FontSize="32"
                                        Foreground="{ThemeResource PastelTealOnBrush}"
                                        Text="{x:Bind ViewModel.GrandTotal, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
                             <TextBlock Style="{StaticResource CaptionTextStyle}"
@@ -516,8 +521,8 @@
                                        Text="{x:Bind ViewModel.TotalSavings, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
                         </Grid>
                     </Border>
-                </StackPanel>
-                </Grid>
+            </StackPanel>
+            </ScrollViewer>
             </Border>
         </Grid>
 
