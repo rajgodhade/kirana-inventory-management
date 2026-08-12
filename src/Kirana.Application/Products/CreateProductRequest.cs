@@ -15,6 +15,12 @@ public sealed class CreateProductRequest
     public int? BrandId { get; init; }
     public UnitOfMeasure Unit { get; init; } = UnitOfMeasure.Piece;
 
+    /// <summary>Optional purchase pack (Phase 13A) — both null or both set, see
+    /// <see cref="Kirana.Domain.Entities.UnitConversion.IsValidPackConfiguration"/>.</summary>
+    public UnitOfMeasure? PurchasePackUnit { get; init; }
+    public decimal? PurchasePackSize { get; init; }
+    public string? UnitDisplayText { get; init; }
+
     public decimal PurchasePrice { get; init; }
     public decimal Mrp { get; init; }
     public decimal SellingPrice { get; init; }

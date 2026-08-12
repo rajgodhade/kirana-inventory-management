@@ -26,6 +26,14 @@ public class PurchaseItem : Entity
     public bool IsTaxInclusiveSnapshot { get; set; }
     public decimal GstRatePercentSnapshot { get; set; }
 
+    /// <summary>Audit-only record of the pack this line was entered in (e.g. "Box"), when the
+    /// purchase used pack mode (Phase 13A). <see cref="Quantity"/> below is always already
+    /// converted to <see cref="UnitSnapshot"/> — these two fields are never read back into any
+    /// calculation, they exist purely so a purchase can later be shown as "10 Box (120 Piece)".
+    /// Null for every line entered directly in the base unit (the common case).</summary>
+    public string? PurchasedPackUnitSnapshot { get; set; }
+    public decimal? PurchasedPackQuantitySnapshot { get; set; }
+
     // --- Quantities and computed amounts ---
     public decimal Quantity { get; set; }
     public decimal PurchasePriceSnapshot { get; set; }

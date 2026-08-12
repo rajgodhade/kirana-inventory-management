@@ -8,6 +8,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -18,51 +19,51 @@
             </StackPanel>
         </Grid>
 
-        <!-- Toolbar -->
-        <Grid Grid.Row="1" Padding="20,12" ColumnSpacing="8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="260" />
-                <ColumnDefinition Width="160" />
-                <ColumnDefinition Width="160" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <TextBox Grid.Column="0" PlaceholderText="Search name / SKU / barcode…"
+        <!-- Filters: their own row, evenly spaced. Kept separate from the actions row below —
+             sharing one row split by a flexible spacer repeatedly overflowed at this page's working
+             window width as more controls were added (Sort, result count), with trailing buttons
+             going completely unrendered and unreachable. Same class of bug fixed earlier on the
+             Purchases page; giving each group its own row sidesteps it for good regardless of how
+             much either group grows. -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Padding="20,12,20,0">
+            <TextBox Width="260" PlaceholderText="Search name / SKU / barcode…"
                      Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnSearchBoxKeyDown"
                      TextChanged="OnSearchTextChanged" />
 
-            <ComboBox Grid.Column="1" PlaceholderText="Category"
-                      ItemsSource="{x:Bind ViewModel.Categories}" DisplayMemberPath="Name"
-                      SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}"
-                      SelectionChanged="OnCategoryOrBrandChanged" />
-
-            <ComboBox Grid.Column="2" PlaceholderText="Brand"
-                      ItemsSource="{x:Bind ViewModel.Brands}" DisplayMemberPath="Name"
-                      SelectedItem="{x:Bind ViewModel.SelectedBrand, Mode=TwoWay}"
-                      SelectionChanged="OnCategoryOrBrandChanged" />
-
-            <CheckBox Grid.Column="3" Content="Show inactive" VerticalAlignment="Center"
+            <CheckBox Content="Show inactive" VerticalAlignment="Center" Margin="4,0,0,0"
                       IsChecked="{x:Bind ViewModel.ShowInactive, Mode=TwoWay}" Checked="OnShowInactiveChanged" Unchecked="OnShowInactiveChanged" />
 
-            <Button Grid.Column="5" Content="Categories" Click="OnManageCategoriesClick" />
-            <Button Grid.Column="6" Content="Brands" Click="OnManageBrandsClick" Margin="8,0,0,0" />
-            <Button Grid.Column="7" Content="Bulk Labels" Click="OnBulkLabelsClick" Margin="8,0,0,0"
+            <CheckBox Content="Out of stock" VerticalAlignment="Center"
+                      IsChecked="{x:Bind ViewModel.OutOfStockOnly, Mode=TwoWay}" Checked="OnOutOfStockOnlyChanged" Unchecked="OnOutOfStockOnlyChanged" />
+
+            <CheckBox Content="Expired" VerticalAlignment="Center"
+                      IsChecked="{x:Bind ViewModel.ExpiredOnly, Mode=TwoWay}" Checked="OnExpiredOnlyChanged" Unchecked="OnExpiredOnlyChanged" />
+
+            <ComboBox Width="200" ItemsSource="{x:Bind ViewModel.SortOptions}"
+                      SelectedItem="{x:Bind ViewModel.SelectedSortOption, Mode=TwoWay}"
+                      SelectionChanged="OnSortOptionChanged"
+                      VerticalAlignment="Center" AutomationProperties.Name="Sort products" />
+
+            <TextBlock Text="{x:Bind ViewModel.TotalProductsText, Mode=OneWay}"
+                       Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" Margin="8,0,0,0" />
+        </StackPanel>
+
+        <!-- Actions: their own row, right-aligned, always fully visible regardless of window width
+             or how much space the filters row above is using. -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Padding="20,12,20,0">
+            <Button Content="Categories" Click="OnManageCategoriesClick" />
+            <Button Content="Brands" Click="OnManageBrandsClick" />
+            <Button Content="Bulk Labels" Click="OnBulkLabelsClick"
                     IsEnabled="{x:Bind ViewModel.CanManageInventory}" />
-            <Button Grid.Column="8" Content="Import" Click="OnImportProductsClick" Margin="8,0,0,0"
+            <Button Content="Import" Click="OnImportProductsClick"
                     IsEnabled="{x:Bind ViewModel.CanEditProducts}"
                     ToolTipService.ToolTip="Bulk-import products from a CSV or Excel file" />
-            <Button Grid.Column="9" Content="Add Product" Style="{StaticResource AccentButtonStyle}"
-                    Click="OnAddProductClick" IsEnabled="{x:Bind ViewModel.CanEditProducts}" Margin="8,0,0,0" />
-        </Grid>
+            <Button Content="Add Product" Style="{StaticResource AccentButtonStyle}"
+                    Click="OnAddProductClick" IsEnabled="{x:Bind ViewModel.CanEditProducts}" />
+        </StackPanel>
 
         <!-- Results -->
-        <Grid Grid.Row="2" Margin="20,0,20,20">
+        <Grid Grid.Row="3" Margin="20,16,20,20">
             <Border Style="{StaticResource CardBorderStyle}" Padding="0">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -76,8 +77,9 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" MinWidth="220" />
                             <ColumnDefinition Width="190" />
-                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="230" />
                             <ColumnDefinition Width="90" />
+                            <ColumnDefinition Width="100" />
                             <!-- Fixed, not Auto: rows differ in button count (only batch-tracked
                                  products get a "Batches" button), and an Auto column would size to
                                  each row's own buttons, stealing different amounts of width from the
@@ -89,7 +91,8 @@
                         <TextBlock Grid.Column="1" Text="CATEGORY / BRAND / UNIT" Style="{StaticResource ColumnHeaderTextStyle}" />
                         <TextBlock Grid.Column="2" Text="PRICING" Style="{StaticResource ColumnHeaderTextStyle}" />
                         <TextBlock Grid.Column="3" Text="STOCK" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
-                        <TextBlock Grid.Column="4" Text="ACTIONS" Style="{StaticResource ColumnHeaderTextStyle}" />
+                        <TextBlock Grid.Column="4" Text="EXPIRY" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Grid.Column="5" Text="ACTIONS" Style="{StaticResource ColumnHeaderTextStyle}" />
                     </Grid>
 
                     <InfoBar Grid.Row="1" IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
@@ -106,36 +109,39 @@
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="vm:ProductRowViewModel">
-                                <Grid Padding="12,10" ColumnSpacing="16" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+                                <Grid Padding="12,6" ColumnSpacing="16" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
                                     <!-- Must stay byte-for-byte identical to the header row's columns
                                          above, or the headers stop lining up with their data. -->
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" MinWidth="220" />
                                         <ColumnDefinition Width="190" />
-                                        <ColumnDefinition Width="130" />
+                                        <ColumnDefinition Width="230" />
                                         <ColumnDefinition Width="90" />
+                                        <ColumnDefinition Width="100" />
                                         <ColumnDefinition Width="150" />
                                     </Grid.ColumnDefinitions>
 
-                                    <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="15" TextWrapping="Wrap" />
+                                    <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
                                         <!-- Ellipsis rather than a hard clip: the code/SKU/barcode line
                                              can outrun the column on long names, and a trailing "…" reads
                                              as "there's more" instead of looking like a truncated value. -->
-                                        <TextBlock Opacity="0.6" FontSize="12" TextTrimming="CharacterEllipsis">
+                                        <TextBlock Opacity="0.6" FontSize="11" TextTrimming="CharacterEllipsis">
                                             <Run Text="{x:Bind ProductCode}" />
                                             <Run Text=" · SKU: " /><Run Text="{x:Bind Sku}" />
                                             <Run Text=" · Barcode: " /><Run Text="{x:Bind Barcode}" />
                                         </TextBlock>
                                     </StackPanel>
 
-                                    <!-- Category and Brand are optional, so their TextBlocks are collapsed
-                                         when empty rather than left as blank lines — otherwise a product
-                                         with no category/brand pushed its Unit to the bottom of the cell
-                                         and the column read as ragged and misaligned across rows. -->
-                                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                        <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource PastelBlueBrush}" HorizontalAlignment="Left" Visibility="{x:Bind CategoryName, Converter={StaticResource StringToVisibilityConverter}}"><TextBlock Text="{x:Bind CategoryName}" Foreground="{ThemeResource PastelBlueOnBrush}" Style="{StaticResource BadgeTextStyle}" /></Border>
-                                        <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource PastelVioletBrush}" HorizontalAlignment="Left" Visibility="{x:Bind BrandName, Converter={StaticResource StringToVisibilityConverter}}"><TextBlock Text="{x:Bind BrandName}" Foreground="{ThemeResource PastelVioletOnBrush}" Style="{StaticResource BadgeTextStyle}" /></Border>
+                                    <!-- Category and Brand share one line (rather than each stacking
+                                         separately) specifically to keep the row's overall height down;
+                                         Unit gets its own line since it's present on every product,
+                                         unlike Category/Brand which are optional and collapse when empty. -->
+                                    <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource PastelBlueBrush}" HorizontalAlignment="Left" Visibility="{x:Bind CategoryName, Converter={StaticResource StringToVisibilityConverter}}"><TextBlock Text="{x:Bind CategoryName}" Foreground="{ThemeResource PastelBlueOnBrush}" Style="{StaticResource BadgeTextStyle}" TextTrimming="CharacterEllipsis" MaxWidth="86" /></Border>
+                                            <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource PastelVioletBrush}" HorizontalAlignment="Left" Visibility="{x:Bind BrandName, Converter={StaticResource StringToVisibilityConverter}}"><TextBlock Text="{x:Bind BrandName}" Foreground="{ThemeResource PastelVioletOnBrush}" Style="{StaticResource BadgeTextStyle}" TextTrimming="CharacterEllipsis" MaxWidth="86" /></Border>
+                                        </StackPanel>
                                         <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource SurfaceAltBrush}"
                                                 HorizontalAlignment="Left">
                                             <TextBlock Text="{x:Bind Unit}" Style="{StaticResource BadgeTextStyle}"
@@ -143,22 +149,26 @@
                                         </Border>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock FontSize="11" Foreground="{ThemeResource TextSecondaryBrush}"><Run Text="MRP  " /><Run Text="{x:Bind Mrp, Converter={StaticResource CurrencyConverter}}" /></TextBlock>
-                                        <TextBlock FontWeight="SemiBold" FontSize="16"><Run Text="SELL  " /><Run Text="{x:Bind SellingPrice, Converter={StaticResource CurrencyConverter}}" /></TextBlock>
-                                        <Border CornerRadius="10" Padding="7,2" HorizontalAlignment="Left"
-                                                Background="{ThemeResource PastelGreenBrush}"
-                                                ToolTipService.ToolTip="GST treatment at billing">
-                                            <TextBlock Text="{x:Bind PricingTypeLabel}" FontSize="11" FontWeight="SemiBold"
-                                                       Foreground="{ThemeResource PastelGreenOnBrush}" />
-                                        </Border>
-                                        <TextBlock FontSize="12" Opacity="0.7"
-                                                   Visibility="{x:Bind ShowPurchasePrice, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <Run Text="Cost " /><Run Text="{x:Bind PurchasePrice, Converter={StaticResource CurrencyConverter}}" />
-                                        </TextBlock>
+                                    <StackPanel Grid.Column="2" Spacing="3" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock FontWeight="SemiBold" FontSize="15" VerticalAlignment="Center"><Run Text="SELL  " /><Run Text="{x:Bind SellingPrice, Converter={StaticResource CurrencyConverter}}" /></TextBlock>
+                                            <Border CornerRadius="10" Padding="7,2" VerticalAlignment="Center"
+                                                    Background="{ThemeResource PastelGreenBrush}"
+                                                    ToolTipService.ToolTip="GST treatment at billing">
+                                                <TextBlock Text="{x:Bind PricingTypeLabel}" FontSize="10" FontWeight="SemiBold"
+                                                           Foreground="{ThemeResource PastelGreenOnBrush}" />
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <TextBlock FontSize="11" Foreground="{ThemeResource TextSecondaryBrush}"><Run Text="MRP  " /><Run Text="{x:Bind Mrp, Converter={StaticResource CurrencyConverter}}" /></TextBlock>
+                                            <TextBlock FontSize="11" Opacity="0.7"
+                                                       Visibility="{x:Bind ShowPurchasePrice, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <Run Text="Cost " /><Run Text="{x:Bind PurchasePrice, Converter={StaticResource CurrencyConverter}}" />
+                                            </TextBlock>
+                                        </StackPanel>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="3" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <StackPanel Grid.Column="3" Spacing="3" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <TextBlock FontWeight="SemiBold" HorizontalAlignment="Center"><Run Text="{x:Bind Stock}" /><Run Text=" " /><Run Text="{x:Bind Unit}" /></TextBlock>
                                         <Border Background="{x:Bind StockStatus, Converter={StaticResource StockStatusToBrushConverter}}"
                                                 Visibility="{x:Bind StockStatus, Converter={StaticResource StringToVisibilityConverter}}"
@@ -167,9 +177,24 @@
                                         </Border>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" HorizontalAlignment="Left">
-                                        <Button Content="Edit" Click="OnEditClick" Tag="{x:Bind}" />
-                                        <Button Content="⋯" FontSize="18" Padding="10,0" AutomationProperties.Name="More product actions"><Button.Flyout><Flyout><StackPanel MinWidth="150" Spacing="2" Padding="4"><Button Content="Edit" Click="OnEditClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" /><Button Content="Stock" Click="OnAdjustStockClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" /><Button Content="Labels" Click="OnLabelsClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" /><Button Content="Batches" Click="OnBatchesClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" Visibility="{x:Bind TracksBatches, Converter={StaticResource BoolToVisibilityConverter}}" /><Button Content="Deactivate" Click="OnToggleActiveClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" Visibility="{x:Bind IsActive, Converter={StaticResource BoolToVisibilityConverter}}" /><Button Content="Reactivate" Click="OnToggleActiveClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" Visibility="{x:Bind IsActive, Converter={StaticResource InverseBoolToVisibilityConverter}}" /></StackPanel></Flyout></Button.Flyout></Button>
+                                    <!-- "—" for products that don't track batches, or that track
+                                         batches but have none with both remaining stock and an
+                                         expiry date set. Mirrors the STOCK column's own value+badge
+                                         layout; the badge only appears once there's something
+                                         actionable (already expired, or due within 30 days). -->
+                                    <StackPanel Grid.Column="4" Spacing="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind ExpiryDateText}" FontSize="12" HorizontalAlignment="Center"
+                                                   Foreground="{ThemeResource TextSecondaryBrush}" />
+                                        <Border Background="{x:Bind ExpiryStatus, Converter={StaticResource ExpiryStatusToBrushConverter}}"
+                                                Visibility="{x:Bind ExpiryStatus, Converter={StaticResource StringToVisibilityConverter}}"
+                                                CornerRadius="3" Padding="6,2">
+                                            <TextBlock Text="{x:Bind ExpiryStatus}" FontSize="9" Foreground="White" />
+                                        </Border>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                        <Button Content="Edit" Click="OnEditClick" Tag="{x:Bind}" Padding="12,5" />
+                                        <Button Content="⋯" FontSize="18" Padding="10,3" AutomationProperties.Name="More product actions"><Button.Flyout><Flyout><StackPanel MinWidth="150" Spacing="2" Padding="4"><Button Content="Edit" Click="OnEditClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" /><Button Content="Stock" Click="OnAdjustStockClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" /><Button Content="Labels" Click="OnLabelsClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" /><Button Content="Batches" Click="OnBatchesClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" Visibility="{x:Bind TracksBatches, Converter={StaticResource BoolToVisibilityConverter}}" /><Button Content="Deactivate" Click="OnToggleActiveClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" Visibility="{x:Bind IsActive, Converter={StaticResource BoolToVisibilityConverter}}" /><Button Content="Reactivate" Click="OnToggleActiveClick" Tag="{x:Bind}" HorizontalAlignment="Stretch" Visibility="{x:Bind IsActive, Converter={StaticResource InverseBoolToVisibilityConverter}}" /></StackPanel></Flyout></Button.Flyout></Button>
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>

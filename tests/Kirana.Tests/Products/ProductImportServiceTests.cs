@@ -405,5 +405,95 @@ public class ProductImportServiceTests : IDisposable
         Assert.Equal(ProductImportParser.NormalizeHeader("Name"), nameColumn.FieldKey);
     }
 
+    // ===================== Phase 13A: units, pack sizes & unit conversion =====================
+
+    private const string HeaderWithPack = Header + ",Purchase Pack Unit,Purchase Pack Size,Unit Display Text";
+
+    private static Stream CsvStreamWithPack(params string[] dataRows) =>
+        new MemoryStream(Encoding.UTF8.GetBytes(HeaderWithPack + "\r\n" + string.Join("\r\n", dataRows) + "\r\n"));
+
+    [Fact]
+    public async Task Import_DefaultsPackFieldsToNull_WhenColumnsAbsent()
+    {
+        // The plain (no-pack-column) Header used throughout this file — proves old-format files
+        // with no pack columns at all still import successfully with no pack configured.
+        var preview = await PreviewAsync("Tata Salt,TATA-1,,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+        await _sut.CommitAsync(preview, _ownerId);
+
+        var product = await _fixture.Context.Products.SingleAsync();
+        Assert.Null(product.PurchasePackUnit);
+        Assert.Null(product.PurchasePackSize);
+        Assert.Null(product.UnitDisplayText);
+    }
+
+    [Fact]
+    public async Task Import_ParsesValidPackConfiguration_WhenColumnsPresent()
+    {
+        var stream = CsvStreamWithPack("Biscuit Box,BISC-1,,Grocery,Parle,Piece,18,25,22,5,10,20,100,Box,12,");
+        var preview = await _sut.BuildPreviewAsync(stream, "products.csv", _ownerId);
+        await _sut.CommitAsync(preview, _ownerId);
+
+        var product = await _fixture.Context.Products.SingleAsync();
+        Assert.Equal(UnitOfMeasure.Box, product.PurchasePackUnit);
+        Assert.Equal(12, product.PurchasePackSize);
+    }
+
+    [Fact]
+    public async Task Import_RowError_WhenPackUnitTextIsUnrecognized()
+    {
+        var stream = CsvStreamWithPack("Biscuit Box,BISC-1,,Grocery,Parle,Piece,18,25,22,5,10,20,100,Crate,12,");
+        var preview = await _sut.BuildPreviewAsync(stream, "products.csv", _ownerId);
+
+        Assert.Contains(preview.Rows.Single().Errors, e => e.Contains("Purchase Pack Unit"));
+    }
+
+    [Theory]
+    [InlineData("0")]
+    [InlineData("-5")]
+    public async Task Import_RowError_WhenPackSizeIsZeroOrNegative(string packSize)
+    {
+        var stream = CsvStreamWithPack($"Biscuit Box,BISC-1,,Grocery,Parle,Piece,18,25,22,5,10,20,100,Box,{packSize},");
+        var preview = await _sut.BuildPreviewAsync(stream, "products.csv", _ownerId);
+
+        Assert.Equal(ProductImportRowStatus.Error, preview.Rows.Single().Status);
+    }
+
+    [Fact]
+    public async Task Import_RowError_WhenPackUnitEqualsUnitColumn()
+    {
+        var stream = CsvStreamWithPack("Biscuit Box,BISC-1,,Grocery,Parle,Piece,18,25,22,5,10,20,100,Piece,12,");
+        var preview = await _sut.BuildPreviewAsync(stream, "products.csv", _ownerId);
+
+        Assert.Equal(ProductImportRowStatus.Error, preview.Rows.Single().Status);
+    }
+
+    [Fact]
+    public async Task Import_RowError_ExcludesRowFromCommit_ButOtherValidRowsStillCommit()
+    {
+        var stream = CsvStreamWithPack(
+            "Good Product,GOOD-1,,Grocery,Tata,Piece,18,25,22,5,10,20,100,,,",
+            "Bad Pack Product,BAD-1,,Grocery,Tata,Piece,18,25,22,5,10,20,100,Piece,12,");
+        var preview = await _sut.BuildPreviewAsync(stream, "products.csv", _ownerId);
+
+        Assert.Equal(1, preview.NewCount);
+        Assert.Equal(1, preview.ErrorCount);
+
+        var result = await _sut.CommitAsync(preview, _ownerId);
+
+        Assert.Equal(1, result.CreatedCount);
+        Assert.Equal(1, result.SkippedErrorCount);
+        Assert.Equal("Good Product", (await _fixture.Context.Products.SingleAsync()).Name);
+    }
+
+    [Fact]
+    public void BuildCsvTemplate_IncludesNewOptionalPackColumns()
+    {
+        var template = _sut.BuildCsvTemplate();
+
+        Assert.Contains("Purchase Pack Unit", template);
+        Assert.Contains("Purchase Pack Size", template);
+        Assert.Contains("Unit Display Text", template);
+    }
+
     public void Dispose() => _fixture.Dispose();
 }

@@ -396,5 +396,63 @@ public class PurchaseReturnServiceTests : IDisposable
         Assert.Contains(purchaseReturn.ReturnNumber, audit!.NewValue);
     }
 
+    // ===================== Phase 13A: units, pack sizes & unit conversion =====================
+
+    [Fact]
+    public async Task PurchaseReturnService_UnaffectedByPackPurchase_ReturnsAgainstBaseUnitQuantity()
+    {
+        // The purchase was entered as 10 Box (1 Box = 12 Piece), but by the time it reaches
+        // PurchaseItem.Quantity it's already plain base-unit Piece — returns should behave
+        // identically to any non-pack purchase, with zero awareness of how it was bought.
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync();
+        product.PurchasePackUnit = UnitOfMeasure.Box;
+        product.PurchasePackSize = 12;
+        await _fixture.Context.SaveChangesAsync();
+
+        var purchase = await _purchaseService.FinalizePurchaseAsync(new CreatePurchaseRequest
+        {
+            SupplierId = supplier.Id,
+            Lines = [new PurchaseLineInput
+            {
+                ProductId = product.Id, Quantity = 120, UnitPrice = 10,
+                PurchasedPackUnit = UnitOfMeasure.Box, PurchasedPackQuantity = 10,
+            }],
+            CreatedByUserId = _ownerId,
+        });
+
+        Assert.Equal(120m, await StockAsync(product.Id));
+
+        var itemId = await FirstItemIdAsync(purchase.Id);
+        var purchaseReturn = await ReturnAsync(purchase, itemId, 24); // return 2 Box worth, in base units
+
+        Assert.Equal(96m, await StockAsync(product.Id));
+        Assert.Equal(240m, purchaseReturn.TotalReturnAmount);
+    }
+
+    [Fact]
+    public async Task PurchaseReturnService_CannotReturnMoreThanPurchased_ForPackPurchasedLine()
+    {
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync();
+        product.PurchasePackUnit = UnitOfMeasure.Box;
+        product.PurchasePackSize = 12;
+        await _fixture.Context.SaveChangesAsync();
+
+        var purchase = await _purchaseService.FinalizePurchaseAsync(new CreatePurchaseRequest
+        {
+            SupplierId = supplier.Id,
+            Lines = [new PurchaseLineInput
+            {
+                ProductId = product.Id, Quantity = 120, UnitPrice = 10,
+                PurchasedPackUnit = UnitOfMeasure.Box, PurchasedPackQuantity = 10,
+            }],
+            CreatedByUserId = _ownerId,
+        });
+        var itemId = await FirstItemIdAsync(purchase.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => ReturnAsync(purchase, itemId, 121));
+    }
+
     public void Dispose() => _fixture.Dispose();
 }

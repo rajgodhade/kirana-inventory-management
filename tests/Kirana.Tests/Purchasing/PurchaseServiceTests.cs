@@ -30,13 +30,16 @@ public class PurchaseServiceTests : IDisposable
 
     private async Task<Product> SeedProductAsync(
         string name = "Tata Salt 1kg", decimal price = 25, decimal stock = 0,
-        UnitOfMeasure unit = UnitOfMeasure.Piece, decimal? gstRate = null, bool isTaxInclusive = false, bool tracksBatches = false)
+        UnitOfMeasure unit = UnitOfMeasure.Piece, decimal? gstRate = null, bool isTaxInclusive = false, bool tracksBatches = false,
+        UnitOfMeasure? purchasePackUnit = null, decimal? purchasePackSize = null)
     {
         var product = new Product
         {
             ProductCode = $"PRD-{Guid.NewGuid():N}"[..12],
             Name = name,
             Unit = unit,
+            PurchasePackUnit = purchasePackUnit,
+            PurchasePackSize = purchasePackSize,
             PurchasePrice = price,
             Mrp = price + 5,
             SellingPrice = price + 3,
@@ -640,6 +643,214 @@ public class PurchaseServiceTests : IDisposable
         var cashier = await _fixture.SeedCashierAsync();
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _sut.GetByIdAsync(purchase.Id, cashier.Id));
+    }
+
+    // ===================== Phase 13A: units, pack sizes & unit conversion =====================
+
+    [Fact]
+    public async Task FinalizePurchaseAsync_AcceptsPlainQuantity_WhenNoPackFieldsSent()
+    {
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync(stock: 10, purchasePackUnit: UnitOfMeasure.Box, purchasePackSize: 12);
+
+        var purchase = await _sut.FinalizePurchaseAsync(BasicRequest(supplier.Id, product.Id, 5, 10, _ownerId));
+
+        Assert.Equal(5m, purchase.Items.Single().Quantity);
+        var inventory = await _fixture.Context.Inventories.SingleAsync(i => i.ProductId == product.Id);
+        Assert.Equal(15m, inventory.QuantityOnHand);
+    }
+
+    [Fact]
+    public async Task FinalizePurchaseAsync_ConvertsPackQuantity_ToBaseUnitInventoryAndStockMovement()
+    {
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync(stock: 0, purchasePackUnit: UnitOfMeasure.Box, purchasePackSize: 12);
+
+        var request = new CreatePurchaseRequest
+        {
+            SupplierId = supplier.Id,
+            Lines = [new PurchaseLineInput
+            {
+                ProductId = product.Id, Quantity = 120, UnitPrice = 10,
+                PurchasedPackUnit = UnitOfMeasure.Box, PurchasedPackQuantity = 10,
+            }],
+            CreatedByUserId = _ownerId,
+        };
+
+        var purchase = await _sut.FinalizePurchaseAsync(request);
+
+        Assert.Equal(120m, purchase.Items.Single().Quantity);
+
+        var inventory = await _fixture.Context.Inventories.SingleAsync(i => i.ProductId == product.Id);
+        Assert.Equal(120m, inventory.QuantityOnHand);
+
+        var movement = await _fixture.Context.StockMovements.SingleAsync(m => m.ProductId == product.Id);
+        Assert.Equal(StockMovementType.Purchase, movement.MovementType);
+        Assert.Equal(120m, movement.QuantityChange);
+        Assert.Equal(0m, movement.PreviousQuantity);
+        Assert.Equal(120m, movement.NewQuantity);
+    }
+
+    [Fact]
+    public async Task FinalizePurchaseAsync_PopulatesPackSnapshotColumns_OnPurchaseItem()
+    {
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync(purchasePackUnit: UnitOfMeasure.Box, purchasePackSize: 12);
+
+        var request = new CreatePurchaseRequest
+        {
+            SupplierId = supplier.Id,
+            Lines = [new PurchaseLineInput
+            {
+                ProductId = product.Id, Quantity = 120, UnitPrice = 10,
+                PurchasedPackUnit = UnitOfMeasure.Box, PurchasedPackQuantity = 10,
+            }],
+            CreatedByUserId = _ownerId,
+        };
+
+        var purchase = await _sut.FinalizePurchaseAsync(request);
+
+        var item = await _fixture.Context.PurchaseItems.SingleAsync(i => i.PurchaseId == purchase.Id);
+        Assert.Equal("Box", item.PurchasedPackUnitSnapshot);
+        Assert.Equal(10m, item.PurchasedPackQuantitySnapshot);
+    }
+
+    [Fact]
+    public async Task FinalizePurchaseAsync_Throws_WhenPackUnitDoesNotMatchProductConfiguration()
+    {
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync(purchasePackUnit: UnitOfMeasure.Box, purchasePackSize: 12);
+
+        var request = new CreatePurchaseRequest
+        {
+            SupplierId = supplier.Id,
+            Lines = [new PurchaseLineInput
+            {
+                ProductId = product.Id, Quantity = 240, UnitPrice = 10,
+                PurchasedPackUnit = UnitOfMeasure.Carton, PurchasedPackQuantity = 10,
+            }],
+            CreatedByUserId = _ownerId,
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.FinalizePurchaseAsync(request));
+    }
+
+    [Fact]
+    public async Task FinalizePurchaseAsync_Throws_WhenProductHasNoPackConfigured_ButPackFieldsSent()
+    {
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync();
+
+        var request = new CreatePurchaseRequest
+        {
+            SupplierId = supplier.Id,
+            Lines = [new PurchaseLineInput
+            {
+                ProductId = product.Id, Quantity = 120, UnitPrice = 10,
+                PurchasedPackUnit = UnitOfMeasure.Box, PurchasedPackQuantity = 10,
+            }],
+            CreatedByUserId = _ownerId,
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.FinalizePurchaseAsync(request));
+    }
+
+    [Fact]
+    public async Task FinalizePurchaseAsync_Throws_WhenSubmittedQuantityDisagreesWithPackMath()
+    {
+        // Fault injection: a tampered/buggy payload claims 10 Box but only sends a base-unit
+        // Quantity of 100 (should be 120) — the server must catch this, not trust the client.
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync(purchasePackUnit: UnitOfMeasure.Box, purchasePackSize: 12);
+
+        var request = new CreatePurchaseRequest
+        {
+            SupplierId = supplier.Id,
+            Lines = [new PurchaseLineInput
+            {
+                ProductId = product.Id, Quantity = 100, UnitPrice = 10,
+                PurchasedPackUnit = UnitOfMeasure.Box, PurchasedPackQuantity = 10,
+            }],
+            CreatedByUserId = _ownerId,
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.FinalizePurchaseAsync(request));
+
+        // Prove the rejection has teeth: nothing was written for the mismatched line.
+        Assert.False(await _fixture.Context.Purchases.AnyAsync(p => p.SupplierId == supplier.Id));
+        var inventory = await _fixture.Context.Inventories.SingleOrDefaultAsync(i => i.ProductId == product.Id);
+        Assert.True(inventory is null || inventory.QuantityOnHand == 0);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-2)]
+    public async Task FinalizePurchaseAsync_Throws_WhenPackQuantityIsZeroOrNegative(decimal packQuantity)
+    {
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync(purchasePackUnit: UnitOfMeasure.Box, purchasePackSize: 12);
+
+        var request = new CreatePurchaseRequest
+        {
+            SupplierId = supplier.Id,
+            Lines = [new PurchaseLineInput
+            {
+                ProductId = product.Id, Quantity = 12, UnitPrice = 10,
+                PurchasedPackUnit = UnitOfMeasure.Box, PurchasedPackQuantity = packQuantity,
+            }],
+            CreatedByUserId = _ownerId,
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.FinalizePurchaseAsync(request));
+    }
+
+    [Fact]
+    public async Task FinalizePurchaseAsync_TopsUpBatchQuantity_UsingConvertedBaseQuantity_WhenTracksBatches()
+    {
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync(tracksBatches: true, purchasePackUnit: UnitOfMeasure.Box, purchasePackSize: 12);
+
+        var request = new CreatePurchaseRequest
+        {
+            SupplierId = supplier.Id,
+            Lines = [new PurchaseLineInput
+            {
+                ProductId = product.Id, Quantity = 120, UnitPrice = 10, BatchNumber = "BATCH-PACK-1",
+                PurchasedPackUnit = UnitOfMeasure.Box, PurchasedPackQuantity = 10,
+            }],
+            CreatedByUserId = _ownerId,
+        };
+
+        await _sut.FinalizePurchaseAsync(request);
+
+        var batch = await _fixture.Context.ProductBatches.SingleAsync(b => b.ProductId == product.Id);
+        Assert.Equal(120m, batch.Quantity);
+    }
+
+    [Fact]
+    public async Task FinalizePurchaseAsync_RemainingStock_AfterPackPurchaseAndSale()
+    {
+        // Purchase: 10 Box x 12 Piece = 120 Piece. Sale: 5 Piece. Remaining: 115 Piece.
+        var supplier = await SeedSupplierAsync();
+        var product = await SeedProductAsync(stock: 0, purchasePackUnit: UnitOfMeasure.Box, purchasePackSize: 12);
+
+        var request = new CreatePurchaseRequest
+        {
+            SupplierId = supplier.Id,
+            Lines = [new PurchaseLineInput
+            {
+                ProductId = product.Id, Quantity = 120, UnitPrice = 10,
+                PurchasedPackUnit = UnitOfMeasure.Box, PurchasedPackQuantity = 10,
+            }],
+            CreatedByUserId = _ownerId,
+        };
+        await _sut.FinalizePurchaseAsync(request);
+
+        var inventory = await _fixture.Context.Inventories.SingleAsync(i => i.ProductId == product.Id);
+        inventory.QuantityOnHand -= 5; // simulate a 5-Piece sale without pulling in SaleService here
+        await _fixture.Context.SaveChangesAsync();
+
+        Assert.Equal(115m, inventory.QuantityOnHand);
     }
 
     public void Dispose() => _fixture.Dispose();

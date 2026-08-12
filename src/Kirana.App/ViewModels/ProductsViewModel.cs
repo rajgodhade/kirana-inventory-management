@@ -20,19 +20,25 @@ public sealed partial class ProductsViewModel(
     private string _searchText = string.Empty;
 
     [ObservableProperty]
-    private Category? _selectedCategory;
-
-    [ObservableProperty]
-    private Brand? _selectedBrand;
-
-    [ObservableProperty]
     private bool _showInactive;
+
+    [ObservableProperty]
+    private bool _outOfStockOnly;
+
+    [ObservableProperty]
+    private bool _expiredOnly;
+
+    [ObservableProperty]
+    private string _selectedSortOption = "Name (A-Z)";
 
     [ObservableProperty]
     private string? _errorMessage;
 
     [ObservableProperty]
     private bool _isBusy;
+
+    [ObservableProperty]
+    private string _totalProductsText = "0 products";
 
     public bool CanEditProducts => session.HasPermission(PermissionKeys.ProductsEdit);
     public bool CanViewPurchasePrice => session.HasPermission(PermissionKeys.PricingViewPurchasePrice);
@@ -41,6 +47,17 @@ public sealed partial class ProductsViewModel(
     public ObservableCollection<Category> Categories { get; } = [];
     public ObservableCollection<Brand> Brands { get; } = [];
     public ObservableCollection<ProductRowViewModel> Products { get; } = [];
+    public IReadOnlyList<string> SortOptions { get; } =
+    [
+        "Name (A-Z)",
+        "Name (Z-A)",
+        "Stock (Low to High)",
+        "Stock (High to Low)",
+        "Price (Low to High)",
+        "Price (High to Low)",
+        "Recently Added",
+        "Expiry Date",
+    ];
 
     public int? CurrentUserId => session.CurrentUser?.Id;
 
@@ -78,16 +95,40 @@ public sealed partial class ProductsViewModel(
             var results = await productService.SearchAsync(new ProductSearchQuery
             {
                 SearchText = SearchText,
-                CategoryId = SelectedCategory?.Id,
-                BrandId = SelectedBrand?.Id,
                 IncludeInactive = ShowInactive,
             });
 
-            Products.Clear();
+            var rows = new List<ProductRowViewModel>();
             foreach (var product in results)
             {
-                Products.Add(await ToRowAsync(product));
+                var row = await ToRowAsync(product);
+                if ((!OutOfStockOnly || row.Stock <= 0) && (!ExpiredOnly || row.ExpiryStatus == "EXPIRED"))
+                {
+                    rows.Add(row);
+                }
             }
+
+            IEnumerable<ProductRowViewModel> sorted = SelectedSortOption switch
+            {
+                "Name (Z-A)" => rows.OrderByDescending(r => r.Name),
+                "Stock (Low to High)" => rows.OrderBy(r => r.Stock).ThenBy(r => r.Name),
+                "Stock (High to Low)" => rows.OrderByDescending(r => r.Stock).ThenBy(r => r.Name),
+                "Price (Low to High)" => rows.OrderBy(r => r.SellingPrice).ThenBy(r => r.Name),
+                "Price (High to Low)" => rows.OrderByDescending(r => r.SellingPrice).ThenBy(r => r.Name),
+                "Recently Added" => rows.OrderByDescending(r => r.CreatedAtUtc),
+                // Products without an expiry (no batches, or batches with no expiry set) sort to
+                // the end rather than the front — the soonest real expiry is what needs attention.
+                "Expiry Date" => rows.OrderBy(r => r.NearestExpiryDate ?? DateOnly.MaxValue).ThenBy(r => r.Name),
+                _ => rows.OrderBy(r => r.Name),
+            };
+
+            Products.Clear();
+            foreach (var row in sorted)
+            {
+                Products.Add(row);
+            }
+
+            TotalProductsText = Products.Count == 1 ? "1 product" : $"{Products.Count} products";
         }
         catch (Exception ex)
         {
@@ -144,6 +185,19 @@ public sealed partial class ProductsViewModel(
                 ? "LOW STOCK"
                 : "";
 
+        // Only batch-tracked products can have an expiry at all, so the extra query is skipped
+        // entirely for the common (non-batch) case rather than run on every row.
+        DateOnly? nearestExpiry = null;
+        if (product.TracksBatches)
+        {
+            var batches = await inventoryService.GetBatchesAsync(product.Id);
+            nearestExpiry = batches
+                .Where(b => b.Quantity > 0 && b.ExpiryDate is not null)
+                .OrderBy(b => b.ExpiryDate)
+                .Select(b => b.ExpiryDate)
+                .FirstOrDefault();
+        }
+
         return new ProductRowViewModel
         {
             Id = product.Id,
@@ -153,7 +207,7 @@ public sealed partial class ProductsViewModel(
             Barcode = product.Barcode,
             CategoryName = product.Category?.Name ?? "",
             BrandName = product.Brand?.Name ?? "",
-            Unit = product.Unit.ToString(),
+            Unit = product.UnitDisplayText ?? product.Unit.ToDisplayText(),
             SellingPrice = product.SellingPrice,
             Mrp = product.Mrp,
             PurchasePrice = CanViewPurchasePrice ? product.PurchasePrice : null,
@@ -163,6 +217,8 @@ public sealed partial class ProductsViewModel(
             IsActive = product.IsActive,
             TracksBatches = product.TracksBatches,
             StockStatus = status,
+            CreatedAtUtc = product.CreatedAtUtc,
+            NearestExpiryDate = nearestExpiry,
         };
     }
 }

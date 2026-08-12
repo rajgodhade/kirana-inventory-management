@@ -23,7 +23,8 @@ public sealed class ProductService(
 
         await ValidateAsync(request.Name, request.CategoryId, request.BrandId, request.PurchasePrice, request.Mrp,
             request.SellingPrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
-            request.Sku, request.Barcode, excludingProductId: null, cancellationToken);
+            request.Sku, request.Barcode, request.Unit, request.PurchasePackUnit, request.PurchasePackSize,
+            excludingProductId: null, cancellationToken);
 
         var productCode = await sequenceGenerator.NextAsync(ProductSequenceKey, ProductCodePrefix, ProductCodePadding, cancellationToken);
 
@@ -37,6 +38,9 @@ public sealed class ProductService(
             CategoryId = request.CategoryId,
             BrandId = request.BrandId,
             Unit = request.Unit,
+            PurchasePackUnit = request.PurchasePackUnit,
+            PurchasePackSize = request.PurchasePackSize,
+            UnitDisplayText = Normalize(request.UnitDisplayText),
             PurchasePrice = request.PurchasePrice,
             Mrp = request.Mrp,
             SellingPrice = request.SellingPrice,
@@ -89,7 +93,8 @@ public sealed class ProductService(
 
         await ValidateAsync(request.Name, request.CategoryId, request.BrandId, request.PurchasePrice, request.Mrp,
             request.SellingPrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
-            request.Sku, request.Barcode, excludingProductId: productId, cancellationToken);
+            request.Sku, request.Barcode, request.Unit, request.PurchasePackUnit, request.PurchasePackSize,
+            excludingProductId: productId, cancellationToken);
 
         var previousPricingSummary = $"Purchase={product.PurchasePrice}, Mrp={product.Mrp}, Selling={product.SellingPrice}";
         var pricingChanged = product.PurchasePrice != request.PurchasePrice
@@ -103,6 +108,9 @@ public sealed class ProductService(
         product.CategoryId = request.CategoryId;
         product.BrandId = request.BrandId;
         product.Unit = request.Unit;
+        product.PurchasePackUnit = request.PurchasePackUnit;
+        product.PurchasePackSize = request.PurchasePackSize;
+        product.UnitDisplayText = Normalize(request.UnitDisplayText);
         product.PurchasePrice = request.PurchasePrice;
         product.Mrp = request.Mrp;
         product.SellingPrice = request.SellingPrice;
@@ -240,6 +248,7 @@ public sealed class ProductService(
     private async Task ValidateAsync(
         string name, int? categoryId, int? brandId, decimal purchasePrice, decimal mrp, decimal sellingPrice,
         decimal? gstRatePercent, decimal minimumStock, decimal reorderQuantity, string? sku, string? barcode,
+        UnitOfMeasure unit, UnitOfMeasure? purchasePackUnit, decimal? purchasePackSize,
         int? excludingProductId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -259,6 +268,13 @@ public sealed class ProductService(
         if (minimumStock < 0 || reorderQuantity < 0)
         {
             throw new ArgumentException("Minimum stock and reorder quantity cannot be negative.");
+        }
+
+        if (!UnitConversion.IsValidPackConfiguration(purchasePackSize, purchasePackUnit, unit))
+        {
+            throw new ArgumentException(
+                "Purchase pack unit and pack size must both be set (or both left empty), the pack size must be " +
+                "greater than zero, and the pack unit must differ from the product's base unit.");
         }
 
         if (categoryId is { } catId && !await db.Categories.AnyAsync(c => c.Id == catId, cancellationToken))

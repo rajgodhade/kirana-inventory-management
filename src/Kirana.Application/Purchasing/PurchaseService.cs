@@ -55,6 +55,37 @@ public sealed class PurchaseService(
                 throw new ArgumentException($"'{product.Name}' is stocked in whole {product.Unit} units — {line.Quantity} is not valid.");
             }
 
+            // Phase 13A: purchasing in a configured bulk pack (e.g. 10 Box where 1 Box = 12
+            // Piece). The client is expected to have already converted line.Quantity to the
+            // base-unit amount — this only VALIDATES that conversion agrees with the product's
+            // configured pack, rather than deriving Quantity itself, so there is never a second
+            // source of truth for how much stock a line adds.
+            if (line.PurchasedPackUnit is { } packUnit)
+            {
+                if (product.PurchasePackUnit is null || product.PurchasePackSize is null)
+                {
+                    throw new ArgumentException($"'{product.Name}' does not have a purchase pack configured.");
+                }
+
+                if (packUnit != product.PurchasePackUnit.Value)
+                {
+                    throw new ArgumentException(
+                        $"'{product.Name}' pack unit is '{product.PurchasePackUnit}', not '{packUnit}'.");
+                }
+
+                if (line.PurchasedPackQuantity is not { } packQty || packQty <= 0)
+                {
+                    throw new ArgumentException($"'{product.Name}' pack quantity must be greater than zero.");
+                }
+
+                var expectedQuantity = UnitConversion.ToBaseQuantity(packQty, product.PurchasePackSize.Value, packUnit, product.Unit);
+                if (line.Quantity != expectedQuantity)
+                {
+                    throw new ArgumentException(
+                        $"'{product.Name}': {packQty} {packUnit} should equal {expectedQuantity} {product.Unit}, but {line.Quantity} was submitted.");
+                }
+            }
+
             if (line.DiscountPercent is < 0 or > 100)
             {
                 throw new ArgumentException($"Discount for '{product.Name}' must be between 0 and 100 percent.");
@@ -129,6 +160,8 @@ public sealed class PurchaseService(
                 SkuSnapshot = product.Sku,
                 HsnCodeSnapshot = product.HsnCode,
                 UnitSnapshot = product.Unit.ToString(),
+                PurchasedPackUnitSnapshot = lineInput.PurchasedPackUnit?.ToString(),
+                PurchasedPackQuantitySnapshot = lineInput.PurchasedPackQuantity,
                 IsTaxInclusiveSnapshot = lineResult.Line.PricingType == PricingType.Inclusive,
                 GstRatePercentSnapshot = product.GstRatePercent ?? 0,
                 Quantity = lineResult.Line.Quantity,

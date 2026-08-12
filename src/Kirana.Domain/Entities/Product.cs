@@ -27,6 +27,21 @@ public class Product : Entity
 
     public UnitOfMeasure Unit { get; set; } = UnitOfMeasure.Piece;
 
+    /// <summary>Optional bulk unit this product can be PURCHASED in (e.g. "Box"), converted to
+    /// <see cref="Unit"/> via <see cref="PurchasePackSize"/> before touching inventory (Phase
+    /// 13A). Selling/stock/pricing always stay in <see cref="Unit"/> — this never changes what
+    /// <see cref="Unit"/> means. Null unless <see cref="PurchasePackSize"/> is also set.</summary>
+    public UnitOfMeasure? PurchasePackUnit { get; set; }
+
+    /// <summary>How many <see cref="Unit"/> one <see cref="PurchasePackUnit"/> equals (e.g. 12 for
+    /// "1 Box = 12 Piece"). Must be positive and paired with <see cref="PurchasePackUnit"/> — see
+    /// <see cref="UnitConversion.IsValidPackConfiguration"/>.</summary>
+    public decimal? PurchasePackSize { get; set; }
+
+    /// <summary>Optional shopper-friendly label override (e.g. "500g Pack") shown in place of the
+    /// plain unit name on POS/receipts/reports. Cosmetic only — never used in arithmetic.</summary>
+    public string? UnitDisplayText { get; set; }
+
     // Pricing (PRD §14)
     public decimal PurchasePrice { get; set; }
     public decimal Mrp { get; set; }

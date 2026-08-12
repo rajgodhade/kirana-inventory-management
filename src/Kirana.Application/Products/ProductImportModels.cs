@@ -37,6 +37,13 @@ public sealed class ProductImportRow
     public string CategoryName { get; init; } = string.Empty;
     public string BrandName { get; init; } = string.Empty;
     public UnitOfMeasure Unit { get; init; } = UnitOfMeasure.Piece;
+
+    /// <summary>Optional purchase pack (Phase 13A) — null unless both the pack unit and size
+    /// columns were provided and validated.</summary>
+    public UnitOfMeasure? PurchasePackUnit { get; init; }
+    public decimal? PurchasePackSize { get; init; }
+    public string? UnitDisplayText { get; init; }
+
     public decimal SellingPrice { get; init; }
     public decimal OpeningStock { get; init; }
 

@@ -23,6 +23,11 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.Property(p => p.Unit).HasConversion<string>().HasMaxLength(20);
 
+        // Optional purchase pack (Phase 13A) — null unless the product can be bought in bulk.
+        builder.Property(p => p.PurchasePackUnit).HasConversion<string>().HasMaxLength(20);
+        builder.Property(p => p.PurchasePackSize).HasPrecision(18, 3);
+        builder.Property(p => p.UnitDisplayText).HasMaxLength(40);
+
         builder.Property(p => p.PurchasePrice).HasPrecision(18, 2);
         builder.Property(p => p.Mrp).HasPrecision(18, 2);
         builder.Property(p => p.SellingPrice).HasPrecision(18, 2);
