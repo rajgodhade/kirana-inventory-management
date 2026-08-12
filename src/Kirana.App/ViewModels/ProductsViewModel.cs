@@ -204,7 +204,11 @@ public sealed partial class ProductsViewModel(
             ProductCode = product.ProductCode,
             Name = product.Name,
             Sku = product.Sku,
-            Barcode = product.Barcode,
+            Barcodes = product.Barcodes
+                .Where(b => b.IsActive)
+                .OrderByDescending(b => b.IsPrimary).ThenBy(b => b.Id)
+                .Select(ProductBarcodeOption.From)
+                .ToList(),
             CategoryName = product.Category?.Name ?? "",
             BrandName = product.Brand?.Name ?? "",
             Unit = product.UnitDisplayText ?? product.Unit.ToDisplayText(),

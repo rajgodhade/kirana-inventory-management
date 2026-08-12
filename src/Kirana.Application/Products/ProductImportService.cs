@@ -1,6 +1,7 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
 using Kirana.Application.Barcodes;
+using Kirana.Domain.Barcodes;
 using Kirana.Domain.Entities;
 using Kirana.Application.Taxation;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,15 @@ public sealed class ProductImportService(
     private const string ProductCodePrefix = "PRD";
     private const int ProductCodePadding = 6;
 
+    /// <summary>Separates multiple barcodes in one cell (Phase 13B). A pipe never appears in a
+    /// retail EAN/UPC/Code128 value and needs no CSV quoting, unlike a comma — and it matches what
+    /// <c>DataExportService</c> emits, so an export round-trips back through this importer.</summary>
+    private const char BarcodeSeparator = '|';
+
+    /// <summary>Prefix marking which barcode in the cell is the primary, e.g. <c>123|*456</c>.
+    /// Stripped before validation and storage. Without it the first value wins.</summary>
+    private const char PrimaryMarker = '*';
+
     /// <summary>Accepted spelling(s) per column, already header-normalized (lowercase alphanumerics
     /// only). The first entry is the canonical name written into the template and the field key
     /// used in <see cref="ProductImportRow.RawFields"/> — by construction it always equals
@@ -24,7 +34,11 @@ public sealed class ProductImportService(
     [
         ("Name", ["name", "productname", "product", "itemname"]),
         ("SKU", ["sku", "skucode"]),
-        ("Barcode", ["barcode", "ean", "upc"]),
+        // Phase 13B: one cell can now carry several codes separated by BarcodeSeparator, optionally
+        // marking one primary with a leading PrimaryMarker. The legacy "barcode"/"ean"/"upc"
+        // spellings stay as aliases, so a file written before 13B (single value, no separator)
+        // parses through this same path and simply yields a one-element list.
+        ("Barcodes", ["barcodes", "barcode", "ean", "upc", "eans", "barcodelist"]),
         ("Description", ["description", "desc"]),
         ("Category", ["category", "categoryname"]),
         ("Brand", ["brand", "brandname"]),
@@ -103,7 +117,7 @@ public sealed class ProductImportService(
         // Snapshot the catalogue once rather than querying per row: an import is a few hundred rows
         // at most, and this keeps validation a pure in-memory pass.
         var existingProducts = await db.Products
-            .Select(p => new { p.Id, p.Sku, p.Barcode })
+            .Select(p => new { p.Id, p.Sku })
             .ToListAsync(cancellationToken);
 
         var bySku = existingProducts
@@ -111,10 +125,13 @@ public sealed class ProductImportService(
             .GroupBy(p => p.Sku!, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase);
 
-        var byBarcode = existingProducts
-            .Where(p => !string.IsNullOrWhiteSpace(p.Barcode))
-            .GroupBy(p => p.Barcode!, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase);
+        // Keyed on the already-normalized value, so an Ordinal comparer is correct here — the
+        // normalization IS the case-insensitivity now (Phase 13B).
+        var byBarcode = (await db.ProductBarcodes
+                .Select(b => new { b.ProductId, b.NormalizedValue })
+                .ToListAsync(cancellationToken))
+            .GroupBy(b => b.NormalizedValue, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First().ProductId, StringComparer.Ordinal);
 
         var categories = await db.Categories.Select(c => c.Name).ToListAsync(cancellationToken);
         var brands = await db.Brands.Select(b => b.Name).ToListAsync(cancellationToken);
@@ -127,7 +144,8 @@ public sealed class ProductImportService(
         // Tracks values claimed by earlier rows in this same file, so two rows fighting over one SKU
         // is caught here rather than blowing up as a unique-constraint violation mid-commit.
         var seenSkus = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        var seenBarcodes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        // Keyed on normalized barcode values (see byBarcode above).
+        var seenBarcodes = new Dictionary<string, int>(StringComparer.Ordinal);
 
         var rows = new List<ProductImportRow>();
 
@@ -163,7 +181,7 @@ public sealed class ProductImportService(
         }
 
         var sku = NullIfBlank(Get(raw, "SKU"));
-        var barcode = NullIfBlank(Get(raw, "Barcode"));
+        var (barcodes, primaryBarcodeIndex) = ParseBarcodeCell(Get(raw, "Barcodes"), errors);
 
         var unit = UnitOfMeasure.Piece;
         var unitText = Get(raw, "Unit");
@@ -240,15 +258,15 @@ public sealed class ProductImportService(
             errors.Add($"'{unit}' is a whole-unit measure — stock quantities must be whole numbers.");
         }
 
-        if (barcode is not null)
+        foreach (var value in barcodes)
         {
             try
             {
-                barcodeService.ValidateFormat(barcode);
+                barcodeService.ValidateFormat(value);
             }
             catch (ArgumentException ex)
             {
-                errors.Add(ex.Message);
+                errors.Add($"Barcode '{value}': {ex.Message}");
             }
         }
 
@@ -257,9 +275,35 @@ public sealed class ProductImportService(
             errors.Add($"SKU '{sku}' is already used by row {skuRow} in this file.");
         }
 
-        if (barcode is not null && seenBarcodes.TryGetValue(barcode, out var barcodeRow))
+        foreach (var value in barcodes)
         {
-            errors.Add($"Barcode '{barcode}' is already used by row {barcodeRow} in this file.");
+            if (seenBarcodes.TryGetValue(BarcodeNormalizer.Normalize(value), out var barcodeRow))
+            {
+                errors.Add($"Barcode '{value}' is already used by row {barcodeRow} in this file.");
+            }
+        }
+
+        // A row whose barcodes point at two different existing products is genuinely ambiguous —
+        // report it rather than silently picking one and quietly re-pointing a code.
+        var matchedByBarcode = barcodes
+            .Select(v => byBarcode.TryGetValue(BarcodeNormalizer.Normalize(v), out var id) ? id : (int?)null)
+            .Where(id => id is not null)
+            .Distinct()
+            .ToList();
+
+        if (matchedByBarcode.Count > 1)
+        {
+            errors.Add("The barcodes on this row belong to two different existing products.");
+        }
+
+        // SKU wins over barcode when both match (see matchedId below), so a row can name one product
+        // by SKU while carrying a barcode that belongs to a different one. Caught here rather than
+        // left to the database: the whole import shares a single SaveChangesAsync, so hitting the
+        // unique index would roll back every other valid row in the file instead of flagging one.
+        if (matchedByBarcode.Count == 1 && sku is not null
+            && bySku.TryGetValue(sku, out var skuOwnerId) && skuOwnerId != matchedByBarcode[0])
+        {
+            errors.Add("A barcode on this row already belongs to a different product.");
         }
 
         if (errors.Count > 0)
@@ -271,7 +315,7 @@ public sealed class ProductImportService(
                 Errors = errors,
                 Name = name,
                 Sku = sku,
-                Barcode = barcode,
+                Barcodes = barcodes,
                 RawFields = raw,
             };
         }
@@ -283,9 +327,9 @@ public sealed class ProductImportService(
             seenSkus[sku] = rowNumber;
         }
 
-        if (barcode is not null)
+        foreach (var value in barcodes)
         {
-            seenBarcodes[barcode] = rowNumber;
+            seenBarcodes[BarcodeNormalizer.Normalize(value)] = rowNumber;
         }
 
         // Match an existing product so re-importing a corrected file updates in place instead of
@@ -295,9 +339,9 @@ public sealed class ProductImportService(
         {
             matchedId = idBySku;
         }
-        else if (barcode is not null && byBarcode.TryGetValue(barcode, out var idByBarcode))
+        else if (matchedByBarcode.Count == 1)
         {
-            matchedId = idByBarcode;
+            matchedId = matchedByBarcode[0];
         }
 
         var categoryName = Get(raw, "Category").Trim();
@@ -319,7 +363,7 @@ public sealed class ProductImportService(
             Status = matchedId is null ? ProductImportRowStatus.New : ProductImportRowStatus.Update,
             Name = name.Trim(),
             Sku = sku,
-            Barcode = barcode,
+            Barcodes = barcodes,
             CategoryName = categoryName,
             BrandName = brandName,
             Unit = unit,
@@ -334,7 +378,8 @@ public sealed class ProductImportService(
             {
                 Name = name.Trim(),
                 Sku = sku,
-                Barcode = barcode,
+                Barcodes = barcodes,
+                PrimaryBarcodeIndex = primaryBarcodeIndex,
                 Description = NullIfBlank(Get(raw, "Description")),
                 Unit = unit,
                 PurchasePackUnit = purchasePackUnit,
@@ -392,8 +437,11 @@ public sealed class ProductImportService(
 
             if (row.MatchedProductId is { } productId)
             {
-                var product = await db.Products.FirstAsync(p => p.Id == productId, cancellationToken);
+                var product = await db.Products
+                    .Include(p => p.Barcodes)
+                    .FirstAsync(p => p.Id == productId, cancellationToken);
                 ApplyTo(product, request, categoryId, brandId);
+                ReconcileBarcodes(product, request);
                 product.UpdatedAtUtc = DateTime.UtcNow;
                 updated++;
                 continue;
@@ -401,6 +449,7 @@ public sealed class ProductImportService(
 
             var newProduct = new Product { ProductCode = reservedCodes.Dequeue(), IsActive = true };
             ApplyTo(newProduct, request, categoryId, brandId);
+            ReconcileBarcodes(newProduct, request);
             db.Products.Add(newProduct);
             db.Inventories.Add(new Inventory { Product = newProduct, QuantityOnHand = request.OpeningStock });
 
@@ -492,11 +541,73 @@ public sealed class ProductImportService(
         return map;
     }
 
+    /// <summary>
+    /// Stages the row's barcodes onto a product (Phase 13B). Deliberately ADDITIVE and never
+    /// destructive: codes already on the product but missing from the file are left alone, because
+    /// an import file is rarely the complete truth about a product and silently retiring a working
+    /// shelf code would be real data loss. A code already present is skipped rather than duplicated.
+    /// <para>Stages entities only — never saves. That keeps the whole import inside CommitAsync's
+    /// single SaveChangesAsync, which is what makes a failed import all-or-nothing.</para>
+    /// </summary>
+    private void ReconcileBarcodes(Product product, CreateProductRequest request)
+    {
+        if (request.Barcodes.Count == 0)
+        {
+            return;
+        }
+
+        var existing = product.Barcodes
+            .Select(b => b.NormalizedValue)
+            .ToHashSet(StringComparer.Ordinal);
+
+        // Only claim primary when the product has none yet — an import shouldn't silently demote a
+        // primary the operator chose in the app.
+        var hasPrimary = product.Barcodes.Any(b => b.IsPrimary);
+
+        for (var index = 0; index < request.Barcodes.Count; index++)
+        {
+            var value = request.Barcodes[index].Trim();
+            var normalized = BarcodeNormalizer.Normalize(value);
+
+            if (!existing.Add(normalized))
+            {
+                continue;
+            }
+
+            var isPrimary = !hasPrimary && index == request.PrimaryBarcodeIndex;
+            if (!hasPrimary && index == request.Barcodes.Count - 1 && !product.Barcodes.Any(b => b.IsPrimary))
+            {
+                // The designated primary was a duplicate that got skipped — fall back to this one so
+                // a product never ends up with barcodes but no primary.
+                isPrimary = true;
+            }
+
+            var barcode = new ProductBarcode
+            {
+                Product = product,
+                Value = value,
+                NormalizedValue = normalized,
+                Symbology = barcodeService.DetermineSymbology(value),
+                IsPrimary = isPrimary,
+                IsActive = true,
+            };
+
+            if (isPrimary)
+            {
+                hasPrimary = true;
+            }
+
+            product.Barcodes.Add(barcode);
+            db.ProductBarcodes.Add(barcode);
+        }
+    }
+
     private static void ApplyTo(Product product, CreateProductRequest request, int? categoryId, int? brandId)
     {
         product.Name = request.Name;
         product.Sku = request.Sku;
-        product.Barcode = request.Barcode;
+        // Barcodes are a child collection now, so they can't be assigned here — this method is
+        // static and synchronous by design. See ReconcileBarcodes, called from CommitAsync.
         product.Description = request.Description;
         product.CategoryId = categoryId;
         product.BrandId = brandId;
@@ -520,9 +631,11 @@ public sealed class ProductImportService(
     public string BuildCsvTemplate()
     {
         var header = string.Join(",", TemplateColumns.Select(c => Escape(c.Canonical)));
+        // The Barcodes cell carries a worked example rather than a blank, so the separator and the
+        // primary marker are self-documenting in the file an operator actually downloads.
         var example = string.Join(",", new[]
         {
-            "Tata Salt 1kg", "TATA-SALT-1KG", "", "Iodised salt", "Grocery", "Tata", "Piece",
+            "Tata Salt 1kg", "TATA-SALT-1KG", "8901030811127|*8901030811134", "Iodised salt", "Grocery", "Tata", "Piece",
             "Box", "12", "",
             "18", "25", "22", "", "", "5", "25010010", "Inclusive", "No", "10", "20", "100",
         }.Select(Escape));
@@ -612,6 +725,57 @@ public sealed class ProductImportService(
 
     private static bool TryParseUnit(string text, out UnitOfMeasure unit) =>
         Enum.TryParse(text.Trim(), ignoreCase: true, out unit) && Enum.IsDefined(unit);
+
+    /// <summary>
+    /// Splits a Barcodes cell into its individual codes and works out which one is primary
+    /// (Phase 13B). Blank/empty segments are tolerated rather than reported, so "123||456" and a
+    /// trailing "123|" both parse cleanly — a stray separator is a typo, not something worth
+    /// failing an import row over. Marking two values primary IS an error, since silently picking
+    /// one would quietly contradict what the file says.
+    /// </summary>
+    private static (IReadOnlyList<string> Barcodes, int PrimaryIndex) ParseBarcodeCell(string cell, List<string> errors)
+    {
+        if (string.IsNullOrWhiteSpace(cell))
+        {
+            return ([], 0);
+        }
+
+        var values = new List<string>();
+        var primaryIndex = 0;
+        var markedCount = 0;
+
+        foreach (var segment in cell.Split(BarcodeSeparator))
+        {
+            var trimmed = segment.Trim();
+            if (trimmed.Length == 0)
+            {
+                continue;
+            }
+
+            if (trimmed[0] == PrimaryMarker)
+            {
+                // Stripped before it ever reaches ValidateFormat — a starred code would otherwise
+                // fail the printable-ASCII/format check on a character that isn't part of the code.
+                trimmed = trimmed[1..].Trim();
+                if (trimmed.Length == 0)
+                {
+                    continue;
+                }
+
+                markedCount++;
+                primaryIndex = values.Count;
+            }
+
+            values.Add(trimmed);
+        }
+
+        if (markedCount > 1)
+        {
+            errors.Add($"Only one barcode may be marked primary with '{PrimaryMarker}'.");
+        }
+
+        return (values, primaryIndex);
+    }
 
     private static bool HasFraction(decimal value) => value != Math.Floor(value);
 

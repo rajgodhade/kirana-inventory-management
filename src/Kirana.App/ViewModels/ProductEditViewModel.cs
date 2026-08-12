@@ -34,8 +34,21 @@ public sealed partial class ProductEditViewModel : ObservableObject
     [ObservableProperty]
     private string? _sku;
 
+    /// <summary>The "add a barcode" input, not a stored value — each code is committed to
+    /// <see cref="Barcodes"/> by the Add command (Phase 13B).</summary>
     [ObservableProperty]
-    private string? _barcode;
+    private string? _newBarcodeInput;
+
+    /// <summary>Every code on this product, primary first. In edit mode each change persists
+    /// immediately through <c>IBarcodeService</c>; in create mode the list is staged here and
+    /// shipped whole in the create request on Save.</summary>
+    public System.Collections.ObjectModel.ObservableCollection<ProductBarcodeRowViewModel> Barcodes { get; } = [];
+
+    public bool HasBarcodes => Barcodes.Count > 0;
+
+    /// <summary>Shown in edit mode only: barcode actions here save straight away, unlike every
+    /// other field in this dialog, so the dialog says so rather than surprising the operator.</summary>
+    public bool ShowImmediateSaveHint => IsEditMode;
 
     [ObservableProperty]
     private string? _description;
@@ -158,8 +171,15 @@ public sealed partial class ProductEditViewModel : ObservableObject
 
         Name = existing.Name;
         Sku = existing.Sku;
-        Barcode = existing.Barcode;
         Description = existing.Description;
+
+        foreach (var barcode in existing.Barcodes
+                     .OrderByDescending(b => b.IsActive)
+                     .ThenByDescending(b => b.IsPrimary)
+                     .ThenBy(b => b.Id))
+        {
+            Barcodes.Add(ProductBarcodeRowViewModel.From(barcode));
+        }
         SelectedCategory = owner.Categories.FirstOrDefault(c => c.Id == existing.CategoryId);
         SelectedBrand = owner.Brands.FirstOrDefault(b => b.Id == existing.BrandId);
         SelectedUnit = existing.Unit;
@@ -182,11 +202,11 @@ public sealed partial class ProductEditViewModel : ObservableObject
         UpdateBarcodePreview();
     }
 
-    partial void OnBarcodeChanged(string? value) => UpdateBarcodePreview();
+    partial void OnNewBarcodeInputChanged(string? value) => UpdateBarcodePreview();
 
     private void UpdateBarcodePreview()
     {
-        if (string.IsNullOrWhiteSpace(Barcode))
+        if (string.IsNullOrWhiteSpace(NewBarcodeInput))
         {
             BarcodePreviewImage = null;
             BarcodeStatusText = "";
@@ -195,7 +215,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
 
         try
         {
-            _barcodeService.ValidateFormat(Barcode);
+            _barcodeService.ValidateFormat(NewBarcodeInput);
         }
         catch (ArgumentException ex)
         {
@@ -204,10 +224,10 @@ public sealed partial class ProductEditViewModel : ObservableObject
             return;
         }
 
-        var symbology = _barcodeService.DetermineSymbology(Barcode);
+        var symbology = _barcodeService.DetermineSymbology(NewBarcodeInput);
         BarcodeStatusText = symbology == BarcodeSymbology.Ean13 ? "Valid EAN-13" : "CODE128 (not a standard EAN-13)";
 
-        var rendered = _barcodeRenderer.Render(Barcode, symbology, 240, 80);
+        var rendered = _barcodeRenderer.Render(NewBarcodeInput, symbology, 240, 80);
         BarcodePreviewImage = ToWriteableBitmap(rendered);
     }
 
@@ -218,7 +238,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
         IsGeneratingBarcode = true;
         try
         {
-            Barcode = await _barcodeService.GenerateInternalBarcodeAsync();
+            NewBarcodeInput = await _barcodeService.GenerateInternalBarcodeAsync();
         }
         catch (Exception ex)
         {
@@ -228,6 +248,163 @@ public sealed partial class ProductEditViewModel : ObservableObject
         {
             IsGeneratingBarcode = false;
         }
+    }
+
+    // ------------------------------------------------------------- barcode list (Phase 13B)
+    // Each command branches on IsEditMode: with a real product id the change persists immediately
+    // through IBarcodeService (which owns the one-primary and uniqueness invariants); without one
+    // it only mutates this in-memory list, which Save then ships whole in the create request.
+
+    [RelayCommand]
+    private async Task AddBarcodeAsync()
+    {
+        ErrorMessage = null;
+
+        var value = NewBarcodeInput?.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            ErrorMessage = "Enter or generate a barcode first.";
+            return;
+        }
+
+        try
+        {
+            _barcodeService.ValidateFormat(value);
+
+            if (Barcodes.Any(b => string.Equals(b.Value, value, StringComparison.OrdinalIgnoreCase)))
+            {
+                ErrorMessage = $"'{value}' is already on this product.";
+                return;
+            }
+
+            if (IsEditMode)
+            {
+                var added = await _barcodeService.AddBarcodeAsync(
+                    _editingProductId!.Value, value, makePrimary: false, _owner.CurrentUserId);
+                await ReloadBarcodesAsync();
+                NewBarcodeInput = null;
+                _ = added;
+                return;
+            }
+
+            // Create mode: uniqueness still has to be checked against the rest of the catalogue,
+            // even though nothing is written until Save.
+            await _barcodeService.EnsureAvailableAsync(value, excludingProductId: null);
+
+            Barcodes.Add(new ProductBarcodeRowViewModel
+            {
+                Value = value,
+                Symbology = _barcodeService.DetermineSymbology(value),
+                IsPrimary = Barcodes.Count == 0,
+                IsActive = true,
+            });
+
+            NewBarcodeInput = null;
+            OnPropertyChanged(nameof(HasBarcodes));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    private async Task SetPrimaryBarcodeAsync(ProductBarcodeRowViewModel? row)
+    {
+        if (row is null)
+        {
+            return;
+        }
+
+        ErrorMessage = null;
+        try
+        {
+            if (IsEditMode)
+            {
+                await _barcodeService.SetPrimaryAsync(row.Id, _owner.CurrentUserId);
+                await ReloadBarcodesAsync();
+                return;
+            }
+
+            foreach (var other in Barcodes)
+            {
+                other.IsPrimary = ReferenceEquals(other, row);
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleBarcodeActiveAsync(ProductBarcodeRowViewModel? row)
+    {
+        if (row is null)
+        {
+            return;
+        }
+
+        ErrorMessage = null;
+        try
+        {
+            if (IsEditMode)
+            {
+                await _barcodeService.SetBarcodeActiveAsync(row.Id, !row.IsActive, _owner.CurrentUserId);
+                await ReloadBarcodesAsync();
+                return;
+            }
+
+            row.IsActive = !row.IsActive;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RemoveBarcodeAsync(ProductBarcodeRowViewModel? row)
+    {
+        if (row is null)
+        {
+            return;
+        }
+
+        ErrorMessage = null;
+        try
+        {
+            if (IsEditMode)
+            {
+                await _barcodeService.RemoveBarcodeAsync(row.Id, _owner.CurrentUserId);
+                await ReloadBarcodesAsync();
+                return;
+            }
+
+            Barcodes.Remove(row);
+            if (Barcodes.Count > 0 && !Barcodes.Any(b => b.IsPrimary))
+            {
+                Barcodes[0].IsPrimary = true;
+            }
+
+            OnPropertyChanged(nameof(HasBarcodes));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private async Task ReloadBarcodesAsync()
+    {
+        var fresh = await _barcodeService.GetForProductAsync(_editingProductId!.Value);
+        Barcodes.Clear();
+        foreach (var barcode in fresh)
+        {
+            Barcodes.Add(ProductBarcodeRowViewModel.From(barcode));
+        }
+
+        OnPropertyChanged(nameof(HasBarcodes));
     }
 
     private static WriteableBitmap ToWriteableBitmap(BarcodeRenderResult result)
@@ -322,7 +499,8 @@ public sealed partial class ProductEditViewModel : ObservableObject
                 {
                     Name = Name,
                     Sku = Sku,
-                    Barcode = Barcode,
+                    // No barcodes here: in edit mode each barcode action already persisted itself
+                    // through IBarcodeService when the operator clicked it.
                     Description = Description,
                     CategoryId = SelectedCategory?.Id,
                     BrandId = SelectedBrand?.Id,
@@ -352,11 +530,14 @@ public sealed partial class ProductEditViewModel : ObservableObject
                     return;
                 }
 
+                var primaryIndex = Barcodes.IndexOf(Barcodes.FirstOrDefault(b => b.IsPrimary)!);
+
                 await _owner.CreateProductAsync(new CreateProductRequest
                 {
                     Name = Name,
                     Sku = Sku,
-                    Barcode = Barcode,
+                    Barcodes = Barcodes.Select(b => b.Value).ToList(),
+                    PrimaryBarcodeIndex = primaryIndex < 0 ? 0 : primaryIndex,
                     Description = Description,
                     CategoryId = SelectedCategory?.Id,
                     BrandId = SelectedBrand?.Id,

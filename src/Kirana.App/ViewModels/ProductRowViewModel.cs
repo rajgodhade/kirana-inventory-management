@@ -9,7 +9,19 @@ public sealed class ProductRowViewModel
     public required string ProductCode { get; init; }
     public required string Name { get; init; }
     public string? Sku { get; init; }
-    public string? Barcode { get; init; }
+    /// <summary>Active barcodes, primary first (Phase 13B) — drives the label dialog's picker.</summary>
+    public IReadOnlyList<ProductBarcodeOption> Barcodes { get; init; } = [];
+
+    public string? PrimaryBarcode => Barcodes.FirstOrDefault(b => b.IsPrimary)?.Value ?? Barcodes.FirstOrDefault()?.Value;
+
+    /// <summary>Compact grid text: the primary code, plus "+N more" when there are alternates —
+    /// keeps the products row a single line however many codes a product accumulates.</summary>
+    public string BarcodeSummary => Barcodes.Count switch
+    {
+        0 => "",
+        1 => PrimaryBarcode!,
+        _ => $"{PrimaryBarcode} +{Barcodes.Count - 1} more",
+    };
     public string CategoryName { get; init; } = "";
     public string BrandName { get; init; } = "";
     public required string Unit { get; init; }

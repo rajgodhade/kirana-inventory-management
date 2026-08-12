@@ -2,6 +2,7 @@
     x:Class="Kirana.App.Views.ProductEditDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kirana.App.ViewModels"
     PrimaryButtonText="Save"
     CloseButtonText="Cancel"
     DefaultButton="Primary">
@@ -31,19 +32,78 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" Header="SKU" Text="{x:Bind ViewModel.Sku, Mode=TwoWay}" />
-                <StackPanel Grid.Column="1" Spacing="4">
-                    <TextBlock Text="Barcode" />
-                    <Grid ColumnSpacing="4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Text="{x:Bind ViewModel.Barcode, Mode=TwoWay}" PlaceholderText="Scan or type…" />
-                        <Button Grid.Column="1" Content="Generate" Command="{x:Bind ViewModel.GenerateBarcodeCommand}"
-                                IsEnabled="{x:Bind ViewModel.IsGeneratingBarcode, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}" />
-                    </Grid>
-                </StackPanel>
             </Grid>
+
+            <!-- ===================== Barcodes (Phase 13B) =====================
+                 A product can carry several codes — manufacturer EAN, repack EAN, internal code —
+                 and every active one scans to it. The starred row is the primary: what label
+                 printing and exports default to. -->
+            <StackPanel Spacing="6" Margin="0,8,0,0">
+                <TextBlock Text="Barcodes" FontWeight="SemiBold" />
+
+                <TextBlock Text="Changes here save immediately."
+                           Style="{StaticResource CaptionTextStyle}"
+                           Visibility="{x:Bind ViewModel.ShowImmediateSaveHint, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                <ItemsControl ItemsSource="{x:Bind ViewModel.Barcodes}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ProductBarcodeRowViewModel">
+                            <Grid ColumnSpacing="8" Padding="0,4" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{x:Bind PrimaryGlyph, Mode=OneWay}"
+                                           FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                           Foreground="{ThemeResource BrandPrimaryBrush}" VerticalAlignment="Center" />
+
+                                <StackPanel Grid.Column="1" Spacing="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Value, Mode=OneWay}" Style="{StaticResource CodeTextStyle}" />
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Text="{x:Bind SymbologyLabel, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Text="•" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Text="{x:Bind RoleLabel, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Text="•" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock Text="{x:Bind StatusLabel, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Button Grid.Column="2" Content="Set primary" Padding="8,4" FontSize="12"
+                                        Click="OnSetPrimaryBarcodeClick" Tag="{x:Bind}"
+                                        IsEnabled="{x:Bind CanSetPrimary, Mode=OneWay}"
+                                        AutomationProperties.Name="Set as primary barcode" />
+
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4">
+                                    <Button Content="{x:Bind ActivateToggleLabel, Mode=OneWay}" Padding="8,4" FontSize="12"
+                                            Click="OnToggleBarcodeActiveClick" Tag="{x:Bind}"
+                                            AutomationProperties.Name="Retire or restore barcode" />
+                                    <Button Content="✕" Padding="8,4" FontSize="12"
+                                            Click="OnRemoveBarcodeClick" Tag="{x:Bind}"
+                                            ToolTipService.ToolTip="Remove permanently — prefer Retire for codes already printed"
+                                            AutomationProperties.Name="Remove barcode" />
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Grid ColumnSpacing="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{x:Bind ViewModel.NewBarcodeInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             PlaceholderText="Scan or type a barcode…" AutomationProperties.Name="New barcode" />
+                    <Button Grid.Column="1" Content="Generate" Command="{x:Bind ViewModel.GenerateBarcodeCommand}"
+                            IsEnabled="{x:Bind ViewModel.IsGeneratingBarcode, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}" />
+                    <Button Grid.Column="2" Content="Add" Style="{StaticResource AccentButtonStyle}"
+                            Command="{x:Bind ViewModel.AddBarcodeCommand}" AutomationProperties.Name="Add barcode" />
+                </Grid>
+            </StackPanel>
 
             <Grid ColumnSpacing="12" Visibility="{x:Bind ViewModel.BarcodePreviewImage, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}">
                 <Grid.ColumnDefinitions>

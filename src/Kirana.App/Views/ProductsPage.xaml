@@ -129,7 +129,7 @@
                                         <TextBlock Opacity="0.6" FontSize="11" TextTrimming="CharacterEllipsis">
                                             <Run Text="{x:Bind ProductCode}" />
                                             <Run Text=" · SKU: " /><Run Text="{x:Bind Sku}" />
-                                            <Run Text=" · Barcode: " /><Run Text="{x:Bind Barcode}" />
+                                            <Run Text=" · Barcode: " /><Run Text="{x:Bind BarcodeSummary}" />
                                         </TextBlock>
                                     </StackPanel>
 

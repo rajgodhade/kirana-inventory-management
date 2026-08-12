@@ -21,6 +21,7 @@ public sealed class KiranaDbContext(DbContextOptions<KiranaDbContext> options)
     public DbSet<Inventory> Inventories => Set<Inventory>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
     public DbSet<ProductBatch> ProductBatches => Set<ProductBatch>();
+    public DbSet<ProductBarcode> ProductBarcodes => Set<ProductBarcode>();
     public DbSet<SequenceCounter> SequenceCounters => Set<SequenceCounter>();
 
     public DbSet<Customer> Customers => Set<Customer>();

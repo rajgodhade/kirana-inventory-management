@@ -1,6 +1,8 @@
 using Kirana.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Kirana.Tests.Persistence;
 
@@ -104,6 +106,212 @@ public sealed class MigrationSchemaTests : IDisposable
 
         Assert.Contains("PurchasedPackUnitSnapshot", columns);
         Assert.Contains("PurchasedPackQuantitySnapshot", columns);
+    }
+
+    // ---- Phase 13B barcode backfill ----
+    //
+    // The one part of this feature no other test can reach: fixtures use EnsureCreated(), which
+    // builds from the model and never executes a single line of migration SQL. So the backfill that
+    // carries every existing shop's barcodes into the new table is exercised only here — by migrating
+    // to the PREVIOUS migration, inserting legacy rows the way the old schema stored them, and then
+    // migrating forward.
+
+    private const string PreviousMigration = "20260813091500_DropLegacyProductIsTaxInclusiveColumn";
+    private const string BarcodeMigration = "20260813100000_AddProductBarcodes";
+
+    /// <summary>Migrates to the pre-barcode migration and inserts legacy Products rows directly,
+    /// since the current entity model no longer has the Barcode column to write through.</summary>
+    private async Task SeedLegacyProductsAsync(KiranaDbContext context, params (string Name, string? Barcode)[] products)
+    {
+        var migrator = context.Database.GetService<IMigrator>();
+        await migrator.MigrateAsync(PreviousMigration);
+
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        for (var i = 0; i < products.Length; i++)
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO Products
+                    (ProductCode, Name, Barcode, Unit, PurchasePrice, Mrp, SellingPrice,
+                     MinimumStock, ReorderQuantity, TracksBatches, IsActive, CreatedAtUtc)
+                VALUES ($code, $name, $barcode, 'Piece', 10, 15, 14, 0, 0, 0, 1, CURRENT_TIMESTAMP);
+                """;
+            command.Parameters.Add(new SqliteParameter("$code", $"PRD-{i + 1:D6}"));
+            command.Parameters.Add(new SqliteParameter("$name", products[i].Name));
+            command.Parameters.Add(new SqliteParameter("$barcode", (object?)products[i].Barcode ?? DBNull.Value));
+            await command.ExecuteNonQueryAsync();
+        }
+    }
+
+    private static async Task<List<(int ProductId, string Value, string Normalized, string Symbology, bool IsPrimary, bool IsActive)>>
+        ReadBarcodesAsync(KiranaDbContext context)
+    {
+        var rows = new List<(int, string, string, string, bool, bool)>();
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            "SELECT ProductId, Value, NormalizedValue, Symbology, IsPrimary, IsActive FROM ProductBarcodes ORDER BY Id";
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            rows.Add((reader.GetInt32(0), reader.GetString(1), reader.GetString(2),
+                reader.GetString(3), reader.GetBoolean(4), reader.GetBoolean(5)));
+        }
+
+        return rows;
+    }
+
+    [Fact]
+    public async Task BarcodeBackfill_MigratesEachExistingBarcode_AsPrimaryAndActive()
+    {
+        await using var context = CreateContext();
+        await SeedLegacyProductsAsync(context, ("Tata Salt", "8901030826501"), ("Amul Butter", "ABC-123"));
+
+        await context.Database.MigrateAsync();
+
+        var barcodes = await ReadBarcodesAsync(context);
+        Assert.Equal(2, barcodes.Count);
+        // Behavior must be preserved one-for-one: whatever scanned before still scans, and label
+        // printing still defaults to the same value.
+        Assert.All(barcodes, b => Assert.True(b.IsPrimary));
+        Assert.All(barcodes, b => Assert.True(b.IsActive));
+        Assert.Contains(barcodes, b => b.Value == "8901030826501");
+        Assert.Contains(barcodes, b => b.Value == "ABC-123");
+    }
+
+    [Fact]
+    public async Task BarcodeBackfill_StoresUpperCasedNormalizedValue()
+    {
+        await using var context = CreateContext();
+        await SeedLegacyProductsAsync(context, ("Mixed Case", "abc-123"));
+
+        await context.Database.MigrateAsync();
+
+        var barcode = Assert.Single(await ReadBarcodesAsync(context));
+        Assert.Equal("abc-123", barcode.Value);       // as entered, for display/printing
+        Assert.Equal("ABC-123", barcode.Normalized);  // the uniqueness + lookup key
+    }
+
+    [Fact]
+    public async Task BarcodeBackfill_TrimsSurroundingWhitespace()
+    {
+        await using var context = CreateContext();
+        await SeedLegacyProductsAsync(context, ("Padded", "  8901030826501  "));
+
+        await context.Database.MigrateAsync();
+
+        var barcode = Assert.Single(await ReadBarcodesAsync(context));
+        Assert.Equal("8901030826501", barcode.Value);
+    }
+
+    [Fact]
+    public async Task BarcodeBackfill_CreatesNoRow_ForNullOrBlankBarcodes()
+    {
+        await using var context = CreateContext();
+        await SeedLegacyProductsAsync(
+            context, ("No Barcode", null), ("Blank Barcode", "   "), ("Has Barcode", "REAL-1"));
+
+        await context.Database.MigrateAsync();
+
+        var barcode = Assert.Single(await ReadBarcodesAsync(context));
+        Assert.Equal("REAL-1", barcode.Value);
+    }
+
+    [Fact]
+    public async Task BarcodeBackfill_MarksThirteenDigitCodesAsEan13()
+    {
+        await using var context = CreateContext();
+        await SeedLegacyProductsAsync(context, ("Ean", "8901030826501"), ("Code128", "ABC-123"));
+
+        await context.Database.MigrateAsync();
+
+        var barcodes = await ReadBarcodesAsync(context);
+        Assert.Equal("Ean13", barcodes.Single(b => b.Value == "8901030826501").Symbology);
+        Assert.Equal("Code128", barcodes.Single(b => b.Value == "ABC-123").Symbology);
+    }
+
+    /// <summary>The old index on Products.Barcode was case-SENSITIVE, so "abc123" and "ABC123" could
+    /// legally coexist — but they collide under the new case-insensitive uniqueness. The migration
+    /// must resolve that itself rather than aborting half-applied and leaving a shop unable to start.</summary>
+    [Fact]
+    public async Task BarcodeBackfill_SurvivesLegacyCaseOnlyDuplicates_KeepingOneRow()
+    {
+        await using var context = CreateContext();
+        await SeedLegacyProductsAsync(context, ("First", "abc123"), ("Second", "ABC123"));
+
+        var exception = await Record.ExceptionAsync(() => context.Database.MigrateAsync());
+
+        Assert.Null(exception);
+        var barcode = Assert.Single(await ReadBarcodesAsync(context));
+        Assert.Equal("ABC123", barcode.Normalized);
+    }
+
+    /// <summary>The surviving row must belong to the product it actually came from. A GROUP BY that
+    /// mixes MIN(Id) with an unaggregated value column can pair one product's id with another
+    /// product's barcode text — pointing a real shelf code at the wrong item.</summary>
+    [Fact]
+    public async Task BarcodeBackfill_KeepsValueAndProductFromTheSameRow_WhenResolvingDuplicates()
+    {
+        await using var context = CreateContext();
+        await SeedLegacyProductsAsync(context, ("First", "abc123"), ("Second", "ABC123"));
+
+        await context.Database.MigrateAsync();
+
+        var barcode = Assert.Single(await ReadBarcodesAsync(context));
+        var ownerName = await ProductNameAsync(context, barcode.ProductId);
+
+        // "First" was inserted first, so it holds the lower Id and keeps the code; its stored value
+        // must therefore be "abc123", not "Second"'s "ABC123".
+        Assert.Equal("First", ownerName);
+        Assert.Equal("abc123", barcode.Value);
+    }
+
+    [Fact]
+    public async Task BarcodeBackfill_LeavesNoOrphanBarcodes_PointingAtMissingProducts()
+    {
+        await using var context = CreateContext();
+        await SeedLegacyProductsAsync(context, ("A", "CODE-A"), ("B", "CODE-B"), ("C", null));
+
+        await context.Database.MigrateAsync();
+
+        var connection = context.Database.GetDbConnection();
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            "SELECT COUNT(*) FROM ProductBarcodes pb LEFT JOIN Products p ON p.Id = pb.ProductId WHERE p.Id IS NULL";
+        Assert.Equal(0L, Convert.ToInt64(await command.ExecuteScalarAsync()));
+    }
+
+    [Fact]
+    public async Task BarcodeMigration_Down_RestoresThePrimaryBarcodeColumn()
+    {
+        await using var context = CreateContext();
+        await SeedLegacyProductsAsync(context, ("Tata Salt", "8901030826501"));
+        await context.Database.MigrateAsync();
+
+        var migrator = context.Database.GetService<IMigrator>();
+        await migrator.MigrateAsync(PreviousMigration);
+
+        var columns = await ColumnNamesAsync(context, "Products");
+        Assert.Contains("Barcode", columns);
+
+        var connection = context.Database.GetDbConnection();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT Barcode FROM Products WHERE Name = 'Tata Salt'";
+        Assert.Equal("8901030826501", await command.ExecuteScalarAsync() as string);
+    }
+
+    private static async Task<string> ProductNameAsync(KiranaDbContext context, int productId)
+    {
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT Name FROM Products WHERE Id = {productId}";
+        return (string)(await command.ExecuteScalarAsync())!;
     }
 
     private static async Task<HashSet<string>> ColumnNamesAsync(KiranaDbContext context, string table)

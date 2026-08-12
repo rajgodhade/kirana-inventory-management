@@ -1,6 +1,7 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
 using Kirana.Application.Barcodes;
+using Kirana.Domain.Barcodes;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Kirana.Application.Taxation;
@@ -23,7 +24,7 @@ public sealed class ProductService(
 
         await ValidateAsync(request.Name, request.CategoryId, request.BrandId, request.PurchasePrice, request.Mrp,
             request.SellingPrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
-            request.Sku, request.Barcode, request.Unit, request.PurchasePackUnit, request.PurchasePackSize,
+            request.Sku, request.Barcodes, request.Unit, request.PurchasePackUnit, request.PurchasePackSize,
             excludingProductId: null, cancellationToken);
 
         var productCode = await sequenceGenerator.NextAsync(ProductSequenceKey, ProductCodePrefix, ProductCodePadding, cancellationToken);
@@ -33,7 +34,6 @@ public sealed class ProductService(
             ProductCode = productCode,
             Name = request.Name.Trim(),
             Sku = Normalize(request.Sku),
-            Barcode = Normalize(request.Barcode),
             Description = request.Description,
             CategoryId = request.CategoryId,
             BrandId = request.BrandId,
@@ -56,6 +56,23 @@ public sealed class ProductService(
         };
 
         db.Products.Add(product);
+
+        // Staged with the Product navigation rather than a ProductId — the identity value doesn't
+        // exist until SaveChanges, same as the Inventory/StockMovement rows below. They all commit
+        // in the one save at the end, so a product is never persisted without its barcodes.
+        for (var index = 0; index < request.Barcodes.Count; index++)
+        {
+            var value = request.Barcodes[index].Trim();
+            db.ProductBarcodes.Add(new ProductBarcode
+            {
+                Product = product,
+                Value = value,
+                NormalizedValue = BarcodeNormalizer.Normalize(value),
+                Symbology = barcodeService.DetermineSymbology(value),
+                IsPrimary = index == request.PrimaryBarcodeIndex,
+                IsActive = true,
+            });
+        }
 
         var inventory = new Inventory { Product = product, QuantityOnHand = request.OpeningStock };
         db.Inventories.Add(inventory);
@@ -93,7 +110,7 @@ public sealed class ProductService(
 
         await ValidateAsync(request.Name, request.CategoryId, request.BrandId, request.PurchasePrice, request.Mrp,
             request.SellingPrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
-            request.Sku, request.Barcode, request.Unit, request.PurchasePackUnit, request.PurchasePackSize,
+            request.Sku, barcodes: [], request.Unit, request.PurchasePackUnit, request.PurchasePackSize,
             excludingProductId: productId, cancellationToken);
 
         var previousPricingSummary = $"Purchase={product.PurchasePrice}, Mrp={product.Mrp}, Selling={product.SellingPrice}";
@@ -103,7 +120,7 @@ public sealed class ProductService(
 
         product.Name = request.Name.Trim();
         product.Sku = Normalize(request.Sku);
-        product.Barcode = Normalize(request.Barcode);
+        // Barcodes are deliberately not touched here — see UpdateProductRequest.
         product.Description = request.Description;
         product.CategoryId = request.CategoryId;
         product.BrandId = request.BrandId;
@@ -168,6 +185,7 @@ public sealed class ProductService(
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Include(p => p.Inventory)
+            .Include(p => p.Barcodes)
             .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
 
     public async Task<IReadOnlyList<Product>> SearchAsync(ProductSearchQuery query, CancellationToken cancellationToken = default)
@@ -193,7 +211,8 @@ public sealed class ProductService(
         }
 
         var baseQuery = Filtered(
-            db.Products.Include(p => p.Category).Include(p => p.Brand).Include(p => p.Inventory));
+            db.Products.Include(p => p.Category).Include(p => p.Brand).Include(p => p.Inventory)
+                .Include(p => p.Barcodes));
 
         var text = query.SearchText?.Trim();
         if (string.IsNullOrEmpty(text))
@@ -215,8 +234,13 @@ public sealed class ProductService(
             }
         }
 
-        // 1. Exact barcode match.
-        AddRange(await baseQuery.Where(p => p.Barcode == text).ToListAsync(cancellationToken));
+        // 1. Exact barcode match. Compared on the normalized value so casing never changes the
+        //    result, and restricted to active barcodes so a retired code can't push a product to
+        //    the top of the list.
+        var normalizedText = BarcodeNormalizer.Normalize(text);
+        AddRange(await baseQuery
+            .Where(p => p.Barcodes.Any(b => b.NormalizedValue == normalizedText && b.IsActive))
+            .ToListAsync(cancellationToken));
 
         // 2. Exact Product ID / SKU match.
         if (results.Count < query.MaxResults)
@@ -232,7 +256,10 @@ public sealed class ProductService(
                 .Where(p =>
                     EF.Functions.Like(p.Name, likeText) ||
                     (p.Sku != null && EF.Functions.Like(p.Sku, likeText)) ||
-                    (p.Barcode != null && EF.Functions.Like(p.Barcode, likeText)) ||
+                    // Active only, like bucket 1: POS search feeds straight into the cart, so a
+                    // retired code that still surfaced its product here would defeat retirement —
+                    // the operator types the old code, presses Enter, and sells against it anyway.
+                    p.Barcodes.Any(b => EF.Functions.Like(b.Value, likeText) && b.IsActive) ||
                     EF.Functions.Like(p.ProductCode, likeText) ||
                     (p.Category != null && EF.Functions.Like(p.Category.Name, likeText)) ||
                     (p.Brand != null && EF.Functions.Like(p.Brand.Name, likeText)))
@@ -247,7 +274,8 @@ public sealed class ProductService(
 
     private async Task ValidateAsync(
         string name, int? categoryId, int? brandId, decimal purchasePrice, decimal mrp, decimal sellingPrice,
-        decimal? gstRatePercent, decimal minimumStock, decimal reorderQuantity, string? sku, string? barcode,
+        decimal? gstRatePercent, decimal minimumStock, decimal reorderQuantity, string? sku,
+        IReadOnlyList<string> barcodes,
         UnitOfMeasure unit, UnitOfMeasure? purchasePackUnit, decimal? purchasePackSize,
         int? excludingProductId, CancellationToken cancellationToken)
     {
@@ -298,11 +326,26 @@ public sealed class ProductService(
             }
         }
 
-        var normalizedBarcode = Normalize(barcode);
-        if (normalizedBarcode is not null)
+        // Each barcode must be individually valid and globally unique, and the request must not
+        // contain the same code twice — including differing only by case, since uniqueness is
+        // enforced on the normalized value.
+        var seenBarcodes = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var rawBarcode in barcodes)
         {
-            barcodeService.ValidateFormat(normalizedBarcode);
-            await barcodeService.EnsureAvailableAsync(normalizedBarcode, excludingProductId, cancellationToken);
+            var trimmed = Normalize(rawBarcode);
+            if (trimmed is null)
+            {
+                continue;
+            }
+
+            barcodeService.ValidateFormat(trimmed);
+
+            if (!seenBarcodes.Add(BarcodeNormalizer.Normalize(trimmed)))
+            {
+                throw new InvalidOperationException($"Barcode '{trimmed}' is listed more than once for this product.");
+            }
+
+            await barcodeService.EnsureAvailableAsync(trimmed, excludingProductId, cancellationToken);
         }
     }
 

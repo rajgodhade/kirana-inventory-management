@@ -14,7 +14,6 @@ public class Product : Entity
 {
     public string ProductCode { get; set; } = string.Empty;
     public string? Sku { get; set; }
-    public string? Barcode { get; set; }
 
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
@@ -72,4 +71,8 @@ public class Product : Entity
     public ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
     public ICollection<ProductBatch> Batches { get; set; } = new List<ProductBatch>();
     public ICollection<PromotionTarget> PromotionTargets { get; set; } = new List<PromotionTarget>();
+
+    /// <summary>Every code that scans to this product (Phase 13B), active and retired alike.
+    /// Exactly one active entry is <see cref="ProductBarcode.IsPrimary"/>.</summary>
+    public ICollection<ProductBarcode> Barcodes { get; set; } = new List<ProductBarcode>();
 }

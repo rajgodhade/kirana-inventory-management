@@ -33,7 +33,8 @@ public sealed class ProductImportRow
 
     public string Name { get; init; } = string.Empty;
     public string? Sku { get; init; }
-    public string? Barcode { get; init; }
+    /// <summary>Every barcode on this row (Phase 13B). Empty when the cell was blank or absent.</summary>
+    public IReadOnlyList<string> Barcodes { get; init; } = [];
     public string CategoryName { get; init; } = string.Empty;
     public string BrandName { get; init; } = string.Empty;
     public UnitOfMeasure Unit { get; init; } = UnitOfMeasure.Piece;
