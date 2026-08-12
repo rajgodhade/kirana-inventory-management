@@ -43,3 +43,33 @@ public sealed class BatchSummaryRow
     public DateOnly? ExpiryDate { get; init; }
     public bool IsExpired { get; init; }
 }
+
+/// <summary>One completed physical stock count and what it adjusted (Phase 13C §22).</summary>
+public sealed class StockCountReportRow
+{
+    public string CountNumber { get; init; } = string.Empty;
+    public DateTime StartedAtUtc { get; init; }
+    public DateTime? CompletedAtUtc { get; init; }
+    public string Status { get; init; } = string.Empty;
+    public string? CountedBy { get; init; }
+
+    public int ProductsCounted { get; init; }
+    public int IncreasedCount { get; init; }
+    public int DecreasedCount { get; init; }
+    public int UnchangedCount { get; init; }
+
+    /// <summary>Sum of the surpluses/shortages actually applied to inventory. Zero for a cancelled
+    /// count, which by definition adjusted nothing.</summary>
+    public decimal TotalIncreaseQuantity { get; init; }
+    public decimal TotalDecreaseQuantity { get; init; }
+
+    /// <summary>Net effect on stock — the single figure that answers "did the shelves hold more or
+    /// less than the system thought".</summary>
+    public decimal NetQuantityChange => TotalIncreaseQuantity - TotalDecreaseQuantity;
+
+    public int AdjustmentCount => IncreasedCount + DecreasedCount;
+
+    /// <summary>How many lines were rebased because stock moved mid-count. Non-zero means the
+    /// applied adjustments differ from the variances the counter observed.</summary>
+    public int RebasedItemCount { get; init; }
+}

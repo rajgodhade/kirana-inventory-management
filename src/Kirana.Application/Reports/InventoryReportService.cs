@@ -182,6 +182,48 @@ public sealed class InventoryReportService(
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<StockCountReportRow>> GetStockCountHistoryAsync(
+        ReportDateRange range, int? performedByUserId, CancellationToken cancellationToken = default)
+    {
+        await permissionEnforcer.EnsureHasPermissionAsync(performedByUserId, PermissionKeys.ReportsView, cancellationToken);
+
+        // The per-count totals are derived from the actual StockMovements the count produced, not
+        // recomputed from the item snapshots. Those movements are what really changed stock —
+        // recomputing from snapshots would silently disagree with the ledger for any count whose
+        // lines were rebased because stock moved mid-count.
+        return await db.StockCounts.AsNoTracking()
+            .Where(c => c.StartedAtUtc >= range.StartUtc && c.StartedAtUtc < range.EndUtc)
+            .OrderByDescending(c => c.StartedAtUtc)
+            .Select(c => new StockCountReportRow
+            {
+                CountNumber = c.CountNumber,
+                StartedAtUtc = c.StartedAtUtc,
+                CompletedAtUtc = c.CompletedAtUtc,
+                Status = c.Status.ToString(),
+                CountedBy = c.StartedByUser != null ? c.StartedByUser.FullName : null,
+                ProductsCounted = c.Items.Count(i => i.CountedQuantity != null),
+                RebasedItemCount = c.RebasedItemCount,
+                IncreasedCount = db.StockMovements.Count(m =>
+                    m.ReferenceType == "StockCount" && m.ReferenceId == c.CountNumber
+                    && m.MovementType == StockMovementType.StockCountIncrease),
+                DecreasedCount = db.StockMovements.Count(m =>
+                    m.ReferenceType == "StockCount" && m.ReferenceId == c.CountNumber
+                    && m.MovementType == StockMovementType.StockCountDecrease),
+                UnchangedCount = c.Items.Count(i => i.CountedQuantity != null)
+                    - db.StockMovements.Count(m =>
+                        m.ReferenceType == "StockCount" && m.ReferenceId == c.CountNumber),
+                TotalIncreaseQuantity = db.StockMovements
+                    .Where(m => m.ReferenceType == "StockCount" && m.ReferenceId == c.CountNumber
+                        && m.MovementType == StockMovementType.StockCountIncrease)
+                    .Sum(m => (decimal?)m.QuantityChange) ?? 0m,
+                TotalDecreaseQuantity = -(db.StockMovements
+                    .Where(m => m.ReferenceType == "StockCount" && m.ReferenceId == c.CountNumber
+                        && m.MovementType == StockMovementType.StockCountDecrease)
+                    .Sum(m => (decimal?)m.QuantityChange) ?? 0m),
+            })
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<BatchSummaryRow>> GetExpiredBatchesAsync(int? performedByUserId, CancellationToken cancellationToken = default)
     {
         await permissionEnforcer.EnsureHasPermissionAsync(performedByUserId, PermissionKeys.ReportsView, cancellationToken);

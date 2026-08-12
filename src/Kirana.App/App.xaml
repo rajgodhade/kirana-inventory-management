@@ -18,6 +18,9 @@
             <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
             <conv:StockStatusToBrushConverter x:Key="StockStatusToBrushConverter" />
             <conv:ExpiryStatusToBrushConverter x:Key="ExpiryStatusToBrushConverter" />
+            <conv:StockCountStatusToBrushConverter x:Key="StockCountStatusToBrushConverter" />
+            <conv:StockCountVarianceToBrushConverter x:Key="StockCountVarianceToBrushConverter" />
+            <conv:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
             <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <conv:CurrencyConverter x:Key="CurrencyConverter" />

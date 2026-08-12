@@ -61,6 +61,8 @@ public interface IKiranaDbContext
     DbSet<SaleItemPromotion> SaleItemPromotions { get; }
     DbSet<CashRegisterSession> CashRegisterSessions { get; }
     DbSet<CashMovement> CashMovements { get; }
+    DbSet<StockCount> StockCounts { get; }
+    DbSet<StockCountItem> StockCountItems { get; }
 
     DatabaseFacade Database { get; }
 

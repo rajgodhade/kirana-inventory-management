@@ -59,6 +59,7 @@ public sealed partial class ManagementShellPage : Page
             var t when t == typeof(ManagementHomePage) => "Home",
             var t when t == typeof(ProductsPage) => "Products",
             var t when t == typeof(PromotionsPage) => "Promotions",
+            var t when t == typeof(StockCountsPage) => "StockCounts",
             var t when t == typeof(BarcodeScanTestPage) => "Barcodes",
             var t when t == typeof(InvoicesPage) || t == typeof(InvoiceDetailsPage) => "Invoices",
             var t when t == typeof(CustomersPage) || t == typeof(CustomerLedgerPage) => "Customers",
@@ -138,6 +139,9 @@ public sealed partial class ManagementShellPage : Page
         SetVisible(NavInvoices, _session.IsUnlocked);
         SetVisible(NavCustomers, _session.HasPermission(PermissionKeys.CustomersManage));
         SetVisible(NavPromotions, _session.HasPermission(PermissionKeys.PromotionsView));
+        // Phase 13C adds no new permission key: stock counting adjusts stock, so it is gated by the
+        // same InventoryManage permission that already governs stock adjustments (Owner + Manager).
+        SetVisible(NavStockCounts, _session.HasPermission(PermissionKeys.InventoryManage));
         SetVisible(NavSuppliers, _session.HasPermission(PermissionKeys.PurchasesManage));
         SetVisible(NavPurchases, _session.HasPermission(PermissionKeys.PurchasesManage));
         // Phase 9 adds no new permission keys: returns reuse the refund permission, purchase
@@ -213,6 +217,7 @@ public sealed partial class ManagementShellPage : Page
             "Home" => typeof(ManagementHomePage),
             "Products" => typeof(ProductsPage),
             "Promotions" => typeof(PromotionsPage),
+            "StockCounts" => typeof(StockCountsPage),
             "Barcodes" => typeof(BarcodeScanTestPage),
             "Customers" => typeof(CustomersPage),
             "Suppliers" => typeof(SuppliersPage),

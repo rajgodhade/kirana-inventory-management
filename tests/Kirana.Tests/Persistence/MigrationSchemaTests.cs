@@ -108,6 +108,103 @@ public sealed class MigrationSchemaTests : IDisposable
         Assert.Contains("PurchasedPackQuantitySnapshot", columns);
     }
 
+    // ---- Phase 13C stock counting ----
+
+    [Fact]
+    public async Task StockCountTables_ExistAfterMigrating()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        var counts = await ColumnNamesAsync(context, "StockCounts");
+        Assert.Contains("CountNumber", counts);
+        Assert.Contains("Status", counts);
+        Assert.Contains("RebasedItemCount", counts);
+
+        var items = await ColumnNamesAsync(context, "StockCountItems");
+        Assert.Contains("SystemQuantity", items);
+        Assert.Contains("CountedQuantity", items);
+        Assert.Contains("SystemQuantityAtFinalization", items);
+        Assert.Contains("ProductNameSnapshot", items);
+        Assert.Contains("UnitSnapshot", items);
+        Assert.Contains("BarcodeSnapshot", items);
+    }
+
+    /// <summary>"Only one count open at a time" and "one item per product per count" are database
+    /// invariants, not just service checks — so they survive any future caller that forgets.</summary>
+    [Fact]
+    public async Task StockCountIndexes_EnforceTheCoreInvariants()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        var indexes = await IndexDefinitionsAsync(context, "StockCounts");
+        Assert.Contains(indexes, i =>
+            i.Name == "IX_StockCounts_SingleInProgress" && i.Sql?.Contains("InProgress") == true);
+
+        var itemIndexes = await IndexDefinitionsAsync(context, "StockCountItems");
+        Assert.Contains(itemIndexes, i =>
+            i.Name == "IX_StockCountItems_StockCountId_ProductId" && i.Sql?.Contains("UNIQUE") == true);
+    }
+
+    /// <summary>Phase 13C is purely additive. A migration that quietly rewrote the ledger while
+    /// adding a feature would be far worse than one that failed outright.</summary>
+    [Fact]
+    public async Task StockCountMigration_LeavesExistingStockMovementsUntouched()
+    {
+        await using var context = CreateContext();
+        var migrator = context.Database.GetService<IMigrator>();
+        await migrator.MigrateAsync(BarcodeMigration);
+
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using (var seed = connection.CreateCommand())
+        {
+            seed.CommandText = """
+                INSERT INTO Products
+                    (ProductCode, Name, Unit, PurchasePrice, Mrp, SellingPrice,
+                     MinimumStock, ReorderQuantity, TracksBatches, IsActive, CreatedAtUtc, PricingType, GstRatePercent)
+                VALUES ('PRD-000001', 'Legacy Product', 'Piece', 10, 15, 14, 0, 0, 0, 1, CURRENT_TIMESTAMP, 'Inclusive', 5);
+                INSERT INTO StockMovements
+                    (ProductId, MovementType, QuantityChange, PreviousQuantity, NewQuantity, TimestampUtc, CreatedAtUtc)
+                VALUES (1, 'Purchase', 25, 0, 25, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+                """;
+            await seed.ExecuteNonQueryAsync();
+        }
+
+        await context.Database.MigrateAsync();
+
+        await using var check = connection.CreateCommand();
+        check.CommandText =
+            "SELECT MovementType, QuantityChange, PreviousQuantity, NewQuantity FROM StockMovements";
+        await using var reader = await check.ExecuteReaderAsync();
+        Assert.True(await reader.ReadAsync());
+        Assert.Equal("Purchase", reader.GetString(0));
+        Assert.Equal(25m, reader.GetDecimal(1));
+        Assert.Equal(0m, reader.GetDecimal(2));
+        Assert.Equal(25m, reader.GetDecimal(3));
+        Assert.False(await reader.ReadAsync());
+    }
+
+    private static async Task<List<(string Name, string? Sql)>> IndexDefinitionsAsync(
+        KiranaDbContext context, string table)
+    {
+        var rows = new List<(string, string?)>();
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='{table}'";
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            rows.Add((reader.GetString(0), reader.IsDBNull(1) ? null : reader.GetString(1)));
+        }
+
+        return rows;
+    }
+
     // ---- Phase 13B barcode backfill ----
     //
     // The one part of this feature no other test can reach: fixtures use EnsureCreated(), which

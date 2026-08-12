@@ -16,6 +16,7 @@ using Kirana.Application.Purchasing;
 using Kirana.Application.Reports;
 using Kirana.Application.Returns;
 using Kirana.Application.Setup;
+using Kirana.Application.StockCounts;
 using Kirana.Application.Taxation;
 using Kirana.Application.Users;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IBrandService, BrandService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IStockCountService, StockCountService>();
         services.AddScoped<IBarcodeService, BarcodeService>();
         services.AddScoped<IBarcodeLookupService, BarcodeLookupService>();
         services.AddScoped<ICustomerService, CustomerService>();

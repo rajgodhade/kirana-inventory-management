@@ -1,0 +1,323 @@
+<Page
+    x:Class="Kirana.App.Views.StockCountsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kirana.App.ViewModels">
+
+    <Grid Background="{ThemeResource PageBackgroundBrush}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="24,20,24,28" Spacing="16">
+
+                <StackPanel Spacing="2">
+                    <TextBlock Text="Stock Counting" Style="{StaticResource PageTitleTextStyle}" />
+                    <TextBlock Text="Count what is physically on the shelves and reconcile it against system stock."
+                               Style="{StaticResource PageSubtitleTextStyle}" />
+                </StackPanel>
+
+                <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                         Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" IsClosable="True" />
+                <InfoBar IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                         Severity="Informational" Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" IsClosable="True" />
+                <ProgressBar IsIndeterminate="True"
+                             Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                <!-- ============ LIST ============ -->
+                <StackPanel Spacing="14" Visibility="{x:Bind ViewModel.IsListView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+
+                    <!-- Active count card -->
+                    <Border Style="{StaticResource CardBorderStyle}"
+                            Visibility="{x:Bind ViewModel.HasActiveCount, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <StackPanel Spacing="4">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="10" Height="10" Fill="{ThemeResource WarningBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="COUNT IN PROGRESS" Foreground="{ThemeResource WarningBrush}" FontWeight="SemiBold" />
+                                </StackPanel>
+                                <TextBlock Text="{x:Bind ViewModel.ActiveCountNumber, Mode=OneWay}" Style="{StaticResource SectionTitleTextStyle}" />
+                                <TextBlock Style="{StaticResource SecondaryTextStyle}">
+                                    <Run Text="Started " /><Run Text="{x:Bind ViewModel.ActiveStartedText, Mode=OneWay}" />
+                                </TextBlock>
+                                <TextBlock Text="{x:Bind ViewModel.ProgressText, Mode=OneWay}" Style="{StaticResource SecondaryTextStyle}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Content="Continue" Style="{StaticResource AccentButtonStyle}"
+                                        Command="{x:Bind ViewModel.ContinueCountCommand}" />
+                                <Button Content="Cancel Count" Click="OnCancelCountClick" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Start new -->
+                    <Border Style="{StaticResource CardBorderStyle}"
+                            Visibility="{x:Bind ViewModel.HasActiveCount, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                        <Grid ColumnSpacing="24">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <StackPanel Spacing="7" VerticalAlignment="Center">
+                                <Border Width="48" Height="48" CornerRadius="24" Background="{ThemeResource PastelBlueBrush}" HorizontalAlignment="Left">
+                                    <FontIcon Glyph="&#xE9D5;" Foreground="{ThemeResource PastelBlueOnBrush}"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="No count in progress" Style="{StaticResource SectionTitleTextStyle}" />
+                                <TextBlock Text="Starting a count does not change any stock. Inventory is only adjusted when you finalize."
+                                           Style="{StaticResource SecondaryTextStyle}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="Start New Stock Count" VerticalAlignment="Center"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    IsEnabled="{x:Bind ViewModel.CanManage}"
+                                    Command="{x:Bind ViewModel.StartCountCommand}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- History -->
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Count history" Style="{StaticResource SectionTitleTextStyle}" />
+
+                            <Grid Padding="0,0,0,6" ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="180" /><ColumnDefinition Width="180" />
+                                    <ColumnDefinition Width="130" /><ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="COUNT NUMBER" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="1" Text="STARTED" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="2" Text="STATUS" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="3" Text="ITEMS" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="4" Text="VARIANCE" Style="{StaticResource ColumnHeaderTextStyle}" />
+                            </Grid>
+
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.History}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:StockCountRowViewModel">
+                                        <Grid Padding="0,9" ColumnSpacing="16"
+                                              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180" /><ColumnDefinition Width="180" />
+                                                <ColumnDefinition Width="130" /><ColumnDefinition Width="110" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{x:Bind CountNumber}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{x:Bind StartedText}" VerticalAlignment="Center"
+                                                       Style="{StaticResource SecondaryTextStyle}" />
+                                            <TextBlock Grid.Column="2" Text="{x:Bind StatusText}" VerticalAlignment="Center"
+                                                       Foreground="{x:Bind StatusText, Converter={StaticResource StockCountStatusToBrushConverter}}"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock Grid.Column="3" Text="{x:Bind ItemsText}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="4" Text="{x:Bind VarianceText}" VerticalAlignment="Center"
+                                                       Style="{StaticResource SecondaryTextStyle}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="No stock counts yet." Style="{StaticResource SecondaryTextStyle}"
+                                       Visibility="{x:Bind ViewModel.History.Count, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============ COUNTING ============ -->
+                <StackPanel Spacing="14" Visibility="{x:Bind ViewModel.IsCountingView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <StackPanel Spacing="3">
+                                <TextBlock Text="{x:Bind ViewModel.ActiveCountNumber, Mode=OneWay}" Style="{StaticResource SectionTitleTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.ProgressText, Mode=OneWay}" Style="{StaticResource SecondaryTextStyle}" />
+                                <TextBlock Text="Stock is not changed until you finalize this count."
+                                           Style="{StaticResource SecondaryTextStyle}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Content="Back" Command="{x:Bind ViewModel.BackToListCommand}" />
+                                <Button Content="Review Variances" Style="{StaticResource AccentButtonStyle}"
+                                        Command="{x:Bind ViewModel.ReviewVariancesCommand}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Scan / search -->
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="10">
+                            <TextBox x:Name="ScanSearchBox" Header="Scan barcode, or search by name / SKU / code"
+                                     PlaceholderText="Scan or type, then press Enter"
+                                     Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     CharacterReceived="OnScanCharacterReceived" KeyDown="OnScanKeyDown"
+                                     AutomationProperties.Name="Scan or search product to count" />
+
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.SearchResults}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:StockCountSearchRowViewModel">
+                                        <Grid Padding="0,6" ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" /><ColumnDefinition Width="150" /><ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="1">
+                                                <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{x:Bind DetailText}" Style="{StaticResource SecondaryTextStyle}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{x:Bind StockText}" VerticalAlignment="Center"
+                                                       Style="{StaticResource SecondaryTextStyle}" />
+                                            <Button Grid.Column="2" Content="Add" Click="OnAddSearchResultClick" Tag="{x:Bind}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Counted items -->
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="8">
+                            <Grid Padding="0,0,0,6" ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" /><ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="140" /><ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="PRODUCT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="1" Text="SYSTEM" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="2" Text="PHYSICAL" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="3" Text="VARIANCE" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="4" Text="" Style="{StaticResource ColumnHeaderTextStyle}" />
+                            </Grid>
+
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.Items}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:StockCountItemRowViewModel">
+                                        <Grid Padding="0,7" ColumnSpacing="14"
+                                              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" /><ColumnDefinition Width="110" />
+                                                <ColumnDefinition Width="140" /><ColumnDefinition Width="110" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Spacing="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind ProductName}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                <TextBlock Style="{StaticResource SecondaryTextStyle}">
+                                                    <Run Text="{x:Bind ProductCode}" /><Run Text=" · " /><Run Text="{x:Bind UnitText}" />
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <TextBlock Grid.Column="1" Text="{x:Bind SystemText}" VerticalAlignment="Center" />
+
+                                            <TextBox Grid.Column="2" Text="{x:Bind QuantityInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     LostFocus="OnQuantityLostFocus" KeyDown="OnQuantityKeyDown" Tag="{x:Bind}"
+                                                     PlaceholderText="Count"
+                                                     AutomationProperties.Name="Physical quantity" />
+
+                                            <TextBlock Grid.Column="3" Text="{x:Bind VarianceText, Mode=OneWay}" VerticalAlignment="Center"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{x:Bind VarianceState, Mode=OneWay, Converter={StaticResource StockCountVarianceToBrushConverter}}" />
+
+                                            <Button Grid.Column="4" Content="&#x2715;" Click="OnRemoveItemClick" Tag="{x:Bind}"
+                                                    VerticalAlignment="Center" ToolTipService.ToolTip="Remove from count"
+                                                    AutomationProperties.Name="Remove from count" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="Nothing counted yet. Scan a barcode or search for a product above."
+                                       Style="{StaticResource SecondaryTextStyle}"
+                                       Visibility="{x:Bind ViewModel.Items.Count, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============ VARIANCE REVIEW ============ -->
+                <StackPanel Spacing="14" Visibility="{x:Bind ViewModel.IsReviewView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Variance Review" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="{x:Bind ViewModel.ReviewSummaryText, Mode=OneWay}" Style="{StaticResource SecondaryTextStyle}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelGreenBrush}">
+                            <StackPanel><TextBlock Text="TOTAL INCREASE" Style="{StaticResource KpiLabelTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.ReviewIncreaseText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelRoseBrush}">
+                            <StackPanel><TextBlock Text="TOTAL DECREASE" Style="{StaticResource KpiLabelTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.ReviewDecreaseText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelBlueBrush}">
+                            <StackPanel><TextBlock Text="PRODUCTS AFFECTED" Style="{StaticResource KpiLabelTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.ReviewAffectedText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <InfoBar IsOpen="{x:Bind ViewModel.RebaseWarning, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                             Severity="Warning" IsClosable="False" Title="Stock changed during this count"
+                             Message="{x:Bind ViewModel.RebaseWarning, Mode=OneWay}" />
+
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="8">
+                            <Grid Padding="0,0,0,6" ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" /><ColumnDefinition Width="180" /><ColumnDefinition Width="120" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="PRODUCT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="1" Text="SYSTEM → PHYSICAL" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="2" Text="VARIANCE" Style="{StaticResource ColumnHeaderTextStyle}" />
+                            </Grid>
+
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.VarianceLines}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:StockCountVarianceRowViewModel">
+                                        <Grid Padding="0,7" ColumnSpacing="14"
+                                              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" /><ColumnDefinition Width="180" /><ColumnDefinition Width="120" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="1">
+                                                <TextBlock Text="{x:Bind ProductName}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                <TextBlock Style="{StaticResource SecondaryTextStyle}">
+                                                    <Run Text="{x:Bind ProductCode}" /><Run Text=" · " /><Run Text="{x:Bind UnitText}" />
+                                                </TextBlock>
+                                                <TextBlock Text="{x:Bind RebaseNote}" Style="{StaticResource SecondaryTextStyle}"
+                                                           Foreground="{ThemeResource WarningBrush}" TextWrapping="Wrap"
+                                                           Visibility="{x:Bind WillRebase, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{x:Bind TransitionText}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" Text="{x:Bind VarianceText}" VerticalAlignment="Center" FontWeight="SemiBold"
+                                                       Foreground="{x:Bind VarianceState, Converter={StaticResource StockCountVarianceToBrushConverter}}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                        <Button Content="Back to Count" Command="{x:Bind ViewModel.BackToCountingCommand}" />
+                        <Button Content="Finalize Stock Count" Style="{StaticResource AccentButtonStyle}"
+                                Click="OnFinalizeClick" IsEnabled="{x:Bind ViewModel.CanManage}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- ============ COMPLETED ============ -->
+                <StackPanel Spacing="14" Visibility="{x:Bind ViewModel.IsCompletedView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="&#xE73E;" Foreground="{ThemeResource SuccessBrush}" FontSize="22" />
+                                <TextBlock Text="Stock Count Completed" Style="{StaticResource SectionTitleTextStyle}"
+                                           Foreground="{ThemeResource SuccessBrush}" />
+                            </StackPanel>
+                            <TextBlock Text="{x:Bind ViewModel.CompletionCountNumber, Mode=OneWay}" FontWeight="SemiBold" FontSize="16" />
+                            <TextBlock Text="{x:Bind ViewModel.CompletionSummary, Mode=OneWay}" Style="{StaticResource SecondaryTextStyle}" />
+                            <Button Content="Back to Stock Counts" Command="{x:Bind ViewModel.BackToListCommand}" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
