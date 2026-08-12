@@ -50,6 +50,8 @@ public sealed class PurchaseItemConfiguration : IEntityTypeConfiguration<Purchas
         builder.Property(i => i.SkuSnapshot).HasMaxLength(60);
         builder.Property(i => i.HsnCodeSnapshot).HasMaxLength(20);
         builder.Property(i => i.UnitSnapshot).IsRequired().HasMaxLength(20);
+        builder.Property(i => i.PurchasedPackUnitSnapshot).HasMaxLength(20);
+        builder.Property(i => i.PurchasedPackQuantitySnapshot).HasPrecision(18, 3);
         builder.Property(i => i.BatchNumber).HasMaxLength(60);
 
         builder.Property(i => i.Quantity).HasPrecision(18, 3);

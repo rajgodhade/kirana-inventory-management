@@ -174,6 +174,14 @@ public sealed partial class PurchaseEntryPage : Page
         }
     }
 
+    private void OnPackModeChanged(object sender, RoutedEventArgs e)
+    {
+        if ((sender as CheckBox)?.Tag is PurchaseLineViewModel)
+        {
+            ViewModel.RecalculateTotals();
+        }
+    }
+
     private void OnLineFieldLostFocus(object sender, RoutedEventArgs e)
     {
         if ((sender as TextBox)?.Tag is PurchaseLineViewModel line)
@@ -181,6 +189,13 @@ public sealed partial class PurchaseEntryPage : Page
             if (line.Quantity <= 0 || (!line.SupportsDecimalQuantity && line.Quantity != Math.Floor(line.Quantity)))
             {
                 line.QuantityText = "1";
+            }
+
+            // Pack units (Box, Carton, Packet, Dozen, ...) are always bought in whole packs,
+            // regardless of whether the underlying base unit itself supports decimals.
+            if (line.PackQuantity <= 0 || line.PackQuantity != Math.Floor(line.PackQuantity))
+            {
+                line.PackQuantityText = "1";
             }
 
             if (line.UnitPrice < 0)

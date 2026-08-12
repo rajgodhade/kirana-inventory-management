@@ -29,6 +29,9 @@ public sealed class ProductImportService(
         ("Category", ["category", "categoryname"]),
         ("Brand", ["brand", "brandname"]),
         ("Unit", ["unit", "uom", "unitofmeasure"]),
+        ("Purchase Pack Unit", ["purchasepackunit", "packunit", "uompack", "packunittype"]),
+        ("Purchase Pack Size", ["purchasepacksize", "packsize"]),
+        ("Unit Display Text", ["unitdisplaytext", "unitdisplay", "displayunit"]),
         ("Purchase Price", ["purchaseprice", "costprice", "cost", "purchase"]),
         ("MRP", ["mrp", "maximumretailprice"]),
         ("Selling Price", ["sellingprice", "saleprice", "rate", "price", "selling"]),
@@ -169,6 +172,32 @@ public sealed class ProductImportService(
             errors.Add($"Unit '{unitText}' is not one of: {string.Join(", ", Enum.GetNames<UnitOfMeasure>())}.");
         }
 
+        // Optional purchase pack (Phase 13A) — a blank cell means "not provided" (not an error),
+        // matching how every other optional column in this import behaves.
+        UnitOfMeasure? purchasePackUnit = null;
+        var purchasePackUnitText = Get(raw, "Purchase Pack Unit");
+        if (!string.IsNullOrWhiteSpace(purchasePackUnitText))
+        {
+            if (TryParseUnit(purchasePackUnitText, out var parsedPackUnit))
+            {
+                purchasePackUnit = parsedPackUnit;
+            }
+            else
+            {
+                errors.Add($"Purchase Pack Unit '{purchasePackUnitText}' is not one of: {string.Join(", ", Enum.GetNames<UnitOfMeasure>())}.");
+            }
+        }
+
+        var purchasePackSize = ParseOptionalDecimal(raw, "Purchase Pack Size", errors);
+        var unitDisplayText = NullIfBlank(Get(raw, "Unit Display Text"));
+
+        if (errors.Count == 0 && !UnitConversion.IsValidPackConfiguration(purchasePackSize, purchasePackUnit, unit))
+        {
+            errors.Add(
+                "Purchase Pack Unit and Purchase Pack Size must both be provided (or both left blank), the pack " +
+                "size must be greater than zero, and the pack unit must differ from Unit.");
+        }
+
         var purchasePrice = ParseDecimal(raw, "Purchase Price", errors, out _);
         var mrp = ParseDecimal(raw, "MRP", errors, out _);
         var sellingPrice = ParseDecimal(raw, "Selling Price", errors, out var sellingProvided);
@@ -294,6 +323,9 @@ public sealed class ProductImportService(
             CategoryName = categoryName,
             BrandName = brandName,
             Unit = unit,
+            PurchasePackUnit = purchasePackUnit,
+            PurchasePackSize = purchasePackSize,
+            UnitDisplayText = unitDisplayText,
             SellingPrice = sellingPrice,
             OpeningStock = openingStock,
             MatchedProductId = matchedId,
@@ -305,6 +337,9 @@ public sealed class ProductImportService(
                 Barcode = barcode,
                 Description = NullIfBlank(Get(raw, "Description")),
                 Unit = unit,
+                PurchasePackUnit = purchasePackUnit,
+                PurchasePackSize = purchasePackSize,
+                UnitDisplayText = unitDisplayText,
                 PurchasePrice = purchasePrice,
                 Mrp = mrp,
                 SellingPrice = sellingPrice,
@@ -466,6 +501,9 @@ public sealed class ProductImportService(
         product.CategoryId = categoryId;
         product.BrandId = brandId;
         product.Unit = request.Unit;
+        product.PurchasePackUnit = request.PurchasePackUnit;
+        product.PurchasePackSize = request.PurchasePackSize;
+        product.UnitDisplayText = request.UnitDisplayText;
         product.PurchasePrice = request.PurchasePrice;
         product.Mrp = request.Mrp;
         product.SellingPrice = request.SellingPrice;
@@ -485,6 +523,7 @@ public sealed class ProductImportService(
         var example = string.Join(",", new[]
         {
             "Tata Salt 1kg", "TATA-SALT-1KG", "", "Iodised salt", "Grocery", "Tata", "Piece",
+            "Box", "12", "",
             "18", "25", "22", "", "", "5", "25010010", "Inclusive", "No", "10", "20", "100",
         }.Select(Escape));
 

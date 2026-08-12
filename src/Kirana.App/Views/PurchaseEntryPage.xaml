@@ -238,6 +238,21 @@
                                         <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind ProductName}" Style="{StaticResource CardTitleTextStyle}" TextWrapping="Wrap" />
                                             <TextBlock Text="{x:Bind ProductCode}" Style="{StaticResource CodeTextStyle}" />
+
+                                            <!-- Optional purchase pack (Phase 13A) — only shown for products
+                                                 with one configured. The checkbox switches which quantity box
+                                                 is active (below), and the caption always shows the converted
+                                                 base-unit amount so a pack entry never silently reinterprets
+                                                 what's being received. -->
+                                            <StackPanel Orientation="Horizontal" Spacing="6"
+                                                        Visibility="{x:Bind HasPurchasePack, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <CheckBox Content="{x:Bind PurchasePackUnit}" IsChecked="{x:Bind IsPackMode, Mode=TwoWay}"
+                                                          Padding="4,0" MinHeight="0"
+                                                          Tag="{x:Bind}" Checked="OnPackModeChanged" Unchecked="OnPackModeChanged"
+                                                          AutomationProperties.Name="Buy in pack unit" />
+                                                <TextBlock Text="{x:Bind ConvertedQuantityPreviewText, Mode=OneWay}"
+                                                           Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                                            </StackPanel>
                                         </StackPanel>
 
                                         <!-- UpdateSourceTrigger=PropertyChanged is REQUIRED: a TwoWay
@@ -246,9 +261,16 @@
                                              row recalculated — quantity edits were silently ignored and
                                              every line priced as qty 1. Same contract POS billing uses. -->
                                         <TextBox Grid.Column="1" Style="{StaticResource LineInputStyle}"
+                                                 Visibility="{x:Bind IsPackMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                                  Text="{x:Bind QuantityText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
                                                  TextChanged="OnLineFieldTextChanged" LostFocus="OnLineFieldLostFocus"
                                                  AutomationProperties.Name="Quantity" />
+
+                                        <TextBox Grid.Column="1" Style="{StaticResource LineInputStyle}"
+                                                 Visibility="{x:Bind IsPackMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                 Text="{x:Bind PackQuantityText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
+                                                 TextChanged="OnLineFieldTextChanged" LostFocus="OnLineFieldLostFocus"
+                                                 AutomationProperties.Name="Pack quantity" />
 
                                         <TextBox Grid.Column="2" Style="{StaticResource LineInputStyle}"
                                                  Text="{x:Bind UnitPriceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"

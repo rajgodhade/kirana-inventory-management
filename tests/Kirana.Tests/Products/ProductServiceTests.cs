@@ -271,5 +271,169 @@ public class ProductServiceTests : IDisposable
         Assert.Equal(inCategory.Id, results[0].Id);
     }
 
+    // ===================== Phase 13A: units, pack sizes & unit conversion =====================
+
+    [Fact]
+    public async Task CreateAsync_DefaultsToPieceUnit_WhenNotSpecified()
+    {
+        var product = await _sut.CreateAsync(new CreateProductRequest
+        {
+            Name = "Default Unit Product", PurchasePrice = 10, Mrp = 15, SellingPrice = 14, PerformedByUserId = _ownerId,
+        });
+
+        Assert.Equal(UnitOfMeasure.Piece, product.Unit);
+    }
+
+    [Fact]
+    public async Task CreateAsync_CreatesProduct_WithPieceUnit()
+    {
+        var product = await _sut.CreateAsync(ValidRequest());
+
+        Assert.Equal(UnitOfMeasure.Piece, product.Unit);
+    }
+
+    [Fact]
+    public async Task CreateAsync_CreatesProduct_WithKilogramUnit()
+    {
+        var product = await _sut.CreateAsync(new CreateProductRequest
+        {
+            Name = "Loose Rice", Sku = "SKU-RICE", Barcode = "BAR-RICE", Unit = UnitOfMeasure.Kilogram,
+            PurchasePrice = 40, Mrp = 60, SellingPrice = 55, PerformedByUserId = _ownerId,
+        });
+
+        Assert.Equal(UnitOfMeasure.Kilogram, product.Unit);
+        Assert.True(product.Unit.SupportsDecimalQuantity());
+    }
+
+    [Fact]
+    public async Task CreateAsync_CreatesProduct_WithPacketUnit()
+    {
+        var product = await _sut.CreateAsync(new CreateProductRequest
+        {
+            Name = "Amul Butter 500g", Sku = "SKU-BUTTER", Barcode = "BAR-BUTTER", Unit = UnitOfMeasure.Packet,
+            UnitDisplayText = "500g Pack", PurchasePrice = 200, Mrp = 260, SellingPrice = 250, PerformedByUserId = _ownerId,
+        });
+
+        Assert.Equal(UnitOfMeasure.Packet, product.Unit);
+        Assert.Equal("500g Pack", product.UnitDisplayText);
+    }
+
+    [Fact]
+    public async Task CreateAsync_Persists_NullPackFields_WhenNotProvided()
+    {
+        var product = await _sut.CreateAsync(ValidRequest());
+
+        var persisted = await _fixture.Context.Products.SingleAsync(p => p.Id == product.Id);
+        Assert.Null(persisted.PurchasePackUnit);
+        Assert.Null(persisted.PurchasePackSize);
+        Assert.Null(persisted.UnitDisplayText);
+    }
+
+    [Fact]
+    public async Task CreateAsync_Persists_ValidPackConfiguration()
+    {
+        var product = await _sut.CreateAsync(new CreateProductRequest
+        {
+            Name = "Biscuit Box", Sku = "SKU-BISCUIT", Barcode = "BAR-BISCUIT", Unit = UnitOfMeasure.Piece,
+            PurchasePackUnit = UnitOfMeasure.Box, PurchasePackSize = 12,
+            PurchasePrice = 8, Mrp = 12, SellingPrice = 10, PerformedByUserId = _ownerId,
+        });
+
+        var persisted = await _fixture.Context.Products.SingleAsync(p => p.Id == product.Id);
+        Assert.Equal(UnitOfMeasure.Box, persisted.PurchasePackUnit);
+        Assert.Equal(12, persisted.PurchasePackSize);
+    }
+
+    [Fact]
+    public async Task CreateAsync_Throws_WhenPackUnitSetWithoutPackSize()
+    {
+        var request = new CreateProductRequest
+        {
+            Name = "Bad Pack Product", PurchasePackUnit = UnitOfMeasure.Box,
+            PurchasePrice = 8, Mrp = 12, SellingPrice = 10, PerformedByUserId = _ownerId,
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateAsync(request));
+    }
+
+    [Fact]
+    public async Task CreateAsync_Throws_WhenPackSizeSetWithoutPackUnit()
+    {
+        var request = new CreateProductRequest
+        {
+            Name = "Bad Pack Product", PurchasePackSize = 12,
+            PurchasePrice = 8, Mrp = 12, SellingPrice = 10, PerformedByUserId = _ownerId,
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateAsync(request));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-4)]
+    public async Task CreateAsync_Throws_WhenPackSizeIsZeroOrNegative(decimal packSize)
+    {
+        var request = new CreateProductRequest
+        {
+            Name = "Bad Pack Product", PurchasePackUnit = UnitOfMeasure.Box, PurchasePackSize = packSize,
+            PurchasePrice = 8, Mrp = 12, SellingPrice = 10, PerformedByUserId = _ownerId,
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateAsync(request));
+    }
+
+    [Fact]
+    public async Task CreateAsync_Throws_WhenPackUnitEqualsBaseUnit()
+    {
+        var request = new CreateProductRequest
+        {
+            Name = "Self Conversion Product", Unit = UnitOfMeasure.Piece,
+            PurchasePackUnit = UnitOfMeasure.Piece, PurchasePackSize = 12,
+            PurchasePrice = 8, Mrp = 12, SellingPrice = 10, PerformedByUserId = _ownerId,
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateAsync(request));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_CanAddPackConfiguration_ToExistingProduct()
+    {
+        var product = await _sut.CreateAsync(ValidRequest());
+
+        await _sut.UpdateAsync(product.Id, new UpdateProductRequest
+        {
+            Name = product.Name, Unit = UnitOfMeasure.Piece,
+            PurchasePackUnit = UnitOfMeasure.Box, PurchasePackSize = 24,
+            PurchasePrice = product.PurchasePrice, Mrp = product.Mrp, SellingPrice = product.SellingPrice,
+            PerformedByUserId = _ownerId,
+        });
+
+        var persisted = await _fixture.Context.Products.SingleAsync(p => p.Id == product.Id);
+        Assert.Equal(UnitOfMeasure.Box, persisted.PurchasePackUnit);
+        Assert.Equal(24, persisted.PurchasePackSize);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_CanRemovePackConfiguration_BySettingBothNull()
+    {
+        var product = await _sut.CreateAsync(new CreateProductRequest
+        {
+            Name = "Biscuit Box", Sku = "SKU-BISCUIT2", Barcode = "BAR-BISCUIT2", Unit = UnitOfMeasure.Piece,
+            PurchasePackUnit = UnitOfMeasure.Box, PurchasePackSize = 12,
+            PurchasePrice = 8, Mrp = 12, SellingPrice = 10, PerformedByUserId = _ownerId,
+        });
+
+        await _sut.UpdateAsync(product.Id, new UpdateProductRequest
+        {
+            Name = product.Name, Unit = UnitOfMeasure.Piece,
+            PurchasePrice = product.PurchasePrice, Mrp = product.Mrp, SellingPrice = product.SellingPrice,
+            PerformedByUserId = _ownerId,
+        });
+
+        var persisted = await _fixture.Context.Products.SingleAsync(p => p.Id == product.Id);
+        Assert.Null(persisted.PurchasePackUnit);
+        Assert.Null(persisted.PurchasePackSize);
+    }
+
     public void Dispose() => _fixture.Dispose();
 }

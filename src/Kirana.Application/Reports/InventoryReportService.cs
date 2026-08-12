@@ -58,7 +58,7 @@ public sealed class InventoryReportService(
             ProductCode = r.ProductCode,
             CategoryName = r.CategoryName,
             QuantityOnHand = r.QuantityOnHand,
-            Unit = r.Unit.ToString(),
+            Unit = r.Unit.ToDisplayText(),
             StockValue = canViewCost ? r.QuantityOnHand * r.PurchasePrice : null,
         }).ToList();
     }
@@ -123,7 +123,7 @@ public sealed class InventoryReportService(
             ProductCode = r.ProductCode,
             CategoryName = r.CategoryName,
             QuantityOnHand = r.QuantityOnHand,
-            Unit = r.Unit.ToString(),
+            Unit = r.Unit.ToDisplayText(),
             StockValue = canViewCost ? r.QuantityOnHand * r.PurchasePrice : null,
         }).ToList();
     }
@@ -263,7 +263,7 @@ public sealed class InventoryReportService(
             ProductCode = p.ProductCode,
             CategoryName = p.CategoryId is { } categoryId ? categoryNames.GetValueOrDefault(categoryId) : null,
             QuantityOnHand = p.Inventory?.QuantityOnHand ?? 0m,
-            Unit = p.Unit.ToString(),
+            Unit = p.Unit.ToDisplayText(),
             StockValue = canViewCost ? (p.Inventory?.QuantityOnHand ?? 0m) * p.PurchasePrice : null,
         }).ToList();
     }

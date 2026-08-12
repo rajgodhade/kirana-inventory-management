@@ -18,6 +18,36 @@ public sealed partial class PurchaseLineViewModel : ObservableObject
     public decimal GstRatePercent { get; init; }
     public IReadOnlyList<PricingType> PricingTypes { get; } = Enum.GetValues<PricingType>();
 
+    /// <summary>Optional purchase pack (Phase 13A), copied from the product at cart-add time. Null
+    /// unless the product has one configured — <see cref="HasPurchasePack"/> gates the toggle.</summary>
+    public UnitOfMeasure? PurchasePackUnit { get; init; }
+    public decimal? PurchasePackSize { get; init; }
+    public bool HasPurchasePack => PurchasePackUnit is not null;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveQuantity))]
+    [NotifyPropertyChangedFor(nameof(ConvertedQuantityPreviewText))]
+    private bool _isPackMode;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveQuantity))]
+    [NotifyPropertyChangedFor(nameof(ConvertedQuantityPreviewText))]
+    private string _packQuantityText = "1";
+
+    public decimal PackQuantity => decimal.TryParse(PackQuantityText, out var v) ? v : 0;
+
+    /// <summary>The base-unit quantity this line actually adds to stock — what
+    /// <see cref="PurchaseEntryViewModel.RecalculateTotals"/> and the submitted
+    /// <c>PurchaseLineInput.Quantity</c> must both use, so the live total always matches what gets
+    /// submitted regardless of which mode is active.</summary>
+    public decimal EffectiveQuantity => IsPackMode && PurchasePackSize is { } size ? PackQuantity * size : Quantity;
+
+    /// <summary>Live "= 120 Piece" preview so a pack-mode entry never silently reinterprets a
+    /// quantity — the converted amount is always visible before the purchase is submitted.</summary>
+    public string ConvertedQuantityPreviewText => IsPackMode
+        ? $"= {EffectiveQuantity:0.###} {Unit}"
+        : string.Empty;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PricingTypeLabel))]
     private PricingType _pricingType = PricingType.Inclusive;
@@ -25,6 +55,8 @@ public sealed partial class PurchaseLineViewModel : ObservableObject
     public string PricingTypeLabel => PricingType == PricingType.Inclusive ? "GST Included" : "GST Extra";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveQuantity))]
+    [NotifyPropertyChangedFor(nameof(ConvertedQuantityPreviewText))]
     private string _quantityText = "1";
 
     [ObservableProperty]

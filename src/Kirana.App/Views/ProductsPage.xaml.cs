@@ -57,9 +57,34 @@ public sealed partial class ProductsPage : Page
         }
     }
 
-    private async void OnCategoryOrBrandChanged(object sender, SelectionChangedEventArgs e) => await ViewModel.SearchAsync();
+    private async void OnSortOptionChanged(object sender, SelectionChangedEventArgs e) => await ViewModel.SearchAsync();
 
     private async void OnShowInactiveChanged(object sender, RoutedEventArgs e) => await ViewModel.SearchAsync();
+
+    // Reads IsChecked directly rather than trusting the x:Bind TwoWay sync has already run before
+    // this handler fires — CheckBox.Checked/Unchecked and the compiled x:Bind update subscribe to
+    // the same event, and relying on subscription order to read the bound property here would
+    // intermittently search with the previous (stale) value, as documented elsewhere in this app
+    // (PurchasesPage's "Outstanding only" filter).
+    private async void OnOutOfStockOnlyChanged(object sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox checkBox)
+        {
+            ViewModel.OutOfStockOnly = checkBox.IsChecked == true;
+        }
+
+        await ViewModel.SearchAsync();
+    }
+
+    private async void OnExpiredOnlyChanged(object sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox checkBox)
+        {
+            ViewModel.ExpiredOnly = checkBox.IsChecked == true;
+        }
+
+        await ViewModel.SearchAsync();
+    }
 
     private async void OnManageCategoriesClick(object sender, RoutedEventArgs e)
     {

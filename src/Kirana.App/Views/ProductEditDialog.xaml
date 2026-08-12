@@ -73,6 +73,26 @@
                           SelectedItem="{x:Bind ViewModel.SelectedUnit, Mode=TwoWay}" HorizontalAlignment="Stretch" />
             </Grid>
 
+            <TextBox Header="Unit display text (optional)" PlaceholderText="e.g. 500g Pack — shown on POS/receipts instead of the plain unit name"
+                     Text="{x:Bind ViewModel.UnitDisplayTextInput, Mode=TwoWay}" />
+
+            <!-- Optional purchase pack (Phase 13A) — collapsed behind a checkbox since most
+                 products never need it. Only affects Purchase Entry; selling/stock/billing always
+                 stay in Unit above. -->
+            <CheckBox Content="This product is purchased in a bulk pack (e.g. buying by the Box)"
+                      IsChecked="{x:Bind ViewModel.HasPurchasePack, Mode=TwoWay}" />
+            <Grid ColumnSpacing="8" Visibility="{x:Bind ViewModel.HasPurchasePack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ComboBox Grid.Column="0" Header="Purchase pack unit"
+                          ItemsSource="{x:Bind ViewModel.Units}"
+                          SelectedItem="{x:Bind ViewModel.SelectedPackUnit, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                <TextBox Grid.Column="1" Header="{x:Bind ViewModel.PackSizeHeader, Mode=OneWay}"
+                         Text="{x:Bind ViewModel.PackSizeText, Mode=TwoWay}" />
+            </Grid>
+
             <TextBlock Text="Pricing" FontWeight="SemiBold" Margin="0,8,0,0" />
             <Grid ColumnSpacing="8">
                 <Grid.ColumnDefinitions>

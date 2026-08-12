@@ -226,6 +226,8 @@ public sealed partial class PurchaseEntryViewModel(
                 TracksBatches = product.TracksBatches,
                 GstRatePercent = product.GstRatePercent ?? 0,
                 PricingType = product.PricingType,
+                PurchasePackUnit = product.PurchasePackUnit,
+                PurchasePackSize = product.PurchasePackSize,
                 QuantityText = "1",
                 UnitPriceText = product.PurchasePrice.ToString("0.##"),
             });
@@ -250,7 +252,7 @@ public sealed partial class PurchaseEntryViewModel(
         // OnLineFieldLostFocus clamps the value when focus leaves, and PurchaseService re-validates
         // everything at finalisation, so nothing invalid can actually be recorded. Mirrors
         // PosShellViewModel.RecalculateCart.
-        if (Lines.Any(l => l.Quantity <= 0))
+        if (Lines.Any(l => l.EffectiveQuantity <= 0))
         {
             return;
         }
@@ -258,7 +260,7 @@ public sealed partial class PurchaseEntryViewModel(
         var purchaseLines = Lines.Select(l => new PurchaseLine
         {
             ProductId = l.ProductId,
-            Quantity = l.Quantity,
+            Quantity = l.EffectiveQuantity,
             UnitPrice = l.UnitPrice,
             PricingType = l.PricingType,
             GstRatePercent = l.GstRatePercent,
@@ -329,12 +331,14 @@ public sealed partial class PurchaseEntryViewModel(
                 Lines = Lines.Select(l => new PurchaseLineInput
                 {
                     ProductId = l.ProductId,
-                    Quantity = l.Quantity,
+                    Quantity = l.EffectiveQuantity,
                     UnitPrice = l.UnitPrice,
                     DiscountPercent = l.DiscountPercent,
                     PricingType = l.PricingType,
                     BatchNumber = string.IsNullOrWhiteSpace(l.BatchNumberText) ? null : l.BatchNumberText,
                     ExpiryDate = l.ExpiryDate,
+                    PurchasedPackUnit = l.IsPackMode ? l.PurchasePackUnit : null,
+                    PurchasedPackQuantity = l.IsPackMode ? l.PackQuantity : null,
                 }).ToList(),
                 AmountPaid = amountPaid,
                 PaymentMethod = amountPaid > 0 ? SelectedPaymentMethod : (PaymentMethod?)null,

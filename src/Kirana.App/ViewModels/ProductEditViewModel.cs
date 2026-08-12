@@ -50,6 +50,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(MinimumStockHeader))]
     [NotifyPropertyChangedFor(nameof(ReorderQuantityHeader))]
     [NotifyPropertyChangedFor(nameof(OpeningStockHeader))]
+    [NotifyPropertyChangedFor(nameof(PackSizeHeader))]
     private UnitOfMeasure _selectedUnit = UnitOfMeasure.Piece;
 
     /// <summary>Inventory quantity fields show the selected unit right in the header (e.g.
@@ -58,6 +59,24 @@ public sealed partial class ProductEditViewModel : ObservableObject
     public string MinimumStockHeader => $"Minimum stock ({SelectedUnit})";
     public string ReorderQuantityHeader => $"Reorder quantity ({SelectedUnit})";
     public string OpeningStockHeader => $"Opening stock ({SelectedUnit})";
+
+    /// <summary>Optional purchase pack (Phase 13A) — most products never need this, so it stays
+    /// collapsed behind a checkbox instead of always showing two extra fields. Selling/stock/
+    /// billing always stay in <see cref="SelectedUnit"/>; this only affects Purchase Entry.</summary>
+    [ObservableProperty]
+    private bool _hasPurchasePack;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PackSizeHeader))]
+    private UnitOfMeasure _selectedPackUnit = UnitOfMeasure.Box;
+
+    [ObservableProperty]
+    private string _packSizeText = string.Empty;
+
+    [ObservableProperty]
+    private string? _unitDisplayTextInput;
+
+    public string PackSizeHeader => $"1 {SelectedPackUnit} = how many {SelectedUnit}?";
 
     [ObservableProperty]
     private string _purchasePriceText = "0";
@@ -144,6 +163,10 @@ public sealed partial class ProductEditViewModel : ObservableObject
         SelectedCategory = owner.Categories.FirstOrDefault(c => c.Id == existing.CategoryId);
         SelectedBrand = owner.Brands.FirstOrDefault(b => b.Id == existing.BrandId);
         SelectedUnit = existing.Unit;
+        HasPurchasePack = existing.PurchasePackUnit is not null;
+        SelectedPackUnit = existing.PurchasePackUnit ?? UnitOfMeasure.Box;
+        PackSizeText = existing.PurchasePackSize?.ToString("0.###") ?? string.Empty;
+        UnitDisplayTextInput = existing.UnitDisplayText;
         PurchasePriceText = existing.PurchasePrice.ToString("0.##");
         MrpText = existing.Mrp.ToString("0.##");
         SellingPriceText = existing.SellingPrice.ToString("0.##");
@@ -270,6 +293,26 @@ public sealed partial class ProductEditViewModel : ObservableObject
             }
         }
 
+        UnitOfMeasure? purchasePackUnit = null;
+        decimal? purchasePackSize = null;
+        if (HasPurchasePack)
+        {
+            if (!TryParseDecimal(PackSizeText, out var packSize) || packSize <= 0)
+            {
+                ErrorMessage = "Pack size must be a valid number greater than zero.";
+                return;
+            }
+
+            if (SelectedPackUnit == SelectedUnit)
+            {
+                ErrorMessage = "Purchase pack unit must be different from the product's unit.";
+                return;
+            }
+
+            purchasePackUnit = SelectedPackUnit;
+            purchasePackSize = packSize;
+        }
+
         IsSaving = true;
         try
         {
@@ -284,6 +327,9 @@ public sealed partial class ProductEditViewModel : ObservableObject
                     CategoryId = SelectedCategory?.Id,
                     BrandId = SelectedBrand?.Id,
                     Unit = SelectedUnit,
+                    PurchasePackUnit = purchasePackUnit,
+                    PurchasePackSize = purchasePackSize,
+                    UnitDisplayText = UnitDisplayTextInput,
                     PurchasePrice = purchasePrice,
                     Mrp = mrp,
                     SellingPrice = sellingPrice,
@@ -315,6 +361,9 @@ public sealed partial class ProductEditViewModel : ObservableObject
                     CategoryId = SelectedCategory?.Id,
                     BrandId = SelectedBrand?.Id,
                     Unit = SelectedUnit,
+                    PurchasePackUnit = purchasePackUnit,
+                    PurchasePackSize = purchasePackSize,
+                    UnitDisplayText = UnitDisplayTextInput,
                     PurchasePrice = purchasePrice,
                     Mrp = mrp,
                     SellingPrice = sellingPrice,

@@ -66,6 +66,46 @@ public sealed class MigrationSchemaTests : IDisposable
         Assert.Contains("SupplierCashPayments", columns);
     }
 
+    [Fact]
+    public async Task Products_NoLongerHasLegacyIsTaxInclusiveColumn()
+    {
+        // Regression guard: this NOT NULL column with no default was orphaned when PricingType
+        // replaced it (2026-08-08) but never dropped, silently breaking every new product creation
+        // against a real migrated database — invisible to the EnsureCreated()-based fixtures other
+        // tests use, since they build straight from the current model and never had this column.
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        var columns = await ColumnNamesAsync(context, "Products");
+
+        Assert.DoesNotContain("IsTaxInclusive", columns);
+    }
+
+    [Fact]
+    public async Task Products_HasPurchasePackFieldsColumns()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        var columns = await ColumnNamesAsync(context, "Products");
+
+        Assert.Contains("PurchasePackUnit", columns);
+        Assert.Contains("PurchasePackSize", columns);
+        Assert.Contains("UnitDisplayText", columns);
+    }
+
+    [Fact]
+    public async Task PurchaseItems_HasPackSnapshotColumns()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        var columns = await ColumnNamesAsync(context, "PurchaseItems");
+
+        Assert.Contains("PurchasedPackUnitSnapshot", columns);
+        Assert.Contains("PurchasedPackQuantitySnapshot", columns);
+    }
+
     private static async Task<HashSet<string>> ColumnNamesAsync(KiranaDbContext context, string table)
     {
         var names = new HashSet<string>(StringComparer.Ordinal);

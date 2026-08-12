@@ -597,5 +597,42 @@ public class SalesReturnServiceTests : IDisposable
         Assert.Equal("SRN-000002", second.ReturnNumber);
     }
 
+    // ===================== Phase 13A: units, pack sizes & unit conversion =====================
+
+    [Fact]
+    public async Task SalesReturnService_UnaffectedByProductPackConfiguration()
+    {
+        // Selling/returns always stay in the base unit regardless of whether the product also has
+        // an optional purchase pack configured — this proves that configuration has zero bearing
+        // on Sale/SalesReturn arithmetic.
+        var product = await SeedProductAsync(price: 100, stock: 50);
+        product.PurchasePackUnit = UnitOfMeasure.Box;
+        product.PurchasePackSize = 12;
+        await _fixture.Context.SaveChangesAsync();
+
+        var sale = await SellAsync(product, 5);
+        Assert.Equal(45m, await StockAsync(product.Id));
+
+        var saleItem = await _fixture.Context.SaleItems.AsNoTracking().FirstAsync(i => i.SaleId == sale.Id);
+        var salesReturn = await ReturnAsync(sale, [Line(saleItem.Id, 5)]);
+
+        Assert.Equal(50m, await StockAsync(product.Id));
+        Assert.Equal(500m, salesReturn.TotalReturnAmount);
+    }
+
+    [Fact]
+    public async Task SalesReturnService_CannotReturnMoreThanSold_ForProductWithPackConfigured()
+    {
+        var product = await SeedProductAsync(price: 100, stock: 50);
+        product.PurchasePackUnit = UnitOfMeasure.Box;
+        product.PurchasePackSize = 12;
+        await _fixture.Context.SaveChangesAsync();
+
+        var sale = await SellAsync(product, 5);
+        var saleItem = await _fixture.Context.SaleItems.AsNoTracking().FirstAsync(i => i.SaleId == sale.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => ReturnAsync(sale, [Line(saleItem.Id, 6)]));
+    }
+
     public void Dispose() => _fixture.Dispose();
 }

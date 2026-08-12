@@ -26,4 +26,22 @@ public sealed class ProductRowViewModel
     public bool IsActive { get; init; }
     public bool TracksBatches { get; init; }
     public string StockStatus { get; init; } = "";
+    public DateTime CreatedAtUtc { get; init; }
+
+    /// <summary>Soonest expiry among this product's batches that still have stock (Phase 27), or
+    /// null when the product doesn't track batches or none of its batches have an expiry date set.
+    /// The nearest date is shown — not every batch's — since that's the one that actually needs
+    /// attention first.</summary>
+    public DateOnly? NearestExpiryDate { get; init; }
+
+    public string ExpiryDateText => NearestExpiryDate?.ToString("dd-MMM-yyyy") ?? "—";
+
+    /// <summary>Mirrors <see cref="StockStatus"/>'s pattern: a short label for the colored badge
+    /// under the date, empty when there's nothing to call out.</summary>
+    public string ExpiryStatus => NearestExpiryDate switch
+    {
+        { } date when date < DateOnly.FromDateTime(DateTime.Today) => "EXPIRED",
+        { } date when date <= DateOnly.FromDateTime(DateTime.Today).AddDays(30) => "EXPIRING SOON",
+        _ => "",
+    };
 }

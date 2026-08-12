@@ -17,6 +17,7 @@ public enum UnitOfMeasure
     Bottle,
     Bag,
     Can,
+    Carton,
 }
 
 public static class UnitOfMeasureExtensions
@@ -30,4 +31,17 @@ public static class UnitOfMeasureExtensions
     ];
 
     public static bool SupportsDecimalQuantity(this UnitOfMeasure unit) => DecimalCapableUnits.Contains(unit);
+
+    /// <summary>Short, shopper-friendly label for POS/receipts/reports (Phase 13A). Purely
+    /// cosmetic — never affects persistence, which always uses the enum member's own name via
+    /// <c>HasConversion&lt;string&gt;()</c>.</summary>
+    public static string ToDisplayText(this UnitOfMeasure unit) => unit switch
+    {
+        UnitOfMeasure.Packet => "Pack",
+        UnitOfMeasure.Kilogram => "Kg",
+        UnitOfMeasure.Gram => "g",
+        UnitOfMeasure.Litre => "L",
+        UnitOfMeasure.Millilitre => "mL",
+        _ => unit.ToString(),
+    };
 }
