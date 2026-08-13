@@ -17,8 +17,21 @@ public sealed partial class BarcodeLabelLineItem : ObservableObject
 
     public string CodeOrSku => string.IsNullOrWhiteSpace(Sku) ? ProductCode : $"{ProductCode} / {Sku}";
 
+    /// <summary>Every active code on this product (Phase 13B) — the picker's options. Products with
+    /// a single barcode hide the picker entirely (see <see cref="HasBarcodeChoice"/>).</summary>
+    public System.Collections.ObjectModel.ObservableCollection<ProductBarcodeOption> AvailableBarcodes { get; } = [];
+
+    public bool HasBarcodeChoice => AvailableBarcodes.Count > 1;
+
+    /// <summary>Which code this label carries. Defaults to the product's primary; changing it
+    /// re-renders the preview so what's on screen always matches what will print.</summary>
     [ObservableProperty]
-    private string? _barcode;
+    [NotifyPropertyChangedFor(nameof(Barcode))]
+    private ProductBarcodeOption? _selectedBarcode;
+
+    /// <summary>The value actually printed. Kept as a passthrough so the print pipeline
+    /// (<c>LabelPrintItem.BarcodeValue</c>) needed no change for Phase 13B.</summary>
+    public string? Barcode => SelectedBarcode?.Value;
 
     [ObservableProperty]
     private string _quantityText = "1";

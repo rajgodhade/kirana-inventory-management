@@ -1,6 +1,7 @@
 using Kirana.Application.Authentication;
 using Kirana.Application.Billing;
 using Kirana.Application.Returns;
+using Kirana.Domain.Barcodes;
 using Kirana.Domain.Entities;
 using Kirana.Infrastructure.Persistence;
 using Kirana.Tests.TestSupport;
@@ -488,7 +489,14 @@ public class SalesReturnServiceTests : IDisposable
     {
         var product = await SeedProductAsync();
         var tracked = await _fixture.Context.Products.FirstAsync(p => p.Id == product.Id);
-        tracked.Barcode = "8901234567890";
+        tracked.Barcodes.Add(new ProductBarcode
+        {
+            Value = "8901234567890",
+            NormalizedValue = "8901234567890",
+            Symbology = BarcodeSymbology.Ean13,
+            IsPrimary = true,
+            IsActive = true,
+        });
         await _fixture.Context.SaveChangesAsync();
 
         var sale = await SellAsync(product, 1);

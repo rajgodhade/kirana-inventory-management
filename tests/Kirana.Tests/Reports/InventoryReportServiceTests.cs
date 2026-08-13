@@ -192,5 +192,143 @@ public class InventoryReportServiceTests : IDisposable
         Assert.Equal("Damaged", row.MovementType);
     }
 
+    // ---- Phase 13C: stock count history ----
+
+    /// <summary>Runs a real count through the real service, so the report is checked against
+    /// movements the finalizer actually wrote rather than hand-built rows that could disagree.</summary>
+    private async Task<Kirana.Application.StockCounts.StockCountService> StockCountServiceAsync()
+    {
+        await Task.CompletedTask;
+        return new Kirana.Application.StockCounts.StockCountService(
+            _fixture.Context,
+            new EfSequenceGenerator(_fixture.Context),
+            new EfAuditLogger(_fixture.Context),
+            new PermissionEnforcer(_fixture.Context),
+            new Kirana.Application.Barcodes.BarcodeLookupService(_fixture.Context));
+    }
+
+    [Fact]
+    public async Task StockCountHistory_ReportsWhatTheCountActuallyAdjusted()
+    {
+        var shortage = await SeedProductAsync("Shortage", purchasePrice: 10, stock: 100);
+        var surplus = await SeedProductAsync("Surplus", purchasePrice: 10, stock: 50);
+        var exact = await SeedProductAsync("Exact", purchasePrice: 10, stock: 30);
+
+        var counts = await StockCountServiceAsync();
+        var count = await counts.StartAsync(null, _ownerId);
+        foreach (var (product, physical) in new[] { (shortage, 97m), (surplus, 52m), (exact, 30m) })
+        {
+            var item = await counts.AddItemAsync(count.Id, product.Id, null, _ownerId);
+            await counts.SetCountedQuantityAsync(item.Id, physical, null, _ownerId);
+        }
+        await counts.FinalizeAsync(count.Id, _ownerId);
+
+        var row = Assert.Single(
+            await _sut.GetStockCountHistoryAsync(ReportDateRange.Resolve(ReportDatePreset.Today), _ownerId));
+
+        Assert.Equal(count.CountNumber, row.CountNumber);
+        Assert.Equal("Completed", row.Status);
+        Assert.Equal(3, row.ProductsCounted);
+        Assert.Equal(1, row.IncreasedCount);
+        Assert.Equal(1, row.DecreasedCount);
+        Assert.Equal(1, row.UnchangedCount);
+        Assert.Equal(2, row.AdjustmentCount);
+        Assert.Equal(2m, row.TotalIncreaseQuantity);
+        Assert.Equal(3m, row.TotalDecreaseQuantity);
+        Assert.Equal(-1m, row.NetQuantityChange);
+    }
+
+    [Fact]
+    public async Task StockCountHistory_ShowsACancelledCountAsAdjustingNothing()
+    {
+        var product = await SeedProductAsync("Cancelled Count Product", purchasePrice: 10, stock: 100);
+        var counts = await StockCountServiceAsync();
+        var count = await counts.StartAsync(null, _ownerId);
+        var item = await counts.AddItemAsync(count.Id, product.Id, null, _ownerId);
+        await counts.SetCountedQuantityAsync(item.Id, 80m, null, _ownerId);
+        await counts.CancelAsync(count.Id, "Recount needed", _ownerId);
+
+        var row = Assert.Single(
+            await _sut.GetStockCountHistoryAsync(ReportDateRange.Resolve(ReportDatePreset.Today), _ownerId));
+
+        Assert.Equal("Cancelled", row.Status);
+        Assert.Equal(0, row.AdjustmentCount);
+        Assert.Equal(0m, row.NetQuantityChange);
+    }
+
+    /// <summary>§24: the report must let an investigator tell "found by counting the shelf" apart
+    /// from "asserted by hand", and break the latter down by reason.</summary>
+    [Fact]
+    public async Task StockCorrectionSummary_SeparatesStockCountsFromManualAdjustments()
+    {
+        var counted = await SeedProductAsync("Counted Product", purchasePrice: 10, stock: 100);
+        var adjusted = await SeedProductAsync("Adjusted Product", purchasePrice: 10, stock: 100);
+
+        // A real stock count: 100 -> 97.
+        var counts = await StockCountServiceAsync();
+        var count = await counts.StartAsync(null, _ownerId);
+        var item = await counts.AddItemAsync(count.Id, counted.Id, null, _ownerId);
+        await counts.SetCountedQuantityAsync(item.Id, 97m, null, _ownerId);
+        await counts.FinalizeAsync(count.Id, _ownerId);
+
+        // Two real manual adjustments with different reasons.
+        var adjustments = new Kirana.Application.Inventories.InventoryAdjustmentService(
+            _fixture.Context, new EfSequenceGenerator(_fixture.Context),
+            new EfAuditLogger(_fixture.Context), new PermissionEnforcer(_fixture.Context));
+
+        await adjustments.CreateAsync(new Kirana.Application.Inventories.CreateInventoryAdjustmentRequest
+        {
+            ProductId = adjusted.Id,
+            Direction = InventoryAdjustmentDirection.Decrease,
+            Quantity = 4m,
+            Reason = InventoryAdjustmentReason.Damaged,
+            PerformedByUserId = _ownerId,
+        });
+        await adjustments.CreateAsync(new Kirana.Application.Inventories.CreateInventoryAdjustmentRequest
+        {
+            ProductId = adjusted.Id,
+            Direction = InventoryAdjustmentDirection.Increase,
+            Quantity = 6m,
+            Reason = InventoryAdjustmentReason.Found,
+            PerformedByUserId = _ownerId,
+        });
+
+        var rows = await _sut.GetStockCorrectionSummaryAsync(
+            ReportDateRange.Resolve(ReportDatePreset.Today), _ownerId);
+
+        var countRow = Assert.Single(rows, r => r.Source == "Physical stock count");
+        Assert.Equal(1, countRow.MovementCount);
+        Assert.Equal(3m, countRow.TotalDecreaseQuantity);
+        Assert.Equal(-3m, countRow.NetQuantityChange);
+
+        var damaged = Assert.Single(rows, r => r.Reason == "Damaged");
+        Assert.Equal("Manual adjustment", damaged.Source);
+        Assert.Equal(4m, damaged.TotalDecreaseQuantity);
+
+        var found = Assert.Single(rows, r => r.Reason == "Found");
+        Assert.Equal(6m, found.TotalIncreaseQuantity);
+        Assert.Equal(6m, found.NetQuantityChange);
+    }
+
+    [Fact]
+    public async Task StockCorrectionSummary_RequiresReportsView()
+    {
+        await _fixture.SeedCashierAsync();
+        var cashier = await _fixture.Context.Users.FirstAsync(u => u.Role.Name == "Cashier");
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _sut.GetStockCorrectionSummaryAsync(ReportDateRange.Resolve(ReportDatePreset.Today), cashier.Id));
+    }
+
+    [Fact]
+    public async Task StockCountHistory_RequiresReportsView()
+    {
+        await _fixture.SeedCashierAsync();
+        var cashier = await _fixture.Context.Users.FirstAsync(u => u.Role.Name == "Cashier");
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _sut.GetStockCountHistoryAsync(ReportDateRange.Resolve(ReportDatePreset.Today), cashier.Id));
+    }
+
     public void Dispose() => _fixture.Dispose();
 }

@@ -58,8 +58,15 @@
                             <TextBlock Text="{x:Bind CodeOrSku}" FontSize="11" Opacity="0.7" />
                         </StackPanel>
 
+                        <!-- Phase 13B: pick WHICH of the product's codes this label carries. The
+                             picker only appears when there's a genuine choice, so a bulk run over
+                             single-barcode products looks exactly as it did before. -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBox Text="{x:Bind Barcode, Mode=TwoWay}" PlaceholderText="Scan or type…" Width="160" />
+                            <ComboBox ItemsSource="{x:Bind AvailableBarcodes}"
+                                      SelectedItem="{x:Bind SelectedBarcode, Mode=TwoWay}"
+                                      DisplayMemberPath="DisplayText"
+                                      PlaceholderText="No barcode yet" Width="260"
+                                      AutomationProperties.Name="Barcode to print" />
                             <Button Content="Generate" Click="OnGenerateClick" Tag="{x:Bind}"
                                     IsEnabled="{x:Bind IsGenerating, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}" />
                         </StackPanel>

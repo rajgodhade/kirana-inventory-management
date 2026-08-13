@@ -22,8 +22,8 @@ public class ProductImportServiceTests : IDisposable
 
         var sequenceGenerator = new EfSequenceGenerator(_fixture.Context);
         var auditLogger = new EfAuditLogger(_fixture.Context);
-        var barcodeService = new BarcodeService(_fixture.Context, sequenceGenerator, auditLogger);
         var permissionEnforcer = new PermissionEnforcer(_fixture.Context);
+        var barcodeService = new BarcodeService(_fixture.Context, sequenceGenerator, auditLogger, permissionEnforcer);
 
         _sut = new ProductImportService(_fixture.Context, sequenceGenerator, auditLogger, barcodeService, permissionEnforcer);
         _productService = new ProductService(_fixture.Context, sequenceGenerator, auditLogger, barcodeService, permissionEnforcer);
@@ -493,6 +493,217 @@ public class ProductImportServiceTests : IDisposable
         Assert.Contains("Purchase Pack Unit", template);
         Assert.Contains("Purchase Pack Size", template);
         Assert.Contains("Unit Display Text", template);
+    }
+
+    // ---- Phase 13B: multiple barcodes per row ----
+    //
+    // Note the shared Header above still says "Barcode" (singular): that is the LEGACY column name,
+    // kept as an alias, so every test in this file doubles as backward-compatibility coverage for
+    // files exported by earlier versions.
+
+    private Task<List<ProductBarcode>> BarcodesOfAsync(string productName) =>
+        _fixture.Context.ProductBarcodes
+            .Where(b => b.Product.Name == productName)
+            .ToListAsync();
+
+    [Fact]
+    public async Task Import_SplitsPipeSeparatedBarcodes_IntoSeparateRows()
+    {
+        var preview = await PreviewAsync(
+            "Multi Code,MULTI-1,8901030826501|5012345678900|INTERNAL-7,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        await _sut.CommitAsync(preview, _ownerId);
+
+        var barcodes = await BarcodesOfAsync("Multi Code");
+        Assert.Equal(3, barcodes.Count);
+        Assert.All(barcodes, b => Assert.True(b.IsActive));
+    }
+
+    [Fact]
+    public async Task Import_MakesTheFirstBarcodePrimary_WhenNoneIsMarked()
+    {
+        var preview = await PreviewAsync(
+            "Multi Code,MULTI-1,FIRST-CODE|SECOND-CODE,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        await _sut.CommitAsync(preview, _ownerId);
+
+        var primary = Assert.Single(await BarcodesOfAsync("Multi Code"), b => b.IsPrimary);
+        Assert.Equal("FIRST-CODE", primary.Value);
+    }
+
+    [Fact]
+    public async Task Import_HonoursTheStarPrimaryMarker_AndStripsItFromTheStoredValue()
+    {
+        var preview = await PreviewAsync(
+            "Multi Code,MULTI-1,FIRST-CODE|*SECOND-CODE,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        await _sut.CommitAsync(preview, _ownerId);
+
+        var primary = Assert.Single(await BarcodesOfAsync("Multi Code"), b => b.IsPrimary);
+        // The marker designates the primary; it is not part of the barcode itself.
+        Assert.Equal("SECOND-CODE", primary.Value);
+    }
+
+    [Fact]
+    public async Task Import_Rejects_WhenMoreThanOneBarcodeIsMarkedPrimary()
+    {
+        var preview = await PreviewAsync(
+            "Multi Code,MULTI-1,*FIRST-CODE|*SECOND-CODE,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        Assert.Equal(1, preview.ErrorCount);
+    }
+
+    [Fact]
+    public async Task Import_StillAcceptsASingleBarcode_InTheLegacyColumnFormat()
+    {
+        var preview = await PreviewAsync(
+            "Legacy Row,LEGACY-1,8901030826501,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        await _sut.CommitAsync(preview, _ownerId);
+
+        var barcode = Assert.Single(await BarcodesOfAsync("Legacy Row"));
+        Assert.Equal("8901030826501", barcode.Value);
+        Assert.True(barcode.IsPrimary);
+    }
+
+    [Fact]
+    public async Task Import_CreatesNoBarcodeRows_WhenTheCellIsEmpty()
+    {
+        var preview = await PreviewAsync(
+            "No Code,NOCODE-1,,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        await _sut.CommitAsync(preview, _ownerId);
+
+        Assert.Empty(await BarcodesOfAsync("No Code"));
+    }
+
+    [Fact]
+    public async Task Import_CollapsesDuplicateBarcodesWithinOneCell()
+    {
+        var preview = await PreviewAsync(
+            "Dupe Cell,DUPE-1,SAME-CODE|same-code,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        await _sut.CommitAsync(preview, _ownerId);
+
+        // Case-only variants are the same barcode under the normalized uniqueness rule.
+        var barcode = Assert.Single(await BarcodesOfAsync("Dupe Cell"));
+        Assert.True(barcode.IsPrimary);
+    }
+
+    /// <summary>A row whose barcode belongs to an existing product is an UPDATE of that product, not
+    /// an error — that's what makes re-importing a corrected file work. Only a row that matches one
+    /// product by SKU while carrying another product's barcode is a genuine conflict.</summary>
+    [Fact]
+    public async Task Import_TreatsARowMatchingAnExistingBarcode_AsAnUpdateOfThatProduct()
+    {
+        await _productService.CreateAsync(new CreateProductRequest
+        {
+            Name = "Existing Owner",
+            Sku = "OWNER-1",
+            Barcodes = ["TAKEN-CODE"],
+            PurchasePrice = 10,
+            Mrp = 15,
+            SellingPrice = 14,
+            PerformedByUserId = _ownerId,
+        });
+
+        var preview = await PreviewAsync(
+            "Renamed Product,,TAKEN-CODE,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        Assert.Equal(0, preview.ErrorCount);
+        Assert.Equal(1, preview.UpdateCount);
+        Assert.Equal(0, preview.NewCount);
+    }
+
+    [Fact]
+    public async Task Import_Rejects_WhenARowClaimsABarcodeOwnedByADifferentProduct()
+    {
+        await _productService.CreateAsync(new CreateProductRequest
+        {
+            Name = "Barcode Owner", Sku = "OWNER-1", Barcodes = ["TAKEN-CODE"],
+            PurchasePrice = 10, Mrp = 15, SellingPrice = 14, PerformedByUserId = _ownerId,
+        });
+        await _productService.CreateAsync(new CreateProductRequest
+        {
+            Name = "Other Product", Sku = "OTHER-1", Barcodes = ["OTHER-CODE"],
+            PurchasePrice = 10, Mrp = 15, SellingPrice = 14, PerformedByUserId = _ownerId,
+        });
+
+        // Matches "Other Product" by SKU, but tries to take a code that belongs to "Barcode Owner".
+        var preview = await PreviewAsync(
+            "Other Product,OTHER-1,TAKEN-CODE,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        Assert.Equal(1, preview.ErrorCount);
+    }
+
+    /// <summary>An import file is rarely the complete truth about a product, so reconciliation is
+    /// additive: codes the file omits are left alone rather than silently retired.</summary>
+    [Fact]
+    public async Task Import_AddsBarcodesToAnExistingProduct_WithoutRemovingItsOthers()
+    {
+        await _productService.CreateAsync(new CreateProductRequest
+        {
+            Name = "Existing Product",
+            Sku = "EXIST-1",
+            Barcodes = ["ORIGINAL-CODE"],
+            PurchasePrice = 10,
+            Mrp = 15,
+            SellingPrice = 14,
+            PerformedByUserId = _ownerId,
+        });
+
+        var preview = await PreviewAsync(
+            "Existing Product,EXIST-1,ADDED-CODE,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+        await _sut.CommitAsync(preview, _ownerId);
+
+        var barcodes = await BarcodesOfAsync("Existing Product");
+        Assert.Equal(2, barcodes.Count);
+        Assert.Contains(barcodes, b => b.Value == "ORIGINAL-CODE");
+        Assert.Contains(barcodes, b => b.Value == "ADDED-CODE");
+    }
+
+    [Fact]
+    public async Task Import_DoesNotDemoteAPrimaryTheOperatorAlreadyChose()
+    {
+        await _productService.CreateAsync(new CreateProductRequest
+        {
+            Name = "Existing Product",
+            Sku = "EXIST-1",
+            Barcodes = ["ORIGINAL-CODE"],
+            PurchasePrice = 10,
+            Mrp = 15,
+            SellingPrice = 14,
+            PerformedByUserId = _ownerId,
+        });
+
+        var preview = await PreviewAsync(
+            "Existing Product,EXIST-1,*ADDED-CODE,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+        await _sut.CommitAsync(preview, _ownerId);
+
+        var primary = Assert.Single(await BarcodesOfAsync("Existing Product"), b => b.IsPrimary);
+        Assert.Equal("ORIGINAL-CODE", primary.Value);
+    }
+
+    /// <summary>The whole import shares one SaveChangesAsync, so a rejected row must leave nothing
+    /// behind — including barcode rows staged before the failure.</summary>
+    [Fact]
+    public async Task Import_CommitsAtomically_LeavingNoBarcodesFromRejectedRows()
+    {
+        var preview = await PreviewAsync(
+            "Good Product,GOOD-1,GOOD-CODE,Grocery,Tata,Piece,18,25,22,5,10,20,100",
+            "Bad Product,BAD-1,*ONE|*TWO,Grocery,Tata,Piece,18,25,22,5,10,20,100");
+
+        await _sut.CommitAsync(preview, _ownerId);
+
+        Assert.Single(await _fixture.Context.Products.ToListAsync());
+        Assert.Empty(await BarcodesOfAsync("Bad Product"));
+        Assert.Single(await BarcodesOfAsync("Good Product"));
+    }
+
+    [Fact]
+    public void BuildCsvTemplate_UsesThePluralBarcodesColumn()
+    {
+        Assert.Contains("Barcodes", _sut.BuildCsvTemplate());
     }
 
     public void Dispose() => _fixture.Dispose();

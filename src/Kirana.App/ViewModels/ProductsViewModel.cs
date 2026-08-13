@@ -19,8 +19,11 @@ public sealed partial class ProductsViewModel(
     [ObservableProperty]
     private string _searchText = string.Empty;
 
+    /// <summary>Narrows the list to discontinued products only, matching how the sibling
+    /// "Out of stock" and "Expired" checkboxes behave. Named <c>...Only</c> for the same reason —
+    /// the previous <c>ShowInactive</c> read as "include these as well", which is not what it does.</summary>
     [ObservableProperty]
-    private bool _showInactive;
+    private bool _inactiveOnly;
 
     [ObservableProperty]
     private bool _outOfStockOnly;
@@ -95,14 +98,21 @@ public sealed partial class ProductsViewModel(
             var results = await productService.SearchAsync(new ProductSearchQuery
             {
                 SearchText = SearchText,
-                IncludeInactive = ShowInactive,
+                IncludeInactive = InactiveOnly,
             });
 
             var rows = new List<ProductRowViewModel>();
             foreach (var product in results)
             {
                 var row = await ToRowAsync(product);
-                if ((!OutOfStockOnly || row.Stock <= 0) && (!ExpiredOnly || row.ExpiryStatus == "EXPIRED"))
+
+                // Every checkbox on this toolbar narrows the list to just those products, rather
+                // than adding them to the active ones — "Show inactive" behaves like its neighbours
+                // "Out of stock" and "Expired". The service call above widens the query to include
+                // inactive rows; this narrows it back down to only them.
+                if ((!InactiveOnly || !row.IsActive)
+                    && (!OutOfStockOnly || row.Stock <= 0)
+                    && (!ExpiredOnly || row.ExpiryStatus == "EXPIRED"))
                 {
                     rows.Add(row);
                 }
@@ -163,8 +173,10 @@ public sealed partial class ProductsViewModel(
     public async Task SetBrandActiveAsync(int brandId, bool isActive) =>
         await brandService.SetActiveAsync(brandId, isActive, CurrentUserId);
 
-    public async Task AdjustStockAsync(int productId, decimal quantityChange, StockMovementType movementType, string? reason) =>
-        await inventoryService.AdjustStockAsync(productId, quantityChange, movementType, reason, CurrentUserId);
+    // No AdjustStockAsync passthrough here any more (Phase 13D): manual stock changes go through
+    // IInventoryAdjustmentService, which records a reason, writes an adjustment record and refuses
+    // to drive stock negative. Leaving a shortcut on this ViewModel would reintroduce the weaker
+    // path the 13D page replaced.
 
     public Task<IReadOnlyList<StockMovement>> GetMovementHistoryAsync(int productId) =>
         inventoryService.GetMovementHistoryAsync(productId, take: 20);
@@ -204,7 +216,11 @@ public sealed partial class ProductsViewModel(
             ProductCode = product.ProductCode,
             Name = product.Name,
             Sku = product.Sku,
-            Barcode = product.Barcode,
+            Barcodes = product.Barcodes
+                .Where(b => b.IsActive)
+                .OrderByDescending(b => b.IsPrimary).ThenBy(b => b.Id)
+                .Select(ProductBarcodeOption.From)
+                .ToList(),
             CategoryName = product.Category?.Name ?? "",
             BrandName = product.Brand?.Name ?? "",
             Unit = product.UnitDisplayText ?? product.Unit.ToDisplayText(),

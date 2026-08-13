@@ -179,12 +179,23 @@ public sealed partial class ProductImportViewModel(IProductImportService importS
         }
 
         var skuKey = Columns.First(c => c.CanonicalName == "SKU").FieldKey;
-        var barcodeKey = Columns.First(c => c.CanonicalName == "Barcode").FieldKey;
+        var barcodeKey = Columns.First(c => c.CanonicalName == "Barcodes").FieldKey;
         var updatedFields = new Dictionary<string, string>(row.RawFields)
         {
             [skuKey] = string.Empty,
             [barcodeKey] = string.Empty,
         };
+
+        // A file written before Phase 13B carries its value under the legacy "barcode" header, which
+        // is a different RawFields key than the canonical "barcodes" — clear that too, or the old
+        // column's value survives and the row keeps matching the product we're trying to detach from.
+        foreach (var legacyKey in new[] { "barcode", "ean", "upc" })
+        {
+            if (updatedFields.ContainsKey(legacyKey))
+            {
+                updatedFields[legacyKey] = string.Empty;
+            }
+        }
 
         return ApplyRevisionAsync(rowNumber, updatedFields);
     }
@@ -428,13 +439,13 @@ public sealed partial class ProductImportRowViewModel(ProductImportRow row, IRea
     public string UndoRemoveButtonAutomationName => $"Undo remove for row {row.RowNumber}";
     public string Name => row.Name.Length > 0 ? row.Name : "(no name)";
     public string ProductCode => row.Sku ?? "—";
-    public string Barcode => row.Barcode ?? "—";
+    public string Barcode => row.Barcodes.Count > 0 ? string.Join(" | ", row.Barcodes) : "—";
     public string SellingPrice => row.SellingPrice.ToString("N2");
     public string ValidationStatus => IsError ? "Needs attention" : IsUpdate ? "Will update" : "Ready";
     public string Details => string.Join("  ·  ", new[]
         {
             row.Sku is null ? null : $"SKU {row.Sku}",
-            row.Barcode is null ? null : $"Barcode {row.Barcode}",
+            row.Barcodes.Count == 0 ? null : $"Barcode {string.Join(" | ", row.Barcodes)}",
             row.CategoryName.Length > 0 ? row.CategoryName : null,
             $"{row.Unit}",
         }.Where(p => p is not null));

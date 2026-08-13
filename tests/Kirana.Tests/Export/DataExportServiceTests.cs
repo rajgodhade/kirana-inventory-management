@@ -1,6 +1,7 @@
 using Kirana.Application.Authentication;
 using Kirana.Application.Export;
 using Kirana.Application.Reports;
+using Kirana.Domain.Barcodes;
 using Kirana.Domain.Entities;
 using Kirana.Tests.TestSupport;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,17 @@ public class DataExportServiceTests : IDisposable
             ProductCode = "PRD-000001",
             Name = "Amul Butter 500g",
             Sku = "AMUL-BUT-500",
-            Barcode = "8901234567890",
+            Barcodes =
+            {
+                new ProductBarcode
+                {
+                    Value = "8901234567890",
+                    NormalizedValue = "8901234567890",
+                    Symbology = BarcodeSymbology.Ean13,
+                    IsPrimary = true,
+                    IsActive = true,
+                },
+            },
             CategoryId = category.Id,
             BrandId = brand.Id,
             Unit = UnitOfMeasure.Piece,

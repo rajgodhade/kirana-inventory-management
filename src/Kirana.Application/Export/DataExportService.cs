@@ -82,7 +82,11 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
                 p.ProductCode,
                 p.Name,
                 p.Sku,
-                p.Barcode,
+                // Projected as a list and joined in memory below — EF can't translate string.Join.
+                // Primary first so a single-barcode export reads exactly as it did before Phase 13B.
+                Barcodes = p.Barcodes.Where(b => b.IsActive)
+                    .OrderByDescending(b => b.IsPrimary).ThenBy(b => b.Id)
+                    .Select(b => b.Value).ToList(),
                 CategoryName = p.Category != null ? p.Category.Name : null,
                 BrandName = p.Brand != null ? p.Brand.Name : null,
                 p.Unit,
@@ -107,13 +111,15 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
             Subtitle = $"{products.Count} product(s) — exported {Now()}",
             Columns =
             [
-                "Product Code", "Name", "SKU", "Barcode", "Category", "Brand", "Unit",
+                "Product Code", "Name", "SKU", "Barcodes", "Category", "Brand", "Unit",
                 "Purchase Price", "MRP", "Selling Price", "Wholesale Price", "GST %", "HSN Code",
                 "Pricing Type", "Stock On Hand", "Minimum Stock", "Reorder Quantity", "Active",
             ],
             Rows = products.Select(p => (IReadOnlyList<string>)
             [
-                p.ProductCode, p.Name, p.Sku ?? string.Empty, p.Barcode ?? string.Empty,
+                // Pipe-separated to match the import format, so an export round-trips back through
+                // ProductImportService unchanged.
+                p.ProductCode, p.Name, p.Sku ?? string.Empty, string.Join("|", p.Barcodes),
                 CategoryName(p.CategoryName), BrandName(p.BrandName), p.Unit.ToString(),
                 canViewCost ? Number(p.PurchasePrice) : string.Empty,
                 Number(p.Mrp), Number(p.SellingPrice), NumberOrBlank(p.WholesalePrice),

@@ -9,7 +9,19 @@ public sealed class ProductRowViewModel
     public required string ProductCode { get; init; }
     public required string Name { get; init; }
     public string? Sku { get; init; }
-    public string? Barcode { get; init; }
+    /// <summary>Active barcodes, primary first (Phase 13B) — drives the label dialog's picker.</summary>
+    public IReadOnlyList<ProductBarcodeOption> Barcodes { get; init; } = [];
+
+    public string? PrimaryBarcode => Barcodes.FirstOrDefault(b => b.IsPrimary)?.Value ?? Barcodes.FirstOrDefault()?.Value;
+
+    /// <summary>Compact grid text: the primary code, plus "+N more" when there are alternates —
+    /// keeps the products row a single line however many codes a product accumulates.</summary>
+    public string BarcodeSummary => Barcodes.Count switch
+    {
+        0 => "",
+        1 => PrimaryBarcode!,
+        _ => $"{PrimaryBarcode} +{Barcodes.Count - 1} more",
+    };
     public string CategoryName { get; init; } = "";
     public string BrandName { get; init; } = "";
     public required string Unit { get; init; }
@@ -24,6 +36,17 @@ public sealed class ProductRowViewModel
 
     public decimal Stock { get; init; }
     public bool IsActive { get; init; }
+
+    /// <summary>Drives the INACTIVE badge beside the product name. Without it a discontinued
+    /// product is indistinguishable from a live one whenever "Show inactive" is ticked — the only
+    /// other cue was the row menu's Reactivate item, which costs a click per row to discover.</summary>
+    public bool IsInactive => !IsActive;
+
+    /// <summary>Dims the whole row for inactive products, so the badge is reinforced by the row's
+    /// overall weight rather than being the single thing to spot. Matches the import preview's
+    /// treatment of removed rows.</summary>
+    public double RowOpacity => IsActive ? 1.0 : 0.55;
+
     public bool TracksBatches { get; init; }
     public string StockStatus { get; init; } = "";
     public DateTime CreatedAtUtc { get; init; }

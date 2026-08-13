@@ -11,7 +11,10 @@ public sealed class UpdateProductRequest
     private PricingType _pricingType = PricingType.Inclusive;
     public required string Name { get; init; }
     public string? Sku { get; init; }
-    public string? Barcode { get; init; }
+
+    // No Barcode here by design (Phase 13B): a product owns many barcodes, and each add/retire/
+    // set-primary goes through IBarcodeService so the one-primary and global-uniqueness invariants
+    // live in exactly one place rather than being re-implemented inside UpdateAsync.
     public string? Description { get; init; }
 
     public int? CategoryId { get; init; }

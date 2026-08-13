@@ -8,7 +8,14 @@ public sealed class CreateProductRequest
     private PricingType _pricingType = PricingType.Inclusive;
     public required string Name { get; init; }
     public string? Sku { get; init; }
-    public string? Barcode { get; init; }
+
+    /// <summary>Every code that should scan to this product (Phase 13B). Empty is valid — a product
+    /// with no barcode is found by name/SKU instead. The entry at
+    /// <see cref="PrimaryBarcodeIndex"/> becomes the primary.</summary>
+    public IReadOnlyList<string> Barcodes { get; init; } = [];
+
+    /// <summary>Index into <see cref="Barcodes"/> of the primary code. Defaults to the first.</summary>
+    public int PrimaryBarcodeIndex { get; init; }
     public string? Description { get; init; }
 
     public int? CategoryId { get; init; }

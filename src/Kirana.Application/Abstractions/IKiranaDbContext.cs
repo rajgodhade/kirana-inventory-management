@@ -25,6 +25,7 @@ public interface IKiranaDbContext
     DbSet<Inventory> Inventories { get; }
     DbSet<StockMovement> StockMovements { get; }
     DbSet<ProductBatch> ProductBatches { get; }
+    DbSet<ProductBarcode> ProductBarcodes { get; }
     DbSet<SequenceCounter> SequenceCounters { get; }
 
     DbSet<Customer> Customers { get; }
@@ -60,6 +61,9 @@ public interface IKiranaDbContext
     DbSet<SaleItemPromotion> SaleItemPromotions { get; }
     DbSet<CashRegisterSession> CashRegisterSessions { get; }
     DbSet<CashMovement> CashMovements { get; }
+    DbSet<StockCount> StockCounts { get; }
+    DbSet<StockCountItem> StockCountItems { get; }
+    DbSet<InventoryAdjustment> InventoryAdjustments { get; }
 
     DatabaseFacade Database { get; }
 

@@ -852,6 +852,93 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.ToTable("Inventories");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.InventoryAdjustment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AdjustedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("AdjustedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AdjustmentNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("AdjustmentQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("NewQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("PreviousQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProductCodeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProductNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SkuSnapshot")
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UnitSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdjustedAtUtc");
+
+                    b.HasIndex("AdjustedByUserId");
+
+                    b.HasIndex("AdjustmentNumber")
+                        .IsUnique();
+
+                    b.HasIndex("Reason");
+
+                    b.HasIndex("ProductId", "AdjustedAtUtc");
+
+                    b.ToTable("InventoryAdjustments");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -929,10 +1016,6 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Barcode")
-                        .HasMaxLength(60)
-                        .HasColumnType("TEXT");
 
                     b.Property<int?>("BrandId")
                         .HasColumnType("INTEGER");
@@ -1031,10 +1114,6 @@ namespace Kirana.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Barcode")
-                        .IsUnique()
-                        .HasFilter("\"Barcode\" IS NOT NULL");
-
                     b.HasIndex("BrandId");
 
                     b.HasIndex("CategoryId");
@@ -1051,6 +1130,64 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasFilter("\"Sku\" IS NOT NULL");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.ProductBarcode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsInternal")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("NormalizedValue")
+                        .IsRequired()
+                        .HasMaxLength(48)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Symbology")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(48)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedValue")
+                        .IsUnique();
+
+                    b.HasIndex("ProductId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ProductBarcodes_ProductId_Primary")
+                        .HasFilter("\"IsPrimary\" = 1");
+
+                    b.HasIndex("IsActive", "NormalizedValue");
+
+                    b.ToTable("ProductBarcodes");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.ProductBatch", b =>
@@ -2155,6 +2292,137 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.ToTable("SequenceCounters");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.StockCount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CompletedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CountNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RebasedItemCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("StartedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("StartedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompletedByUserId");
+
+                    b.HasIndex("CountNumber")
+                        .IsUnique();
+
+                    b.HasIndex("StartedAtUtc");
+
+                    b.HasIndex("StartedByUserId");
+
+                    b.HasIndex("Status")
+                        .IsUnique()
+                        .HasDatabaseName("IX_StockCounts_SingleInProgress")
+                        .HasFilter("\"Status\" = 'InProgress'");
+
+                    b.ToTable("StockCounts");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.StockCountItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BarcodeSnapshot")
+                        .HasMaxLength(48)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CountedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("CountedQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProductCodeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProductNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SkuSnapshot")
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StockCountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("SystemQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("SystemQuantityAtFinalization")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UnitSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("StockCountId", "ProductId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_StockCountItems_StockCountId_ProductId");
+
+                    b.ToTable("StockCountItems");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.StockMovement", b =>
                 {
                     b.Property<int>("Id")
@@ -2649,6 +2917,24 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.InventoryAdjustment", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.User", "AdjustedByUser")
+                        .WithMany()
+                        .HasForeignKey("AdjustedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Kirana.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AdjustedByUser");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.Payment", b =>
                 {
                     b.HasOne("Kirana.Domain.Entities.Sale", "Sale")
@@ -2675,6 +2961,17 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Brand");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.ProductBarcode", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.Product", "Product")
+                        .WithMany("Barcodes")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.ProductBatch", b =>
@@ -3007,6 +3304,42 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("SalesReturn");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.StockCount", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.User", "CompletedByUser")
+                        .WithMany()
+                        .HasForeignKey("CompletedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Kirana.Domain.Entities.User", "StartedByUser")
+                        .WithMany()
+                        .HasForeignKey("StartedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CompletedByUser");
+
+                    b.Navigation("StartedByUser");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.StockCountItem", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Kirana.Domain.Entities.StockCount", "StockCount")
+                        .WithMany("Items")
+                        .HasForeignKey("StockCountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("StockCount");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.StockMovement", b =>
                 {
                     b.HasOne("Kirana.Domain.Entities.Product", "Product")
@@ -3102,6 +3435,8 @@ namespace Kirana.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Kirana.Domain.Entities.Product", b =>
                 {
+                    b.Navigation("Barcodes");
+
                     b.Navigation("Batches");
 
                     b.Navigation("Inventory");
@@ -3159,6 +3494,11 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.SalesReturn", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.StockCount", b =>
                 {
                     b.Navigation("Items");
                 });

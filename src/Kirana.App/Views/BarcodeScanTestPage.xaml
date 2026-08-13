@@ -40,8 +40,19 @@
                         <Run Text="{x:Bind ViewModel.FoundProduct.ProductCode, Mode=OneWay}" />
                         <Run Text=" · SKU: " /><Run Text="{x:Bind ViewModel.FoundProduct.Sku, Mode=OneWay}" />
                     </TextBlock>
+                    <!-- Phase 13B: which code was scanned, what kind it is, whether it's the
+                         product's primary, and whether it would actually scan at billing. -->
                     <TextBlock FontSize="13">
-                        <Run Text="Barcode: " /><Run Text="{x:Bind ViewModel.FoundProduct.Barcode, Mode=OneWay}" />
+                        <Run Text="Barcode: " /><Run Text="{x:Bind ViewModel.LastScannedBarcode, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock FontSize="13">
+                        <Run Text="Barcode type: " /><Run Text="{x:Bind ViewModel.SymbologyText, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock FontSize="13">
+                        <Run Text="Barcode role: " /><Run Text="{x:Bind ViewModel.RoleText, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock FontSize="13">
+                        <Run Text="Status: " /><Run Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" />
                     </TextBlock>
                     <TextBlock FontSize="16" FontWeight="SemiBold">
                         <Run Text="Selling price: " /><Run Text="{x:Bind ViewModel.FoundProduct.SellingPrice, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
@@ -55,8 +66,14 @@
                 </StackPanel>
             </Border>
 
+            <!-- Phase 13B: the code IS known, so "not found" would be a lie. Say what's actually
+                 wrong — retired barcode, or discontinued product — so the operator can fix it. -->
+            <InfoBar IsOpen="{x:Bind ViewModel.ShowBlockedWarning, Mode=OneWay}" Severity="Warning" IsClosable="False"
+                     Title="Will not scan at billing" Message="{x:Bind ViewModel.BlockedReason, Mode=OneWay}"
+                     MaxWidth="480" HorizontalAlignment="Left" />
+
             <InfoBar IsOpen="{x:Bind ViewModel.ShowNotFound, Mode=OneWay}" Severity="Warning"
-                     Title="Not found" Message="No active product matches that barcode." MaxWidth="480" HorizontalAlignment="Left" />
+                     Title="Not found" Message="No product in the catalogue has that barcode." MaxWidth="480" HorizontalAlignment="Left" />
         </StackPanel>
     </Grid>
 </Page>

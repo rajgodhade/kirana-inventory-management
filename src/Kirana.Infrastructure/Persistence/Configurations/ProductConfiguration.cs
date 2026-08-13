@@ -11,12 +11,10 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.ProductCode).IsRequired().HasMaxLength(30);
         builder.HasIndex(p => p.ProductCode).IsUnique();
 
-        // Sku/Barcode are optional but must be unique when present (PRD §11, §13).
+        // Sku is optional but must be unique when present (PRD §11, §13). Barcodes moved to their
+        // own table in Phase 13B — see ProductBarcodeConfiguration.
         builder.Property(p => p.Sku).HasMaxLength(60);
         builder.HasIndex(p => p.Sku).IsUnique().HasFilter("\"Sku\" IS NOT NULL");
-
-        builder.Property(p => p.Barcode).HasMaxLength(60);
-        builder.HasIndex(p => p.Barcode).IsUnique().HasFilter("\"Barcode\" IS NOT NULL");
 
         builder.Property(p => p.Name).IsRequired().HasMaxLength(200);
         builder.HasIndex(p => p.Name);

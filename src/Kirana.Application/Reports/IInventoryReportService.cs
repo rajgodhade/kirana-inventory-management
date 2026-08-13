@@ -36,4 +36,17 @@ public interface IInventoryReportService
     Task<IReadOnlyList<BatchSummaryRow>> GetExpiringSoonAsync(int withinDays, int? performedByUserId, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<BatchSummaryRow>> GetBatchSummaryAsync(int? performedByUserId, CancellationToken cancellationToken = default);
+
+    /// <summary>Completed physical stock counts and what each one adjusted (Phase 13C). Lives here
+    /// rather than in a separate reporting system because "what did the stock-take find" is an
+    /// inventory question, and it shares the existing <see cref="PermissionKeys.ReportsView"/> gate.</summary>
+    Task<IReadOnlyList<StockCountReportRow>> GetStockCountHistoryAsync(
+        ReportDateRange range, int? performedByUserId, CancellationToken cancellationToken = default);
+
+    /// <summary>How much stock each correction mechanism moved over the period, split into physical
+    /// stock counts and manual adjustments broken down by reason (Phase 13D). Extends the existing
+    /// inventory reporting rather than adding a parallel system, and shares its
+    /// <see cref="PermissionKeys.ReportsView"/> gate.</summary>
+    Task<IReadOnlyList<StockCorrectionSummaryRow>> GetStockCorrectionSummaryAsync(
+        ReportDateRange range, int? performedByUserId, CancellationToken cancellationToken = default);
 }

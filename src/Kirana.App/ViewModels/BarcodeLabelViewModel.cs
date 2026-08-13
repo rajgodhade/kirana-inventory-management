@@ -50,8 +50,28 @@ public sealed partial class BarcodeLabelViewModel : ObservableObject
                 Sku = product.Sku,
                 Mrp = product.Mrp ?? 0,
                 SellingPrice = product.SellingPrice,
-                Barcode = product.Barcode,
             };
+
+            foreach (var option in product.Barcodes)
+            {
+                item.AvailableBarcodes.Add(option);
+            }
+
+            // Default to the primary, so a bulk run over hundreds of products prints the expected
+            // code without the operator touching a single picker.
+            item.SelectedBarcode = item.AvailableBarcodes.FirstOrDefault(b => b.IsPrimary)
+                ?? item.AvailableBarcodes.FirstOrDefault();
+
+            // Re-render whenever the operator picks a different code, so the on-screen preview and
+            // the printed label can never disagree.
+            item.PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName == nameof(BarcodeLabelLineItem.SelectedBarcode))
+                {
+                    RenderPreview(item);
+                }
+            };
+
             Items.Add(item);
             RenderPreview(item);
         }
@@ -64,8 +84,25 @@ public sealed partial class BarcodeLabelViewModel : ObservableObject
         item.IsGenerating = true;
         try
         {
-            var product = await _barcodeService.AssignBarcodeAsync(item.ProductId, explicitBarcode: null, _owner.CurrentUserId);
-            item.Barcode = product.Barcode;
+            var created = await _barcodeService.AssignBarcodeAsync(item.ProductId, explicitBarcode: null, _owner.CurrentUserId);
+
+            // AssignBarcodeAsync makes the new code primary, so demote the local copies to match
+            // rather than re-querying just to refresh a picker.
+            foreach (var existing in item.AvailableBarcodes.ToList())
+            {
+                item.AvailableBarcodes[item.AvailableBarcodes.IndexOf(existing)] = new ProductBarcodeOption
+                {
+                    Id = existing.Id,
+                    Value = existing.Value,
+                    Symbology = existing.Symbology,
+                    IsPrimary = false,
+                    IsActive = existing.IsActive,
+                };
+            }
+
+            var option = ProductBarcodeOption.From(created);
+            item.AvailableBarcodes.Add(option);
+            item.SelectedBarcode = option;
             RenderPreview(item);
         }
         catch (Exception ex)

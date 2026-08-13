@@ -1,5 +1,6 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Domain.Barcodes;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,10 +36,15 @@ public sealed class SalesReturnService(
         if (!string.IsNullOrEmpty(text))
         {
             var like = $"%{text}%";
+            var normalizedText = BarcodeNormalizer.Normalize(text);
 
             // One box, four ways to search (PRD §33). Barcode and product hits resolve through the
-            // sale's *snapshotted* line data plus the product's live barcode/SKU, so a scan finds
+            // sale's *snapshotted* line data plus the product's live barcodes/SKU, so a scan finds
             // the sale even when the product has been renamed since.
+            //
+            // Retired barcodes deliberately still match here (no IsActive filter): someone
+            // returning goods months later may well scan a code that has since been retired, and
+            // finding the original sale is exactly the point.
             sales = sales.Where(s =>
                 EF.Functions.Like(s.InvoiceNumber, like)
                 || (s.Customer != null && (
@@ -49,7 +55,7 @@ public sealed class SalesReturnService(
                     EF.Functions.Like(i.ProductNameSnapshot, like)
                     || EF.Functions.Like(i.ProductCodeSnapshot, like)
                     || (i.SkuSnapshot != null && EF.Functions.Like(i.SkuSnapshot, like))
-                    || (i.Product.Barcode != null && i.Product.Barcode == text)));
+                    || i.Product.Barcodes.Any(b => b.NormalizedValue == normalizedText)));
         }
 
         var matches = await sales

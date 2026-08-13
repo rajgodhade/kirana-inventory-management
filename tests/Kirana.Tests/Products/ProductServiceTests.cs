@@ -20,8 +20,8 @@ public class ProductServiceTests : IDisposable
 
         var sequenceGenerator = new EfSequenceGenerator(_fixture.Context);
         var auditLogger = new EfAuditLogger(_fixture.Context);
-        var barcodeService = new BarcodeService(_fixture.Context, sequenceGenerator, auditLogger);
         var permissionEnforcer = new PermissionEnforcer(_fixture.Context);
+        var barcodeService = new BarcodeService(_fixture.Context, sequenceGenerator, auditLogger, permissionEnforcer);
         _sut = new ProductService(_fixture.Context, sequenceGenerator, auditLogger, barcodeService, permissionEnforcer);
     }
 
@@ -29,7 +29,7 @@ public class ProductServiceTests : IDisposable
     {
         Name = name,
         Sku = sku,
-        Barcode = barcode,
+        Barcodes = barcode is null ? [] : [barcode],
         Unit = UnitOfMeasure.Piece,
         PurchasePrice = 18,
         Mrp = 25,
@@ -79,7 +79,7 @@ public class ProductServiceTests : IDisposable
         {
             Name = "No Opening Stock Product",
             Sku = "SKU-NO-STOCK",
-            Barcode = "BAR-NO-STOCK",
+            Barcodes = ["BAR-NO-STOCK"],
             PurchasePrice = 10,
             Mrp = 15,
             SellingPrice = 14,
@@ -165,7 +165,8 @@ public class ProductServiceTests : IDisposable
         {
             Name = "Tata Salt 1kg (Updated)",
             Sku = product.Sku,
-            Barcode = product.Barcode,
+            // Phase 13B: barcodes are no longer part of the update request — they're owned by
+            // IBarcodeService and persist independently.
             Unit = product.Unit,
             PurchasePrice = 19,
             Mrp = 26,
@@ -188,7 +189,6 @@ public class ProductServiceTests : IDisposable
         {
             Name = product.Name,
             Sku = product.Sku,
-            Barcode = product.Barcode,
             Unit = product.Unit,
             PurchasePrice = product.PurchasePrice,
             Mrp = product.Mrp,
@@ -227,6 +227,27 @@ public class ProductServiceTests : IDisposable
         var results = await _sut.SearchAsync(new ProductSearchQuery { SearchText = "9998887776665" });
 
         Assert.Equal(target.Id, results[0].Id);
+    }
+
+    /// <summary>POS search feeds straight into the cart: typing a retired code and pressing Enter
+    /// must not sell against it. Both the exact-match bucket and the partial-LIKE bucket have to
+    /// filter IsActive — only the exact bucket did at first, so the retired code still surfaced
+    /// through the partial match and defeated retirement entirely.</summary>
+    [Fact]
+    public async Task SearchAsync_DoesNotSurfaceAProduct_ByItsRetiredBarcode()
+    {
+        var product = await _sut.CreateAsync(ValidRequest("Retired Code Product", "RETIRE-SKU", "ACTIVE-CODE"));
+        var barcodeService = new BarcodeService(
+            _fixture.Context, new EfSequenceGenerator(_fixture.Context),
+            new EfAuditLogger(_fixture.Context), new PermissionEnforcer(_fixture.Context));
+        var retired = await barcodeService.AddBarcodeAsync(product.Id, "OLDPACK-9", makePrimary: false, _ownerId);
+        await barcodeService.SetBarcodeActiveAsync(retired.Id, isActive: false, _ownerId);
+
+        Assert.Empty(await _sut.SearchAsync(new ProductSearchQuery { SearchText = "OLDPACK-9" }));
+        // A partial fragment of the retired code must not surface it either.
+        Assert.Empty(await _sut.SearchAsync(new ProductSearchQuery { SearchText = "OLDPACK" }));
+        // ...while the product remains findable by its active code.
+        Assert.Single(await _sut.SearchAsync(new ProductSearchQuery { SearchText = "ACTIVE-CODE" }));
     }
 
     [Fact]
@@ -297,7 +318,7 @@ public class ProductServiceTests : IDisposable
     {
         var product = await _sut.CreateAsync(new CreateProductRequest
         {
-            Name = "Loose Rice", Sku = "SKU-RICE", Barcode = "BAR-RICE", Unit = UnitOfMeasure.Kilogram,
+            Name = "Loose Rice", Sku = "SKU-RICE", Barcodes = ["BAR-RICE"], Unit = UnitOfMeasure.Kilogram,
             PurchasePrice = 40, Mrp = 60, SellingPrice = 55, PerformedByUserId = _ownerId,
         });
 
@@ -310,7 +331,7 @@ public class ProductServiceTests : IDisposable
     {
         var product = await _sut.CreateAsync(new CreateProductRequest
         {
-            Name = "Amul Butter 500g", Sku = "SKU-BUTTER", Barcode = "BAR-BUTTER", Unit = UnitOfMeasure.Packet,
+            Name = "Amul Butter 500g", Sku = "SKU-BUTTER", Barcodes = ["BAR-BUTTER"], Unit = UnitOfMeasure.Packet,
             UnitDisplayText = "500g Pack", PurchasePrice = 200, Mrp = 260, SellingPrice = 250, PerformedByUserId = _ownerId,
         });
 
@@ -334,7 +355,7 @@ public class ProductServiceTests : IDisposable
     {
         var product = await _sut.CreateAsync(new CreateProductRequest
         {
-            Name = "Biscuit Box", Sku = "SKU-BISCUIT", Barcode = "BAR-BISCUIT", Unit = UnitOfMeasure.Piece,
+            Name = "Biscuit Box", Sku = "SKU-BISCUIT", Barcodes = ["BAR-BISCUIT"], Unit = UnitOfMeasure.Piece,
             PurchasePackUnit = UnitOfMeasure.Box, PurchasePackSize = 12,
             PurchasePrice = 8, Mrp = 12, SellingPrice = 10, PerformedByUserId = _ownerId,
         });
@@ -418,7 +439,7 @@ public class ProductServiceTests : IDisposable
     {
         var product = await _sut.CreateAsync(new CreateProductRequest
         {
-            Name = "Biscuit Box", Sku = "SKU-BISCUIT2", Barcode = "BAR-BISCUIT2", Unit = UnitOfMeasure.Piece,
+            Name = "Biscuit Box", Sku = "SKU-BISCUIT2", Barcodes = ["BAR-BISCUIT2"], Unit = UnitOfMeasure.Piece,
             PurchasePackUnit = UnitOfMeasure.Box, PurchasePackSize = 12,
             PurchasePrice = 8, Mrp = 12, SellingPrice = 10, PerformedByUserId = _ownerId,
         });
