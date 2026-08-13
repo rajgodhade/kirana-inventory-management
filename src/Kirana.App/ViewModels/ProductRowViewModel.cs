@@ -36,6 +36,17 @@ public sealed class ProductRowViewModel
 
     public decimal Stock { get; init; }
     public bool IsActive { get; init; }
+
+    /// <summary>Drives the INACTIVE badge beside the product name. Without it a discontinued
+    /// product is indistinguishable from a live one whenever "Show inactive" is ticked — the only
+    /// other cue was the row menu's Reactivate item, which costs a click per row to discover.</summary>
+    public bool IsInactive => !IsActive;
+
+    /// <summary>Dims the whole row for inactive products, so the badge is reinforced by the row's
+    /// overall weight rather than being the single thing to spot. Matches the import preview's
+    /// treatment of removed rows.</summary>
+    public double RowOpacity => IsActive ? 1.0 : 0.55;
+
     public bool TracksBatches { get; init; }
     public string StockStatus { get; init; } = "";
     public DateTime CreatedAtUtc { get; init; }

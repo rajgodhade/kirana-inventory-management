@@ -109,7 +109,11 @@
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="vm:ProductRowViewModel">
-                                <Grid Padding="12,6" ColumnSpacing="16" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
+                                <!-- Inactive products are dimmed as well as badged, so a discontinued
+                                     row reads as "switched off" from across the grid rather than
+                                     depending on spotting one small label. -->
+                                <Grid Padding="12,6" ColumnSpacing="16" BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1"
+                                      Opacity="{x:Bind RowOpacity}">
                                     <!-- Must stay byte-for-byte identical to the header row's columns
                                          above, or the headers stop lining up with their data. -->
                                     <Grid.ColumnDefinitions>
@@ -122,7 +126,17 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
+                                        <!-- Name and badge share a line to keep the row height the
+                                             compact single-line-per-field shape the grid uses. -->
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
+                                            <Border Style="{StaticResource BadgeBorderStyle}" Background="{ThemeResource DangerSubtleBrush}"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{x:Bind IsInactive, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="INACTIVE" Foreground="{ThemeResource DangerBrush}"
+                                                           Style="{StaticResource BadgeTextStyle}" />
+                                            </Border>
+                                        </StackPanel>
                                         <!-- Ellipsis rather than a hard clip: the code/SKU/barcode line
                                              can outrun the column on long names, and a trailing "…" reads
                                              as "there's more" instead of looking like a truncated value. -->
