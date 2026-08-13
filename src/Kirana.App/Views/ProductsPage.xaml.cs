@@ -65,13 +65,13 @@ public sealed partial class ProductsPage : Page
     // intermittently search with the previous (stale) value, as documented elsewhere in this app
     // (PurchasesPage's "Outstanding only" filter).
     //
-    // This one was missed when the two below were fixed, which is why ticking "Show inactive" did
-    // nothing: the search ran with the stale false and inactive products stayed hidden.
-    private async void OnShowInactiveChanged(object sender, RoutedEventArgs e)
+    // This one was missed when the two below were fixed, which is why ticking the inactive filter
+    // did nothing: the search ran with the stale false and inactive products stayed hidden.
+    private async void OnInactiveOnlyChanged(object sender, RoutedEventArgs e)
     {
         if (sender is CheckBox checkBox)
         {
-            ViewModel.ShowInactive = checkBox.IsChecked == true;
+            ViewModel.InactiveOnly = checkBox.IsChecked == true;
         }
 
         await ViewModel.SearchAsync();

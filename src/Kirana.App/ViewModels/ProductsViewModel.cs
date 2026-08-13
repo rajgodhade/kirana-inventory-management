@@ -19,8 +19,11 @@ public sealed partial class ProductsViewModel(
     [ObservableProperty]
     private string _searchText = string.Empty;
 
+    /// <summary>Narrows the list to discontinued products only, matching how the sibling
+    /// "Out of stock" and "Expired" checkboxes behave. Named <c>...Only</c> for the same reason —
+    /// the previous <c>ShowInactive</c> read as "include these as well", which is not what it does.</summary>
     [ObservableProperty]
-    private bool _showInactive;
+    private bool _inactiveOnly;
 
     [ObservableProperty]
     private bool _outOfStockOnly;
@@ -95,14 +98,21 @@ public sealed partial class ProductsViewModel(
             var results = await productService.SearchAsync(new ProductSearchQuery
             {
                 SearchText = SearchText,
-                IncludeInactive = ShowInactive,
+                IncludeInactive = InactiveOnly,
             });
 
             var rows = new List<ProductRowViewModel>();
             foreach (var product in results)
             {
                 var row = await ToRowAsync(product);
-                if ((!OutOfStockOnly || row.Stock <= 0) && (!ExpiredOnly || row.ExpiryStatus == "EXPIRED"))
+
+                // Every checkbox on this toolbar narrows the list to just those products, rather
+                // than adding them to the active ones — "Show inactive" behaves like its neighbours
+                // "Out of stock" and "Expired". The service call above widens the query to include
+                // inactive rows; this narrows it back down to only them.
+                if ((!InactiveOnly || !row.IsActive)
+                    && (!OutOfStockOnly || row.Stock <= 0)
+                    && (!ExpiredOnly || row.ExpiryStatus == "EXPIRED"))
                 {
                     rows.Add(row);
                 }

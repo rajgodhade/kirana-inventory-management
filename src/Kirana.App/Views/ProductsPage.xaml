@@ -30,8 +30,10 @@
                      Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnSearchBoxKeyDown"
                      TextChanged="OnSearchTextChanged" />
 
-            <CheckBox Content="Show inactive" VerticalAlignment="Center" Margin="4,0,0,0"
-                      IsChecked="{x:Bind ViewModel.ShowInactive, Mode=TwoWay}" Checked="OnShowInactiveChanged" Unchecked="OnShowInactiveChanged" />
+            <!-- "Inactive", not "Show inactive": all three of these narrow the list to matching
+                 products, so the labels read the same way. -->
+            <CheckBox Content="Inactive" VerticalAlignment="Center" Margin="4,0,0,0"
+                      IsChecked="{x:Bind ViewModel.InactiveOnly, Mode=TwoWay}" Checked="OnInactiveOnlyChanged" Unchecked="OnInactiveOnlyChanged" />
 
             <CheckBox Content="Out of stock" VerticalAlignment="Center"
                       IsChecked="{x:Bind ViewModel.OutOfStockOnly, Mode=TwoWay}" Checked="OnOutOfStockOnlyChanged" Unchecked="OnOutOfStockOnlyChanged" />
