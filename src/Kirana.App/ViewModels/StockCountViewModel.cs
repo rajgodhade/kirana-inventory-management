@@ -22,6 +22,7 @@ public sealed partial class StockCountViewModel(
     public ObservableCollection<StockCountRowViewModel> History { get; } = [];
     public ObservableCollection<StockCountItemRowViewModel> Items { get; } = [];
     public ObservableCollection<StockCountVarianceRowViewModel> VarianceLines { get; } = [];
+    public ObservableCollection<StockCountDetailRowViewModel> DetailLines { get; } = [];
 
     /// <summary>Deliberately its own minimal row type rather than the products page's
     /// ProductRowViewModel: this picker needs three fields, and that type carries pricing/stock/
@@ -48,7 +49,17 @@ public sealed partial class StockCountViewModel(
     [NotifyPropertyChangedFor(nameof(IsCountingView))]
     [NotifyPropertyChangedFor(nameof(IsReviewView))]
     [NotifyPropertyChangedFor(nameof(IsCompletedView))]
+    [NotifyPropertyChangedFor(nameof(IsDetailsView))]
     private string _viewState = "List";
+
+    // ---- Details of a past count ----
+    [ObservableProperty] private string _detailsCountNumber = "";
+    [ObservableProperty] private string _detailsStatusText = "";
+    [ObservableProperty] private string _detailsSummaryText = "";
+    [ObservableProperty] private string _detailsIncreaseText = "";
+    [ObservableProperty] private string _detailsDecreaseText = "";
+    [ObservableProperty] private string _detailsAffectedText = "";
+    [ObservableProperty] private string _detailsRebaseNote = "";
 
     // ---- Review / completion summary ----
     [ObservableProperty] private string _reviewSummaryText = "";
@@ -59,10 +70,14 @@ public sealed partial class StockCountViewModel(
     [ObservableProperty] private string _completionSummary = "";
     [ObservableProperty] private string _completionCountNumber = "";
 
+    /// <summary>Id of the count just finalized, for the completion screen's View Details.</summary>
+    public int CompletedCountId { get; private set; }
+
     public bool IsListView => ViewState == "List";
     public bool IsCountingView => ViewState == "Counting";
     public bool IsReviewView => ViewState == "Review";
     public bool IsCompletedView => ViewState == "Completed";
+    public bool IsDetailsView => ViewState == "Details";
 
     public bool HasActiveCount => ActiveCount is not null;
     public string ActiveCountNumber => ActiveCount?.CountNumber ?? "";
@@ -139,6 +154,56 @@ public sealed partial class StockCountViewModel(
 
     [RelayCommand]
     private void BackToList() => ViewState = "List";
+
+    /// <summary>
+    /// Opens a finished count read-only: what each product's system quantity was, what was counted,
+    /// and the variance. Uses the stored snapshots rather than recomputing against today's stock, so
+    /// the record still says what it said the day it was finalized.
+    /// </summary>
+    public async Task ShowDetailsAsync(int stockCountId)
+    {
+        await RunAsync(async () =>
+        {
+            var count = await stockCounts.GetByIdAsync(stockCountId)
+                ?? throw new InvalidOperationException("That stock count no longer exists.");
+
+            DetailsCountNumber = count.CountNumber;
+            DetailsStatusText = count.Status switch
+            {
+                StockCountStatus.Completed => "Completed",
+                StockCountStatus.Cancelled => "Cancelled — no stock was changed",
+                _ => "In Progress",
+            };
+
+            DetailLines.Clear();
+            // Differences first: that is what someone opening a past count is looking for.
+            foreach (var item in count.Items
+                .OrderBy(i => i.VarianceQuantity is null)
+                .ThenBy(i => i.VarianceQuantity == 0m)
+                .ThenBy(i => i.ProductNameSnapshot))
+            {
+                DetailLines.Add(new StockCountDetailRowViewModel(item));
+            }
+
+            var counted = count.Items.Where(i => i.CountedQuantity is not null).ToList();
+            var increases = counted.Where(i => i.VarianceQuantity > 0m).ToList();
+            var decreases = counted.Where(i => i.VarianceQuantity < 0m).ToList();
+
+            DetailsSummaryText =
+                $"{counted.Count} of {count.Items.Count} product(s) counted · " +
+                $"{increases.Count} increased · {decreases.Count} decreased · " +
+                $"{counted.Count - increases.Count - decreases.Count} unchanged";
+            DetailsIncreaseText = $"+{increases.Sum(i => i.VarianceQuantity ?? 0m):0.###}";
+            DetailsDecreaseText = $"-{Math.Abs(decreases.Sum(i => i.VarianceQuantity ?? 0m)):0.###}";
+            DetailsAffectedText = (increases.Count + decreases.Count).ToString();
+            DetailsRebaseNote = count.RebasedItemCount > 0
+                ? $"{count.RebasedItemCount} product(s) had stock movement during this count, so their " +
+                  "adjustments were recalculated against stock at the time of finalizing."
+                : "";
+
+            ViewState = "Details";
+        });
+    }
 
     [RelayCommand]
     private void BackToCounting() => ViewState = "Counting";
@@ -296,6 +361,9 @@ public sealed partial class StockCountViewModel(
             var result = await stockCounts.FinalizeAsync(ActiveCount.Id, UserId);
 
             CompletionCountNumber = result.CountNumber;
+            // Kept so the completion screen's "View Details" can open the count that was just
+            // finalized, without making the user find it in the history list.
+            CompletedCountId = result.StockCountId;
             CompletionSummary =
                 $"Products counted: {result.ProductsCounted}\n" +
                 $"Increased: {result.IncreasedCount}\n" +

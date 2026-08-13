@@ -124,6 +124,7 @@
                                      Visibility="{x:Bind ViewModel.HasSelectedProduct, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                      Text="{x:Bind ViewModel.ProductSearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      CharacterReceived="OnScanCharacterReceived" KeyDown="OnScanKeyDown"
+                                     TextChanged="OnScanTextChanged"
                                      AutomationProperties.Name="Scan or search product to adjust" />
 
                             <ItemsControl ItemsSource="{x:Bind ViewModel.SearchResults}">

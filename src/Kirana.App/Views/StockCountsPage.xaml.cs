@@ -37,9 +37,16 @@ public sealed partial class StockCountsPage : Page
 
     // ---- Scan / search box ----
 
-    private void OnScanCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args)
-    {
+    /// <summary>Feeds the scanner buffer, which needs per-character timing to tell a scanner burst
+    /// from human typing. Suggestions are driven by <see cref="OnScanTextChanged"/> instead.</summary>
+    private void OnScanCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args) =>
         ViewModel.ScannerBuffer.OnCharacter(args.Character, DateTimeOffset.UtcNow);
+
+    /// <summary>Drives the live suggestion list. TextChanged rather than CharacterReceived, which
+    /// only fires for physical keystrokes — it misses paste, backspace and programmatic changes, so
+    /// suggestions never appeared for them. Same pattern as the Products page.</summary>
+    private void OnScanTextChanged(object sender, TextChangedEventArgs e)
+    {
         _searchDebounce.Stop();
         _searchDebounce.Start();
     }
@@ -100,6 +107,17 @@ public sealed partial class StockCountsPage : Page
         if ((sender as FrameworkElement)?.Tag is StockCountItemRowViewModel row)
         {
             await ViewModel.SetQuantityAsync(row);
+        }
+    }
+
+    private async void OnViewCompletedDetailsClick(object sender, RoutedEventArgs e) =>
+        await ViewModel.ShowDetailsAsync(ViewModel.CompletedCountId);
+
+    private async void OnViewDetailsClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is StockCountRowViewModel row)
+        {
+            await ViewModel.ShowDetailsAsync(row.Id);
         }
     }
 

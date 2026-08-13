@@ -30,6 +30,54 @@ public sealed partial class StockCountRowViewModel(StockCountSummary summary) : 
     public string StartedByText { get; } = summary.StartedByUserName ?? "—";
 
     public bool IsActive { get; } = summary.Status == StockCountStatus.InProgress;
+
+    /// <summary>A finished count is a historical record worth opening; an in-progress one is
+    /// reached via Continue instead, so it gets no Details button.</summary>
+    public bool CanViewDetails { get; } = summary.Status != StockCountStatus.InProgress;
+}
+
+/// <summary>
+/// One line of a completed count's detail view: what the system said, what was counted, and what
+/// was actually applied. Read-only — a completed count is immutable.
+/// </summary>
+public sealed class StockCountDetailRowViewModel(StockCountItem item)
+{
+    public string ProductName { get; } = item.ProductNameSnapshot;
+    public string ProductCode { get; } = item.ProductCodeSnapshot;
+    public string UnitText { get; } = item.UnitSnapshot.ToDisplayText();
+
+    public string SystemText { get; } = item.SystemQuantity.ToString("0.###");
+
+    public string PhysicalText { get; } = item.CountedQuantity?.ToString("0.###") ?? "Not counted";
+
+    /// <summary>Always signed, so surplus and shortage read differently without relying on colour.</summary>
+    public string VarianceText { get; } = item.VarianceQuantity switch
+    {
+        null => "—",
+        0m => "0",
+        > 0m => $"+{item.VarianceQuantity.Value:0.###}",
+        _ => item.VarianceQuantity.Value.ToString("0.###"),
+    };
+
+    public string VarianceState { get; } = item.VarianceQuantity switch
+    {
+        null => "Pending",
+        0m => "Match",
+        > 0m => "Surplus",
+        _ => "Shortage",
+    };
+
+    /// <summary>Set only when live stock had moved by the time the count was finalized, so the
+    /// applied adjustment differed from the variance the counter observed.</summary>
+    public bool WasRebased { get; } = item.SystemQuantityAtFinalization is not null;
+
+    public string RebaseNote { get; } = item.SystemQuantityAtFinalization is { } atFinalization
+        ? $"Stock had changed to {atFinalization:0.###} by the time this count was finalized, " +
+          $"so the adjustment was recalculated against that."
+        : "";
+
+    public string NotesText { get; } = item.Notes ?? "";
+    public bool HasNotes { get; } = !string.IsNullOrWhiteSpace(item.Notes);
 }
 
 /// <summary>

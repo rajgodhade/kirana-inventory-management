@@ -94,9 +94,16 @@ public sealed partial class InventoryAdjustmentsPage : Page
 
     // ---- Product selection ----
 
-    private void OnScanCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args)
-    {
+    /// <summary>Feeds the scanner buffer, which needs per-character timing to tell a scanner burst
+    /// from human typing. Suggestions are driven by <see cref="OnScanTextChanged"/> instead.</summary>
+    private void OnScanCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs args) =>
         ViewModel.ScannerBuffer.OnCharacter(args.Character, DateTimeOffset.UtcNow);
+
+    /// <summary>Drives the live suggestion list. TextChanged rather than CharacterReceived, which
+    /// only fires for physical keystrokes — it misses paste, backspace and programmatic changes, so
+    /// suggestions never appeared for them. Same pattern as the Products page.</summary>
+    private void OnScanTextChanged(object sender, TextChangedEventArgs e)
+    {
         _productSearchDebounce.Stop();
         _productSearchDebounce.Start();
     }
