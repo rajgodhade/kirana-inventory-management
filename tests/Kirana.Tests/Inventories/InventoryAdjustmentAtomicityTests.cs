@@ -1,82 +1,66 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
-using Kirana.Application.Barcodes;
-using Kirana.Application.StockCounts;
+using Kirana.Application.Inventories;
 using Kirana.Domain.Entities;
 using Kirana.Infrastructure.Persistence;
 using Kirana.Tests.TestSupport;
 using Microsoft.EntityFrameworkCore;
 
-namespace Kirana.Tests.StockCounts;
+namespace Kirana.Tests.Inventories;
 
 /// <summary>
-/// Proves finalization is genuinely all-or-nothing (§12). Finalization writes stock movements,
-/// mutates inventory quantities, flips the count status, and writes an audit row — a partial
-/// application would leave stock moved with no count to explain it, which is unrecoverable without
-/// manual database surgery.
+/// Proves an adjustment is genuinely all-or-nothing. It writes four linked things — the adjustment
+/// record, a stock movement, the quantity change, and an audit row — and any subset landing without
+/// the others is unrecoverable without manual database surgery: stock moved with no explanation, or
+/// an explanation with no stock movement.
 ///
 /// <para>Failures are injected through a decorating <see cref="IKiranaDbContext"/> and a throwing
-/// <see cref="IAuditLogger"/>, so the real service runs unmodified and the real SQLite transaction
-/// is what performs the rollback — rather than asserting against a mock that never touched a
-/// database.</para>
+/// <see cref="IAuditLogger"/>, so the real service and the real SQLite transaction do the work —
+/// rather than asserting against a mock that never touched a database.</para>
 /// </summary>
-public class StockCountAtomicityTests : IDisposable
+public class InventoryAdjustmentAtomicityTests : IDisposable
 {
     private readonly SqliteDbContextFixture _fixture = new();
     private readonly int _ownerId;
     private int _productId;
-    private int _secondProductId;
 
-    public StockCountAtomicityTests()
+    public InventoryAdjustmentAtomicityTests()
     {
         _ownerId = _fixture.SeedOwnerAsync().GetAwaiter().GetResult().Id;
-        SeedProductsAsync().GetAwaiter().GetResult();
+        SeedAsync().GetAwaiter().GetResult();
     }
 
-    private async Task SeedProductsAsync()
+    private async Task SeedAsync()
     {
-        var first = new Product
+        var product = new Product
         {
-            ProductCode = "PRD-ATOM1", Name = "Atomic Product", Unit = UnitOfMeasure.Piece,
+            ProductCode = "PRD-ATOMADJ", Name = "Atomic Product", Unit = UnitOfMeasure.Piece,
             PurchasePrice = 10m, Mrp = 15m, SellingPrice = 14m, IsActive = true,
         };
-        var second = new Product
-        {
-            ProductCode = "PRD-ATOM2", Name = "Second Product", Unit = UnitOfMeasure.Piece,
-            PurchasePrice = 10m, Mrp = 15m, SellingPrice = 14m, IsActive = true,
-        };
-        _fixture.Context.Products.AddRange(first, second);
-        _fixture.Context.Inventories.Add(new Inventory { Product = first, QuantityOnHand = 100m });
-        _fixture.Context.Inventories.Add(new Inventory { Product = second, QuantityOnHand = 50m });
+        _fixture.Context.Products.Add(product);
+        _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = 100m });
         await _fixture.Context.SaveChangesAsync();
-        _productId = first.Id;
-        _secondProductId = second.Id;
+        _productId = product.Id;
     }
 
-    private StockCountService CreateService(
+    private InventoryAdjustmentService CreateService(
         IKiranaDbContext? db = null, IAuditLogger? auditLogger = null) =>
         new(db ?? _fixture.Context,
             new EfSequenceGenerator(_fixture.Context),
             auditLogger ?? new EfAuditLogger(_fixture.Context),
-            new PermissionEnforcer(_fixture.Context),
-            new BarcodeLookupService(_fixture.Context));
+            new PermissionEnforcer(_fixture.Context));
 
-    /// <summary>Builds a count with both products counted at a variance, ready to finalize.</summary>
-    private async Task<StockCount> BuildCountAsync()
+    private CreateInventoryAdjustmentRequest Request() => new()
     {
-        var service = CreateService();
-        var count = await service.StartAsync(null, _ownerId);
+        ProductId = _productId,
+        Direction = InventoryAdjustmentDirection.Decrease,
+        Quantity = 5m,
+        Reason = InventoryAdjustmentReason.Damaged,
+        Notes = "Injected failure test",
+        PerformedByUserId = _ownerId,
+    };
 
-        var first = await service.AddItemAsync(count.Id, _productId, null, _ownerId);
-        await service.SetCountedQuantityAsync(first.Id, 97m, null, _ownerId);
-
-        var second = await service.AddItemAsync(count.Id, _secondProductId, null, _ownerId);
-        await service.SetCountedQuantityAsync(second.Id, 55m, null, _ownerId);
-
-        return count;
-    }
-
-    private async Task AssertNothingAppliedAsync(int stockCountId)
+    private async Task AssertNothingAppliedAsync()
     {
         // A fresh context: the failed attempt leaves stale tracked entities in the shared one, and
         // the question is what actually reached the database.
@@ -84,84 +68,89 @@ public class StockCountAtomicityTests : IDisposable
             new DbContextOptionsBuilder<KiranaDbContext>()
                 .UseSqlite(_fixture.Context.Database.GetDbConnection()).Options);
 
-        Assert.Equal(100m, await verify.Inventories.Where(i => i.ProductId == _productId)
-            .Select(i => i.QuantityOnHand).FirstAsync());
-        Assert.Equal(50m, await verify.Inventories.Where(i => i.ProductId == _secondProductId)
-            .Select(i => i.QuantityOnHand).FirstAsync());
-
+        Assert.Equal(100m, await verify.Inventories
+            .Where(i => i.ProductId == _productId).Select(i => i.QuantityOnHand).FirstAsync());
         Assert.Empty(await verify.StockMovements.ToListAsync());
-
-        var reloaded = await verify.StockCounts.FirstAsync(c => c.Id == stockCountId);
-        Assert.Equal(StockCountStatus.InProgress, reloaded.Status);
-        Assert.Null(reloaded.CompletedAtUtc);
-
-        Assert.False(await verify.AuditLogs.AnyAsync(a => a.Action == "StockCountCompleted"));
+        Assert.Empty(await verify.InventoryAdjustments.ToListAsync());
+        Assert.False(await verify.AuditLogs.AnyAsync(a => a.Action == "InventoryAdjusted"));
     }
 
     [Fact]
-    public async Task Finalize_RollsBackEverything_WhenTheStockWriteFails()
+    public async Task RollsBackEverything_WhenTheWriteFails()
     {
-        var count = await BuildCountAsync();
-        var failing = new FailingSaveDbContext(_fixture.Context);
-        var service = CreateService(db: failing);
+        var service = CreateService(db: new FailingSaveDbContext(_fixture.Context));
 
-        await Assert.ThrowsAnyAsync<Exception>(() => service.FinalizeAsync(count.Id, _ownerId));
+        await Assert.ThrowsAnyAsync<Exception>(() => service.CreateAsync(Request()));
 
-        await AssertNothingAppliedAsync(count.Id);
+        await AssertNothingAppliedAsync();
     }
 
-    /// <summary>The audit write is the last step, and happens AFTER stock has already been written
-    /// inside the transaction. If it throws and the transaction did not roll back, inventory would
-    /// be permanently changed with no audit record of why.</summary>
+    /// <summary>The audit write happens LAST, after stock has already been written inside the
+    /// transaction. If it throws and the transaction did not roll back, inventory would be
+    /// permanently changed with no record of why — the exact scenario the transaction exists for.</summary>
     [Fact]
-    public async Task Finalize_RollsBackTheStockWrite_WhenTheAuditWriteFails()
+    public async Task RollsBackTheStockWrite_WhenTheAuditWriteFails()
     {
-        var count = await BuildCountAsync();
         var service = CreateService(auditLogger: new ThrowingAuditLogger());
 
-        await Assert.ThrowsAnyAsync<Exception>(() => service.FinalizeAsync(count.Id, _ownerId));
+        await Assert.ThrowsAnyAsync<Exception>(() => service.CreateAsync(Request()));
 
-        await AssertNothingAppliedAsync(count.Id);
+        await AssertNothingAppliedAsync();
     }
 
     [Fact]
-    public async Task Finalize_LeavesNoPartialMovements_WhenFailureOccursPartWayThroughAMultiItemCount()
+    public async Task CanRetrySuccessfully_AfterAFailedAttempt()
     {
-        var count = await BuildCountAsync();
-        var failing = new FailingSaveDbContext(_fixture.Context);
-        var service = CreateService(db: failing);
+        var failing = CreateService(db: new FailingSaveDbContext(_fixture.Context));
+        await Assert.ThrowsAnyAsync<Exception>(() => failing.CreateAsync(Request()));
 
-        await Assert.ThrowsAnyAsync<Exception>(() => service.FinalizeAsync(count.Id, _ownerId));
-
-        // Neither product may be adjusted: it must not be possible for the first line to land and
-        // the second to be lost.
-        await AssertNothingAppliedAsync(count.Id);
-    }
-
-    [Fact]
-    public async Task Finalize_CanBeRetriedSuccessfully_AfterAFailedAttempt()
-    {
-        var count = await BuildCountAsync();
-        var service = CreateService(db: new FailingSaveDbContext(_fixture.Context));
-        await Assert.ThrowsAnyAsync<Exception>(() => service.FinalizeAsync(count.Id, _ownerId));
-
-        // The rollback must leave the count genuinely re-finalizable, not wedged half-done.
+        // The rollback must leave the row genuinely re-adjustable, not wedged half-done.
         _fixture.Context.ChangeTracker.Clear();
         var healthy = CreateService();
-        var result = await healthy.FinalizeAsync(count.Id, _ownerId);
+        var adjustment = await healthy.CreateAsync(Request());
 
-        Assert.Equal(2, result.AdjustmentCount);
-        Assert.Equal(97m, await _fixture.Context.Inventories
+        Assert.Equal(95m, adjustment.NewQuantity);
+        Assert.Equal(95m, await _fixture.Context.Inventories
             .Where(i => i.ProductId == _productId).Select(i => i.QuantityOnHand).FirstAsync());
-        Assert.Equal(55m, await _fixture.Context.Inventories
-            .Where(i => i.ProductId == _secondProductId).Select(i => i.QuantityOnHand).FirstAsync());
+        Assert.Single(await _fixture.Context.StockMovements.ToListAsync());
+        Assert.Single(await _fixture.Context.InventoryAdjustments.ToListAsync());
+    }
+
+    /// <summary>Reconciliation invariant: every adjustment record has exactly one movement, and
+    /// every adjustment movement has a matching record. Neither can exist alone.</summary>
+    [Fact]
+    public async Task EveryAdjustmentHasExactlyOneMatchingMovement()
+    {
+        var service = CreateService();
+        await service.CreateAsync(Request());
+        await service.CreateAsync(new CreateInventoryAdjustmentRequest
+        {
+            ProductId = _productId,
+            Direction = InventoryAdjustmentDirection.Increase,
+            Quantity = 2m,
+            Reason = InventoryAdjustmentReason.Found,
+            PerformedByUserId = _ownerId,
+        });
+
+        var adjustments = await _fixture.Context.InventoryAdjustments.ToListAsync();
+        var movements = await _fixture.Context.StockMovements
+            .Where(m => m.ReferenceType == nameof(InventoryAdjustment)).ToListAsync();
+
+        Assert.Equal(2, adjustments.Count);
+        Assert.Equal(adjustments.Count, movements.Count);
+        foreach (var adjustment in adjustments)
+        {
+            var movement = Assert.Single(movements, m => m.ReferenceId == adjustment.AdjustmentNumber);
+            Assert.Equal(adjustment.SignedQuantity, movement.QuantityChange);
+            Assert.Equal(adjustment.PreviousQuantity, movement.PreviousQuantity);
+            Assert.Equal(adjustment.NewQuantity, movement.NewQuantity);
+        }
     }
 
     public void Dispose() => _fixture.Dispose();
 
-    /// <summary>Passes everything through to the real context but fails the save that finalization
-    /// uses to write movements and quantities. Everything else — including the transaction — is the
-    /// genuine SQLite implementation.</summary>
+    /// <summary>Passes everything through to the real context but fails the save the adjustment
+    /// uses. Everything else — including the transaction — is genuine SQLite.</summary>
     private sealed class FailingSaveDbContext(KiranaDbContext inner) : IKiranaDbContext
     {
         public DbSet<Store> Stores => inner.Stores;
@@ -214,7 +203,7 @@ public class StockCountAtomicityTests : IDisposable
         public Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade Database => inner.Database;
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
-            throw new InvalidOperationException("Injected failure: stock write refused.");
+            throw new InvalidOperationException("Injected failure: adjustment write refused.");
     }
 
     private sealed class ThrowingAuditLogger : IAuditLogger

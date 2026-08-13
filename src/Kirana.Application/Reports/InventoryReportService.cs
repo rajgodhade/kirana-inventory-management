@@ -224,6 +224,66 @@ public sealed class InventoryReportService(
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<StockCorrectionSummaryRow>> GetStockCorrectionSummaryAsync(
+        ReportDateRange range, int? performedByUserId, CancellationToken cancellationToken = default)
+    {
+        await permissionEnforcer.EnsureHasPermissionAsync(performedByUserId, PermissionKeys.ReportsView, cancellationToken);
+
+        var countTypes = new[] { StockMovementType.StockCountIncrease, StockMovementType.StockCountDecrease };
+        var adjustmentTypes = new[]
+        {
+            StockMovementType.InventoryAdjustmentIncrease, StockMovementType.InventoryAdjustmentDecrease,
+        };
+
+        var rows = new List<StockCorrectionSummaryRow>();
+
+        // Stock counts: one aggregate row. A count has no per-line reason — the reason IS "this is
+        // what was physically on the shelf".
+        var countMovements = await db.StockMovements.AsNoTracking()
+            .Where(m => countTypes.Contains(m.MovementType)
+                && m.TimestampUtc >= range.StartUtc && m.TimestampUtc < range.EndUtc)
+            .Select(m => m.QuantityChange)
+            .ToListAsync(cancellationToken);
+
+        if (countMovements.Count > 0)
+        {
+            rows.Add(new StockCorrectionSummaryRow
+            {
+                Source = "Physical stock count",
+                MovementCount = countMovements.Count,
+                TotalIncreaseQuantity = countMovements.Where(q => q > 0m).Sum(),
+                TotalDecreaseQuantity = Math.Abs(countMovements.Where(q => q < 0m).Sum()),
+            });
+        }
+
+        // Manual adjustments: split by reason, since "we lost 40 units" means something very
+        // different from "we found 40 units" or "someone fixed an opening balance". Joined to the
+        // adjustment record via the ADJ- reference the movement carries.
+        var adjustmentRows = await db.StockMovements.AsNoTracking()
+            .Where(m => adjustmentTypes.Contains(m.MovementType)
+                && m.TimestampUtc >= range.StartUtc && m.TimestampUtc < range.EndUtc)
+            .Join(db.InventoryAdjustments.AsNoTracking(),
+                m => m.ReferenceId,
+                a => a.AdjustmentNumber,
+                (m, a) => new { a.Reason, m.QuantityChange })
+            .ToListAsync(cancellationToken);
+
+        rows.AddRange(adjustmentRows
+            .GroupBy(x => x.Reason)
+            .Select(g => new StockCorrectionSummaryRow
+            {
+                Source = "Manual adjustment",
+                Reason = g.Key.ToDisplayText(),
+                MovementCount = g.Count(),
+                TotalIncreaseQuantity = g.Where(x => x.QuantityChange > 0m).Sum(x => x.QuantityChange),
+                TotalDecreaseQuantity = Math.Abs(g.Where(x => x.QuantityChange < 0m).Sum(x => x.QuantityChange)),
+            })
+            .OrderByDescending(r => r.MovementCount)
+            .ThenBy(r => r.Reason));
+
+        return rows;
+    }
+
     public async Task<IReadOnlyList<BatchSummaryRow>> GetExpiredBatchesAsync(int? performedByUserId, CancellationToken cancellationToken = default)
     {
         await permissionEnforcer.EnsureHasPermissionAsync(performedByUserId, PermissionKeys.ReportsView, cancellationToken);

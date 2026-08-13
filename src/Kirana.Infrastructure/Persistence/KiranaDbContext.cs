@@ -59,6 +59,7 @@ public sealed class KiranaDbContext(DbContextOptions<KiranaDbContext> options)
     public DbSet<CashMovement> CashMovements => Set<CashMovement>();
     public DbSet<StockCount> StockCounts => Set<StockCount>();
     public DbSet<StockCountItem> StockCountItems => Set<StockCountItem>();
+    public DbSet<InventoryAdjustment> InventoryAdjustments => Set<InventoryAdjustment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

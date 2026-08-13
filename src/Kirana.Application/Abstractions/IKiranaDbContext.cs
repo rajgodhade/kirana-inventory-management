@@ -63,6 +63,7 @@ public interface IKiranaDbContext
     DbSet<CashMovement> CashMovements { get; }
     DbSet<StockCount> StockCounts { get; }
     DbSet<StockCountItem> StockCountItems { get; }
+    DbSet<InventoryAdjustment> InventoryAdjustments { get; }
 
     DatabaseFacade Database { get; }
 

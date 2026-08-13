@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IBrandService, BrandService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IInventoryAdjustmentService, InventoryAdjustmentService>();
         services.AddScoped<IStockCountService, StockCountService>();
         services.AddScoped<IBarcodeService, BarcodeService>();
         services.AddScoped<IBarcodeLookupService, BarcodeLookupService>();

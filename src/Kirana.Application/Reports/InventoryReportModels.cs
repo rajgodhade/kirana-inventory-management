@@ -44,6 +44,27 @@ public sealed class BatchSummaryRow
     public bool IsExpired { get; init; }
 }
 
+/// <summary>
+/// How much stock each correction mechanism moved over a period (Phase 13D §24). Answers "was this
+/// found by counting the shelves, or asserted by hand?" — the two carry very different weight in a
+/// shrinkage investigation, which is why they have separate movement types.
+/// </summary>
+public sealed class StockCorrectionSummaryRow
+{
+    /// <summary>"Physical stock count" or "Manual adjustment".</summary>
+    public string Source { get; init; } = string.Empty;
+
+    /// <summary>Reason label for manual adjustments; empty for stock counts, which have no reason
+    /// beyond "this is what was on the shelf".</summary>
+    public string Reason { get; init; } = string.Empty;
+
+    public int MovementCount { get; init; }
+    public decimal TotalIncreaseQuantity { get; init; }
+    public decimal TotalDecreaseQuantity { get; init; }
+
+    public decimal NetQuantityChange => TotalIncreaseQuantity - TotalDecreaseQuantity;
+}
+
 /// <summary>One completed physical stock count and what it adjusted (Phase 13C §22).</summary>
 public sealed class StockCountReportRow
 {

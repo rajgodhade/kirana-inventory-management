@@ -173,8 +173,10 @@ public sealed partial class ProductsViewModel(
     public async Task SetBrandActiveAsync(int brandId, bool isActive) =>
         await brandService.SetActiveAsync(brandId, isActive, CurrentUserId);
 
-    public async Task AdjustStockAsync(int productId, decimal quantityChange, StockMovementType movementType, string? reason) =>
-        await inventoryService.AdjustStockAsync(productId, quantityChange, movementType, reason, CurrentUserId);
+    // No AdjustStockAsync passthrough here any more (Phase 13D): manual stock changes go through
+    // IInventoryAdjustmentService, which records a reason, writes an adjustment record and refuses
+    // to drive stock negative. Leaving a shortcut on this ViewModel would reintroduce the weaker
+    // path the 13D page replaced.
 
     public Task<IReadOnlyList<StockMovement>> GetMovementHistoryAsync(int productId) =>
         inventoryService.GetMovementHistoryAsync(productId, take: 20);

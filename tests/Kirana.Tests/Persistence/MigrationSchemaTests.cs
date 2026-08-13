@@ -108,6 +108,92 @@ public sealed class MigrationSchemaTests : IDisposable
         Assert.Contains("PurchasedPackQuantitySnapshot", columns);
     }
 
+    // ---- Phase 13D inventory adjustments ----
+
+    private const string StockCountMigration = "20260813110000_AddStockCounts";
+
+    [Fact]
+    public async Task InventoryAdjustmentsTable_ExistsAfterMigrating()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        var columns = await ColumnNamesAsync(context, "InventoryAdjustments");
+        Assert.Contains("AdjustmentNumber", columns);
+        Assert.Contains("Direction", columns);
+        Assert.Contains("Reason", columns);
+        Assert.Contains("AdjustmentQuantity", columns);
+        Assert.Contains("PreviousQuantity", columns);
+        Assert.Contains("NewQuantity", columns);
+        Assert.Contains("ProductNameSnapshot", columns);
+        Assert.Contains("UnitSnapshot", columns);
+        Assert.Contains("Notes", columns);
+    }
+
+    /// <summary>An "ADJ-…" reference on a stock movement must resolve to exactly one record.</summary>
+    [Fact]
+    public async Task AdjustmentNumber_IsUniquelyIndexed()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        var indexes = await IndexDefinitionsAsync(context, "InventoryAdjustments");
+        Assert.Contains(indexes, i =>
+            i.Name == "IX_InventoryAdjustments_AdjustmentNumber" && i.Sql?.Contains("UNIQUE") == true);
+    }
+
+    /// <summary>Phase 13D is purely additive. In particular it must not disturb the Phase 13C stock
+    /// count tables or rewrite any historical stock movement.</summary>
+    [Fact]
+    public async Task InventoryAdjustmentMigration_LeavesStockCountsAndMovementsUntouched()
+    {
+        await using var context = CreateContext();
+        var migrator = context.Database.GetService<IMigrator>();
+        await migrator.MigrateAsync(StockCountMigration);
+
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using (var seed = connection.CreateCommand())
+        {
+            seed.CommandText = """
+                INSERT INTO Products
+                    (ProductCode, Name, Unit, PurchasePrice, Mrp, SellingPrice,
+                     MinimumStock, ReorderQuantity, TracksBatches, IsActive, CreatedAtUtc, PricingType, GstRatePercent)
+                VALUES ('PRD-000001', 'Legacy Product', 'Piece', 10, 15, 14, 0, 0, 0, 1, CURRENT_TIMESTAMP, 'Inclusive', 5);
+                INSERT INTO StockMovements
+                    (ProductId, MovementType, QuantityChange, PreviousQuantity, NewQuantity, TimestampUtc, CreatedAtUtc)
+                VALUES (1, 'StockCountDecrease', -2, 100, 98, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+                INSERT INTO StockCounts
+                    (CountNumber, Status, StartedAtUtc, RebasedItemCount, CreatedAtUtc)
+                VALUES ('STK-COUNT-000001', 'Completed', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP);
+                """;
+            await seed.ExecuteNonQueryAsync();
+        }
+
+        await context.Database.MigrateAsync();
+
+        await using var check = connection.CreateCommand();
+        check.CommandText =
+            "SELECT MovementType, QuantityChange, PreviousQuantity, NewQuantity FROM StockMovements";
+        await using (var reader = await check.ExecuteReaderAsync())
+        {
+            Assert.True(await reader.ReadAsync());
+            Assert.Equal("StockCountDecrease", reader.GetString(0));
+            Assert.Equal(-2m, reader.GetDecimal(1));
+            Assert.Equal(100m, reader.GetDecimal(2));
+            Assert.Equal(98m, reader.GetDecimal(3));
+            Assert.False(await reader.ReadAsync());
+        }
+
+        await using var counts = connection.CreateCommand();
+        counts.CommandText = "SELECT CountNumber, Status FROM StockCounts";
+        await using var countReader = await counts.ExecuteReaderAsync();
+        Assert.True(await countReader.ReadAsync());
+        Assert.Equal("STK-COUNT-000001", countReader.GetString(0));
+        Assert.Equal("Completed", countReader.GetString(1));
+    }
+
     // ---- Phase 13C stock counting ----
 
     [Fact]

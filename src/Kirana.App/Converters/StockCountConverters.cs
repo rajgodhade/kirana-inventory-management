@@ -61,6 +61,24 @@ public sealed class StockCountVarianceToBrushConverter : IValueConverter
         throw new NotSupportedException();
 }
 
+/// <summary>
+/// Colours a manual inventory adjustment by direction (Phase 13D). Paired with a signed "+5" / "-5"
+/// label in the UI — colour reinforces the sign, it is never the only signal.
+/// </summary>
+public sealed class AdjustmentDirectionToBrushConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language) =>
+        (value as string) switch
+        {
+            "Increase" => SemanticBrush.Resolve("SuccessBrush", SemanticBrush.Default),
+            "Decrease" => SemanticBrush.Resolve("DangerBrush", SemanticBrush.Default),
+            _ => SemanticBrush.Default,
+        };
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotSupportedException();
+}
+
 /// <summary>Shows an element only when a count is zero — for "nothing here yet" empty states.</summary>
 public sealed class ZeroToVisibilityConverter : IValueConverter
 {

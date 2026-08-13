@@ -42,4 +42,11 @@ public interface IInventoryReportService
     /// inventory question, and it shares the existing <see cref="PermissionKeys.ReportsView"/> gate.</summary>
     Task<IReadOnlyList<StockCountReportRow>> GetStockCountHistoryAsync(
         ReportDateRange range, int? performedByUserId, CancellationToken cancellationToken = default);
+
+    /// <summary>How much stock each correction mechanism moved over the period, split into physical
+    /// stock counts and manual adjustments broken down by reason (Phase 13D). Extends the existing
+    /// inventory reporting rather than adding a parallel system, and shares its
+    /// <see cref="PermissionKeys.ReportsView"/> gate.</summary>
+    Task<IReadOnlyList<StockCorrectionSummaryRow>> GetStockCorrectionSummaryAsync(
+        ReportDateRange range, int? performedByUserId, CancellationToken cancellationToken = default);
 }

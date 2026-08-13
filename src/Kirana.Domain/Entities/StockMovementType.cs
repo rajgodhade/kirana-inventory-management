@@ -22,6 +22,21 @@ public enum StockMovementType
     /// <summary>Shortage found by a physical stock count (Phase 13C). See
     /// <see cref="StockCountIncrease"/> for why this is not just <see cref="NegativeAdjustment"/>.</summary>
     StockCountDecrease,
+
+    /// <summary>Stock added by an authorized manual correction (Phase 13D) — found goods, an
+    /// opening-balance fix, or compensating an earlier mistake. Carries an "ADJ-…" reference to the
+    /// <see cref="InventoryAdjustment"/> holding the reason and notes.
+    /// <para>Distinct from <see cref="StockCountIncrease"/> (evidence from counting a shelf) and
+    /// from the legacy <see cref="PositiveAdjustment"/> (kept only so historical rows keep their
+    /// meaning; nothing writes it any more).</para></summary>
+    InventoryAdjustmentIncrease,
+
+    /// <summary>Stock removed by an authorized manual correction (Phase 13D) — damage, expiry,
+    /// loss, or theft. See <see cref="InventoryAdjustmentIncrease"/>.
+    /// <para>Deliberately NOT <see cref="Damaged"/>, even for damage: that type is written by the
+    /// sales-return flow and feeds the damaged-stock report, so reusing it here would mix
+    /// goods-returned-broken with shelf breakage and make both figures untrustworthy.</para></summary>
+    InventoryAdjustmentDecrease,
 }
 
 public static class StockMovementTypeExtensions
@@ -33,6 +48,7 @@ public static class StockMovementTypeExtensions
         StockMovementType.SalesReturn,
         StockMovementType.PositiveAdjustment,
         StockMovementType.StockCountIncrease,
+        StockMovementType.InventoryAdjustmentIncrease,
     ];
 
     public static bool IsIncrease(this StockMovementType type) => IncreaseTypes.Contains(type);

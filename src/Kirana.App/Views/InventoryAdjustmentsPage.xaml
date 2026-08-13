@@ -1,0 +1,315 @@
+<Page
+    x:Class="Kirana.App.Views.InventoryAdjustmentsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kirana.App.ViewModels">
+
+    <Grid Background="{ThemeResource PageBackgroundBrush}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="24,20,24,28" Spacing="16">
+
+                <StackPanel Spacing="2">
+                    <TextBlock Text="Inventory Adjustments" Style="{StaticResource PageTitleTextStyle}" />
+                    <TextBlock Text="Correct stock for damage, expiry, loss, theft or found goods. Every change is recorded and cannot be edited."
+                               Style="{StaticResource PageSubtitleTextStyle}" />
+                </StackPanel>
+
+                <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                         Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" IsClosable="True" />
+                <InfoBar IsOpen="{x:Bind ViewModel.StatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                         Severity="Informational" Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" IsClosable="True" />
+                <ProgressBar IsIndeterminate="True"
+                             Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                <!-- ============ HISTORY ============ -->
+                <StackPanel Spacing="14" Visibility="{x:Bind ViewModel.IsHistoryView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+
+                    <Grid ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                            <TextBox x:Name="HistorySearchBox" Width="240" PlaceholderText="Search number / product / notes…"
+                                     Text="{x:Bind ViewModel.HistorySearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     TextChanged="OnHistorySearchTextChanged"
+                                     AutomationProperties.Name="Search adjustments" />
+                            <ComboBox Width="160" ItemsSource="{x:Bind ViewModel.ReasonFilterOptions}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedReasonFilter, Mode=TwoWay}"
+                                      SelectionChanged="OnFilterChanged" AutomationProperties.Name="Filter by reason" />
+                            <ComboBox Width="150" ItemsSource="{x:Bind ViewModel.DirectionFilterOptions}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedDirectionFilter, Mode=TwoWay}"
+                                      SelectionChanged="OnFilterChanged" AutomationProperties.Name="Filter by direction" />
+                            <CalendarDatePicker Date="{x:Bind ViewModel.FromDate, Mode=TwoWay}" PlaceholderText="From"
+                                                DateChanged="OnDateFilterChanged" AutomationProperties.Name="From date" />
+                            <CalendarDatePicker Date="{x:Bind ViewModel.ToDate, Mode=TwoWay}" PlaceholderText="To"
+                                                DateChanged="OnDateFilterChanged" AutomationProperties.Name="To date" />
+                            <Button Content="Clear" Command="{x:Bind ViewModel.ClearFiltersCommand}" />
+                            <TextBlock Text="{x:Bind ViewModel.HistoryCountText, Mode=OneWay}"
+                                       Style="{StaticResource SecondaryTextStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="New Adjustment" Style="{StaticResource AccentButtonStyle}"
+                                IsEnabled="{x:Bind ViewModel.CanManage}"
+                                Command="{x:Bind ViewModel.StartNewCommand}" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="8">
+                            <Grid Padding="0,0,0,6" ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="140" /><ColumnDefinition Width="150" />
+                                    <ColumnDefinition Width="*" /><ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="140" /><ColumnDefinition Width="140" />
+                                    <ColumnDefinition Width="120" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="ADJUSTMENT #" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="1" Text="DATE" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="2" Text="PRODUCT" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="3" Text="QUANTITY" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="4" Text="STOCK" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="5" Text="REASON" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                <TextBlock Grid.Column="6" Text="USER" Style="{StaticResource ColumnHeaderTextStyle}" />
+                            </Grid>
+
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.History}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:InventoryAdjustmentRowViewModel">
+                                        <Grid Padding="0,8" ColumnSpacing="14"
+                                              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="140" /><ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="*" /><ColumnDefinition Width="110" />
+                                                <ColumnDefinition Width="140" /><ColumnDefinition Width="140" />
+                                                <ColumnDefinition Width="120" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="{x:Bind AdjustmentNumber}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{x:Bind DateText}" VerticalAlignment="Center"
+                                                       Style="{StaticResource SecondaryTextStyle}" />
+                                            <StackPanel Grid.Column="2" Spacing="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind ProductName}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                <TextBlock Text="{x:Bind ProductCode}" Style="{StaticResource SecondaryTextStyle}" />
+                                                <TextBlock Text="{x:Bind NotesText}" Style="{StaticResource SecondaryTextStyle}"
+                                                           TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis"
+                                                           Visibility="{x:Bind HasNotes, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="3" Text="{x:Bind QuantityText}" VerticalAlignment="Center"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{x:Bind DirectionState, Converter={StaticResource AdjustmentDirectionToBrushConverter}}" />
+                                            <TextBlock Grid.Column="4" Text="{x:Bind TransitionText}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="5" Text="{x:Bind ReasonText}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="6" Text="{x:Bind UserText}" VerticalAlignment="Center"
+                                                       Style="{StaticResource SecondaryTextStyle}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="No adjustments recorded." Style="{StaticResource SecondaryTextStyle}"
+                                       Visibility="{x:Bind ViewModel.History.Count, Mode=OneWay, Converter={StaticResource ZeroToVisibilityConverter}}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============ CREATE ============ -->
+                <StackPanel Spacing="14" Visibility="{x:Bind ViewModel.IsCreateView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+
+                    <!-- The product picker collapses to just the summary strip once a product is
+                         chosen, so the numbers and the Review button stay above the fold on a
+                         laptop-height window instead of being pushed off the bottom. -->
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Product" Style="{StaticResource SectionTitleTextStyle}"
+                                       Visibility="{x:Bind ViewModel.HasSelectedProduct, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                            <TextBox x:Name="ProductScanBox" PlaceholderText="Scan a barcode, or search by name / SKU / code"
+                                     Visibility="{x:Bind ViewModel.HasSelectedProduct, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                                     Text="{x:Bind ViewModel.ProductSearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     CharacterReceived="OnScanCharacterReceived" KeyDown="OnScanKeyDown"
+                                     AutomationProperties.Name="Scan or search product to adjust" />
+
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.SearchResults}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:AdjustmentProductRowViewModel">
+                                        <Grid Padding="0,6" ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" /><ColumnDefinition Width="150" /><ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="1">
+                                                <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{x:Bind DetailText}" Style="{StaticResource SecondaryTextStyle}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{x:Bind StockText}" VerticalAlignment="Center"
+                                                       Style="{StaticResource SecondaryTextStyle}" />
+                                            <Button Grid.Column="2" Content="Select" Click="OnSelectProductClick" Tag="{x:Bind}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Border Background="{ThemeResource PastelBlueBrush}" CornerRadius="6" Padding="14"
+                                    Visibility="{x:Bind ViewModel.HasSelectedProduct, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedProductName, Mode=OneWay}"
+                                                   FontWeight="SemiBold" FontSize="15"
+                                                   Foreground="{ThemeResource PastelBlueOnBrush}" />
+                                        <TextBlock Text="{x:Bind ViewModel.SelectedProductDetail, Mode=OneWay}"
+                                                   Foreground="{ThemeResource PastelBlueOnBrush}" Opacity="0.8" FontSize="12" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" Margin="0,0,12,0">
+                                        <TextBlock Text="CURRENT STOCK" Style="{StaticResource KpiLabelTextStyle}"
+                                                   Foreground="{ThemeResource PastelBlueOnBrush}" HorizontalAlignment="Right" />
+                                        <TextBlock Text="{x:Bind ViewModel.CurrentStockText, Mode=OneWay}"
+                                                   FontSize="20" FontWeight="Bold"
+                                                   Foreground="{ThemeResource PastelBlueOnBrush}" HorizontalAlignment="Right" />
+                                    </StackPanel>
+                                    <!-- The search box hides once a product is picked, so this is
+                                         how the operator gets back to choosing a different one. -->
+                                    <Button Grid.Column="2" Content="Change" VerticalAlignment="Center"
+                                            Click="OnChangeProductClick"
+                                            AutomationProperties.Name="Change product" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardBorderStyle}"
+                            Visibility="{x:Bind ViewModel.HasSelectedProduct, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Adjustment" Style="{StaticResource SectionTitleTextStyle}" />
+
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0" Header="Direction" HorizontalAlignment="Stretch"
+                                          ItemsSource="{x:Bind ViewModel.DirectionOptions}"
+                                          SelectedItem="{x:Bind ViewModel.SelectedDirection, Mode=TwoWay}"
+                                          AutomationProperties.Name="Adjustment direction" />
+                                <TextBox Grid.Column="1" Header="Quantity" PlaceholderText="0"
+                                         Text="{x:Bind ViewModel.QuantityInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Adjustment quantity" />
+                                <ComboBox Grid.Column="2" Header="Reason" HorizontalAlignment="Stretch"
+                                          ItemsSource="{x:Bind ViewModel.ReasonOptions}"
+                                          SelectedItem="{x:Bind ViewModel.SelectedReason, Mode=TwoWay}"
+                                          AutomationProperties.Name="Adjustment reason" />
+                            </Grid>
+
+                            <!-- Current -> Adjustment -> New, spelled out. Inventory changes are
+                                 financially significant, so the whole effect is on one line. -->
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelBlueBrush}">
+                                    <StackPanel><TextBlock Text="CURRENT" Style="{StaticResource KpiLabelTextStyle}" />
+                                        <TextBlock Text="{x:Bind ViewModel.CurrentStockText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel>
+                                </Border>
+                                <Border Grid.Column="1" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}">
+                                    <StackPanel><TextBlock Text="ADJUSTMENT" Style="{StaticResource KpiLabelTextStyle}" />
+                                        <TextBlock Text="{x:Bind ViewModel.SignedQuantityText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel>
+                                </Border>
+                                <Border Grid.Column="2" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelGreenBrush}">
+                                    <StackPanel><TextBlock Text="NEW QUANTITY" Style="{StaticResource KpiLabelTextStyle}" />
+                                        <TextBlock Text="{x:Bind ViewModel.NewQuantityText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <InfoBar IsOpen="{x:Bind ViewModel.WouldGoNegative, Mode=OneWay}" Severity="Error" IsClosable="False"
+                                     Title="Stock cannot go negative"
+                                     Message="This decrease is larger than the quantity in stock. Reduce the quantity or choose Increase." />
+
+                            <TextBox Header="Notes" AcceptsReturn="True" Height="72" TextWrapping="Wrap"
+                                     PlaceholderText="e.g. 5 packets damaged during shelf handling"
+                                     Text="{x:Bind ViewModel.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="Adjustment notes" />
+                            <TextBlock Text="Notes are required for this reason."
+                                       Style="{StaticResource CaptionTextStyle}" Foreground="{ThemeResource WarningBrush}"
+                                       Visibility="{x:Bind ViewModel.NotesAreRequired, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                                <Button Content="Cancel" Command="{x:Bind ViewModel.BackToHistoryCommand}" />
+                                <Button Content="Review Adjustment" Style="{StaticResource AccentButtonStyle}"
+                                        Command="{x:Bind ViewModel.ReviewCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============ REVIEW ============ -->
+                <StackPanel Spacing="14" Visibility="{x:Bind ViewModel.IsReviewView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="Review Inventory Adjustment" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="Stock has not changed yet. Confirm below to apply this adjustment — it cannot be edited or undone afterwards."
+                                       Style="{StaticResource SecondaryTextStyle}" TextWrapping="Wrap" />
+
+                            <StackPanel Spacing="3">
+                                <TextBlock Text="PRODUCT" Style="{StaticResource KpiLabelTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.SelectedProductName, Mode=OneWay}" FontSize="17" FontWeight="SemiBold" />
+                                <TextBlock Text="{x:Bind ViewModel.SelectedProductDetail, Mode=OneWay}" Style="{StaticResource SecondaryTextStyle}" />
+                            </StackPanel>
+
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelBlueBrush}">
+                                    <StackPanel><TextBlock Text="CURRENT" Style="{StaticResource KpiLabelTextStyle}" />
+                                        <TextBlock Text="{x:Bind ViewModel.CurrentStockText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel>
+                                </Border>
+                                <Border Grid.Column="1" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}">
+                                    <StackPanel><TextBlock Text="ADJUSTMENT" Style="{StaticResource KpiLabelTextStyle}" />
+                                        <TextBlock Text="{x:Bind ViewModel.SignedQuantityText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel>
+                                </Border>
+                                <Border Grid.Column="2" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelGreenBrush}">
+                                    <StackPanel><TextBlock Text="NEW QUANTITY" Style="{StaticResource KpiLabelTextStyle}" />
+                                        <TextBlock Text="{x:Bind ViewModel.NewQuantityText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <StackPanel Spacing="3">
+                                <TextBlock Text="REASON" Style="{StaticResource KpiLabelTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.SelectedReason, Mode=OneWay}" FontWeight="SemiBold" />
+                            </StackPanel>
+
+                            <StackPanel Spacing="3" Visibility="{x:Bind ViewModel.Notes, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}">
+                                <TextBlock Text="NOTES" Style="{StaticResource KpiLabelTextStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.Notes, Mode=OneWay}" TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                                <Button Content="Back" Command="{x:Bind ViewModel.BackToCreateCommand}" />
+                                <Button Content="Confirm Adjustment" Style="{StaticResource AccentButtonStyle}"
+                                        IsEnabled="{x:Bind ViewModel.CanManage}" Click="OnConfirmClick" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============ COMPLETED ============ -->
+                <StackPanel Spacing="14" Visibility="{x:Bind ViewModel.IsCompletedView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="&#xE73E;" Foreground="{ThemeResource SuccessBrush}" FontSize="22" />
+                                <TextBlock Text="Adjustment Recorded" Style="{StaticResource SectionTitleTextStyle}"
+                                           Foreground="{ThemeResource SuccessBrush}" />
+                            </StackPanel>
+                            <TextBlock Text="{x:Bind ViewModel.CompletionNumber, Mode=OneWay}" FontWeight="SemiBold" FontSize="16" />
+                            <TextBlock Text="{x:Bind ViewModel.CompletionSummary, Mode=OneWay}" Style="{StaticResource SecondaryTextStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button Content="Back to Adjustments" Command="{x:Bind ViewModel.BackToHistoryCommand}" />
+                                <Button Content="New Adjustment" Command="{x:Bind ViewModel.StartNewCommand}"
+                                        IsEnabled="{x:Bind ViewModel.CanManage}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

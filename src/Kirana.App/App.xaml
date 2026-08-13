@@ -21,6 +21,7 @@
             <conv:StockCountStatusToBrushConverter x:Key="StockCountStatusToBrushConverter" />
             <conv:StockCountVarianceToBrushConverter x:Key="StockCountVarianceToBrushConverter" />
             <conv:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
+            <conv:AdjustmentDirectionToBrushConverter x:Key="AdjustmentDirectionToBrushConverter" />
             <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <conv:CurrencyConverter x:Key="CurrencyConverter" />

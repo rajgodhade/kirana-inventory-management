@@ -188,15 +188,13 @@ public sealed partial class ProductsPage : Page
             return;
         }
 
-        var product = await ViewModel.GetProductAsync(row.Id);
-        if (product is null)
-        {
-            return;
-        }
-
-        var dialog = new StockAdjustmentDialog(new StockAdjustmentViewModel(ViewModel, product)).Themed(XamlRoot);
-        await dialog.ShowAsync();
-        await ViewModel.SearchAsync();
+        // Routes to the Phase 13D adjustment workflow with this product preselected, rather than
+        // opening a lightweight dialog of its own. There is deliberately exactly ONE way to change
+        // stock by hand: the old dialog had no negative-stock guard, no transaction, no reason and
+        // no adjustment record, and it computed against the quantity the grid happened to be
+        // showing. Keeping it as a convenience shortcut would have kept all of that reachable.
+        await Task.CompletedTask;
+        Frame.Navigate(typeof(InventoryAdjustmentsPage), row.Id);
     }
 
     private async void OnBatchesClick(object sender, RoutedEventArgs e)
