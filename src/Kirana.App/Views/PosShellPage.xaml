@@ -316,7 +316,7 @@
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="vm:CartLineViewModel">
-                                <Grid ColumnSpacing="10" Padding="14,10"
+                                <Grid ColumnSpacing="10" Padding="14,7"
                                       BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" MinWidth="160" />
@@ -328,34 +328,43 @@
                                         <ColumnDefinition Width="44" />
                                     </Grid.ColumnDefinitions>
 
-                                    <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                    <!-- Two lines, not four: the name sits on one, and the code plus the
+                                         GST/promotion badges share the next. Stacking each badge on its
+                                         own row made every cart line as tall as its rarest element, so a
+                                         plain three-item bill filled the screen. -->
+                                    <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
                                         <TextBlock Text="{x:Bind ProductName}" Style="{StaticResource CardTitleTextStyle}" TextWrapping="Wrap" />
-                                        <TextBlock Text="{x:Bind ProductCode}" Style="{StaticResource CodeTextStyle}" />
-                                        <Border Background="{ThemeResource SurfaceAltBrush}" CornerRadius="10" Padding="7,3"
-                                                HorizontalAlignment="Left"
-                                                ToolTipService.ToolTip="GST treatment for this item">
-                                            <TextBlock Text="{x:Bind PricingTypeLabel}" FontSize="10" FontWeight="SemiBold"
-                                                       Foreground="{ThemeResource TextSecondaryBrush}" />
-                                        </Border>
-                                        <Border Background="{ThemeResource PastelGreenBrush}" CornerRadius="10" Padding="7,3"
-                                                HorizontalAlignment="Left"
-                                                Visibility="{x:Bind HasPromotion, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                                <FontIcon Glyph="&#xE73E;" FontSize="10" Foreground="{ThemeResource PastelGreenOnBrush}" />
-                                                <TextBlock Text="{x:Bind PromotionText, Mode=OneWay}" FontSize="10" FontWeight="SemiBold"
-                                                           Foreground="{ThemeResource PastelGreenOnBrush}" />
-                                            </StackPanel>
-                                        </Border>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind ProductCode}" Style="{StaticResource CodeTextStyle}"
+                                                       VerticalAlignment="Center" />
+                                            <Border Background="{ThemeResource SurfaceAltBrush}" CornerRadius="10" Padding="7,2"
+                                                    VerticalAlignment="Center"
+                                                    ToolTipService.ToolTip="GST treatment for this item">
+                                                <TextBlock Text="{x:Bind PricingTypeLabel}" FontSize="10" FontWeight="SemiBold"
+                                                           Foreground="{ThemeResource TextSecondaryBrush}" />
+                                            </Border>
+                                            <Border Background="{ThemeResource PastelGreenBrush}" CornerRadius="10" Padding="7,2"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{x:Bind HasPromotion, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <FontIcon Glyph="&#xE73E;" FontSize="10" Foreground="{ThemeResource PastelGreenOnBrush}" />
+                                                    <TextBlock Text="{x:Bind PromotionText, Mode=OneWay}" FontSize="10" FontWeight="SemiBold"
+                                                               Foreground="{ThemeResource PastelGreenOnBrush}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
                                     </StackPanel>
 
-                                    <!-- Unit sits under the quantity box because it qualifies that number
-                                         ("1.5 Kilogram"), and it is the same unit printed on the invoice. -->
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                        <TextBox Text="{x:Bind QuantityText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
+                                    <!-- Unit sits BESIDE the quantity box rather than under it: it still
+                                         qualifies the number ("1.5 Kg"), but stacking it added ~20px to
+                                         every row, and this column was what actually set the row height. -->
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"
+                                                VerticalAlignment="Center">
+                                        <TextBox Width="58" Text="{x:Bind QuantityText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
                                                  TextChanged="OnQuantityTextChanged" LostFocus="OnQuantityLostFocus"
                                                  TextAlignment="Center" />
                                         <TextBlock Text="{x:Bind Unit}" Style="{StaticResource CaptionTextStyle}"
-                                                   HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
 
                                     <!-- Read-only: MRP is a product attribute shown for comparison, never
@@ -366,13 +375,17 @@
                                                Text="{x:Bind Mrp, Converter={StaticResource CurrencyConverter}}"
                                                Visibility="{x:Bind HasMrp, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-                                    <StackPanel Grid.Column="3" VerticalAlignment="Center" Spacing="1">
-                                        <TextBox Text="{x:Bind UnitPriceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
+                                    <!-- Struck-through original price sits beside the box for the same
+                                         reason as the unit above: it appears only on overridden lines, so
+                                         stacking it made every row as tall as its rarest case. -->
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="5"
+                                                VerticalAlignment="Center">
+                                        <TextBox Width="66" Text="{x:Bind UnitPriceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
                                                  TextChanged="OnPriceTextChanged" LostFocus="OnPriceLostFocus"
                                                  TextAlignment="Center"
                                                  AutomationProperties.Name="Price (editable — applies to this bill only)" />
                                         <TextBlock Text="{x:Bind OriginalUnitPrice, Converter={StaticResource CurrencyConverter}}"
-                                                   Style="{StaticResource CaptionTextStyle}" HorizontalAlignment="Center"
+                                                   Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center"
                                                    TextDecorations="Strikethrough"
                                                    Visibility="{x:Bind IsPriceOverridden, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                                     </StackPanel>
