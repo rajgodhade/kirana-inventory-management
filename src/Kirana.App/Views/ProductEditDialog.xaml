@@ -179,6 +179,10 @@
             <StackPanel Grid.Column="1" Spacing="10">
 
                 <TextBlock Text="Pricing" FontWeight="SemiBold" />
+
+                <!-- What the product costs and what it's printed at — reference amounts, not
+                     selling levels. Kept on their own row so the two price LEVELS below read as a
+                     pair rather than wholesale appearing to belong with the purchase cost. -->
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -187,16 +191,22 @@
                     <TextBox Grid.Column="0" Header="Purchase price"
                              Visibility="{x:Bind ViewModel.ShowPurchasePrice, Converter={StaticResource BoolToVisibilityConverter}}"
                              Text="{x:Bind ViewModel.PurchasePriceText, Mode=TwoWay}" />
-                    <TextBox Grid.Column="1" Header="Wholesale price" Text="{x:Bind ViewModel.WholesalePriceText, Mode=TwoWay}" />
+                    <TextBox Grid.Column="1" Header="MRP *" Text="{x:Bind ViewModel.MrpText, Mode=TwoWay}" />
                 </Grid>
 
+                <!-- The two price levels Phase 15A exposes. "Retail price" is the same field the
+                     dialog has always bound (Product.SellingPrice) — renamed for clarity only, so
+                     the label matches the PriceLevel the value is stored under. Wholesale stays
+                     optional: a BLANK box means the level is not configured, which is not the same
+                     as an explicit 0, hence the placeholder rather than a pre-filled zero. -->
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0" Header="MRP *" Text="{x:Bind ViewModel.MrpText, Mode=TwoWay}" />
-                    <TextBox Grid.Column="1" Header="Selling price *" Text="{x:Bind ViewModel.SellingPriceText, Mode=TwoWay}" />
+                    <TextBox Grid.Column="0" Header="Retail price *" Text="{x:Bind ViewModel.SellingPriceText, Mode=TwoWay}" />
+                    <TextBox Grid.Column="1" Header="Wholesale price" PlaceholderText="Not configured"
+                             Text="{x:Bind ViewModel.WholesalePriceText, Mode=TwoWay}" />
                 </Grid>
 
                 <Grid ColumnSpacing="8">
@@ -273,7 +283,8 @@
 
                 <!-- Errors live at the bottom of the right column so Save/Cancel (in the dialog's
                      own footer, directly below) are the next thing the eye reaches. -->
-                <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                <InfoBar x:Name="ErrorBar"
+                         IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
                          Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
             </StackPanel>
         </Grid>

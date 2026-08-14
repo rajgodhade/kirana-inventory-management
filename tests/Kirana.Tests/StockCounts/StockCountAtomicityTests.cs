@@ -178,6 +178,7 @@ public class StockCountAtomicityTests : IDisposable
         public DbSet<StockMovement> StockMovements => inner.StockMovements;
         public DbSet<ProductBatch> ProductBatches => inner.ProductBatches;
         public DbSet<ProductBarcode> ProductBarcodes => inner.ProductBarcodes;
+        public DbSet<ProductPrice> ProductPrices => inner.ProductPrices;
         public DbSet<SequenceCounter> SequenceCounters => inner.SequenceCounters;
         public DbSet<Customer> Customers => inner.Customers;
         public DbSet<Sale> Sales => inner.Sales;

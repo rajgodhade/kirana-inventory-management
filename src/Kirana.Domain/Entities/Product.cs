@@ -44,7 +44,16 @@ public class Product : Entity
     // Pricing (PRD §14)
     public decimal PurchasePrice { get; set; }
     public decimal Mrp { get; set; }
+
+    /// <summary>The retail selling price POS charges. Since Phase 15A this is a SYNCHRONISED
+    /// PROJECTION of the <see cref="PriceLevel.Retail"/> row in <see cref="Prices"/> — the
+    /// authoritative store — kept here so existing POS/report/export readers work unchanged. Write
+    /// it through <c>IProductPricingService</c>, never directly, or the two will drift.</summary>
     public decimal SellingPrice { get; set; }
+
+    /// <summary>Optional bulk/trade price. Projection of the <see cref="PriceLevel.Wholesale"/> row
+    /// in <see cref="Prices"/>; null means the level is not configured, which is not the same as
+    /// zero. Nothing resolves this at the till yet — that is Phase 15B.</summary>
     public decimal? WholesalePrice { get; set; }
     public decimal? DefaultDiscountPercent { get; set; }
     public decimal? GstRatePercent { get; set; }
@@ -81,4 +90,8 @@ public class Product : Entity
     /// <summary>Every code that scans to this product (Phase 13B), active and retired alike.
     /// Exactly one active entry is <see cref="ProductBarcode.IsPrimary"/>.</summary>
     public ICollection<ProductBarcode> Barcodes { get; set; } = new List<ProductBarcode>();
+
+    /// <summary>Selling prices by level (Phase 15A) — the authoritative pricing store. At most one
+    /// ACTIVE row per <see cref="PriceLevel"/>.</summary>
+    public ICollection<ProductPrice> Prices { get; set; } = new List<ProductPrice>();
 }

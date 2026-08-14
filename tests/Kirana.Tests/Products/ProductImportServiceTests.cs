@@ -25,8 +25,10 @@ public class ProductImportServiceTests : IDisposable
         var permissionEnforcer = new PermissionEnforcer(_fixture.Context);
         var barcodeService = new BarcodeService(_fixture.Context, sequenceGenerator, auditLogger, permissionEnforcer);
 
-        _sut = new ProductImportService(_fixture.Context, sequenceGenerator, auditLogger, barcodeService, permissionEnforcer);
-        _productService = new ProductService(_fixture.Context, sequenceGenerator, auditLogger, barcodeService, permissionEnforcer);
+        var pricingService = new ProductPricingService(_fixture.Context, auditLogger, permissionEnforcer);
+
+        _sut = new ProductImportService(_fixture.Context, sequenceGenerator, auditLogger, barcodeService, permissionEnforcer, pricingService);
+        _productService = new ProductService(_fixture.Context, sequenceGenerator, auditLogger, barcodeService, permissionEnforcer, pricingService);
     }
 
     private const string Header = "Name,SKU,Barcode,Category,Brand,Unit,Purchase Price,MRP,Selling Price,GST %,Minimum Stock,Reorder Quantity,Opening Stock";
@@ -704,6 +706,157 @@ public class ProductImportServiceTests : IDisposable
     public void BuildCsvTemplate_UsesThePluralBarcodesColumn()
     {
         Assert.Contains("Barcodes", _sut.BuildCsvTemplate());
+    }
+
+    // ---- Phase 15A: import is additive about wholesale ----
+    //
+    // Decided in Step 1 but never pinned by a test until now. An import file is rarely the complete
+    // truth about a product, so a missing wholesale value leaves the existing tier alone instead of
+    // withdrawing it — otherwise an ordinary retail price-list import would quietly strip every
+    // product's wholesale price.
+    //
+    // ACTUAL PARSER SEMANTICS (verified, not assumed): Get() returns "" for an ABSENT column and
+    // ParseOptionalDecimal() maps both "" and a blank cell to null. Absent and present-but-blank are
+    // therefore INDISTINGUISHABLE to the importer, and neither clears wholesale. Clearing a
+    // wholesale price is a Product Edit operation, not an import one.
+
+    private const string HeaderWithWholesale =
+        "Name,SKU,Barcode,Category,Brand,Unit,Purchase Price,MRP,Selling Price,GST %,Minimum Stock,Reorder Quantity,Opening Stock,Wholesale Price";
+
+    private Task<ProductImportPreview> PreviewWithHeaderAsync(string header, params string[] dataRows) =>
+        _sut.BuildPreviewAsync(
+            new MemoryStream(Encoding.UTF8.GetBytes(header + "\r\n" + string.Join("\r\n", dataRows) + "\r\n")),
+            "products.csv", _ownerId);
+
+    private Task<Product> SeedPricedProductAsync(string name, string sku, decimal retail, decimal? wholesale) =>
+        _productService.CreateAsync(new CreateProductRequest
+        {
+            Name = name, Sku = sku, Unit = UnitOfMeasure.Piece,
+            PurchasePrice = 18, Mrp = 200, SellingPrice = retail, WholesalePrice = wholesale,
+            PerformedByUserId = _ownerId,
+        });
+
+    private async Task<decimal?> LevelOfAsync(int productId, PriceLevel level) =>
+        await _fixture.Context.ProductPrices.AsNoTracking()
+            .Where(p => p.ProductId == productId && p.Level == level && p.IsActive)
+            .Select(p => (decimal?)p.Price)
+            .FirstOrDefaultAsync();
+
+    /// <summary>Case A: the column is present, so its value is applied to both stores.</summary>
+    [Fact]
+    public async Task Import_AppliesWholesale_WhenTheColumnIsPresent()
+    {
+        var existing = await SeedPricedProductAsync("Tata Salt", "TATA-1", retail: 100m, wholesale: 90m);
+
+        var preview = await PreviewWithHeaderAsync(HeaderWithWholesale,
+            "Tata Salt,TATA-1,,Grocery,Tata,Piece,18,200,105,5,0,0,0,85");
+        await _sut.CommitAsync(preview, _ownerId);
+
+        Assert.Equal(105m, await LevelOfAsync(existing.Id, PriceLevel.Retail));
+        Assert.Equal(85m, await LevelOfAsync(existing.Id, PriceLevel.Wholesale));
+
+        var product = await _fixture.Context.Products.AsNoTracking().SingleAsync(p => p.Id == existing.Id);
+        Assert.Equal(105m, product.SellingPrice);
+        Assert.Equal(85m, product.WholesalePrice);
+    }
+
+    /// <summary>Case B: no wholesale column at all — retail moves, wholesale survives.</summary>
+    [Fact]
+    public async Task Import_PreservesExistingWholesale_WhenTheColumnIsAbsent()
+    {
+        var existing = await SeedPricedProductAsync("Tata Salt", "TATA-1", retail: 100m, wholesale: 90m);
+
+        // The standard template has no Wholesale Price column.
+        var preview = await PreviewAsync("Tata Salt,TATA-1,,Grocery,Tata,Piece,18,200,105,5,0,0,0");
+        await _sut.CommitAsync(preview, _ownerId);
+
+        Assert.Equal(105m, await LevelOfAsync(existing.Id, PriceLevel.Retail));
+        Assert.Equal(90m, await LevelOfAsync(existing.Id, PriceLevel.Wholesale));
+
+        var product = await _fixture.Context.Products.AsNoTracking().SingleAsync(p => p.Id == existing.Id);
+        Assert.Equal(105m, product.SellingPrice);
+        Assert.Equal(90m, product.WholesalePrice);
+    }
+
+    /// <summary>
+    /// Case C: the column IS present but the cell is blank. The importer cannot tell this apart from
+    /// an absent column, so the documented behaviour is "preserve", NOT "clear". Pinned here so that
+    /// if anyone later teaches the parser to distinguish the two, this test forces the decision to
+    /// be deliberate rather than silently changing what a blank cell does to live pricing.
+    /// </summary>
+    [Fact]
+    public async Task Import_PreservesExistingWholesale_WhenTheColumnIsPresentButBlank()
+    {
+        var existing = await SeedPricedProductAsync("Tata Salt", "TATA-1", retail: 100m, wholesale: 90m);
+
+        var preview = await PreviewWithHeaderAsync(HeaderWithWholesale,
+            "Tata Salt,TATA-1,,Grocery,Tata,Piece,18,200,105,5,0,0,0,");
+        await _sut.CommitAsync(preview, _ownerId);
+
+        Assert.Equal(0, preview.ErrorCount);                       // blank is accepted, not rejected
+        Assert.Equal(105m, await LevelOfAsync(existing.Id, PriceLevel.Retail));
+        Assert.Equal(90m, await LevelOfAsync(existing.Id, PriceLevel.Wholesale));   // preserved
+    }
+
+    /// <summary>Case D: rows in one file follow the rule independently of each other.</summary>
+    [Fact]
+    public async Task Import_AppliesWholesalePerRow_WhenSomeRowsLeaveItBlank()
+    {
+        var withValue = await SeedPricedProductAsync("Has Wholesale", "HW-1", retail: 100m, wholesale: 90m);
+        var leftBlank = await SeedPricedProductAsync("Keeps Wholesale", "KW-1", retail: 100m, wholesale: 90m);
+        var neverHad = await SeedPricedProductAsync("No Wholesale", "NW-1", retail: 100m, wholesale: null);
+
+        var preview = await PreviewWithHeaderAsync(HeaderWithWholesale,
+            "Has Wholesale,HW-1,,Grocery,Tata,Piece,18,200,105,5,0,0,0,85",
+            "Keeps Wholesale,KW-1,,Grocery,Tata,Piece,18,200,105,5,0,0,0,",
+            "No Wholesale,NW-1,,Grocery,Tata,Piece,18,200,105,5,0,0,0,");
+        await _sut.CommitAsync(preview, _ownerId);
+
+        Assert.Equal(85m, await LevelOfAsync(withValue.Id, PriceLevel.Wholesale));   // applied
+        Assert.Equal(90m, await LevelOfAsync(leftBlank.Id, PriceLevel.Wholesale));   // preserved
+        Assert.Null(await LevelOfAsync(neverHad.Id, PriceLevel.Wholesale));          // still unset
+
+        // ...and every row's retail moved.
+        foreach (var id in new[] { withValue.Id, leftBlank.Id, neverHad.Id })
+        {
+            Assert.Equal(105m, await LevelOfAsync(id, PriceLevel.Retail));
+        }
+    }
+
+    /// <summary>Zero in the column is a configured zero, not "unset" — the same NULL-vs-zero
+    /// distinction the rest of the phase preserves.</summary>
+    [Fact]
+    public async Task Import_TreatsZeroWholesale_AsAConfiguredPrice()
+    {
+        var existing = await SeedPricedProductAsync("Tata Salt", "TATA-1", retail: 100m, wholesale: 90m);
+
+        var preview = await PreviewWithHeaderAsync(HeaderWithWholesale,
+            "Tata Salt,TATA-1,,Grocery,Tata,Piece,18,200,105,5,0,0,0,0");
+        await _sut.CommitAsync(preview, _ownerId);
+
+        Assert.Equal(0m, await LevelOfAsync(existing.Id, PriceLevel.Wholesale));
+        var product = await _fixture.Context.Products.AsNoTracking().SingleAsync(p => p.Id == existing.Id);
+        Assert.Equal(0m, product.WholesalePrice);
+    }
+
+    /// <summary>A new product imported with a wholesale value gets the level; without one it does
+    /// not get an invented zero.</summary>
+    [Fact]
+    public async Task Import_CreatesWholesaleLevelOnNewProducts_OnlyWhenAValueIsSupplied()
+    {
+        var preview = await PreviewWithHeaderAsync(HeaderWithWholesale,
+            "With WS,WWS-1,,Grocery,,Piece,10,20,14,5,0,0,0,12",
+            "Without WS,NWS-1,,Grocery,,Piece,10,20,14,5,0,0,0,");
+        await _sut.CommitAsync(preview, _ownerId);
+
+        var withWs = await _fixture.Context.Products.AsNoTracking().SingleAsync(p => p.Sku == "WWS-1");
+        var withoutWs = await _fixture.Context.Products.AsNoTracking().SingleAsync(p => p.Sku == "NWS-1");
+
+        Assert.Equal(12m, await LevelOfAsync(withWs.Id, PriceLevel.Wholesale));
+        Assert.Equal(12m, withWs.WholesalePrice);
+
+        Assert.Null(await LevelOfAsync(withoutWs.Id, PriceLevel.Wholesale));
+        Assert.Null(withoutWs.WholesalePrice);
     }
 
     public void Dispose() => _fixture.Dispose();

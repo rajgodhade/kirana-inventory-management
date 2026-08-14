@@ -124,6 +124,305 @@ public sealed class MigrationSchemaTests : IDisposable
         Assert.Contains("PurchasedPackQuantitySnapshot", columns);
     }
 
+    // ---- Phase 15A pricing foundation ----
+
+    /// <summary>The migration immediately before Phase 15A, so the backfill can be exercised against
+    /// a database that still holds prices only in the legacy Product columns.</summary>
+    private const string PrePricingMigration = "20260813194209_Phase14DReplenishment";
+
+    /// <summary>
+    /// Inserts products the way the pre-15A schema stored them — prices in Product columns only,
+    /// no ProductPrices table yet — so migrating forward exercises the real backfill rather than a
+    /// model-built schema. The fixtures use EnsureCreated() and never run migration SQL, so this is
+    /// the only place the backfill is actually executed.
+    /// </summary>
+    private async Task SeedPreP15ProductsAsync(
+        KiranaDbContext context, params (string Name, string Selling, string? Wholesale)[] products)
+    {
+        var migrator = context.Database.GetService<IMigrator>();
+        await migrator.MigrateAsync(PrePricingMigration);
+
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        for (var i = 0; i < products.Length; i++)
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO Products
+                    (ProductCode, Name, Unit, PurchasePrice, Mrp, SellingPrice, WholesalePrice,
+                     MinimumStock, ReorderQuantity, TracksBatches, IsActive, CreatedAtUtc,
+                     PricingType, GstRatePercent, ReplenishmentEnabled)
+                VALUES ($code, $name, 'Piece', 10, 120, $selling, $wholesale, 0, 0, 0, 1,
+                        CURRENT_TIMESTAMP, 'Inclusive', 5, 0);
+                """;
+            command.Parameters.Add(new SqliteParameter("$code", $"PRD-{i + 1:D6}"));
+            command.Parameters.Add(new SqliteParameter("$name", products[i].Name));
+            command.Parameters.Add(new SqliteParameter("$selling", products[i].Selling));
+            command.Parameters.Add(new SqliteParameter("$wholesale", (object?)products[i].Wholesale ?? DBNull.Value));
+            await command.ExecuteNonQueryAsync();
+        }
+    }
+
+    /// <summary>Deterministic "ProductId|Retail|Wholesale" fingerprint. <paramref name="fromPrices"/>
+    /// selects the ProductPrices table rather than the legacy columns, so the same function can
+    /// describe both stores and their outputs compared directly.</summary>
+    private static async Task<List<string>> PriceFingerprintAsync(KiranaDbContext context, bool fromPrices)
+    {
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = fromPrices
+            ? """
+              SELECT p.Id,
+                     (SELECT pr.Price FROM ProductPrices pr
+                       WHERE pr.ProductId = p.Id AND pr.Level = 'Retail' AND pr.IsActive = 1),
+                     (SELECT pr.Price FROM ProductPrices pr
+                       WHERE pr.ProductId = p.Id AND pr.Level = 'Wholesale' AND pr.IsActive = 1)
+              FROM Products p ORDER BY p.Id
+              """
+            : "SELECT p.Id, p.SellingPrice, p.WholesalePrice FROM Products p ORDER BY p.Id";
+
+        var rows = new List<string>();
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var retail = reader.IsDBNull(1) ? "NULL" : reader.GetValue(1).ToString();
+            var wholesale = reader.IsDBNull(2) ? "NULL" : reader.GetValue(2).ToString();
+            rows.Add($"{reader.GetInt32(0)}|{retail}|{wholesale}");
+        }
+
+        return rows;
+    }
+
+    private static async Task<long> ScalarAsync(KiranaDbContext context, string sql)
+    {
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+        await using var command = connection.CreateCommand();
+        command.CommandText = sql;
+        return Convert.ToInt64(await command.ExecuteScalarAsync());
+    }
+
+    [Fact]
+    public async Task ProductPricesTable_ExistsWithRequiredColumns()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        var columns = await ColumnNamesAsync(context, "ProductPrices");
+        Assert.Contains("ProductId", columns);
+        Assert.Contains("Level", columns);
+        Assert.Contains("Price", columns);
+        Assert.Contains("IsActive", columns);
+        Assert.Contains("CreatedAtUtc", columns);
+        Assert.Contains("UpdatedAtUtc", columns);
+    }
+
+    /// <summary>"One active price per product per level" must be a database invariant, not just a
+    /// service convention.</summary>
+    [Fact]
+    public async Task ProductPrices_HasFilteredUniqueIndexAndForeignKey()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        var indexes = await IndexDefinitionsAsync(context, "ProductPrices");
+        var unique = Assert.Single(indexes, i => i.Name == "IX_ProductPrices_ProductId_Level_Active");
+        Assert.Contains("UNIQUE", unique.Sql!);
+        Assert.Contains("IsActive", unique.Sql!);
+
+        var connection = context.Database.GetDbConnection();
+        await using var fk = connection.CreateCommand();
+        fk.CommandText = "SELECT \"table\" FROM pragma_foreign_key_list('ProductPrices')";
+        Assert.Equal("Products", (string?)await fk.ExecuteScalarAsync());
+    }
+
+    [Fact]
+    public async Task Backfill_GivesEveryExistingProductExactlyOneRetailPrice()
+    {
+        await using var context = CreateContext();
+        await SeedPreP15ProductsAsync(context,
+            ("Alpha", "100", null), ("Beta", "57.50", "49.99"), ("Gamma", "0", null));
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(3, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM ProductPrices WHERE Level='Retail' AND IsActive=1"));
+        Assert.Equal(0, await ScalarAsync(context, """
+            SELECT COUNT(*) FROM Products p
+            WHERE NOT EXISTS (SELECT 1 FROM ProductPrices pr
+                              WHERE pr.ProductId=p.Id AND pr.Level='Retail' AND pr.IsActive=1)
+            """));
+    }
+
+    [Fact]
+    public async Task Backfill_CopiesRetailPricesExactly_WithoutRounding()
+    {
+        await using var context = CreateContext();
+        await SeedPreP15ProductsAsync(context,
+            ("Alpha", "100", null), ("Beta", "57.50", null), ("Gamma", "0", null));
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(0, await ScalarAsync(context, """
+            SELECT COUNT(*) FROM Products p
+            JOIN ProductPrices pr ON pr.ProductId = p.Id AND pr.Level='Retail' AND pr.IsActive=1
+            WHERE pr.Price <> p.SellingPrice
+            """));
+    }
+
+    /// <summary>NULL means "wholesale is not configured" and must never become a zero-priced row.</summary>
+    [Fact]
+    public async Task Backfill_CreatesNoWholesaleRow_ForNullWholesalePrice()
+    {
+        await using var context = CreateContext();
+        await SeedPreP15ProductsAsync(context, ("NoWholesale", "100", null));
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(0, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM ProductPrices WHERE Level='Wholesale'"));
+    }
+
+    /// <summary>...but an explicit zero IS a configured price and must survive as a real row —
+    /// the distinction NULL-vs-zero is the whole point.</summary>
+    [Fact]
+    public async Task Backfill_CreatesWholesaleRow_ForExplicitZero()
+    {
+        await using var context = CreateContext();
+        await SeedPreP15ProductsAsync(context, ("ZeroWholesale", "100", "0"));
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(1, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM ProductPrices WHERE Level='Wholesale' AND IsActive=1"));
+        Assert.Equal(0, await ScalarAsync(context, """
+            SELECT COUNT(*) FROM ProductPrices pr
+            JOIN Products p ON p.Id = pr.ProductId
+            WHERE pr.Level='Wholesale' AND pr.Price <> p.WholesalePrice
+            """));
+    }
+
+    [Fact]
+    public async Task Backfill_CopiesConfiguredWholesalePricesExactly()
+    {
+        await using var context = CreateContext();
+        await SeedPreP15ProductsAsync(context,
+            ("A", "100", "95"), ("B", "57.50", "49.99"), ("C", "10", null));
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(2, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM ProductPrices WHERE Level='Wholesale' AND IsActive=1"));
+        Assert.Equal(0, await ScalarAsync(context, """
+            SELECT COUNT(*) FROM Products p
+            JOIN ProductPrices pr ON pr.ProductId=p.Id AND pr.Level='Wholesale' AND pr.IsActive=1
+            WHERE pr.Price <> p.WholesalePrice
+            """));
+    }
+
+    /// <summary>
+    /// The §5 fingerprint: describe every product's prices from the legacy columns before the
+    /// migration and from ProductPrices after, and require the two descriptions to be identical.
+    /// Catches a changed price, a skipped product, a duplicate, NULL becoming zero, and any change
+    /// in decimal representation — in one assertion.
+    /// </summary>
+    [Fact]
+    public async Task Backfill_PriceFingerprintIsUnchanged()
+    {
+        await using var context = CreateContext();
+        await SeedPreP15ProductsAsync(context,
+            ("Alpha", "100", null),
+            ("Beta", "57.50", "49.99"),
+            ("Gamma", "0", "0"),
+            ("Delta", "1234.56", null),
+            ("Epsilon", "9.99", "9.99"));
+
+        var before = await PriceFingerprintAsync(context, fromPrices: false);
+
+        await context.Database.MigrateAsync();
+
+        var after = await PriceFingerprintAsync(context, fromPrices: true);
+
+        Assert.Equal(before, after);
+    }
+
+    [Fact]
+    public async Task Backfill_LeavesProjectionColumnsUntouched()
+    {
+        await using var context = CreateContext();
+        await SeedPreP15ProductsAsync(context, ("Alpha", "100", "95"), ("Beta", "57.50", null));
+
+        var before = await PriceFingerprintAsync(context, fromPrices: false);
+        await context.Database.MigrateAsync();
+        var after = await PriceFingerprintAsync(context, fromPrices: false);
+
+        Assert.Equal(before, after);
+    }
+
+    [Fact]
+    public async Task Backfill_CreatesNoOrphansOrDuplicates()
+    {
+        await using var context = CreateContext();
+        await SeedPreP15ProductsAsync(context, ("A", "10", "9"), ("B", "20", null), ("C", "30", "0"));
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(0, await ScalarAsync(context, """
+            SELECT COUNT(*) FROM ProductPrices pr
+            LEFT JOIN Products p ON p.Id = pr.ProductId WHERE p.Id IS NULL
+            """));
+        Assert.Equal(0, await ScalarAsync(context, """
+            SELECT COUNT(*) FROM (
+                SELECT ProductId, Level FROM ProductPrices WHERE IsActive=1
+                GROUP BY ProductId, Level HAVING COUNT(*) > 1)
+            """));
+    }
+
+    /// <summary>Phase 15A is additive: a pricing migration must not disturb the transaction history
+    /// or any Phase 13/14 data.</summary>
+    [Fact]
+    public async Task PricingMigration_LeavesProductCountAndHistoricalDataUntouched()
+    {
+        await using var context = CreateContext();
+        await SeedPreP15ProductsAsync(context, ("Alpha", "100", "95"), ("Beta", "57.50", null));
+
+        var connection = context.Database.GetDbConnection();
+        await using (var seed = connection.CreateCommand())
+        {
+            seed.CommandText = """
+                INSERT INTO StockMovements
+                    (ProductId, MovementType, QuantityChange, PreviousQuantity, NewQuantity, TimestampUtc, CreatedAtUtc)
+                VALUES (1, 'Purchase', 25, 0, 25, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+                INSERT INTO Inventories (ProductId, QuantityOnHand, CreatedAtUtc)
+                VALUES (1, 25, CURRENT_TIMESTAMP);
+                """;
+            await seed.ExecuteNonQueryAsync();
+        }
+
+        var productsBefore = await ScalarAsync(context, "SELECT COUNT(*) FROM Products");
+        var movementsBefore = await ScalarAsync(context, "SELECT COUNT(*) FROM StockMovements");
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(productsBefore, await ScalarAsync(context, "SELECT COUNT(*) FROM Products"));
+        Assert.Equal(movementsBefore, await ScalarAsync(context, "SELECT COUNT(*) FROM StockMovements"));
+
+        await using var check = connection.CreateCommand();
+        check.CommandText =
+            "SELECT MovementType, QuantityChange, PreviousQuantity, NewQuantity FROM StockMovements";
+        await using var reader = await check.ExecuteReaderAsync();
+        Assert.True(await reader.ReadAsync());
+        Assert.Equal("Purchase", reader.GetString(0));
+        Assert.Equal(25m, reader.GetDecimal(1));
+        Assert.Equal(0m, reader.GetDecimal(2));
+        Assert.Equal(25m, reader.GetDecimal(3));
+
+        Assert.Equal(25m, await ScalarAsync(context, "SELECT QuantityOnHand FROM Inventories"));
+    }
+
     // ---- Phase 13D inventory adjustments ----
 
     private const string StockCountMigration = "20260813110000_AddStockCounts";

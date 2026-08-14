@@ -24,6 +24,17 @@ public sealed partial class ProductEditDialog : ContentDialog
             if (ViewModel.ErrorMessage is not null)
             {
                 args.Cancel = true;
+
+                // The error bar sits at the bottom of the right column, which on a shorter window
+                // is scrolled out of the viewport — so a rejected save would keep the dialog open
+                // with no visible reason. Scrolling it into view is what makes the refusal legible
+                // without moving it away from the Save button it belongs next to.
+                //
+                // UpdateLayout first: IsOpen has only just gone true through the binding, so
+                // without it the bar still measures as collapsed and BringIntoView scrolls to
+                // where it *used* to be.
+                ErrorBar.UpdateLayout();
+                ErrorBar.StartBringIntoView();
             }
         }
         finally
