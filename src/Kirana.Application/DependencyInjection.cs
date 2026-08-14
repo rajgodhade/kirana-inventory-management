@@ -35,6 +35,8 @@ public static class DependencyInjection
         services.AddScoped<IUserManagementService, UserManagementService>();
         services.AddScoped<IAuditLogQueryService, AuditLogQueryService>();
         services.AddScoped<IProductPricingService, ProductPricingService>();
+        // Read side of pricing (Phase 15B-1). Registered but not yet consumed by POS.
+        services.AddScoped<IProductPriceResolver, ProductPriceResolver>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IProductImportService, ProductImportService>();
         services.AddScoped<ICategoryService, CategoryService>();
