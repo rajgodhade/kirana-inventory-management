@@ -33,6 +33,10 @@
                 <TextBlock Text="New Purchase" Style="{StaticResource PageTitleTextStyle}" />
                 <TextBlock Text="Record goods received. Stock increases when the purchase is finalised."
                            Style="{StaticResource PageSubtitleTextStyle}" />
+                <TextBlock Margin="0,6,0,0" Foreground="{ThemeResource BrandPrimaryBrush}" FontWeight="SemiBold"
+                           Visibility="{x:Bind ViewModel.IsGoodsReceiptPurchase, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Run Text="From "/><Run Text="{x:Bind ViewModel.SourceGoodsReceiptNumber, Mode=OneWay}"/><Run Text=" · "/><Run Text="{x:Bind ViewModel.SourcePurchaseOrderNumber, Mode=OneWay}"/>
+                </TextBlock>
             </StackPanel>
         </Grid>
 
@@ -109,6 +113,7 @@
                         </Border>
 
                         <Button Grid.Column="3" Click="OnSupplierClick" VerticalAlignment="Center"
+                                IsEnabled="{x:Bind ViewModel.CanChangeSourceItems, Mode=OneWay}"
                                 CornerRadius="{StaticResource RadiusMedium}" Padding="14,8"
                                 AutomationProperties.Name="Select Supplier (F4)">
                             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -130,6 +135,7 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBox x:Name="ScanSearchBox" Grid.Column="0" FontSize="15" Padding="14,10"
+                                 IsEnabled="{x:Bind ViewModel.CanChangeSourceItems, Mode=OneWay}"
                                  CornerRadius="{StaticResource RadiusMedium}"
                                  PlaceholderText="Scan barcode, or type Product ID / SKU / name  (F2)"
                                  CharacterReceived="OnCharacterReceived" KeyDown="OnScanSearchKeyDown"
@@ -263,6 +269,7 @@
                                         <TextBox Grid.Column="1" Style="{StaticResource LineInputStyle}"
                                                  Visibility="{x:Bind IsPackMode, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                                  Text="{x:Bind QuantityText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="{x:Bind}"
+                                                 IsReadOnly="{x:Bind IsSourceQuantityLocked}"
                                                  TextChanged="OnLineFieldTextChanged" LostFocus="OnLineFieldLostFocus"
                                                  AutomationProperties.Name="Quantity" />
 
@@ -316,6 +323,7 @@
                                                    Text="{x:Bind LineTotal, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" />
 
                                         <Button Grid.Column="7" Click="OnRemoveLineClick" Tag="{x:Bind}"
+                                                IsEnabled="{x:Bind CanRemove}"
                                                 VerticalAlignment="Center" Padding="8,6" MinWidth="0"
                                                 Background="Transparent" BorderThickness="0"
                                                 CornerRadius="{StaticResource RadiusMedium}"

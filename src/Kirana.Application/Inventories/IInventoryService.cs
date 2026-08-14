@@ -45,5 +45,11 @@ public interface IInventoryService
 
     Task<IReadOnlyList<ProductBatch>> GetBatchesAsync(int productId, CancellationToken cancellationToken = default);
 
+    Task UpdateBatchExpiryAsync(
+        int batchId,
+        DateOnly? expiryDate,
+        int? performedByUserId,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<ProductBatch>> GetExpiringBatchesAsync(int withinDays, CancellationToken cancellationToken = default);
 }

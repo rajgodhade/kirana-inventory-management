@@ -41,6 +41,103 @@ public class ProductServiceTests : IDisposable
         PerformedByUserId = _ownerId,
     };
 
+    private CreateProductRequest ReplenishmentRequest(
+        decimal reorder, decimal target, UnitOfMeasure unit = UnitOfMeasure.Piece, bool enabled = true) => new()
+    {
+        Name = $"Replenishment {Guid.NewGuid():N}", Sku = $"REP-{Guid.NewGuid():N}", Barcodes = [],
+        Unit = unit, PurchasePrice = 10, Mrp = 12, SellingPrice = 11,
+        MinimumStock = reorder, ReorderQuantity = target, ReplenishmentEnabled = enabled,
+        OpeningStock = 0, PerformedByUserId = _ownerId,
+    };
+
+    [Fact]
+    public async Task ReplenishmentConfiguration_PersistsDisabledByDefault()
+    {
+        var product = await _sut.CreateAsync(ValidRequest());
+        Assert.False(product.ReplenishmentEnabled);
+        Assert.Null(product.PreferredSupplierId);
+    }
+
+    [Fact]
+    public async Task LegacyUpdatePath_PreservesExistingReplenishmentConfiguration()
+    {
+        var product = await _sut.CreateAsync(ReplenishmentRequest(20, 50));
+
+        await _sut.UpdateAsync(product.Id, new UpdateProductRequest
+        {
+            Name = "Updated without replenishment fields",
+            Unit = product.Unit,
+            PurchasePrice = product.PurchasePrice,
+            Mrp = product.Mrp,
+            SellingPrice = product.SellingPrice,
+            MinimumStock = product.MinimumStock,
+            ReorderQuantity = product.ReorderQuantity,
+            PerformedByUserId = _ownerId,
+        });
+
+        var persisted = await _fixture.Context.Products.SingleAsync(p => p.Id == product.Id);
+        Assert.True(persisted.ReplenishmentEnabled);
+    }
+
+    [Fact]
+    public async Task EditProduct_CanConfigureAndReloadReplenishmentSettings()
+    {
+        var supplier = new Supplier
+        {
+            SupplierCode = "SUP-REPLENISH",
+            Name = "Preferred Replenishment Supplier",
+            IsActive = true,
+        };
+        _fixture.Context.Suppliers.Add(supplier);
+        await _fixture.Context.SaveChangesAsync();
+        var product = await _sut.CreateAsync(ValidRequest());
+
+        await _sut.UpdateAsync(product.Id, new UpdateProductRequest
+        {
+            Name = product.Name,
+            Sku = product.Sku,
+            Unit = product.Unit,
+            PurchasePrice = product.PurchasePrice,
+            Mrp = product.Mrp,
+            SellingPrice = product.SellingPrice,
+            MinimumStock = 12,
+            ReorderQuantity = 40,
+            UpdateReplenishmentConfiguration = true,
+            ReplenishmentEnabled = true,
+            PreferredSupplierId = supplier.Id,
+            PerformedByUserId = _ownerId,
+        });
+
+        _fixture.Context.ChangeTracker.Clear();
+        var reloaded = await _sut.GetByIdAsync(product.Id);
+        Assert.NotNull(reloaded);
+        Assert.True(reloaded.ReplenishmentEnabled);
+        Assert.Equal(12, reloaded.MinimumStock);
+        Assert.Equal(40, reloaded.ReorderQuantity);
+        Assert.Equal(supplier.Id, reloaded.PreferredSupplierId);
+        Assert.Equal(supplier.Name, reloaded.PreferredSupplier!.Name);
+    }
+
+    [Theory]
+    [InlineData(-1, 50)]
+    [InlineData(20, -1)]
+    [InlineData(50, 20)]
+    public async Task ReplenishmentConfiguration_RejectsInvalidBounds(decimal reorder, decimal target)
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateAsync(ReplenishmentRequest(reorder, target)));
+    }
+
+    [Fact]
+    public async Task ReplenishmentConfiguration_RejectsFractionalPieceAndAllowsFractionalKilogram()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _sut.CreateAsync(ReplenishmentRequest(10.5m, 20.5m)));
+        var product = await _sut.CreateAsync(ReplenishmentRequest(
+            10.5m, 20.5m, UnitOfMeasure.Kilogram));
+        Assert.Equal(10.5m, product.MinimumStock);
+        Assert.Equal(20.5m, product.ReorderQuantity);
+    }
+
     [Fact]
     public async Task CreateAsync_GeneratesSequentialProductCodes()
     {

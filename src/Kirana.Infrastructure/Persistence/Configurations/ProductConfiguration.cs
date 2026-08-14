@@ -35,6 +35,7 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.PricingType).HasConversion<string>().HasMaxLength(20).HasDefaultValue(PricingType.Inclusive);
         builder.Property(p => p.MinimumStock).HasPrecision(18, 3);
         builder.Property(p => p.ReorderQuantity).HasPrecision(18, 3);
+        builder.Property(p => p.ReplenishmentEnabled).HasDefaultValue(false);
 
         builder.Property(p => p.HsnCode).HasMaxLength(20);
 
@@ -48,8 +49,15 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasForeignKey(p => p.BrandId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        builder.HasOne(p => p.PreferredSupplier)
+            .WithMany(s => s.PreferredForProducts)
+            .HasForeignKey(p => p.PreferredSupplierId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.HasIndex(p => p.CategoryId);
         builder.HasIndex(p => p.BrandId);
         builder.HasIndex(p => p.IsActive);
+        builder.HasIndex(p => p.PreferredSupplierId);
+        builder.HasIndex(p => p.ReplenishmentEnabled);
     }
 }

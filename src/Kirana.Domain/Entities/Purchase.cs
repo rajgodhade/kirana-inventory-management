@@ -10,6 +10,10 @@ namespace Kirana.Domain.Entities;
 /// </summary>
 public class Purchase : Entity
 {
+    public int? GoodsReceiptId { get; set; }
+    public GoodsReceipt? GoodsReceipt { get; set; }
+    public int? PurchaseOrderId { get; set; }
+    public PurchaseOrder? PurchaseOrder { get; set; }
     public string PurchaseNumber { get; set; } = string.Empty;
     public string? SupplierInvoiceNumber { get; set; }
     public DateTime PurchaseDateUtc { get; set; } = DateTime.UtcNow;

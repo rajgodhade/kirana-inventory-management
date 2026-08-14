@@ -40,6 +40,14 @@ public sealed class UpdateProductRequest
     public bool TracksBatches { get; init; }
     public decimal MinimumStock { get; init; }
     public decimal ReorderQuantity { get; init; }
+    /// <summary>
+    /// Opts this update into changing the Phase 14D replenishment configuration. Older update
+    /// paths (for example product import) leave this false so they cannot silently disable or
+    /// clear an operator's existing replenishment settings.
+    /// </summary>
+    public bool UpdateReplenishmentConfiguration { get; init; }
+    public bool ReplenishmentEnabled { get; init; }
+    public int? PreferredSupplierId { get; init; }
 
     public int? PerformedByUserId { get; init; }
 }

@@ -151,7 +151,7 @@
 
                     <Button x:Name="LowStockCard" Grid.Row="1" Grid.Column="2" Style="{StaticResource DashboardTileButtonStyle}"
                             Background="{ThemeResource PastelAmberBrush}" BorderBrush="{ThemeResource PastelAmberBrush}"
-                            Tag="Products" Click="OnDashboardDestinationClick" AutomationProperties.Name="Open low stock products"
+                            Tag="Products:LowStock" Click="OnDashboardDestinationClick" AutomationProperties.Name="Open low stock products"
                             Visibility="{x:Bind ViewModel.CanSeeInventory, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid><StackPanel Spacing="5">
                             <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE7BA;" FontSize="15" Foreground="{ThemeResource PastelAmberOnBrush}" /><TextBlock Text="LOW STOCK" Style="{StaticResource KpiLabelTextStyle}" Foreground="{ThemeResource PastelAmberOnBrush}" /></StackPanel>
@@ -162,7 +162,7 @@
 
                     <Button x:Name="OutStockCard" Grid.Row="1" Grid.Column="3" Style="{StaticResource DashboardTileButtonStyle}"
                             Background="{ThemeResource PastelRoseBrush}" BorderBrush="{ThemeResource PastelRoseBrush}"
-                            Tag="Products" Click="OnDashboardDestinationClick" AutomationProperties.Name="Open out of stock products"
+                            Tag="Products:OutOfStock" Click="OnDashboardDestinationClick" AutomationProperties.Name="Open out of stock products"
                             Visibility="{x:Bind ViewModel.CanSeeInventory, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid><StackPanel Spacing="5">
                             <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xEA39;" FontSize="15" Foreground="{ThemeResource PastelRoseOnBrush}" /><TextBlock Text="OUT OF STOCK" Style="{StaticResource KpiLabelTextStyle}" Foreground="{ThemeResource PastelRoseOnBrush}" /></StackPanel>

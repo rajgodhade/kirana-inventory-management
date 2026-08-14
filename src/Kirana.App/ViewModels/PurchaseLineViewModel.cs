@@ -16,6 +16,8 @@ public sealed partial class PurchaseLineViewModel : ObservableObject
     public required bool SupportsDecimalQuantity { get; init; }
     public required bool TracksBatches { get; init; }
     public decimal GstRatePercent { get; init; }
+    public bool IsSourceQuantityLocked { get; init; }
+    public bool CanRemove => !IsSourceQuantityLocked;
     public IReadOnlyList<PricingType> PricingTypes { get; } = Enum.GetValues<PricingType>();
 
     /// <summary>Optional purchase pack (Phase 13A), copied from the product at cart-add time. Null

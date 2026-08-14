@@ -23,6 +23,7 @@
             <conv:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
             <conv:AdjustmentDirectionToBrushConverter x:Key="AdjustmentDirectionToBrushConverter" />
             <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+            <conv:SelectedCountConverter x:Key="SelectedCountConverter" />
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <conv:CurrencyConverter x:Key="CurrencyConverter" />
             <conv:QuantityConverter x:Key="QuantityConverter" />

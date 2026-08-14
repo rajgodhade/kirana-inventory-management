@@ -13,6 +13,8 @@ public sealed class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
         builder.Property(p => p.SupplierInvoiceNumber).HasMaxLength(60);
         builder.HasIndex(p => p.SupplierInvoiceNumber);
         builder.HasIndex(p => p.PurchaseDateUtc);
+        builder.HasIndex(p => p.GoodsReceiptId).IsUnique();
+        builder.HasIndex(p => p.PurchaseOrderId);
 
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
         builder.Property(p => p.PaymentMethod).HasConversion<string>().HasMaxLength(20);
@@ -38,6 +40,11 @@ public sealed class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(p => p.SupplierId);
+
+        builder.HasOne(p => p.PurchaseOrder)
+            .WithMany()
+            .HasForeignKey(p => p.PurchaseOrderId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 

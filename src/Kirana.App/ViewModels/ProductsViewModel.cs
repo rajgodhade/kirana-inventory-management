@@ -4,15 +4,24 @@ using CommunityToolkit.Mvvm.Input;
 using Kirana.Application.Authentication;
 using Kirana.Application.Inventories;
 using Kirana.Application.Products;
+using Kirana.Application.Purchasing;
 using Kirana.Domain.Entities;
 
 namespace Kirana.App.ViewModels;
 
 /// <summary>Backs the Products management page (PRD §12-13, §24, §26).</summary>
+public enum ProductListNavigationFilter
+{
+    All,
+    LowStock,
+    OutOfStock,
+}
+
 public sealed partial class ProductsViewModel(
     IProductService productService,
     ICategoryService categoryService,
     IBrandService brandService,
+    ISupplierService supplierService,
     IInventoryService inventoryService,
     ManagementSession session) : ObservableObject
 {
@@ -27,6 +36,9 @@ public sealed partial class ProductsViewModel(
 
     [ObservableProperty]
     private bool _outOfStockOnly;
+
+    [ObservableProperty]
+    private bool _lowStockOnly;
 
     [ObservableProperty]
     private bool _expiredOnly;
@@ -46,9 +58,11 @@ public sealed partial class ProductsViewModel(
     public bool CanEditProducts => session.HasPermission(PermissionKeys.ProductsEdit);
     public bool CanViewPurchasePrice => session.HasPermission(PermissionKeys.PricingViewPurchasePrice);
     public bool CanManageInventory => session.HasPermission(PermissionKeys.InventoryManage);
+    public bool CanConfigureReplenishment => session.HasPermission(PermissionKeys.PurchasesManage);
 
     public ObservableCollection<Category> Categories { get; } = [];
     public ObservableCollection<Brand> Brands { get; } = [];
+    public ObservableCollection<Supplier> Suppliers { get; } = [];
     public ObservableCollection<ProductRowViewModel> Products { get; } = [];
     public IReadOnlyList<string> SortOptions { get; } =
     [
@@ -74,6 +88,9 @@ public sealed partial class ProductsViewModel(
     {
         var categories = await categoryService.GetAllAsync();
         var brands = await brandService.GetAllAsync();
+        var suppliers = CanConfigureReplenishment
+            ? await supplierService.SearchAsync(new SupplierSearchQuery(), CurrentUserId)
+            : [];
 
         Categories.Clear();
         foreach (var category in categories)
@@ -85,6 +102,12 @@ public sealed partial class ProductsViewModel(
         foreach (var brand in brands)
         {
             Brands.Add(brand);
+        }
+
+        Suppliers.Clear();
+        foreach (var supplier in suppliers.Where(s => s.IsActive))
+        {
+            Suppliers.Add(supplier);
         }
     }
 
@@ -111,6 +134,7 @@ public sealed partial class ProductsViewModel(
                 // "Out of stock" and "Expired". The service call above widens the query to include
                 // inactive rows; this narrows it back down to only them.
                 if ((!InactiveOnly || !row.IsActive)
+                    && (!LowStockOnly || row.StockStatus == "LOW STOCK")
                     && (!OutOfStockOnly || row.Stock <= 0)
                     && (!ExpiredOnly || row.ExpiryStatus == "EXPIRED"))
                 {
@@ -153,6 +177,15 @@ public sealed partial class ProductsViewModel(
     public Task<Product> CreateProductAsync(CreateProductRequest request) =>
         productService.CreateAsync(request);
 
+    public void ApplyNavigationFilter(ProductListNavigationFilter filter)
+    {
+        SearchText = string.Empty;
+        InactiveOnly = false;
+        ExpiredOnly = false;
+        LowStockOnly = filter == ProductListNavigationFilter.LowStock;
+        OutOfStockOnly = filter == ProductListNavigationFilter.OutOfStock;
+    }
+
     public Task<Product> UpdateProductAsync(int productId, UpdateProductRequest request) =>
         productService.UpdateAsync(productId, request);
 
@@ -184,8 +217,13 @@ public sealed partial class ProductsViewModel(
     public Task<IReadOnlyList<ProductBatch>> GetBatchesAsync(int productId) =>
         inventoryService.GetBatchesAsync(productId);
 
+    public Task<decimal> GetStockAsync(int productId) => inventoryService.GetStockAsync(productId);
+
     public async Task AddBatchAsync(int productId, string batchNumber, DateOnly? mfgDate, DateOnly? expiryDate, decimal quantity, decimal? purchasePrice, decimal? sellingPrice) =>
         await inventoryService.AddBatchAsync(productId, batchNumber, mfgDate, expiryDate, quantity, purchasePrice, sellingPrice, CurrentUserId);
+
+    public Task UpdateBatchExpiryAsync(int batchId, DateOnly? expiryDate) =>
+        inventoryService.UpdateBatchExpiryAsync(batchId, expiryDate, CurrentUserId);
 
     private async Task<ProductRowViewModel> ToRowAsync(Product product)
     {

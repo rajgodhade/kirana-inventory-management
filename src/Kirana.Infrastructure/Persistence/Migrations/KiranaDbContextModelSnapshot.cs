@@ -750,6 +750,159 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.ToTable("ExpenseCategories");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.GoodsReceipt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CancelledAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CancelledByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CompletedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("GoodsReceiptNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PurchaseOrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ReceivedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SupplierCodeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SupplierNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CancelledByUserId");
+
+                    b.HasIndex("CompletedByUserId");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("GoodsReceiptNumber")
+                        .IsUnique();
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.HasIndex("ReceivedAtUtc");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("GoodsReceipts");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.GoodsReceiptItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BarcodeSnapshot")
+                        .HasMaxLength(48)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("GoodsReceiptId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("OrderedQuantitySnapshot")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProductCodeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProductNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PurchaseOrderItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("ReceivedQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SkuSnapshot")
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UnitSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GoodsReceiptId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("PurchaseOrderItemId");
+
+                    b.ToTable("GoodsReceiptItems");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.HeldBill", b =>
                 {
                     b.Property<int>("Id")
@@ -1057,6 +1210,9 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("PreferredSupplierId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("PricingType")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -1084,6 +1240,11 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Property<decimal>("ReorderQuantity")
                         .HasPrecision(18, 3)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("ReplenishmentEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
 
                     b.Property<decimal>("SellingPrice")
                         .HasPrecision(18, 2)
@@ -1122,8 +1283,12 @@ namespace Kirana.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Name");
 
+                    b.HasIndex("PreferredSupplierId");
+
                     b.HasIndex("ProductCode")
                         .IsUnique();
+
+                    b.HasIndex("ReplenishmentEnabled");
 
                     b.HasIndex("Sku")
                         .IsUnique()
@@ -1518,6 +1683,9 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("GoodsReceiptId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("GrandTotal")
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
@@ -1541,6 +1709,9 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("PurchaseOrderId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("RoundOffAmount")
                         .HasPrecision(18, 2)
@@ -1577,10 +1748,15 @@ namespace Kirana.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
+                    b.HasIndex("GoodsReceiptId")
+                        .IsUnique();
+
                     b.HasIndex("PurchaseDateUtc");
 
                     b.HasIndex("PurchaseNumber")
                         .IsUnique();
+
+                    b.HasIndex("PurchaseOrderId");
 
                     b.HasIndex("SupplierId");
 
@@ -1690,6 +1866,202 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.HasIndex("PurchaseId");
 
                     b.ToTable("PurchaseItems");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PurchaseOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CancelledAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CancelledByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("DiscountTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("GrandTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("OrderDateUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PurchaseOrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("RoundOffAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("SubTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("SubmittedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("SubmittedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SupplierCodeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SupplierContactSnapshot")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SupplierNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("TaxTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("TaxableTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CancelledByUserId");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("OrderDateUtc");
+
+                    b.HasIndex("PurchaseOrderNumber")
+                        .IsUnique();
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("SubmittedByUserId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("PurchaseOrders");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PurchaseOrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("DiscountPercent")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("GstAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("GstRatePercentSnapshot")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HsnCodeSnapshot")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("LineTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("OrderedQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PricingTypeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProductCodeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProductNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PurchaseOrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SkuSnapshot")
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("TaxableAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UnitSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.ToTable("PurchaseOrderItems");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.PurchaseReturn", b =>
@@ -2870,6 +3242,73 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("ExpenseCategory");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.GoodsReceipt", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.User", "CancelledByUser")
+                        .WithMany()
+                        .HasForeignKey("CancelledByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Kirana.Domain.Entities.User", "CompletedByUser")
+                        .WithMany()
+                        .HasForeignKey("CompletedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Kirana.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Kirana.Domain.Entities.PurchaseOrder", "PurchaseOrder")
+                        .WithMany("GoodsReceipts")
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Kirana.Domain.Entities.Supplier", "Supplier")
+                        .WithMany("GoodsReceipts")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CancelledByUser");
+
+                    b.Navigation("CompletedByUser");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("PurchaseOrder");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.GoodsReceiptItem", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.GoodsReceipt", "GoodsReceipt")
+                        .WithMany("Items")
+                        .HasForeignKey("GoodsReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kirana.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Kirana.Domain.Entities.PurchaseOrderItem", "PurchaseOrderItem")
+                        .WithMany("GoodsReceiptItems")
+                        .HasForeignKey("PurchaseOrderItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GoodsReceipt");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("PurchaseOrderItem");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.HeldBill", b =>
                 {
                     b.HasOne("Kirana.Domain.Entities.User", "CashierUser")
@@ -2958,9 +3397,16 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("Kirana.Domain.Entities.Supplier", "PreferredSupplier")
+                        .WithMany("PreferredForProducts")
+                        .HasForeignKey("PreferredSupplierId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Brand");
 
                     b.Navigation("Category");
+
+                    b.Navigation("PreferredSupplier");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.ProductBarcode", b =>
@@ -3074,6 +3520,16 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Kirana.Domain.Entities.GoodsReceipt", "GoodsReceipt")
+                        .WithOne("Purchase")
+                        .HasForeignKey("Kirana.Domain.Entities.Purchase", "GoodsReceiptId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Kirana.Domain.Entities.PurchaseOrder", "PurchaseOrder")
+                        .WithMany()
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Kirana.Domain.Entities.Supplier", "Supplier")
                         .WithMany("Purchases")
                         .HasForeignKey("SupplierId")
@@ -3081,6 +3537,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("CreatedByUser");
+
+                    b.Navigation("GoodsReceipt");
+
+                    b.Navigation("PurchaseOrder");
 
                     b.Navigation("Supplier");
                 });
@@ -3102,6 +3562,57 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Purchase");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PurchaseOrder", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.User", "CancelledByUser")
+                        .WithMany()
+                        .HasForeignKey("CancelledByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Kirana.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Kirana.Domain.Entities.User", "SubmittedByUser")
+                        .WithMany()
+                        .HasForeignKey("SubmittedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Kirana.Domain.Entities.Supplier", "Supplier")
+                        .WithMany("PurchaseOrders")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CancelledByUser");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("SubmittedByUser");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PurchaseOrderItem", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Kirana.Domain.Entities.PurchaseOrder", "PurchaseOrder")
+                        .WithMany("Items")
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("PurchaseOrder");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.PurchaseReturn", b =>
@@ -3423,6 +3934,13 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Expenses");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.GoodsReceipt", b =>
+                {
+                    b.Navigation("Items");
+
+                    b.Navigation("Purchase");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.HeldBill", b =>
                 {
                     b.Navigation("Items");
@@ -3469,6 +3987,18 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Payments");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.PurchaseOrder", b =>
+                {
+                    b.Navigation("GoodsReceipts");
+
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.PurchaseOrderItem", b =>
+                {
+                    b.Navigation("GoodsReceiptItems");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.PurchaseReturn", b =>
                 {
                     b.Navigation("Items");
@@ -3505,7 +4035,13 @@ namespace Kirana.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Kirana.Domain.Entities.Supplier", b =>
                 {
+                    b.Navigation("GoodsReceipts");
+
                     b.Navigation("Payments");
+
+                    b.Navigation("PreferredForProducts");
+
+                    b.Navigation("PurchaseOrders");
 
                     b.Navigation("Purchases");
                 });

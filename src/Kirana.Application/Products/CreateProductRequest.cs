@@ -41,6 +41,8 @@ public sealed class CreateProductRequest
     public bool TracksBatches { get; init; }
     public decimal MinimumStock { get; init; }
     public decimal ReorderQuantity { get; init; }
+    public bool ReplenishmentEnabled { get; init; }
+    public int? PreferredSupplierId { get; init; }
 
     public decimal OpeningStock { get; init; }
 

@@ -65,7 +65,13 @@ public class Product : Entity
 
     // Inventory thresholds (PRD §26)
     public decimal MinimumStock { get; set; }
+    /// <summary>Target quantity in the product's base unit. The existing ReorderQuantity column is
+    /// reused to avoid a duplicate stock target; it is only interpreted by replenishment when
+    /// <see cref="ReplenishmentEnabled"/> is true.</summary>
     public decimal ReorderQuantity { get; set; }
+    public bool ReplenishmentEnabled { get; set; }
+    public int? PreferredSupplierId { get; set; }
+    public Supplier? PreferredSupplier { get; set; }
 
     public Inventory? Inventory { get; set; }
     public ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();

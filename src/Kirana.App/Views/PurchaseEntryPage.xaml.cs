@@ -26,12 +26,18 @@ public sealed partial class PurchaseEntryPage : Page
             services.GetRequiredService<IBarcodeLookupService>(),
             services.GetRequiredService<ISupplierService>(),
             services.GetRequiredService<IPurchaseService>(),
+            services.GetRequiredService<IGoodsReceiptService>(),
             services.GetRequiredService<ManagementSession>());
 
         InitializeComponent();
-        Loaded += (_, _) =>
+        Loaded += async (_, _) =>
         {
             ViewModel.Initialize();
+            if (_goodsReceiptId is { } goodsReceiptId)
+            {
+                try { await ViewModel.LoadFromGoodsReceiptAsync(goodsReceiptId); }
+                catch (Exception ex) { await new ContentDialog { Title = "Could not load goods receipt", Content = ex.Message, CloseButtonText = "Close" }.Themed(XamlRoot).ShowAsync(); }
+            }
             ScanSearchBox.Focus(FocusState.Programmatic);
         };
 
@@ -46,6 +52,14 @@ public sealed partial class PurchaseEntryPage : Page
         AddShortcut(Windows.System.VirtualKey.F2, () => ScanSearchBox.Focus(FocusState.Programmatic));
         AddShortcut(Windows.System.VirtualKey.F4, () => _ = OpenSupplierPickerAsync());
         AddShortcut(Windows.System.VirtualKey.F9, () => _ = CompletePurchaseAsync());
+    }
+
+    private int? _goodsReceiptId;
+
+    protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        _goodsReceiptId = e.Parameter as int?;
     }
 
     private void AddShortcut(Windows.System.VirtualKey key, Action action)

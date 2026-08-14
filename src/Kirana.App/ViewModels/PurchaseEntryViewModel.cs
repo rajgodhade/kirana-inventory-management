@@ -17,6 +17,7 @@ public sealed partial class PurchaseEntryViewModel(
     IBarcodeLookupService barcodeLookupService,
     ISupplierService supplierService,
     IPurchaseService purchaseService,
+    IGoodsReceiptService goodsReceiptService,
     ManagementSession session) : ObservableObject
 {
     [ObservableProperty]
@@ -117,6 +118,51 @@ public sealed partial class PurchaseEntryViewModel(
     private int _suggestionQueryToken;
 
     public Purchase? CompletedPurchase { get; private set; }
+    public int? SourceGoodsReceiptId { get; private set; }
+    public int? SourcePurchaseOrderId { get; private set; }
+    public string? SourceGoodsReceiptNumber { get; private set; }
+    public string? SourcePurchaseOrderNumber { get; private set; }
+    public bool IsGoodsReceiptPurchase => SourceGoodsReceiptId is not null;
+    public bool CanChangeSourceItems => !IsGoodsReceiptPurchase;
+
+    public async Task LoadFromGoodsReceiptAsync(int goodsReceiptId)
+    {
+        var prefill = await goodsReceiptService.GetPurchasePrefillAsync(goodsReceiptId, CurrentUserId);
+        var supplier = await supplierService.GetByIdAsync(prefill.SupplierId, CurrentUserId)
+            ?? throw new InvalidOperationException("Supplier not found.");
+        SelectedSupplier = supplier;
+        Lines.Clear();
+        foreach (var input in prefill.Lines)
+        {
+            var product = await productService.GetByIdAsync(input.ProductId)
+                ?? throw new InvalidOperationException($"Product #{input.ProductId} not found.");
+            Lines.Add(new PurchaseLineViewModel
+            {
+                ProductId = product.Id,
+                ProductName = product.Name,
+                ProductCode = product.ProductCode,
+                Sku = product.Sku,
+                Unit = product.Unit.ToString(),
+                SupportsDecimalQuantity = product.Unit.SupportsDecimalQuantity(),
+                TracksBatches = product.TracksBatches,
+                GstRatePercent = product.GstRatePercent ?? 0,
+                PricingType = input.PricingType ?? product.PricingType,
+                IsSourceQuantityLocked = true,
+                QuantityText = input.Quantity.ToString("0.###"),
+                UnitPriceText = input.UnitPrice.ToString("0.##"),
+                DiscountPercentText = input.DiscountPercent.ToString("0.##"),
+            });
+        }
+        SourceGoodsReceiptId = prefill.GoodsReceiptId;
+        SourcePurchaseOrderId = prefill.PurchaseOrderId;
+        SourceGoodsReceiptNumber = prefill.GoodsReceiptNumber;
+        SourcePurchaseOrderNumber = prefill.PurchaseOrderNumber;
+        OnPropertyChanged(nameof(IsGoodsReceiptPurchase));
+        OnPropertyChanged(nameof(CanChangeSourceItems));
+        OnPropertyChanged(nameof(SourceGoodsReceiptNumber));
+        OnPropertyChanged(nameof(SourcePurchaseOrderNumber));
+        RecalculateTotals();
+    }
 
     /// <summary>Same keyboard-wedge scanner pipeline the POS uses (PRD §17) — receiving goods by
     /// scanning each item is exactly as useful as scanning them at checkout.</summary>
@@ -345,6 +391,8 @@ public sealed partial class PurchaseEntryViewModel(
                 PaymentReferenceNumber = string.IsNullOrWhiteSpace(PaymentReferenceNumber) ? null : PaymentReferenceNumber,
                 Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes,
                 CreatedByUserId = CurrentUserId,
+                GoodsReceiptId = SourceGoodsReceiptId,
+                PurchaseOrderId = SourcePurchaseOrderId,
             };
 
             CompletedPurchase = await purchaseService.FinalizePurchaseAsync(request);

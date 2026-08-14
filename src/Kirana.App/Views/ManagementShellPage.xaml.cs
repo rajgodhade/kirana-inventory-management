@@ -25,7 +25,6 @@ public sealed partial class ManagementShellPage : Page
 {
     private readonly ManagementSession _session;
     private readonly ThemeService _themeService;
-    private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private string? _initialDestination;
 
     public ManagementShellPage()
@@ -37,8 +36,6 @@ public sealed partial class ManagementShellPage : Page
 
         ApplyPermissionsToPane();
         UpdateThemeIcon();
-        _clockTimer.Tick += (_, _) => UpdateClock();
-
         // Keeping the back button in sync here means hosted pages never have to think about it.
         ContentFrame.Navigated += (_, _) =>
         {
@@ -47,7 +44,6 @@ public sealed partial class ManagementShellPage : Page
         };
 
         Loaded += OnLoaded;
-        Unloaded += (_, _) => _clockTimer.Stop();
     }
 
     /// <summary>Keeps the pane highlight on the section a drill-down screen belongs to, so going
@@ -66,6 +62,10 @@ public sealed partial class ManagementShellPage : Page
             var t when t == typeof(CustomersPage) || t == typeof(CustomerLedgerPage) => "Customers",
             var t when t == typeof(SuppliersPage) || t == typeof(SupplierLedgerPage) => "Suppliers",
             var t when t == typeof(PurchasesPage) || t == typeof(PurchaseEntryPage) => "Purchases",
+            var t when t == typeof(PurchaseOrdersPage) || t == typeof(PurchaseOrderEntryPage) => "PurchaseOrders",
+            var t when t == typeof(GoodsReceiptsPage) || t == typeof(GoodsReceiptEntryPage) => "GoodsReceipts",
+            var t when t == typeof(PurchaseReconciliationsPage) || t == typeof(PurchaseReconciliationDetailsPage) => "PurchaseReconciliation",
+            var t when t == typeof(ReplenishmentPage) => "Replenishment",
             var t when t == typeof(SalesReturnsPage) || t == typeof(NewSalesReturnPage)
                 || t == typeof(SalesReturnDetailsPage) => "SalesReturns",
             var t when t == typeof(PurchaseReturnsPage) || t == typeof(NewPurchaseReturnPage)
@@ -101,8 +101,6 @@ public sealed partial class ManagementShellPage : Page
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        UpdateClock();
-        _clockTimer.Start();
         UserNameText.Text = _session.CurrentUser?.FullName ?? "Signed in";
         UserRoleText.Text = _session.CurrentUser?.Role?.Name ?? string.Empty;
 
@@ -148,6 +146,10 @@ public sealed partial class ManagementShellPage : Page
         SetVisible(NavInventoryAdjustments, _session.HasPermission(PermissionKeys.InventoryManage));
         SetVisible(NavSuppliers, _session.HasPermission(PermissionKeys.PurchasesManage));
         SetVisible(NavPurchases, _session.HasPermission(PermissionKeys.PurchasesManage));
+        SetVisible(NavPurchaseOrders, _session.HasPermission(PermissionKeys.PurchasesManage));
+        SetVisible(NavGoodsReceipts, _session.HasPermission(PermissionKeys.PurchasesManage));
+        SetVisible(NavPurchaseReconciliation, _session.HasPermission(PermissionKeys.PurchasesManage));
+        SetVisible(NavReplenishment, _session.HasPermission(PermissionKeys.PurchasesManage));
         // Phase 9 adds no new permission keys: returns reuse the refund permission, purchase
         // returns reuse the purchasing permission, and expenses reuse the expenses permission.
         SetVisible(NavSalesReturns, _session.HasPermission(PermissionKeys.SalesProcessRefund));
@@ -176,7 +178,11 @@ public sealed partial class ManagementShellPage : Page
         SetVisible(NavTradeHeader, NavCustomers.Visibility == Visibility.Visible
             || NavInvoices.Visibility == Visibility.Visible
             || NavSuppliers.Visibility == Visibility.Visible
-            || NavPurchases.Visibility == Visibility.Visible);
+            || NavPurchases.Visibility == Visibility.Visible
+            || NavPurchaseOrders.Visibility == Visibility.Visible
+            || NavGoodsReceipts.Visibility == Visibility.Visible
+            || NavPurchaseReconciliation.Visibility == Visibility.Visible
+            || NavReplenishment.Visibility == Visibility.Visible);
 
         SetVisible(NavReturnsHeader, NavSalesReturns.Visibility == Visibility.Visible
             || NavPurchaseReturns.Visibility == Visibility.Visible
@@ -227,6 +233,10 @@ public sealed partial class ManagementShellPage : Page
             "Customers" => typeof(CustomersPage),
             "Suppliers" => typeof(SuppliersPage),
             "Purchases" => typeof(PurchasesPage),
+            "PurchaseOrders" => typeof(PurchaseOrdersPage),
+            "GoodsReceipts" => typeof(GoodsReceiptsPage),
+            "PurchaseReconciliation" => typeof(PurchaseReconciliationsPage),
+            "Replenishment" => typeof(ReplenishmentPage),
             "SalesReturns" => typeof(SalesReturnsPage),
             "PurchaseReturns" => typeof(PurchaseReturnsPage),
             "CashRegister" => typeof(CashRegisterPage),
@@ -299,10 +309,4 @@ public sealed partial class ManagementShellPage : Page
     private void OnBackToBillingClick(object sender, RoutedEventArgs e) =>
         App.RootFrame?.Navigate(typeof(PosShellPage));
 
-    private void UpdateClock()
-    {
-        var now = DateTime.Now;
-        CurrentDayDateText.Text = now.ToString("dddd, dd MMM yyyy");
-        CurrentTimeText.Text = now.ToString("hh:mm:ss tt");
-    }
 }

@@ -58,6 +58,10 @@ public static class DependencyInjection
         services.AddScoped<ICustomerReceiptService, CustomerReceiptService>();
         services.AddScoped<ISupplierService, SupplierService>();
         services.AddScoped<IPurchaseService, PurchaseService>();
+        services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+        services.AddScoped<IGoodsReceiptService, GoodsReceiptService>();
+        services.AddScoped<IPurchaseReconciliationService, PurchaseReconciliationService>();
+        services.AddScoped<IReplenishmentService, ReplenishmentService>();
         services.AddScoped<ISalesReturnService, SalesReturnService>();
         services.AddScoped<IPurchaseReturnService, PurchaseReturnService>();
         services.AddScoped<IExpenseCategoryService, ExpenseCategoryService>();

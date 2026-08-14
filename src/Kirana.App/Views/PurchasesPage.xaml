@@ -114,10 +114,13 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Column="0" PlaceholderText="Search purchase # / supplier invoice #…"
-                         Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnSearchBoxKeyDown"
-                         TextChanged="OnSearchTextChanged" CornerRadius="{StaticResource RadiusMedium}"
-                         AutomationProperties.Name="Search purchases" />
+                <AutoSuggestBox x:Name="SearchBox" Grid.Column="0" PlaceholderText="Search purchase # / supplier invoice #…"
+                                Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{x:Bind ViewModel.SearchSuggestions}" TextChanged="OnSearchTextChanged"
+                                SuggestionChosen="OnSuggestionChosen" QuerySubmitted="OnSearchQuerySubmitted" GotFocus="OnSearchGotFocus"
+                                CornerRadius="{StaticResource RadiusMedium}" AutomationProperties.Name="Search purchases">
+                    <AutoSuggestBox.ItemTemplate><DataTemplate x:DataType="vm:SearchSuggestionItem"><StackPanel Padding="4,2"><TextBlock Text="{x:Bind Title}" FontWeight="SemiBold"/><TextBlock Text="{x:Bind Detail}" Style="{StaticResource CaptionTextStyle}"/></StackPanel></DataTemplate></AutoSuggestBox.ItemTemplate>
+                </AutoSuggestBox>
 
                 <ComboBox Grid.Column="1" ItemsSource="{x:Bind ViewModel.SupplierFilterOptions}"
                           SelectedItem="{x:Bind ViewModel.SelectedSupplierFilter, Mode=TwoWay}"

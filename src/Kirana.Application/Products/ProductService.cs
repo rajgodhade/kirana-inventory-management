@@ -24,6 +24,7 @@ public sealed class ProductService(
 
         await ValidateAsync(request.Name, request.CategoryId, request.BrandId, request.PurchasePrice, request.Mrp,
             request.SellingPrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
+            request.ReplenishmentEnabled, request.PreferredSupplierId,
             request.Sku, request.Barcodes, request.Unit, request.PurchasePackUnit, request.PurchasePackSize,
             excludingProductId: null, cancellationToken);
 
@@ -52,6 +53,8 @@ public sealed class ProductService(
             TracksBatches = request.TracksBatches,
             MinimumStock = request.MinimumStock,
             ReorderQuantity = request.ReorderQuantity,
+            ReplenishmentEnabled = request.ReplenishmentEnabled,
+            PreferredSupplierId = request.PreferredSupplierId,
             IsActive = true,
         };
 
@@ -108,8 +111,16 @@ public sealed class ProductService(
         var product = await db.Products.FirstOrDefaultAsync(p => p.Id == productId, cancellationToken)
             ?? throw new InvalidOperationException("Product not found.");
 
+        var replenishmentEnabled = request.UpdateReplenishmentConfiguration
+            ? request.ReplenishmentEnabled
+            : product.ReplenishmentEnabled;
+        var preferredSupplierId = request.UpdateReplenishmentConfiguration
+            ? request.PreferredSupplierId
+            : product.PreferredSupplierId;
+
         await ValidateAsync(request.Name, request.CategoryId, request.BrandId, request.PurchasePrice, request.Mrp,
             request.SellingPrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
+            replenishmentEnabled, preferredSupplierId,
             request.Sku, barcodes: [], request.Unit, request.PurchasePackUnit, request.PurchasePackSize,
             excludingProductId: productId, cancellationToken);
 
@@ -139,6 +150,11 @@ public sealed class ProductService(
         product.TracksBatches = request.TracksBatches;
         product.MinimumStock = request.MinimumStock;
         product.ReorderQuantity = request.ReorderQuantity;
+        if (request.UpdateReplenishmentConfiguration)
+        {
+            product.ReplenishmentEnabled = request.ReplenishmentEnabled;
+            product.PreferredSupplierId = request.PreferredSupplierId;
+        }
         product.UpdatedAtUtc = DateTime.UtcNow;
 
         await db.SaveChangesAsync(cancellationToken);
@@ -186,6 +202,7 @@ public sealed class ProductService(
             .Include(p => p.Brand)
             .Include(p => p.Inventory)
             .Include(p => p.Barcodes)
+            .Include(p => p.PreferredSupplier)
             .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
 
     public async Task<IReadOnlyList<Product>> SearchAsync(ProductSearchQuery query, CancellationToken cancellationToken = default)
@@ -274,7 +291,8 @@ public sealed class ProductService(
 
     private async Task ValidateAsync(
         string name, int? categoryId, int? brandId, decimal purchasePrice, decimal mrp, decimal sellingPrice,
-        decimal? gstRatePercent, decimal minimumStock, decimal reorderQuantity, string? sku,
+        decimal? gstRatePercent, decimal minimumStock, decimal reorderQuantity,
+        bool replenishmentEnabled, int? preferredSupplierId, string? sku,
         IReadOnlyList<string> barcodes,
         UnitOfMeasure unit, UnitOfMeasure? purchasePackUnit, decimal? purchasePackSize,
         int? excludingProductId, CancellationToken cancellationToken)
@@ -296,6 +314,23 @@ public sealed class ProductService(
         if (minimumStock < 0 || reorderQuantity < 0)
         {
             throw new ArgumentException("Minimum stock and reorder quantity cannot be negative.");
+        }
+
+        if (replenishmentEnabled && reorderQuantity < minimumStock)
+        {
+            throw new ArgumentException("Target stock must be greater than or equal to reorder level.");
+        }
+
+        if (!unit.SupportsDecimalQuantity()
+            && (minimumStock != decimal.Truncate(minimumStock) || reorderQuantity != decimal.Truncate(reorderQuantity)))
+        {
+            throw new ArgumentException($"'{unit}' replenishment quantities must be whole numbers.");
+        }
+
+        if (preferredSupplierId is { } supplierId
+            && !await db.Suppliers.AnyAsync(s => s.Id == supplierId && s.IsActive, cancellationToken))
+        {
+            throw new InvalidOperationException("Selected preferred supplier does not exist or is inactive.");
         }
 
         if (!UnitConversion.IsValidPackConfiguration(purchasePackSize, purchasePackUnit, unit))

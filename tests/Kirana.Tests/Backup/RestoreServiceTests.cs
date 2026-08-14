@@ -86,6 +86,66 @@ public class RestoreServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task RestoreAsync_PreservesGoodsReceiptsAndTheirItems()
+    {
+        var owner = await _fixture.SeedOwnerAsync();
+        var supplier = new Supplier { SupplierCode = "SUP-BACKUP-GRN", Name = "Backup Supplier", IsActive = true };
+        var product = new Product
+        {
+            ProductCode = "PRD-BACKUP-GRN", Name = "Backup Product", Unit = UnitOfMeasure.Piece,
+            PurchasePrice = 10m, Mrp = 15m, SellingPrice = 14m, PricingType = PricingType.Inclusive,
+            GstRatePercent = 5m, IsActive = true,
+        };
+        var order = new PurchaseOrder
+        {
+            PurchaseOrderNumber = "PO-BACKUP-GRN", Supplier = supplier,
+            SupplierNameSnapshot = supplier.Name, SupplierCodeSnapshot = supplier.SupplierCode,
+            Status = PurchaseOrderStatus.PartiallyReceived, CreatedByUserId = owner.Id,
+        };
+        var orderItem = new PurchaseOrderItem
+        {
+            PurchaseOrder = order, Product = product, ProductNameSnapshot = product.Name,
+            ProductCodeSnapshot = product.ProductCode, UnitSnapshot = product.Unit.ToString(),
+            PricingTypeSnapshot = product.PricingType, GstRatePercentSnapshot = 5m,
+            OrderedQuantity = 10m, UnitCost = 10m,
+        };
+        var receipt = new GoodsReceipt
+        {
+            GoodsReceiptNumber = "GRN-BACKUP-000001", PurchaseOrder = order, Supplier = supplier,
+            SupplierNameSnapshot = supplier.Name, SupplierCodeSnapshot = supplier.SupplierCode,
+            Status = GoodsReceiptStatus.Completed, CreatedByUserId = owner.Id,
+            CompletedByUserId = owner.Id, CompletedAtUtc = DateTime.UtcNow,
+        };
+        receipt.Items.Add(new GoodsReceiptItem
+        {
+            PurchaseOrderItem = orderItem, Product = product, ProductNameSnapshot = product.Name,
+            ProductCodeSnapshot = product.ProductCode, UnitSnapshot = product.Unit,
+            OrderedQuantitySnapshot = 10m, ReceivedQuantity = 4m,
+        });
+        _fixture.Context.AddRange(orderItem, receipt);
+        await _fixture.Context.SaveChangesAsync();
+
+        var backup = await CreateBackupService().CreateBackupAsync(BackupType.Manual, owner.Id);
+        Assert.True(backup.Succeeded, backup.ErrorMessage);
+
+        _fixture.Context.GoodsReceipts.Add(new GoodsReceipt
+        {
+            GoodsReceiptNumber = "GRN-AFTER-BACKUP", PurchaseOrder = order, Supplier = supplier,
+            SupplierNameSnapshot = supplier.Name, SupplierCodeSnapshot = supplier.SupplierCode,
+            Status = GoodsReceiptStatus.Draft, CreatedByUserId = owner.Id,
+        });
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Checkpoint();
+        Assert.Equal(2, CountRows("GoodsReceipts"));
+
+        var result = await CreateRestoreService().RestoreAsync(backup.FilePath!, owner.Id);
+
+        Assert.True(result.Succeeded, result.ErrorMessage);
+        Assert.Equal(1, CountRows("GoodsReceipts"));
+        Assert.Equal(1, CountRows("GoodsReceiptItems"));
+    }
+
+    [Fact]
     public async Task RestoreAsync_PreservesUsersPermissionsAndAuditHistory()
     {
         var owner = await _fixture.SeedOwnerAsync();

@@ -59,6 +59,11 @@
                                    Visibility="{x:Bind ViewModel.HasSupplierInvoiceNumber, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Run Text="Supplier Invoice #: " /><Run Text="{x:Bind ViewModel.SupplierInvoiceNumber}" />
                         </TextBlock>
+                        <TextBlock Style="{StaticResource CaptionTextStyle}"
+                                   Visibility="{x:Bind ViewModel.HasProcurementSource, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Run Text="GRN: " /><Run Text="{x:Bind ViewModel.GoodsReceiptNumber}" />
+                            <Run Text="  ·  PO: " /><Run Text="{x:Bind ViewModel.PurchaseOrderNumber}" />
+                        </TextBlock>
                         <TextBlock Text="{x:Bind ViewModel.Notes}" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap"
                                    Visibility="{x:Bind ViewModel.HasNotes, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </StackPanel>

@@ -25,6 +25,7 @@ public sealed class SqliteDatabaseMaintenanceService(
         "Products", "Categories", "Brands", "Inventories", "StockMovements", "ProductBatches",
         "Customers", "Sales", "SaleItems", "Payments", "CustomerCredits",
         "Suppliers", "Purchases", "PurchaseItems", "SupplierPayments",
+        "PurchaseOrders", "PurchaseOrderItems", "GoodsReceipts", "GoodsReceiptItems",
         "SalesReturns", "PurchaseReturns", "Expenses", "Users", "AuditLogs", "BackupRecords",
     ];
 
@@ -40,6 +41,14 @@ public sealed class SqliteDatabaseMaintenanceService(
             "SELECT pm.Id FROM Payments pm LEFT JOIN Sales s ON s.Id = pm.SaleId WHERE s.Id IS NULL"),
         ("Purchase lines whose purchase no longer exists",
             "SELECT pi.Id FROM PurchaseItems pi LEFT JOIN Purchases p ON p.Id = pi.PurchaseId WHERE p.Id IS NULL"),
+        ("Purchase order lines whose purchase order no longer exists",
+            "SELECT poi.Id FROM PurchaseOrderItems poi LEFT JOIN PurchaseOrders po ON po.Id = poi.PurchaseOrderId WHERE po.Id IS NULL"),
+        ("Goods receipts whose purchase order no longer exists",
+            "SELECT gr.Id FROM GoodsReceipts gr LEFT JOIN PurchaseOrders po ON po.Id = gr.PurchaseOrderId WHERE po.Id IS NULL"),
+        ("Goods receipt lines whose goods receipt no longer exists",
+            "SELECT gri.Id FROM GoodsReceiptItems gri LEFT JOIN GoodsReceipts gr ON gr.Id = gri.GoodsReceiptId WHERE gr.Id IS NULL"),
+        ("Goods receipt lines whose purchase order line no longer exists",
+            "SELECT gri.Id FROM GoodsReceiptItems gri LEFT JOIN PurchaseOrderItems poi ON poi.Id = gri.PurchaseOrderItemId WHERE poi.Id IS NULL"),
         ("Product batches whose product no longer exists",
             "SELECT b.Id FROM ProductBatches b LEFT JOIN Products p ON p.Id = b.ProductId WHERE p.Id IS NULL"),
         ("Udhaar credits whose customer no longer exists",

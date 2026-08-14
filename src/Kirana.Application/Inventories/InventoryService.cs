@@ -161,6 +161,29 @@ public sealed class InventoryService(IKiranaDbContext db, IAuditLogger auditLogg
             .OrderBy(b => b.ExpiryDate)
             .ToListAsync(cancellationToken);
 
+    public async Task UpdateBatchExpiryAsync(
+        int batchId,
+        DateOnly? expiryDate,
+        int? performedByUserId,
+        CancellationToken cancellationToken = default)
+    {
+        await permissionEnforcer.EnsureHasPermissionAsync(performedByUserId, PermissionKeys.InventoryManage, cancellationToken);
+
+        var batch = await db.ProductBatches
+            .Include(b => b.Product)
+            .FirstOrDefaultAsync(b => b.Id == batchId, cancellationToken)
+            ?? throw new InvalidOperationException("Product batch not found.");
+
+        var previousExpiry = batch.ExpiryDate;
+        batch.ExpiryDate = expiryDate;
+        await db.SaveChangesAsync(cancellationToken);
+
+        await auditLogger.RecordAsync(
+            performedByUserId, "BatchExpiryUpdated", nameof(ProductBatch), batch.Id.ToString(),
+            previousValue: previousExpiry?.ToString("yyyy-MM-dd"),
+            newValue: expiryDate?.ToString("yyyy-MM-dd"), cancellationToken: cancellationToken);
+    }
+
     public async Task<IReadOnlyList<ProductBatch>> GetExpiringBatchesAsync(int withinDays, CancellationToken cancellationToken = default)
     {
         var threshold = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(withinDays));

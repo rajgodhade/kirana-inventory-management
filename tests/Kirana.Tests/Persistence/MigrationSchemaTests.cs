@@ -69,6 +69,22 @@ public sealed class MigrationSchemaTests : IDisposable
     }
 
     [Fact]
+    public async Task Products_HasDisabledByDefaultReplenishmentConfiguration()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        var columns = await ColumnNamesAsync(context, "Products");
+        Assert.Contains("ReplenishmentEnabled", columns);
+        Assert.Contains("PreferredSupplierId", columns);
+
+        var connection = context.Database.GetDbConnection();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT dflt_value FROM pragma_table_info('Products') WHERE name = 'ReplenishmentEnabled'";
+        Assert.Equal("0", Convert.ToString(await command.ExecuteScalarAsync()));
+    }
+
+    [Fact]
     public async Task Products_NoLongerHasLegacyIsTaxInclusiveColumn()
     {
         // Regression guard: this NOT NULL column with no default was orphaned when PricingType
