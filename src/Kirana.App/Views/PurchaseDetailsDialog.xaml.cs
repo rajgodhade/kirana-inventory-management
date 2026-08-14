@@ -15,6 +15,10 @@ public sealed partial class PurchaseDetailsDialog : ContentDialog
     {
         ViewModel = PurchaseDetailsViewModel.FromPurchase(purchase);
         InitializeComponent();
+        if (purchase.PurchaseOrderId is not null)
+        {
+            SecondaryButtonText = "Reconciliation";
+        }
     }
 
     private void OnCloseIconClick(object sender, RoutedEventArgs e) => Hide();

@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <!--
+    The ViewModels under test are plain CommunityToolkit ObservableObject types with no WinUI
+    dependency, so their sources are compiled directly here rather than project-referencing
+    Kirana.App. Referencing the WinUI exe drags in the Windows App SDK MSIX/PRI build targets,
+    which need packaging tooling that is not installed with this SDK and which a test assembly has
+    no use for. Linking keeps these tests on a plain net10.0 target and running under the normal
+    `dotnet test` host.
+
+    Only add files here that are genuinely UI-free; anything touching Microsoft.UI.* belongs in the
+    app and cannot be unit tested this way.
+  -->
+  <ItemGroup>
+    <Compile Include="..\..\src\Kirana.App\ViewModels\PurchaseOrderViewModels.cs" Link="Linked\PurchaseOrderViewModels.cs" />
+    <Compile Include="..\..\src\Kirana.App\ViewModels\SearchSuggestionItem.cs" Link="Linked\SearchSuggestionItem.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Kirana.Domain\Kirana.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Kirana.Application\Kirana.Application.csproj" />
+  </ItemGroup>
+
+</Project>

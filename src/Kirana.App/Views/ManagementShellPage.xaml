@@ -35,8 +35,6 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Width="32" Height="32" CornerRadius="{StaticResource RadiusMedium}"
@@ -59,30 +57,21 @@
                 </StackPanel>
             </Button>
 
-            <!-- Live store clock is persistent, so management users can stay oriented without
-                 relying on the desktop taskbar. -->
-            <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,8,0">
-                <TextBlock x:Name="CurrentDayDateText" Style="{StaticResource SecondaryTextStyle}"
-                           HorizontalAlignment="Right" />
-                <TextBlock x:Name="CurrentTimeText" Style="{StaticResource CaptionTextStyle}"
-                           HorizontalAlignment="Right" />
-            </StackPanel>
-
             <!-- Signed-in user, so it's never ambiguous whose actions are being audited. -->
-            <StackPanel Grid.Column="5" VerticalAlignment="Center" Margin="0,0,4,0">
+            <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,4,0">
                 <TextBlock x:Name="UserNameText" Style="{StaticResource SecondaryTextStyle}"
                            HorizontalAlignment="Right" />
                 <TextBlock x:Name="UserRoleText" Style="{StaticResource CaptionTextStyle}"
                            HorizontalAlignment="Right" />
             </StackPanel>
 
-            <Button Grid.Column="6" Click="OnThemeToggleClick" VerticalAlignment="Center"
+            <Button Grid.Column="4" Click="OnThemeToggleClick" VerticalAlignment="Center"
                     AutomationProperties.Name="Toggle light and dark theme"
                     ToolTipService.ToolTip="Switch between light and dark">
                 <FontIcon x:Name="ThemeIcon" Glyph="&#xE706;" FontSize="15" />
             </Button>
 
-            <Button Grid.Column="7" Click="OnLockClick" VerticalAlignment="Center"
+            <Button Grid.Column="5" Click="OnLockClick" VerticalAlignment="Center"
                     AutomationProperties.Name="Lock and return to billing">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE72E;" FontSize="14" />
@@ -164,6 +153,22 @@
                     <muxc:NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE7B8;" />
                     </muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:Name="NavPurchaseOrders" Content="Purchase Orders" Tag="PurchaseOrders">
+                    <muxc:NavigationViewItem.Icon><FontIcon Glyph="&#xE8A5;" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:Name="NavGoodsReceipts" Content="Goods Receipts" Tag="GoodsReceipts">
+                    <muxc:NavigationViewItem.Icon><FontIcon Glyph="&#xE8B0;" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:Name="NavPurchaseReconciliation" Content="Purchase Reconciliation" Tag="PurchaseReconciliation">
+                    <muxc:NavigationViewItem.Icon><FontIcon Glyph="&#xE9D5;" /></muxc:NavigationViewItem.Icon>
+                </muxc:NavigationViewItem>
+
+                <muxc:NavigationViewItem x:Name="NavReplenishment" Content="Replenishment" Tag="Replenishment">
+                    <muxc:NavigationViewItem.Icon><FontIcon Glyph="&#xE7BF;" /></muxc:NavigationViewItem.Icon>
                 </muxc:NavigationViewItem>
 
                 <muxc:NavigationViewItemHeader x:Name="NavReturnsHeader" Content="Returns &amp; Money" />

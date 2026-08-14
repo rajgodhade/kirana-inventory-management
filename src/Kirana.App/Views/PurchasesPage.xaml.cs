@@ -34,8 +34,15 @@ public sealed partial class PurchasesPage : Page
         };
     }
 
-    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+    private void OnSearchTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs e)
     {
+        ViewModel.SearchText = sender.Text;
+        ViewModel.UpdateSearchSuggestions(sender.Text);
+        sender.IsSuggestionListOpen = e.Reason == AutoSuggestionBoxTextChangeReason.UserInput && ViewModel.SearchSuggestions.Count > 0;
+        if (e.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
+        {
+            return;
+        }
         _searchDebounce.Stop();
         _searchDebounce.Start();
     }
@@ -47,6 +54,31 @@ public sealed partial class PurchasesPage : Page
             _searchDebounce.Stop();
             await ViewModel.SearchAsync();
         }
+    }
+
+    private void OnSearchGotFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is AutoSuggestBox box)
+        {
+            ViewModel.UpdateSearchSuggestions(box.Text);
+            box.IsSuggestionListOpen = ViewModel.SearchSuggestions.Count > 0;
+        }
+    }
+
+    private async void OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs e)
+    {
+        if (e.SelectedItem is not SearchSuggestionItem item) return;
+        _searchDebounce.Stop();
+        ViewModel.SearchText = item.Value;
+        sender.Text = item.Value;
+        await ViewModel.SearchAsync();
+    }
+
+    private async void OnSearchQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs e)
+    {
+        _searchDebounce.Stop();
+        ViewModel.SearchText = e.ChosenSuggestion is SearchSuggestionItem item ? item.Value : e.QueryText;
+        await ViewModel.SearchAsync();
     }
 
     private async void OnFilterChanged(object sender, RoutedEventArgs e) => await ViewModel.SearchAsync();
@@ -126,7 +158,10 @@ public sealed partial class PurchasesPage : Page
         }
 
         var dialog = new PurchaseDetailsDialog(purchase).Themed(XamlRoot);
-        await dialog.ShowAsync();
+        if (await dialog.ShowAsync() == ContentDialogResult.Secondary && purchase.PurchaseOrderId is int purchaseOrderId)
+        {
+            Frame.Navigate(typeof(PurchaseReconciliationDetailsPage), purchaseOrderId);
+        }
     }
 
     private async void OnRecordPaymentClick(object sender, RoutedEventArgs e)

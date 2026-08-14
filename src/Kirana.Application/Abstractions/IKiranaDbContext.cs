@@ -43,6 +43,10 @@ public interface IKiranaDbContext
     DbSet<Purchase> Purchases { get; }
     DbSet<PurchaseItem> PurchaseItems { get; }
     DbSet<SupplierPayment> SupplierPayments { get; }
+    DbSet<PurchaseOrder> PurchaseOrders { get; }
+    DbSet<PurchaseOrderItem> PurchaseOrderItems { get; }
+    DbSet<GoodsReceipt> GoodsReceipts { get; }
+    DbSet<GoodsReceiptItem> GoodsReceiptItems { get; }
 
     DbSet<SalesReturn> SalesReturns { get; }
     DbSet<SalesReturnItem> SalesReturnItems { get; }

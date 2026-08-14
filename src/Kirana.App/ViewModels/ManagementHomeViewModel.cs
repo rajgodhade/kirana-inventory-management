@@ -341,7 +341,7 @@ public sealed partial class ManagementHomeViewModel(
             BusinessAlerts.Add(new DashboardAlertViewModel
             {
                 Glyph = "", Title = $"{lowStock:N0} low-stock product(s)",
-                Detail = "Review reorder levels before products run out.", Action = "Review products", Destination = "Products",
+                Detail = "Review reorder levels before products run out.", Action = "Review products", Destination = "Products:LowStock",
             });
         }
 
@@ -350,7 +350,7 @@ public sealed partial class ManagementHomeViewModel(
             BusinessAlerts.Add(new DashboardAlertViewModel
             {
                 Glyph = "", Title = $"{outOfStock:N0} product(s) out of stock",
-                Detail = "These products cannot be billed until stock is replenished.", Action = "View inventory", Destination = "Products",
+                Detail = "These products cannot be billed until stock is replenished.", Action = "View inventory", Destination = "Products:OutOfStock",
             });
         }
 

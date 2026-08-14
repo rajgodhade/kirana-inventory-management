@@ -194,7 +194,11 @@ public sealed class PromotionService(IKiranaDbContext db, IAuditLogger auditLogg
             throw new ArgumentException("Fixed price must be lower than every targeted product's selling price.");
 
         if (!request.ActivateImmediately) return;
+        // An expired promotion can remain marked active for history and reporting,
+        // but it can no longer participate in a live scheduling conflict.
+        var now = DateTime.UtcNow;
         var overlapping = await QueryReadOnly().Where(x => x.Id != existingId && x.IsActive
+            && x.Schedule!.EndAtUtc > now
             && x.Schedule!.StartAtUtc < request.EndAtUtc && request.StartAtUtc < x.Schedule.EndAtUtc).ToListAsync(cancellationToken);
         foreach (var existing in overlapping.Where(x => !request.AllowStacking || !x.AllowStacking))
         {

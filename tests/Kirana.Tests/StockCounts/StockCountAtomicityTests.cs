@@ -192,6 +192,10 @@ public class StockCountAtomicityTests : IDisposable
         public DbSet<Purchase> Purchases => inner.Purchases;
         public DbSet<PurchaseItem> PurchaseItems => inner.PurchaseItems;
         public DbSet<SupplierPayment> SupplierPayments => inner.SupplierPayments;
+        public DbSet<PurchaseOrder> PurchaseOrders => inner.PurchaseOrders;
+        public DbSet<PurchaseOrderItem> PurchaseOrderItems => inner.PurchaseOrderItems;
+        public DbSet<GoodsReceipt> GoodsReceipts => inner.GoodsReceipts;
+        public DbSet<GoodsReceiptItem> GoodsReceiptItems => inner.GoodsReceiptItems;
         public DbSet<SalesReturn> SalesReturns => inner.SalesReturns;
         public DbSet<SalesReturnItem> SalesReturnItems => inner.SalesReturnItems;
         public DbSet<PurchaseReturn> PurchaseReturns => inner.PurchaseReturns;

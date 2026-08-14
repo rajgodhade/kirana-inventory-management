@@ -5,10 +5,12 @@ using Kirana.Application.Authentication;
 using Kirana.Application.Barcodes;
 using Kirana.Application.Inventories;
 using Kirana.Application.Products;
+using Kirana.Application.Purchasing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Navigation;
 
 namespace Kirana.App.Views;
 
@@ -29,6 +31,7 @@ public sealed partial class ProductsPage : Page
             services.GetRequiredService<IProductService>(),
             services.GetRequiredService<ICategoryService>(),
             services.GetRequiredService<IBrandService>(),
+            services.GetRequiredService<ISupplierService>(),
             services.GetRequiredService<IInventoryService>(),
             services.GetRequiredService<ManagementSession>());
 
@@ -40,6 +43,14 @@ public sealed partial class ProductsPage : Page
             _searchDebounce.Stop();
             await ViewModel.SearchAsync();
         };
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        ViewModel.ApplyNavigationFilter(e.Parameter is ProductListNavigationFilter filter
+            ? filter
+            : ProductListNavigationFilter.All);
     }
 
     private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
@@ -82,6 +93,16 @@ public sealed partial class ProductsPage : Page
         if (sender is CheckBox checkBox)
         {
             ViewModel.OutOfStockOnly = checkBox.IsChecked == true;
+        }
+
+        await ViewModel.SearchAsync();
+    }
+
+    private async void OnLowStockOnlyChanged(object sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox checkBox)
+        {
+            ViewModel.LowStockOnly = checkBox.IsChecked == true;
         }
 
         await ViewModel.SearchAsync();
@@ -175,8 +196,10 @@ public sealed partial class ProductsPage : Page
             return;
         }
 
-        var dialog = new ProductEditDialog(new ProductEditViewModel(
-            ViewModel, App.Services.GetRequiredService<IBarcodeService>(), App.Services.GetRequiredService<IBarcodeRenderer>(), product)).Themed(XamlRoot);
+        var editViewModel = new ProductEditViewModel(
+            ViewModel, App.Services.GetRequiredService<IBarcodeService>(), App.Services.GetRequiredService<IBarcodeRenderer>(), product);
+        await editViewModel.LoadBatchExpiryAsync();
+        var dialog = new ProductEditDialog(editViewModel).Themed(XamlRoot);
         await dialog.ShowAsync();
         await ViewModel.SearchAsync();
     }

@@ -29,6 +29,44 @@ public sealed class PurchaseService(
             throw new InvalidOperationException($"'{supplier.Name}' is inactive and cannot receive new purchases.");
         }
 
+        var supplierInvoiceNumber = string.IsNullOrWhiteSpace(request.SupplierInvoiceNumber)
+            ? null : request.SupplierInvoiceNumber.Trim();
+        if (supplierInvoiceNumber is not null && await db.Purchases.AsNoTracking().AnyAsync(
+                p => p.SupplierId == request.SupplierId && p.SupplierInvoiceNumber == supplierInvoiceNumber,
+                cancellationToken))
+        {
+            throw new InvalidOperationException(
+                $"Supplier invoice '{supplierInvoiceNumber}' has already been recorded for {supplier.Name}.");
+        }
+
+        GoodsReceipt? sourceReceipt = null;
+        if (request.GoodsReceiptId is { } receiptId)
+        {
+            sourceReceipt = await db.GoodsReceipts.Include(g => g.Items).Include(g => g.Purchase)
+                .FirstOrDefaultAsync(g => g.Id == receiptId, cancellationToken)
+                ?? throw new InvalidOperationException("Goods receipt not found.");
+            if (sourceReceipt.Status != GoodsReceiptStatus.Completed)
+                throw new InvalidOperationException("Only a completed goods receipt can create a purchase.");
+            if (sourceReceipt.Purchase is not null)
+                throw new InvalidOperationException($"Purchase {sourceReceipt.Purchase.PurchaseNumber} already exists for this goods receipt.");
+            if (sourceReceipt.SupplierId != request.SupplierId)
+                throw new InvalidOperationException("The purchase supplier must match the goods receipt supplier.");
+            if (request.PurchaseOrderId != sourceReceipt.PurchaseOrderId)
+                throw new InvalidOperationException("The purchase order reference does not match the goods receipt.");
+
+            var receivedByProduct = sourceReceipt.Items.GroupBy(i => i.ProductId)
+                .ToDictionary(g => g.Key, g => g.Sum(i => i.ReceivedQuantity));
+            var requestedByProduct = request.Lines.GroupBy(i => i.ProductId)
+                .ToDictionary(g => g.Key, g => g.Sum(i => i.Quantity));
+            if (receivedByProduct.Count != requestedByProduct.Count
+                || receivedByProduct.Any(x => !requestedByProduct.TryGetValue(x.Key, out var quantity) || quantity != x.Value))
+                throw new InvalidOperationException("Purchase quantities must exactly match the completed goods receipt.");
+        }
+        else if (request.PurchaseOrderId is not null)
+        {
+            throw new InvalidOperationException("A purchase order reference requires a goods receipt reference.");
+        }
+
         var productIds = request.Lines.Select(l => l.ProductId).Distinct().ToList();
         var products = await db.Products
             .Include(p => p.Inventory)
@@ -130,7 +168,7 @@ public sealed class PurchaseService(
         var purchase = new Purchase
         {
             PurchaseNumber = purchaseNumber,
-            SupplierInvoiceNumber = string.IsNullOrWhiteSpace(request.SupplierInvoiceNumber) ? null : request.SupplierInvoiceNumber.Trim(),
+            SupplierInvoiceNumber = supplierInvoiceNumber,
             PurchaseDateUtc = request.PurchaseDateUtc ?? DateTime.UtcNow,
             Supplier = supplier,
             CreatedByUserId = request.CreatedByUserId,
@@ -145,6 +183,8 @@ public sealed class PurchaseService(
             PaymentMethod = request.AmountPaid > 0 ? request.PaymentMethod : null,
             Notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes.Trim(),
             Status = PurchaseStatus.Completed,
+            GoodsReceipt = sourceReceipt,
+            PurchaseOrderId = sourceReceipt?.PurchaseOrderId,
         };
 
         foreach (var lineResult in totals.Lines)
@@ -252,6 +292,14 @@ public sealed class PurchaseService(
             request.CreatedByUserId, "PurchaseCreated", nameof(Purchase), purchase.Id.ToString(),
             newValue: $"{purchaseNumber} — ₹{totals.GrandTotal:0.00} from {supplier.SupplierCode}", cancellationToken: cancellationToken);
 
+        if (sourceReceipt is not null)
+        {
+            await auditLogger.RecordAsync(
+                request.CreatedByUserId, "PurchaseCreatedFromGoodsReceipt", nameof(GoodsReceipt), sourceReceipt.Id.ToString(),
+                newValue: $"{sourceReceipt.GoodsReceiptNumber} -> {purchaseNumber}; PO #{sourceReceipt.PurchaseOrderId}",
+                cancellationToken: cancellationToken);
+        }
+
         // Audit the up-front payment as a payment in its own right, so every SupplierPayment row is
         // individually traceable — otherwise money taken at purchase time is only implicitly
         // covered by the PurchaseCreated entry and can't be reconciled from the audit log alone.
@@ -317,6 +365,8 @@ public sealed class PurchaseService(
             .Include(p => p.Payments)
             .Include(p => p.Supplier)
             .Include(p => p.CreatedByUser)
+            .Include(p => p.GoodsReceipt)
+            .Include(p => p.PurchaseOrder)
             .FirstOrDefaultAsync(p => p.Id == purchaseId, cancellationToken);
     }
 

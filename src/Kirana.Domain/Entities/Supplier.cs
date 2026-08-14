@@ -23,5 +23,8 @@ public class Supplier : Entity
     public decimal OutstandingBalance { get; set; }
 
     public ICollection<Purchase> Purchases { get; set; } = new List<Purchase>();
+    public ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
+    public ICollection<GoodsReceipt> GoodsReceipts { get; set; } = new List<GoodsReceipt>();
+    public ICollection<Product> PreferredForProducts { get; set; } = new List<Product>();
     public ICollection<SupplierPayment> Payments { get; set; } = new List<SupplierPayment>();
 }

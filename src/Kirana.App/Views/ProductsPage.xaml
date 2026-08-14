@@ -38,6 +38,9 @@
             <CheckBox Content="Out of stock" VerticalAlignment="Center"
                       IsChecked="{x:Bind ViewModel.OutOfStockOnly, Mode=TwoWay}" Checked="OnOutOfStockOnlyChanged" Unchecked="OnOutOfStockOnlyChanged" />
 
+            <CheckBox Content="Low stock" VerticalAlignment="Center"
+                      IsChecked="{x:Bind ViewModel.LowStockOnly, Mode=TwoWay}" Checked="OnLowStockOnlyChanged" Unchecked="OnLowStockOnlyChanged" />
+
             <CheckBox Content="Expired" VerticalAlignment="Center"
                       IsChecked="{x:Bind ViewModel.ExpiredOnly, Mode=TwoWay}" Checked="OnExpiredOnlyChanged" Unchecked="OnExpiredOnlyChanged" />
 

@@ -18,4 +18,7 @@ public sealed class CreatePurchaseRequest
 
     public string? Notes { get; init; }
     public int? CreatedByUserId { get; init; }
+    /// <summary>Optional non-posting source documents. Direct purchases leave both null.</summary>
+    public int? GoodsReceiptId { get; init; }
+    public int? PurchaseOrderId { get; init; }
 }

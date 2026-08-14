@@ -53,6 +53,8 @@ public sealed partial class PurchasesViewModel(
     public int? CurrentUserId => session.CurrentUser?.Id;
 
     public ObservableCollection<PurchaseRowViewModel> Purchases { get; } = [];
+    public ObservableCollection<SearchSuggestionItem> SearchSuggestions { get; } = [];
+    private readonly List<SearchSuggestionItem> _searchCatalog = [];
 
     [ObservableProperty]
     private bool _hasResults;
@@ -159,6 +161,21 @@ public sealed partial class PurchasesViewModel(
                 Purchases.Add(row);
             }
 
+            if (string.IsNullOrWhiteSpace(SearchText))
+            {
+                _searchCatalog.Clear();
+                foreach (var purchase in Purchases)
+                {
+                    _searchCatalog.Add(new SearchSuggestionItem(purchase.PurchaseNumber, purchase.PurchaseNumber,
+                        $"Purchase · {purchase.SupplierName}", $"{purchase.PurchaseNumber} {purchase.SupplierName}"));
+                    _searchCatalog.Add(new SearchSuggestionItem(purchase.SupplierName, purchase.SupplierName,
+                        $"Supplier · {purchase.PurchaseNumber}", $"{purchase.SupplierName} {purchase.PurchaseNumber}"));
+                }
+                foreach (var supplierOption in SupplierFilterOptions.Where(s => s.Id > 0))
+                    _searchCatalog.Add(new SearchSuggestionItem(supplierOption.Name, supplierOption.Name, "Supplier", supplierOption.Name));
+            }
+            UpdateSearchSuggestions(SearchText);
+
             HasResults = Purchases.Count > 0;
             RecalculateSummary();
         }
@@ -198,6 +215,9 @@ public sealed partial class PurchasesViewModel(
         FromDateFilter = null;
         ToDateFilter = null;
     }
+
+    public void UpdateSearchSuggestions(string? text) =>
+        SearchSuggestionCollection.Update(SearchSuggestions, _searchCatalog, text);
 
     public void ClearDateFilters()
     {

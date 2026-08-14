@@ -62,10 +62,21 @@ public sealed partial class ManagementHomePage : Page
 
     private void OnDashboardDestinationClick(object sender, RoutedEventArgs e)
     {
-        if ((sender as FrameworkElement)?.Tag is not string destination)
+        if ((sender as FrameworkElement)?.Tag is not string route)
         {
             return;
         }
+
+        var parts = route.Split(':', 2);
+        var destination = parts[0];
+        object? parameter = destination == "Products" && parts.Length == 2
+            ? parts[1] switch
+            {
+                "LowStock" => ProductListNavigationFilter.LowStock,
+                "OutOfStock" => ProductListNavigationFilter.OutOfStock,
+                _ => ProductListNavigationFilter.All,
+            }
+            : null;
 
         var pageType = destination switch
         {
@@ -74,6 +85,7 @@ public sealed partial class ManagementHomePage : Page
             "Customers" => typeof(CustomersPage),
             "Invoices" => typeof(InvoicesPage),
             "Purchases" => typeof(PurchasesPage),
+            "PurchaseOrders" => typeof(PurchaseOrdersPage),
             "PurchaseEntry" => typeof(PurchaseEntryPage),
             "Expenses" => typeof(ExpensesPage),
             "Reports" => typeof(ReportsHubPage),
@@ -83,7 +95,7 @@ public sealed partial class ManagementHomePage : Page
 
         if (pageType is not null && Frame?.CurrentSourcePageType != pageType)
         {
-            Frame?.Navigate(pageType);
+            Frame?.Navigate(pageType, parameter);
         }
     }
 

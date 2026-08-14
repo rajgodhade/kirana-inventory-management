@@ -161,6 +161,24 @@ public class InventoryServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateBatchExpiryAsync_UpdatesOnlyExpiryAndWritesAuditEntry()
+    {
+        var product = await SeedProductAsync();
+        var originalExpiry = DateOnly.FromDateTime(DateTime.Today.AddDays(30));
+        var revisedExpiry = DateOnly.FromDateTime(DateTime.Today.AddDays(60));
+        var batch = await _sut.AddBatchAsync(
+            product.Id, "BATCH-EXP", null, originalExpiry, 12, 8, 12, _ownerId);
+
+        await _sut.UpdateBatchExpiryAsync(batch.Id, revisedExpiry, _ownerId);
+
+        var persisted = await _fixture.Context.ProductBatches.SingleAsync(b => b.Id == batch.Id);
+        Assert.Equal(revisedExpiry, persisted.ExpiryDate);
+        Assert.Equal(12, persisted.Quantity);
+        Assert.Contains(await _fixture.Context.AuditLogs.ToListAsync(),
+            entry => entry.Action == "BatchExpiryUpdated" && entry.EntityId == batch.Id.ToString());
+    }
+
+    [Fact]
     public async Task GetExpiringBatchesAsync_ReturnsBatchesWithinThreshold()
     {
         var product = await SeedProductAsync();

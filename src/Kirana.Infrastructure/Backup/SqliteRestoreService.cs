@@ -22,7 +22,7 @@ public sealed class SqliteRestoreService(
     private static readonly string[] CountedTables =
     [
         "Products", "Inventories", "Customers", "Suppliers", "Sales", "SaleItems",
-        "Purchases", "Expenses", "Users", "AuditLogs",
+        "Purchases", "PurchaseOrders", "GoodsReceipts", "Expenses", "Users", "AuditLogs",
     ];
 
     public async Task<BackupInfo> GetBackupInfoAsync(string filePath, CancellationToken cancellationToken = default)

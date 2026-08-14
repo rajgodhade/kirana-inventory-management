@@ -27,6 +27,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
 
     public System.Collections.ObjectModel.ObservableCollection<Category> Categories => _owner.Categories;
     public System.Collections.ObjectModel.ObservableCollection<Brand> Brands => _owner.Brands;
+    public System.Collections.ObjectModel.ObservableCollection<Supplier> Suppliers => _owner.Suppliers;
 
     [ObservableProperty]
     private string _name = string.Empty;
@@ -64,13 +65,15 @@ public sealed partial class ProductEditViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(ReorderQuantityHeader))]
     [NotifyPropertyChangedFor(nameof(OpeningStockHeader))]
     [NotifyPropertyChangedFor(nameof(PackSizeHeader))]
+    [NotifyPropertyChangedFor(nameof(CurrentStockText))]
+    [NotifyPropertyChangedFor(nameof(SuggestedReorderText))]
     private UnitOfMeasure _selectedUnit = UnitOfMeasure.Piece;
 
     /// <summary>Inventory quantity fields show the selected unit right in the header (e.g.
     /// "Minimum stock (Kilogram)") so it is obvious what "5" in the box actually means — the same
     /// unit the product's own stock ledger and POS billing already use.</summary>
     public string MinimumStockHeader => $"Minimum stock ({SelectedUnit})";
-    public string ReorderQuantityHeader => $"Reorder quantity ({SelectedUnit})";
+    public string ReorderQuantityHeader => $"Target stock ({SelectedUnit})";
     public string OpeningStockHeader => $"Opening stock ({SelectedUnit})";
 
     /// <summary>Optional purchase pack (Phase 13A) — most products never need this, so it stays
@@ -121,13 +124,55 @@ public sealed partial class ProductEditViewModel : ObservableObject
         : "GST will be added during billing.";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SuggestedReorderText))]
     private string _minimumStockText = "0";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SuggestedReorderText))]
     private string _reorderQuantityText = "0";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SuggestedReorderText))]
+    private bool _replenishmentEnabled;
+
+    [ObservableProperty]
+    private Supplier? _selectedPreferredSupplier;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentStockText))]
+    [NotifyPropertyChangedFor(nameof(SuggestedReorderText))]
+    private decimal _currentStock;
+
+    public string CurrentStockText => $"{CurrentStock:0.###} {SelectedUnit}";
+    public string SuggestedReorderText
+    {
+        get
+        {
+            if (!ReplenishmentEnabled) return "Not configured";
+            if (!decimal.TryParse(MinimumStockText, out var reorder)
+                || !decimal.TryParse(ReorderQuantityText, out var target)
+                || reorder < 0 || target < reorder) return "Fix configuration to calculate";
+            var suggested = CurrentStock <= reorder ? Math.Max(target - CurrentStock, 0) : 0;
+            return $"{suggested:0.###} {SelectedUnit}";
+        }
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowExpiryField))]
     private bool _tracksBatches;
+
+    [ObservableProperty]
+    private DateTimeOffset? _expiryDate;
+
+    [ObservableProperty]
+    private bool _canEditExpiryInline = true;
+
+    [ObservableProperty]
+    private string _expiryHelpText = "Set the expiry for this product's current batch.";
+
+    public bool ShowExpiryField => TracksBatches;
+
+    private int? _editingBatchId;
 
     [ObservableProperty]
     private string _openingStockText = "0";
@@ -157,6 +202,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
         _barcodeRenderer = barcodeRenderer;
         IsEditMode = false;
         ShowPurchasePrice = owner.CanViewPurchasePrice;
+        CurrentStock = 0;
     }
 
     /// <summary>Edit mode, pre-filled from an existing product.</summary>
@@ -197,9 +243,35 @@ public sealed partial class ProductEditViewModel : ObservableObject
         SelectedPricingType = existing.PricingType;
         MinimumStockText = existing.MinimumStock.ToString("0.###");
         ReorderQuantityText = existing.ReorderQuantity.ToString("0.###");
+        ReplenishmentEnabled = existing.ReplenishmentEnabled;
+        SelectedPreferredSupplier = owner.Suppliers.FirstOrDefault(s => s.Id == existing.PreferredSupplierId);
+        CurrentStock = existing.Inventory?.QuantityOnHand ?? 0;
         TracksBatches = existing.TracksBatches;
 
         UpdateBarcodePreview();
+    }
+
+    public async Task LoadBatchExpiryAsync()
+    {
+        if (!IsEditMode || !TracksBatches)
+        {
+            return;
+        }
+
+        var batches = await _owner.GetBatchesAsync(_editingProductId!.Value);
+        if (batches.Count == 1)
+        {
+            _editingBatchId = batches[0].Id;
+            ExpiryDate = batches[0].ExpiryDate is { } date
+                ? new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue))
+                : null;
+            ExpiryHelpText = "Expiry is stored on this product's current batch.";
+        }
+        else if (batches.Count > 1)
+        {
+            CanEditExpiryInline = false;
+            ExpiryHelpText = "This product has multiple batches. Use the Batches action on the Products page to set each expiry date separately.";
+        }
     }
 
     partial void OnNewBarcodeInputChanged(string? value) => UpdateBarcodePreview();
@@ -452,6 +524,12 @@ public sealed partial class ProductEditViewModel : ObservableObject
             return;
         }
 
+        if (ReplenishmentEnabled && reorderQuantity < minimumStock)
+        {
+            ErrorMessage = "Target stock must be greater than or equal to reorder level.";
+            return;
+        }
+
         // Mirrors the same whole-unit rule SaleService enforces at billing time — a product sold
         // in whole Pieces/Boxes/etc. shouldn't be able to have a fractional minimum/reorder/opening
         // stock either, since no sale could ever land the stock level on that exact fraction.
@@ -493,9 +571,10 @@ public sealed partial class ProductEditViewModel : ObservableObject
         IsSaving = true;
         try
         {
+            Product savedProduct;
             if (IsEditMode)
             {
-                await _owner.UpdateProductAsync(_editingProductId!.Value, new UpdateProductRequest
+                savedProduct = await _owner.UpdateProductAsync(_editingProductId!.Value, new UpdateProductRequest
                 {
                     Name = Name,
                     Sku = Sku,
@@ -519,8 +598,29 @@ public sealed partial class ProductEditViewModel : ObservableObject
                     TracksBatches = TracksBatches,
                     MinimumStock = minimumStock,
                     ReorderQuantity = reorderQuantity,
+                    UpdateReplenishmentConfiguration = true,
+                    ReplenishmentEnabled = ReplenishmentEnabled,
+                    PreferredSupplierId = SelectedPreferredSupplier?.Id,
                     PerformedByUserId = _owner.CurrentUserId,
                 });
+
+                if (TracksBatches && CanEditExpiryInline)
+                {
+                    DateOnly? expiry = ExpiryDate is { } selectedExpiry
+                        ? DateOnly.FromDateTime(selectedExpiry.Date)
+                        : null;
+
+                    if (_editingBatchId is { } batchId)
+                    {
+                        await _owner.UpdateBatchExpiryAsync(batchId, expiry);
+                    }
+                    else if (expiry is not null)
+                    {
+                        var quantity = await _owner.GetStockAsync(savedProduct.Id);
+                        await _owner.AddBatchAsync(savedProduct.Id, $"DEFAULT-{savedProduct.ProductCode}", null, expiry,
+                            quantity, savedProduct.PurchasePrice, savedProduct.SellingPrice);
+                    }
+                }
             }
             else
             {
@@ -532,7 +632,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
 
                 var primaryIndex = Barcodes.IndexOf(Barcodes.FirstOrDefault(b => b.IsPrimary)!);
 
-                await _owner.CreateProductAsync(new CreateProductRequest
+                savedProduct = await _owner.CreateProductAsync(new CreateProductRequest
                 {
                     Name = Name,
                     Sku = Sku,
@@ -556,9 +656,18 @@ public sealed partial class ProductEditViewModel : ObservableObject
                     TracksBatches = TracksBatches,
                     MinimumStock = minimumStock,
                     ReorderQuantity = reorderQuantity,
+                    ReplenishmentEnabled = ReplenishmentEnabled,
+                    PreferredSupplierId = SelectedPreferredSupplier?.Id,
                     OpeningStock = openingStock,
                     PerformedByUserId = _owner.CurrentUserId,
                 });
+
+                if (TracksBatches && ExpiryDate is { } selectedExpiry)
+                {
+                    await _owner.AddBatchAsync(savedProduct.Id, $"OPENING-{savedProduct.ProductCode}", null,
+                        DateOnly.FromDateTime(selectedExpiry.Date), openingStock,
+                        savedProduct.PurchasePrice, savedProduct.SellingPrice);
+                }
             }
 
             Saved?.Invoke(this, EventArgs.Empty);

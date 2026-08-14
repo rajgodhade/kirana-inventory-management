@@ -17,6 +17,8 @@ public sealed class PurchaseDetailsViewModel
     public string DateText { get; init; } = "";
     public string? SupplierInvoiceNumber { get; init; }
     public string? Notes { get; init; }
+    public string? GoodsReceiptNumber { get; init; }
+    public string? PurchaseOrderNumber { get; init; }
 
     public decimal SubTotal { get; init; }
     public decimal DiscountTotal { get; init; }
@@ -30,6 +32,7 @@ public sealed class PurchaseDetailsViewModel
 
     public bool HasSupplierInvoiceNumber => !string.IsNullOrWhiteSpace(SupplierInvoiceNumber);
     public bool HasNotes => !string.IsNullOrWhiteSpace(Notes);
+    public bool HasProcurementSource => !string.IsNullOrWhiteSpace(GoodsReceiptNumber);
     public bool HasDiscount => DiscountTotal > 0;
     public bool HasOutstanding => OutstandingAmount > 0;
 
@@ -59,6 +62,8 @@ public sealed class PurchaseDetailsViewModel
             DateText = purchase.PurchaseDateUtc.ToLocalTime().ToString("dd-MMM-yyyy hh:mm tt"),
             SupplierInvoiceNumber = purchase.SupplierInvoiceNumber,
             Notes = purchase.Notes,
+            GoodsReceiptNumber = purchase.GoodsReceipt?.GoodsReceiptNumber,
+            PurchaseOrderNumber = purchase.PurchaseOrder?.PurchaseOrderNumber,
             SubTotal = purchase.SubTotal,
             DiscountTotal = purchase.DiscountTotal,
             TaxTotal = purchase.TaxTotal,
