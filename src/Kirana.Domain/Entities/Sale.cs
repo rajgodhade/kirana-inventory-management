@@ -31,6 +31,22 @@ public class Sale : Entity
 
     public SaleStatus Status { get; set; } = SaleStatus.Completed;
 
+    /// <summary>
+    /// The price level this bill was actually sold at (Phase 15B-5). Bill-wide, because that is how
+    /// the level is chosen — there is deliberately no per-line level, and a sale therefore has
+    /// exactly one.
+    ///
+    /// <para>Historical metadata, written once at completion and never changed. It records the
+    /// pricing CONTEXT; <see cref="SaleItem.UnitPriceSnapshot"/> remains authoritative for what each
+    /// line actually cost. Neither is ever recomputed from today's prices or from the customer's
+    /// current preference.</para>
+    ///
+    /// <para>Sales created before this column existed are classified <see cref="PriceLevel.Retail"/>
+    /// by the migration. That is a labelling policy, not evidence: their real context was never
+    /// stored, and it cannot be reconstructed from prices, totals or the customer.</para>
+    /// </summary>
+    public PriceLevel PriceLevel { get; set; } = PriceLevel.Retail;
+
     /// <summary>Who authorized a discount above the cashier's normal limit, if any (PRD §10).</summary>
     public int? DiscountAuthorizedByUserId { get; set; }
     public User? DiscountAuthorizedByUser { get; set; }

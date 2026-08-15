@@ -30,9 +30,9 @@ public sealed partial class SalesReportView : UserControl
 
     private async void OnRefreshClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => await ViewModel.LoadAsync();
 
-    private async void OnDateFilterChanged(object sender, SelectionChangedEventArgs e) => await ViewModel.LoadAsync();
+    private async void OnFilterChanged(object sender, SelectionChangedEventArgs e) => await ViewModel.LoadAsync();
 
-    private async void OnDateFilterChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs e) => await ViewModel.LoadAsync();
+    private async void OnFilterChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs e) => await ViewModel.LoadAsync();
 
     private async void OnExportSalesCsvClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => await ExportAsync(ViewModel.BuildSalesExportData, ReportExportFormat.Csv);
     private async void OnExportSalesExcelClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => await ExportAsync(ViewModel.BuildSalesExportData, ReportExportFormat.Excel);

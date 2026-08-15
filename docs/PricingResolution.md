@@ -211,12 +211,90 @@ sales, snapshots, product prices, stock and payments are untouched. It is audite
 existing `CustomerUpdated` entry, which now names the level it moved from and to; re-saving the same
 value claims no change, and merely selecting a customer at the till writes nothing at all.
 
-### Still no historical price-level persistence
+### A preference, not a history
 
-Unchanged from 15B-3: `Sale`/`SaleItem` record what was charged, not which level was used.
 `Customer.DefaultPriceLevel` is a **current preference**, not a record of how past bills were
 priced — a customer switched from Wholesale to Retail today says nothing about last month's
-invoices. The backlog note above still stands.
+invoices. What each bill was actually sold at is recorded separately on the sale; see below.
+
+## Historical price-level persistence (Phase 15B-5)
+
+`Sale.PriceLevel` records the level a completed bill was actually sold at, so the system can answer
+"how much did we sell at wholesale?" without guessing.
+
+### Bill-wide, and written once
+
+The level is stored on **`Sale`**, not `SaleItem`, because that is how it is chosen — one level per
+bill, no mixed-level lines, so a sale has exactly one. It is written at completion from the same
+`CompleteSaleRequest.PriceLevel` the prices were resolved from, which means the recorded context can
+never disagree with the amounts charged.
+
+```
+Customer.DefaultPriceLevel   (a current default)
+        ↓
+Bill.PriceLevel              (what the operator chose)
+        ↓
+CompleteSaleRequest.PriceLevel
+        ↓
+Sale.PriceLevel              (historical fact)
+```
+
+Nothing downstream recomputes it. `SaleService` never reads the customer, and no code path mutates a
+`Sale` after creation — sales were already effectively immutable, and this column inherits that.
+
+### Two different kinds of historical truth
+
+| | Records |
+| --- | --- |
+| `SaleItem.UnitPriceSnapshot` | what each line **cost** |
+| `Sale.PriceLevel` | the **context** it was priced under |
+
+Both are snapshots. Changing today's prices, or a customer's preference, moves neither.
+
+### Existing sales are labelled Retail
+
+The migration backfills every pre-existing sale to `Retail`.
+
+**This is a labelling policy, not a finding.** Those sales never stored their pricing context, and it
+cannot be reconstructed afterwards — comparing a snapshot against today's `ProductPrice`, the
+customer's current preference, or the product's projection columns would all be guesses against
+values that have since moved. Retail is chosen because it is what the till actually did for every one
+of those bills (price-level selection did not exist yet), so the label is accurate in practice while
+still not being evidence.
+
+> One concrete example from this repository's own development database: the wholesale sale completed
+> during Phase 15B-3 verification (INV-2026-000042) is labelled `Retail` by the backfill, because at
+> the time it was created there was nowhere to record that it was a wholesale bill. That is exactly
+> the limitation this policy describes.
+
+EF scaffolded the column with `defaultValue: ""`, which would have written a value that is not a
+member of the enum into every historical row; it was corrected to `Retail` before the migration was
+ever applied.
+
+### Reporting
+
+`SalesReportSummary` gains `RetailSales` / `WholesaleSales` and their bill counts, summed from the
+level **recorded on each sale**. They reconcile exactly: `RetailSales + WholesaleSales == GrossSales`
+for any filter that does not itself narrow by level. `ReportFilter.PriceLevel` narrows to one level.
+
+On screen this surfaces on **Reports → Sales & GST**: two metric cards (`Retail Sales` /
+`Wholesale Sales`, each with its bill count) alongside the existing summary, and a `Price level`
+filter offering *All price levels* / *Retail* / *Wholesale*.
+
+The filter narrows the **sales summary only** — the GST report on the same screen deliberately
+ignores it. GST is owed on everything sold in the period regardless of which level it was billed at,
+so a level-filtered GST figure would be a number nobody should be filing. When a level is selected
+the exported subtitle says so ("Today — Wholesale only"), because once a CSV leaves the app a
+filtered "Gross Sales" is otherwise indistinguishable from an unfiltered one.
+
+Reporting is read-only and reuses the existing `ReportsView` permission — no new permission, and no
+separate gate for the level split. Totals, discounts and GST come from the stored sale figures and
+are never recalculated from current prices.
+
+`Price Level` is also **appended** to the Sales export (a trailing column, so anything reading it by
+position keeps working) and shown on the invoice detail screen. The customer-facing invoice is
+deliberately unchanged: which price level a shop billed at is internal information, and there is no
+existing convention for printing a pricing category on a receipt.
 
 ### Query cost
 
@@ -382,11 +460,10 @@ read. Each was caught by the test that should catch it, and each was restored.
 
 ## Limitations
 
-Phase 15B-1 provides resolution only. It does **not** include:
+Phase 15B-1 provided resolution only; 15B-2 put it behind billing, 15B-3 added the POS selector,
+15B-4 the customer default and 15B-5 the historical record. As of 15B-5 the following are still
+**not** included:
 
-- POS integration — billing still reads `Product.SellingPrice`
-- any POS price-level selector
-- automatic wholesale selection
 - customer-specific or customer-group pricing
 - quantity, slab or bulk pricing
 - promotions, coupons, loyalty or combo pricing
@@ -397,8 +474,12 @@ Phase 15B-1 provides resolution only. It does **not** include:
 
 ## Next
 
-**Phase 15B-2** should integrate the resolver into POS: have the cart obtain its unit price through
-`IProductPriceResolver` with `PricingContext.Retail` instead of reading `Product.SellingPrice`
-directly, keeping billing behaviour identical. That swap is what makes every later pricing feature a
-change of *context* rather than a change to checkout — and it is the step that finally lets the
-projection columns retire.
+Billing, the POS selector, the customer default and the historical record are all in place, so the
+next pricing work is the first one that makes a price depend on something other than the level the
+operator picked — customer-specific pricing or quantity breaks. Both are additive: they extend
+`PricingContext` and add a `PriceSource` member rather than changing the resolver's signature or any
+call site, which is what the context type was introduced for.
+
+Retiring `Product.SellingPrice` / `Product.WholesalePrice` remains outstanding. Nothing bills through
+them any more, but reports, exports and label printing still read the projections, so removing them
+is its own migration rather than a side effect of a pricing phase.

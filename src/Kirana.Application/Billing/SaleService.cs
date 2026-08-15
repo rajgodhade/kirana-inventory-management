@@ -234,6 +234,12 @@ public sealed class SaleService(
             RoundOffAmount = totals.RoundOffAmount,
             GrandTotal = totals.GrandTotal,
             Status = SaleStatus.Completed,
+
+            // The level this bill was sold at, recorded from the SAME request field the prices were
+            // resolved from - so the stored context can never disagree with the amounts charged.
+            // Deliberately not read from the customer: a customer's preference is a current default,
+            // not a record of how this bill was priced.
+            PriceLevel = request.PriceLevel,
             DiscountAuthorizedByUserId = maxDiscountRequested > MaxUnauthorizedDiscountPercent ? request.DiscountAuthorizedByUserId : null,
             PriceOverrideAuthorizedByUserId = hasPriceOverride ? request.PriceOverrideAuthorizedByUserId : null,
         };

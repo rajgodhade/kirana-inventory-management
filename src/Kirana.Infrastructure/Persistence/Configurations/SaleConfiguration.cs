@@ -14,6 +14,10 @@ public sealed class SaleConfiguration : IEntityTypeConfiguration<Sale>
 
         builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(20);
 
+        // Same enum-name convention as Status and Customer.DefaultPriceLevel. Non-nullable: every
+        // completed sale was sold at some level, so "unknown" is not a state this column may hold.
+        builder.Property(s => s.PriceLevel).HasConversion<string>().HasMaxLength(20).IsRequired();
+
         builder.Property(s => s.SubTotal).HasPrecision(18, 2);
         builder.Property(s => s.ItemDiscountTotal).HasPrecision(18, 2);
         builder.Property(s => s.PromotionDiscountTotal).HasPrecision(18, 2);

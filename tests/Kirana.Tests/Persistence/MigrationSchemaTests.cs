@@ -965,6 +965,144 @@ public sealed class MigrationSchemaTests : IDisposable
         Assert.Equal(0, await ScalarAsync(context, "SELECT COUNT(*) FROM Sales"));
     }
 
+    // ---- Phase 15B-5 historical sale price level ----
+
+    private const string PreSalePriceLevelMigration = "20260815131436_AddCustomerDefaultPriceLevel";
+
+    /// <summary>Inserts sales the way the pre-15B-5 schema stored them — no price level at all — so
+    /// migrating forward exercises the real backfill.</summary>
+    private async Task SeedPreSalePriceLevelAsync(KiranaDbContext context, params (string Invoice, decimal Total)[] sales)
+    {
+        var migrator = context.Database.GetService<IMigrator>();
+        await migrator.MigrateAsync(PreSalePriceLevelMigration);
+
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using (var product = connection.CreateCommand())
+        {
+            product.CommandText = """
+                INSERT INTO Products
+                    (ProductCode, Name, Unit, PurchasePrice, Mrp, SellingPrice, WholesalePrice,
+                     MinimumStock, ReorderQuantity, TracksBatches, IsActive, CreatedAtUtc,
+                     PricingType, GstRatePercent, ReplenishmentEnabled)
+                VALUES ('PRD-000001', 'Historic', 'Piece', 10, 30, 25, 20, 0, 0, 0, 1,
+                        CURRENT_TIMESTAMP, 'Inclusive', 5, 0);
+                """;
+            await product.ExecuteNonQueryAsync();
+        }
+
+        for (var i = 0; i < sales.Length; i++)
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO Sales
+                    (InvoiceNumber, SaleDateUtc, SubTotal, ItemDiscountTotal, PromotionDiscountTotal,
+                     BillDiscountPercent, BillDiscountAmount, TaxableTotal, TaxTotal, RoundOffAmount,
+                     GrandTotal, Status, CreatedAtUtc)
+                VALUES ($invoice, CURRENT_TIMESTAMP, $total, 0, 0, 0, 0, $total, 0, 0, $total,
+                        'Completed', CURRENT_TIMESTAMP);
+
+                INSERT INTO SaleItems
+                    (SaleId, ProductId, ProductNameSnapshot, ProductCodeSnapshot, UnitSnapshot,
+                     IsTaxInclusiveSnapshot, GstRatePercentSnapshot, Quantity, UnitPriceSnapshot,
+                     DiscountPercent, DiscountAmount, TaxableAmount, GstAmount, LineTotal,
+                     MrpSnapshot, PromotionDiscountAmount, CreatedAtUtc)
+                VALUES (last_insert_rowid(), 1, 'Historic', 'PRD-000001', 'Piece', 1, 0, 1, $total,
+                        0, 0, $total, 0, $total, 30, 0, CURRENT_TIMESTAMP);
+                """;
+            command.Parameters.Add(new SqliteParameter("$invoice", sales[i].Invoice));
+            command.Parameters.Add(new SqliteParameter("$total", sales[i].Total));
+            await command.ExecuteNonQueryAsync();
+        }
+    }
+
+    [Fact]
+    public async Task SalesTable_GainsANonNullPriceLevelColumn()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        Assert.Contains("PriceLevel", await ColumnNamesAsync(context, "Sales"));
+
+        var connection = context.Database.GetDbConnection();
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT \"notnull\" FROM pragma_table_info('Sales') WHERE name='PriceLevel'";
+        Assert.Equal(1L, Convert.ToInt64(await cmd.ExecuteScalarAsync()));   // NOT NULL
+    }
+
+    /// <summary>
+    /// The backfill policy: every pre-existing sale is labelled Retail. EF scaffolded this column
+    /// with an empty-string default, which would have written a value that is not a member of the
+    /// enum into every historical row — this asserts the corrected 'Retail'.
+    /// </summary>
+    [Fact]
+    public async Task ExistingSales_AreBackfilledToRetail_NotToAnEmptyOrInvalidValue()
+    {
+        await using var context = CreateContext();
+        await SeedPreSalePriceLevelAsync(context, ("INV-0001", 100m), ("INV-0002", 250m));
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(2, await ScalarAsync(context, "SELECT COUNT(*) FROM Sales"));
+        Assert.Equal(2, await ScalarAsync(context, "SELECT COUNT(*) FROM Sales WHERE PriceLevel='Retail'"));
+        Assert.Equal(0, await ScalarAsync(context, "SELECT COUNT(*) FROM Sales WHERE PriceLevel='Wholesale'"));
+        // No empty strings, nulls, or anything else that is not a level.
+        Assert.Equal(0, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM Sales WHERE PriceLevel IS NULL OR PriceLevel NOT IN ('Retail','Wholesale')"));
+    }
+
+    /// <summary>Sales and their items must come through the migration untouched apart from the new
+    /// column — no duplication, no lost rows, no altered money.</summary>
+    [Fact]
+    public async Task TheSaleMigration_LeavesSalesItemsAndTotalsUnchanged()
+    {
+        await using var context = CreateContext();
+        await SeedPreSalePriceLevelAsync(context, ("INV-0001", 100m), ("INV-0002", 250m));
+
+        var salesBefore = await SaleFingerprintAsync(context);
+        var itemsBefore = await ScalarAsync(context, "SELECT COUNT(*) FROM SaleItems");
+        var snapshotsBefore = await ScalarAsync(context,
+            "SELECT COUNT(*) FROM SaleItems WHERE UnitPriceSnapshot IN (100, 250)");
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(salesBefore, await SaleFingerprintAsync(context));
+        Assert.Equal(itemsBefore, await ScalarAsync(context, "SELECT COUNT(*) FROM SaleItems"));
+        Assert.Equal(snapshotsBefore, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM SaleItems WHERE UnitPriceSnapshot IN (100, 250)"));
+        Assert.Equal(1, await ScalarAsync(context, "SELECT COUNT(*) FROM Products"));
+        Assert.Equal(0, await ScalarAsync(context, "SELECT COUNT(*) FROM Payments"));
+    }
+
+    /// <summary>Invoice numbers, dates and money, described independently of the new column so the
+    /// comparison is meaningful either side of the migration.</summary>
+    private static async Task<List<string>> SaleFingerprintAsync(KiranaDbContext context)
+    {
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT Id, InvoiceNumber, SaleDateUtc, SubTotal, TaxTotal, GrandTotal, Status
+            FROM Sales ORDER BY Id
+            """;
+        var rows = new List<string>();
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var parts = new List<string>();
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                parts.Add(reader.IsDBNull(i) ? "NULL" : reader.GetValue(i).ToString()!);
+            }
+
+            rows.Add(string.Join("|", parts));
+        }
+
+        return rows;
+    }
+
     public void Dispose()
     {
         SqliteConnection.ClearAllPools();

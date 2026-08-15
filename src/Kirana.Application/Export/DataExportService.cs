@@ -265,6 +265,7 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
                 s.RoundOffAmount,
                 s.GrandTotal,
                 s.Status,
+                s.PriceLevel,
                 PaymentMethods = s.Payments.Select(p => p.Method).ToList(),
             })
             .OrderByDescending(s => s.SaleDateUtc)
@@ -278,6 +279,9 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
             [
                 "Invoice Number", "Date", "Customer", "Cashier", "Items", "Subtotal",
                 "Item Discount", "Bill Discount", "GST", "Round Off", "Grand Total", "Payment Method(s)", "Status",
+                // Appended rather than inserted: anything consuming this export by column position
+                // keeps working, and a new trailing column is the safest way to extend it.
+                "Price Level",
             ],
             Rows = rows.Select(s => (IReadOnlyList<string>)
             [
@@ -287,6 +291,7 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
                 Number(s.TaxTotal), Number(s.RoundOffAmount), Number(s.GrandTotal),
                 string.Join(" + ", s.PaymentMethods.Select(ReportFormatting.FormatPaymentMethod)),
                 s.Status.ToString(),
+                s.PriceLevel.ToDisplayText(),
             ]).ToList(),
         };
     }

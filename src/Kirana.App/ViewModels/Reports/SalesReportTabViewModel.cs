@@ -3,6 +3,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Kirana.Application.Authentication;
 using Kirana.Application.Reports;
+using Kirana.Domain.Entities;
 
 namespace Kirana.App.ViewModels.Reports;
 
@@ -10,7 +11,18 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
 {
     private static readonly CultureInfo Inr = CultureInfo.GetCultureInfo("en-IN");
 
+    /// <summary>The "no narrowing" entry in the price-level filter. Named rather than left blank so
+    /// the combo never shows an empty row that reads as "unset by accident".</summary>
+    private const string AllPriceLevels = "All price levels";
+
     public ReportDateFilterViewModel DateFilter { get; } = new();
+
+    /// <summary>Price-level filter (Phase 15B-5). Narrows to the level RECORDED on each bill, so a
+    /// later price change cannot move a sale between these buckets.</summary>
+    public IReadOnlyList<string> PriceLevelFilterNames { get; } =
+        [AllPriceLevels, PriceLevel.Retail.ToDisplayText(), PriceLevel.Wholesale.ToDisplayText()];
+
+    [ObservableProperty] private string _selectedPriceLevelFilterName = AllPriceLevels;
 
     [ObservableProperty] private string? _errorMessage;
     [ObservableProperty] private bool _isBusy;
@@ -26,6 +38,11 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
     [ObservableProperty] private string _averageBillValueText = "₹0.00";
     [ObservableProperty] private string _itemsSoldText = "0";
 
+    [ObservableProperty] private string _retailSalesText = "₹0.00";
+    [ObservableProperty] private string _wholesaleSalesText = "₹0.00";
+    [ObservableProperty] private string _retailBillCountText = "0 bills";
+    [ObservableProperty] private string _wholesaleBillCountText = "0 bills";
+
     [ObservableProperty] private string _salesTaxableText = "₹0.00";
     [ObservableProperty] private string _salesGstText = "₹0.00";
     [ObservableProperty] private string _purchaseTaxableText = "₹0.00";
@@ -36,6 +53,14 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
     public ObservableCollection<GstRateBreakdown> PurchaseGstByRate { get; } = [];
 
     private int? CurrentUserId => session.CurrentUser?.Id;
+
+    // Matched back through ToDisplayText rather than Enum.Parse, so the combo's labels stay the
+    // single definition of how a level is spelled for the operator.
+    private PriceLevel? SelectedPriceLevel => SelectedPriceLevelFilterName == AllPriceLevels
+        ? null
+        : Enum.GetValues<PriceLevel>()
+            .Cast<PriceLevel?>()
+            .FirstOrDefault(l => l!.Value.ToDisplayText() == SelectedPriceLevelFilterName);
     private SalesReportSummary? _lastSummary;
     private GstReport? _lastGst;
 
@@ -49,7 +74,12 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
         {
             var range = DateFilter.Resolve();
 
-            var summary = await salesReportService.GetSummaryAsync(range, filter: null, CurrentUserId);
+            // Only the sales summary is narrowed by price level. The GST report deliberately is not:
+            // GST is owed on everything sold in the period regardless of which level it was billed
+            // at, so a filtered GST figure would be a number no one should be filing.
+            var filter = SelectedPriceLevel is { } level ? new ReportFilter { PriceLevel = level } : null;
+
+            var summary = await salesReportService.GetSummaryAsync(range, filter, CurrentUserId);
             _lastSummary = summary;
             ApplySummary(summary);
 
@@ -79,6 +109,11 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
         BillCountText = s.BillCount.ToString();
         AverageBillValueText = Fmt(s.AverageBillValue);
         ItemsSoldText = s.ItemsSold.ToString("0.###");
+
+        RetailSalesText = Fmt(s.RetailSales);
+        WholesaleSalesText = Fmt(s.WholesaleSales);
+        RetailBillCountText = BillCountLabel(s.RetailBillCount);
+        WholesaleBillCountText = BillCountLabel(s.WholesaleBillCount);
 
         PaymentMethods.Clear();
         foreach (var p in s.PaymentMethodBreakdown)
@@ -113,7 +148,11 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
         return new ReportExportData
         {
             Title = "Sales Report",
-            Subtitle = DateFilter.Resolve().Label,
+            // The level filter belongs in the subtitle: without it an exported "Gross Sales" of a
+            // filtered report is indistinguishable from an unfiltered one once it leaves the app.
+            Subtitle = SelectedPriceLevel is null
+                ? DateFilter.Resolve().Label
+                : $"{DateFilter.Resolve().Label} — {SelectedPriceLevelFilterName} only",
             Columns = ["Metric", "Amount"],
             Rows =
             [
@@ -127,6 +166,10 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
                 ["Bills", s.BillCount.ToString()],
                 ["Average Bill Value", Fmt(s.AverageBillValue)],
                 ["Items Sold", s.ItemsSold.ToString("0.###")],
+                ["Retail Sales", Fmt(s.RetailSales)],
+                ["Wholesale Sales", Fmt(s.WholesaleSales)],
+                ["Retail Bills", s.RetailBillCount.ToString()],
+                ["Wholesale Bills", s.WholesaleBillCount.ToString()],
                 .. s.PaymentMethodBreakdown.Select(p => new[] { $"Payment: {p.Method}", Fmt(p.Amount) }),
             ],
         };
@@ -156,4 +199,6 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
     }
 
     private static string Fmt(decimal amount) => "₹" + amount.ToString("N2", Inr);
+
+    private static string BillCountLabel(int count) => count == 1 ? "1 bill" : $"{count} bills";
 }
