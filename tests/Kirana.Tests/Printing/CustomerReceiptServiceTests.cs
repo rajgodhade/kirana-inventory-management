@@ -48,7 +48,7 @@ public class CustomerReceiptServiceTests : IDisposable
         {
             ProductCode = $"PRD-{Guid.NewGuid():N}"[..12], Name = "Receipt Product",
             Unit = UnitOfMeasure.Piece, PurchasePrice = 60, Mrp = 110, SellingPrice = 100, IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = 100 });
         await _fixture.Context.SaveChangesAsync();

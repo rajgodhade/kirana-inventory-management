@@ -51,7 +51,7 @@ public class ProfitReportServiceTests : IDisposable
             Mrp = sellingPrice + 10,
             SellingPrice = sellingPrice,
             IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = stock });
         await _fixture.Context.SaveChangesAsync();

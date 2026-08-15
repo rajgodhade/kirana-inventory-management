@@ -41,7 +41,7 @@ public class ProductReportServiceTests : IDisposable
             CategoryId = categoryId,
             BrandId = brandId,
             IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = stock });
         await _fixture.Context.SaveChangesAsync();

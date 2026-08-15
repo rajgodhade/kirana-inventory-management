@@ -51,7 +51,7 @@ public class CustomerCreditServiceTests : IDisposable
             Mrp = price + 5,
             SellingPrice = price,
             IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = stock });
         await _fixture.Context.SaveChangesAsync();

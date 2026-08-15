@@ -61,6 +61,7 @@ public sealed partial class PosShellPage : Page
             services.GetRequiredService<ICustomerService>(),
             services.GetRequiredService<IPromotionEngine>(),
             services.GetRequiredService<IGstCalculationService>(),
+            services.GetRequiredService<IProductPriceResolver>(),
             services.GetRequiredService<IKiranaDbContext>(),
             services.GetRequiredService<ManagementSession>());
 
@@ -319,7 +320,7 @@ public sealed partial class PosShellPage : Page
         _suggestionDebounce.Start();
     }
 
-    private void OnSuggestionItemClick(object sender, ItemClickEventArgs e)
+    private async void OnSuggestionItemClick(object sender, ItemClickEventArgs e)
     {
         if (e.ClickedItem is not Product product)
         {
@@ -328,10 +329,13 @@ public sealed partial class PosShellPage : Page
 
         _suggestionDebounce.Stop();
         ViewModel.ClearSuggestions();
-        ViewModel.AddOrIncrement(product);
 
+        // Clear and refocus the box BEFORE awaiting the price lookup, so the operator can keep
+        // scanning without waiting on a round trip.
         ScanSearchBox.Text = string.Empty;
         ScanSearchBox.Focus(FocusState.Programmatic);
+
+        await ViewModel.AddOrIncrementAsync(product);
     }
 
     private async void OnCustomerClick(object sender, RoutedEventArgs e) => await OpenCustomerPickerAsync();

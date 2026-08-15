@@ -1,5 +1,6 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.Products;
 using Kirana.Application.Promotions;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +10,19 @@ namespace Kirana.Application.Billing;
 
 public sealed class SaleService(
     IKiranaDbContext db, ISequenceGenerator sequenceGenerator, IAuditLogger auditLogger, IPermissionEnforcer permissionEnforcer,
-    IPromotionEngine? promotionEngine = null, IGstCalculationService? gstCalculationService = null)
+    IPromotionEngine? promotionEngine = null, IGstCalculationService? gstCalculationService = null,
+    IProductPriceResolver? priceResolver = null)
     : ISaleService
 {
+    /// <summary>
+    /// Phase 15B-2 selling-price source. Optional in the signature — the same convention the
+    /// promotion engine and GST calculator were added under — but unlike those, omitting it does
+    /// NOT disable the behaviour: it falls back to a real resolver over this same context, never to
+    /// <c>Product.SellingPrice</c>. There is deliberately no way to construct a SaleService that
+    /// prices from the projection column.
+    /// </summary>
+    private readonly IProductPriceResolver priceResolver = priceResolver ?? new ProductPriceResolver(db);
+
     /// <summary>Item/bill discounts at or below this don't need manager authorization (PRD §10).</summary>
     public const decimal MaxUnauthorizedDiscountPercent = 10m;
 
@@ -70,6 +81,33 @@ public sealed class SaleService(
             }
         }
 
+        // Phase 15B-2: the selling price comes from the pricing resolver, not Product.SellingPrice.
+        //
+        // Resolved HERE, on the server side of the till, because this method is the trust boundary:
+        // a client can put any number in UnitPriceOverride, and the override check below decides
+        // whether that number needed authorization by comparing it against the real price. If that
+        // comparison used a client-supplied figure the check would be meaningless, so the price is
+        // re-established from the authoritative store regardless of what the UI displayed.
+        //
+        // Resolved once per DISTINCT product rather than per line, and before any write, so a cart
+        // with the same item on several lines costs one query and a failure leaves nothing behind.
+        var retailPrices = new Dictionary<int, decimal>(productIds.Count);
+        foreach (var productId in productIds)
+        {
+            var resolution = await priceResolver.ResolveAsync(
+                productId, PricingContext.Retail, cancellationToken);
+
+            if (!resolution.IsResolved)
+            {
+                // No silent fallback - not to wholesale, not to the projection column, not to MRP,
+                // not to zero. A product we cannot price is a product we must not sell.
+                throw new InvalidOperationException(
+                    $"'{products[productId].Name}' has no active retail price and cannot be sold.");
+            }
+
+            retailPrices[productId] = resolution.UnitPrice.Value;
+        }
+
         // Store-level opt-out (Settings → Billing Authorization, Owner-only): a single-operator
         // store can turn this requirement off so the Owner isn't asked to authorize their own
         // action. Read fresh from AppSettings rather than trusting anything client-supplied, so the
@@ -86,7 +124,7 @@ public sealed class SaleService(
         }
 
         var hasPriceOverride = request.Lines.Any(l =>
-            l.UnitPriceOverride is { } overridePrice && overridePrice != products[l.ProductId].SellingPrice);
+            l.UnitPriceOverride is { } overridePrice && overridePrice != retailPrices[l.ProductId]);
 
         if (hasPriceOverride && (appSettings?.RequirePinForPriceOverride ?? true))
         {
@@ -104,10 +142,10 @@ public sealed class SaleService(
                 {
                     ProductId = line.ProductId,
                     Quantity = line.Quantity,
-                    UnitPrice = line.UnitPriceOverride ?? products[line.ProductId].SellingPrice,
+                    UnitPrice = line.UnitPriceOverride ?? retailPrices[line.ProductId],
                 }).ToList(),
                 BillAmount = request.Lines.Sum(line =>
-                    line.Quantity * (line.UnitPriceOverride ?? products[line.ProductId].SellingPrice)),
+                    line.Quantity * (line.UnitPriceOverride ?? retailPrices[line.ProductId])),
                 CustomerId = request.CustomerId,
                 AtUtc = DateTime.UtcNow,
             }, cancellationToken)).ToDictionary(x => x.ProductId);
@@ -119,7 +157,7 @@ public sealed class SaleService(
             {
                 ProductId = line.ProductId,
                 Quantity = line.Quantity,
-                UnitPrice = line.UnitPriceOverride ?? product.SellingPrice,
+                UnitPrice = line.UnitPriceOverride ?? retailPrices[line.ProductId],
                 PricingType = product.PricingType,
                 GstRatePercent = product.GstRatePercent ?? 0,
                 DiscountPercent = line.DiscountPercent,

@@ -27,6 +27,7 @@ public sealed partial class PosShellViewModel(
     ICustomerService customerService,
     IPromotionEngine promotionEngine,
     IGstCalculationService gstCalculationService,
+    IProductPriceResolver priceResolver,
     IKiranaDbContext db,
     ManagementSession session) : ObservableObject
 {
@@ -366,7 +367,7 @@ public sealed partial class PosShellViewModel(
             return;
         }
 
-        AddOrIncrement(product);
+        await AddOrIncrementAsync(product);
     }
 
     /// <summary>Manual search box Enter — Product ID / SKU / name (PRD §13), takes the
@@ -388,7 +389,7 @@ public sealed partial class PosShellViewModel(
             return;
         }
 
-        AddOrIncrement(product);
+        await AddOrIncrementAsync(product);
     }
 
     /// <summary>Live "as you type" suggestions for the search box (e.g. typing "Amu" surfaces every
@@ -433,31 +434,52 @@ public sealed partial class PosShellViewModel(
         HasSuggestions = false;
     }
 
-    public void AddOrIncrement(Product product)
+    /// <summary>
+    /// Adds a product to the cart at its resolved retail price (Phase 15B-2).
+    ///
+    /// <para>Async because the price now comes from <see cref="IProductPriceResolver"/> rather than
+    /// the <c>Product.SellingPrice</c> column that happened to be loaded with the product. The cart
+    /// shows what the till will charge, so it must ask the same source SaleService does — otherwise
+    /// the displayed price and the billed price could disagree.</para>
+    ///
+    /// <para>A product with no resolvable retail price is refused here rather than added at some
+    /// guessed figure; SaleService would reject it at checkout anyway, and failing at scan time says
+    /// so while the operator can still act on it.</para>
+    /// </summary>
+    public async Task AddOrIncrementAsync(Product product)
     {
         var existing = CartLines.FirstOrDefault(l => l.ProductId == product.Id);
         if (existing is not null)
         {
             existing.QuantityText = (existing.Quantity + 1).ToString("0.###");
+            RecalculateCart();
+            return;
         }
-        else
+
+        var resolution = await priceResolver.ResolveAsync(product.Id, PricingContext.Retail);
+        if (!resolution.IsResolved)
         {
-            CartLines.Add(new CartLineViewModel
-            {
-                ProductId = product.Id,
-                ProductName = product.Name,
-                ProductCode = product.ProductCode,
-                Sku = product.Sku,
-                Unit = product.UnitDisplayText ?? product.Unit.ToDisplayText(),
-                SupportsDecimalQuantity = product.Unit.SupportsDecimalQuantity(),
-                OriginalUnitPrice = product.SellingPrice,
-                Mrp = product.Mrp,
-                UnitPriceText = product.SellingPrice.ToString("0.##"),
-                GstRatePercent = product.GstRatePercent ?? 0,
-                PricingType = product.PricingType,
-                QuantityText = "1",
-            });
+            ErrorMessage = $"'{product.Name}' has no active retail price and cannot be sold.";
+            return;
         }
+
+        var retailPrice = resolution.UnitPrice.Value;
+
+        CartLines.Add(new CartLineViewModel
+        {
+            ProductId = product.Id,
+            ProductName = product.Name,
+            ProductCode = product.ProductCode,
+            Sku = product.Sku,
+            Unit = product.UnitDisplayText ?? product.Unit.ToDisplayText(),
+            SupportsDecimalQuantity = product.Unit.SupportsDecimalQuantity(),
+            OriginalUnitPrice = retailPrice,
+            Mrp = product.Mrp,
+            UnitPriceText = retailPrice.ToString("0.##"),
+            GstRatePercent = product.GstRatePercent ?? 0,
+            PricingType = product.PricingType,
+            QuantityText = "1",
+        });
 
         RecalculateCart();
     }
@@ -667,6 +689,18 @@ public sealed partial class PosShellViewModel(
         foreach (var item in held.Items)
         {
             var product = item.Product;
+
+            // Resumed lines re-resolve too: a bill held yesterday must bill at today's shelf price,
+            // which is what happened before when this read the live projection column.
+            var resolution = await priceResolver.ResolveAsync(product.Id, PricingContext.Retail);
+            if (!resolution.IsResolved)
+            {
+                ErrorMessage = $"'{product.Name}' has no active retail price and cannot be sold.";
+                continue;
+            }
+
+            var retailPrice = resolution.UnitPrice.Value;
+
             CartLines.Add(new CartLineViewModel
             {
                 ProductId = product.Id,
@@ -675,9 +709,9 @@ public sealed partial class PosShellViewModel(
                 Sku = product.Sku,
                 Unit = product.UnitDisplayText ?? product.Unit.ToDisplayText(),
                 SupportsDecimalQuantity = product.Unit.SupportsDecimalQuantity(),
-                OriginalUnitPrice = product.SellingPrice,
+                OriginalUnitPrice = retailPrice,
                 Mrp = product.Mrp,
-                UnitPriceText = product.SellingPrice.ToString("0.##"),
+                UnitPriceText = retailPrice.ToString("0.##"),
                 GstRatePercent = product.GstRatePercent ?? 0,
                 PricingType = product.PricingType,
                 QuantityText = item.Quantity.ToString("0.###"),

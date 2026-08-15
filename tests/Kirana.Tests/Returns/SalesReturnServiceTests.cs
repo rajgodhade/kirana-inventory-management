@@ -48,7 +48,7 @@ public class SalesReturnServiceTests : IDisposable
             SellingPrice = price,
             TracksBatches = tracksBatches,
             IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = stock });
         await _fixture.Context.SaveChangesAsync();

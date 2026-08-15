@@ -53,7 +53,7 @@ public class SalesReportServiceTests : IDisposable
             IsTaxInclusive = isTaxInclusive,
             CategoryId = categoryId,
             IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = 1000 });
         await _fixture.Context.SaveChangesAsync();

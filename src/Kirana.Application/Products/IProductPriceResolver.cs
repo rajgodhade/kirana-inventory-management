@@ -17,8 +17,10 @@ namespace Kirana.Application.Products;
 /// level. Whether wholesale should ever fall back to retail is a policy decision, and inventing it
 /// here would bury it in a lookup.</para>
 ///
-/// <para><b>POS does not use this yet.</b> Billing still reads <c>Product.SellingPrice</c>
-/// unchanged; wiring the till through the resolver is a later 15B task.</para>
+/// <para><b>POS resolves through this</b> as of Phase 15B-2: <c>SaleService</c> establishes each
+/// line's price here, on the server side of the till, and the cart displays the same resolved
+/// figure. <c>Product.SellingPrice</c> remains a compatibility projection for reports, exports and
+/// label printing, but is no longer the till's pricing authority.</para>
 /// </summary>
 public interface IProductPriceResolver
 {

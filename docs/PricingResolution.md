@@ -23,12 +23,64 @@ Adding those rules directly into `SaleService` would scatter pricing decisions t
 where they are hard to test and easy to get subtly wrong. So the abstraction is built and proved
 first, and wired into POS later.
 
-## POS is not integrated yet
+## POS integration (Phase 15B-2)
 
-**This phase changes no billing behaviour.** `SaleService` still reads `Product.SellingPrice`, the
-cart still prices the same way, and price override, discounts and tax are untouched. The resolver is
-registered in DI and covered by tests, but nothing calls it in production yet. Integration is a
-later 15B task.
+The till now prices through the resolver. Billing behaviour is unchanged — the same numbers on the
+same bills — but the *source* of those numbers moved:
+
+```
+before:  Product → Product.SellingPrice → cart → SaleItem.UnitPriceSnapshot
+after:   Product + PricingContext.Retail → resolver → ProductPrice → cart → SaleItem.UnitPriceSnapshot
+```
+
+**POS always uses `PricingContext.Retail`.** There is no price-level selector, no wholesale button,
+no customer pricing and no automatic wholesale selection. Wholesale can be stored and edited, but it
+has no effect on a bill.
+
+### Resolved twice, on purpose
+
+Both the cart and `SaleService` resolve — and that is deliberate, not duplication:
+
+- **`PosShellViewModel`** resolves to *display* the price when a line is added or a held bill is
+  resumed, so the operator sees what will be charged.
+- **`SaleService.CompleteSaleAsync`** resolves again because it is the **trust boundary**. A client
+  can put any number in `UnitPriceOverride`, and the override check decides whether that number
+  needed manager authorization by comparing it against the real price. If that comparison used a
+  client-supplied figure it would be meaningless, so the server re-establishes the price from the
+  authoritative store regardless of what the UI displayed.
+
+Both ask the same resolver with the same context, so they agree. The server's answer is the one that
+gets billed.
+
+### Failure policy
+
+If retail cannot be resolved, the sale is **refused**. No fallback to wholesale, to
+`Product.SellingPrice`, to MRP, to purchase cost, or to zero — a product that cannot be priced is a
+product that must not be sold.
+
+Resolution happens **before any write**, so a refused sale leaves no sale, no sale item, no stock
+movement and no audit row. The cart refuses at scan time too, so the operator hears about it while
+they can still act on it rather than at payment.
+
+### Price override is unchanged
+
+`PricingChangeSellingPrice` and the existing override flow are untouched. One subtlety worth
+stating: an override *equal to the resolved retail price* still counts as "no override" and needs no
+authorization. Because the comparison now uses the resolved price rather than the projection column,
+a diverged projection can no longer cause ordinary sales to start demanding manager PINs.
+
+### Historical snapshots
+
+`SaleItem.UnitPriceSnapshot` records the resolved price actually charged and is never rewritten. A
+later retail change moves tomorrow's sales, not yesterday's, and returns continue to work off the
+original sale's figures.
+
+### Query cost
+
+One resolver call per **distinct product** per sale, made before any write — a cart with the same
+item on several lines costs one query, not one per line. The cart's own display resolution is one
+query per line added. No caching and no batch API; if profiling later shows either is needed, that
+is a deliberate decision to take then rather than a speculative one now.
 
 ## ProductPrice is the read source
 

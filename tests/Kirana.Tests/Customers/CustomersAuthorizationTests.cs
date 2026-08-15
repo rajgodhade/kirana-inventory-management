@@ -52,7 +52,7 @@ public class CustomersAuthorizationTests : IDisposable
         {
             ProductCode = "PRD-CGATE1", Name = "Gated Product", Unit = UnitOfMeasure.Piece,
             PurchasePrice = 50, Mrp = 70, SellingPrice = 100, IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = 100 });
         await _fixture.Context.SaveChangesAsync();

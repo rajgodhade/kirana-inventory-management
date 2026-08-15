@@ -38,7 +38,7 @@ public sealed class ReceiptHardwareGuardTests : IDisposable
         {
             ProductCode = "PRD-HW-001", Name = "Hardware isolation product", Unit = UnitOfMeasure.Piece,
             PurchasePrice = 8, Mrp = 12, SellingPrice = 10, IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = 5 });
         await _fixture.Context.SaveChangesAsync();

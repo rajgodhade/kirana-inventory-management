@@ -130,7 +130,7 @@ public sealed class PromotionServiceAndBillingTests : IDisposable
 
     private async Task<Product> Product()
     {
-        var p = new Product { ProductCode = "PRD-TEST", Name = "Milk", SellingPrice = 100, Mrp = 110, PurchasePrice = 80, IsActive = true };
+        var p = new Product { ProductCode = "PRD-TEST", Name = "Milk", SellingPrice = 100, Mrp = 110, PurchasePrice = 80, IsActive = true }.WithRetailPrice();
         _fixture.Context.Products.Add(p); _fixture.Context.Inventories.Add(new Inventory { Product = p, QuantityOnHand = 20 }); await _fixture.Context.SaveChangesAsync(); return p;
     }
 

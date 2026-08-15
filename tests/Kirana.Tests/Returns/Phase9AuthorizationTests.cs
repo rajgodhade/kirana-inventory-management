@@ -62,7 +62,7 @@ public class Phase9AuthorizationTests : IDisposable
         {
             ProductCode = "PRD-AUTH01", Name = "Gated Product", Unit = UnitOfMeasure.Piece,
             PurchasePrice = 50, Mrp = 120, SellingPrice = 100, IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = 100 });
         await _fixture.Context.SaveChangesAsync();
