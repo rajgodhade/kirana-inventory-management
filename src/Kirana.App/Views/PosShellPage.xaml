@@ -168,6 +168,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="ScanSearchBox" Grid.Column="0" FontSize="17" Padding="14,11"
@@ -202,9 +203,31 @@
                 </Border>
             </Popup>
 
+            <!-- Price level (Phase 15B-3). Two toggles rather than a bound ComboBox: switching
+                 re-prices the whole cart asynchronously, and a TwoWay-bound selection would also
+                 fire when a tab switch RESTORES a level, re-running the re-price for no reason.
+                 Click handlers mean only a deliberate operator choice ever re-prices. -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="0" VerticalAlignment="Center"
+                        AutomationProperties.Name="Price level">
+                <ToggleButton x:Name="RetailToggle" Click="OnRetailLevelClick" MinWidth="88" Padding="12,9"
+                              CornerRadius="6,0,0,6"
+                              IsChecked="{x:Bind ViewModel.IsWholesaleSelected, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}"
+                              ToolTipService.ToolTip="Sell this bill at retail prices"
+                              AutomationProperties.Name="Retail price level">
+                    <TextBlock Text="Retail" FontWeight="SemiBold" />
+                </ToggleButton>
+                <ToggleButton x:Name="WholesaleToggle" Click="OnWholesaleLevelClick" MinWidth="98" Padding="12,9"
+                              CornerRadius="0,6,6,0" Margin="-1,0,0,0"
+                              IsChecked="{x:Bind ViewModel.IsWholesaleSelected, Mode=OneWay}"
+                              ToolTipService.ToolTip="Sell this bill at wholesale prices"
+                              AutomationProperties.Name="Wholesale price level">
+                    <TextBlock Text="Wholesale" FontWeight="SemiBold" />
+                </ToggleButton>
+            </StackPanel>
+
             <!-- The button's content is icon + bound text, which leaves it without an accessible
                  name; set one explicitly so screen readers announce it. -->
-            <Button Grid.Column="1" Click="OnCustomerClick" Padding="14,9"
+            <Button Grid.Column="2" Click="OnCustomerClick" Padding="14,9"
                     CornerRadius="{StaticResource RadiusMedium}"
                     AutomationProperties.Name="Select Customer (F4)">
                 <StackPanel Orientation="Horizontal" Spacing="10">

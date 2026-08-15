@@ -47,6 +47,31 @@ public sealed partial class PosShellViewModel(
     [ObservableProperty]
     private decimal _billDiscountPercent;
 
+    // ==============================  PRICE LEVEL  ==============================
+    // The bill's price level lives here, on the active-bill surface, and is snapshotted into
+    // BillSessionViewModel when tabs switch - the same place and the same way the customer, bill
+    // discount and authorizations already live. One authoritative copy; the tab entries are storage.
+
+    /// <summary>
+    /// The level the ACTIVE bill sells at. Retail by default, so a till nobody touches behaves
+    /// exactly as it did before this phase existed.
+    ///
+    /// <para>Changing this does not itself re-price anything — <see cref="ApplyPriceLevelAsync"/>
+    /// does, because re-resolving is asynchronous and a property setter cannot await. The selector
+    /// calls it; see that method for why the two are separate.</para>
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsWholesaleSelected))]
+    private PriceLevel _selectedPriceLevel = PriceLevel.Retail;
+
+    /// <summary>Drives the selector's visual state without leaking the enum into XAML.</summary>
+    public bool IsWholesaleSelected => SelectedPriceLevel == PriceLevel.Wholesale;
+
+    /// <summary>True while any line has no price at the bill's current level. Payment is blocked
+    /// until it clears, so a bill labelled Wholesale can never quietly contain a Retail-priced
+    /// line.</summary>
+    public bool HasUnresolvedLines => CartLines.Any(l => l.HasPriceIssue);
+
     [ObservableProperty]
     private decimal _subTotal;
 
@@ -261,6 +286,12 @@ public sealed partial class PosShellViewModel(
         DiscountAuthorizedByUserId = bill.DiscountAuthorizedByUserId;
         PriceOverrideAuthorizedByUserId = bill.PriceOverrideAuthorizedByUserId;
 
+        // Restored, never re-resolved: the incoming tab's lines already hold the prices they were
+        // resolved at, and re-pricing them here would change amounts the cashier had already agreed
+        // with a customer just because they glanced at another bill.
+        SelectedPriceLevel = bill.PriceLevel;
+
+        OnPropertyChanged(nameof(HasUnresolvedLines));
         OnPropertyChanged(nameof(ActiveBillNote));
         RecalculateCart();
         UpdateActiveBillSummary();
@@ -279,6 +310,7 @@ public sealed partial class PosShellViewModel(
         current.BillDiscountPercent = BillDiscountPercent;
         current.DiscountAuthorizedByUserId = DiscountAuthorizedByUserId;
         current.PriceOverrideAuthorizedByUserId = PriceOverrideAuthorizedByUserId;
+        current.PriceLevel = SelectedPriceLevel;
     }
 
     /// <summary>True when closing this tab would discard goods the cashier already scanned — the
@@ -456,14 +488,16 @@ public sealed partial class PosShellViewModel(
             return;
         }
 
-        var resolution = await priceResolver.ResolveAsync(product.Id, PricingContext.Retail);
+        // At the bill's CURRENT level, not always retail: a product scanned onto a wholesale bill
+        // joins it at wholesale, rather than arriving at retail and waiting to be re-priced.
+        var resolution = await priceResolver.ResolveAsync(product.Id, new PricingContext(SelectedPriceLevel));
         if (!resolution.IsResolved)
         {
-            ErrorMessage = $"'{product.Name}' has no active retail price and cannot be sold.";
+            ErrorMessage = UnavailableMessage(product.Name, SelectedPriceLevel);
             return;
         }
 
-        var retailPrice = resolution.UnitPrice.Value;
+        var unitPrice = resolution.UnitPrice.Value;
 
         CartLines.Add(new CartLineViewModel
         {
@@ -473,14 +507,67 @@ public sealed partial class PosShellViewModel(
             Sku = product.Sku,
             Unit = product.UnitDisplayText ?? product.Unit.ToDisplayText(),
             SupportsDecimalQuantity = product.Unit.SupportsDecimalQuantity(),
-            OriginalUnitPrice = retailPrice,
+            OriginalUnitPrice = unitPrice,
             Mrp = product.Mrp,
-            UnitPriceText = retailPrice.ToString("0.##"),
+            UnitPriceText = unitPrice.ToString("0.##"),
             GstRatePercent = product.GstRatePercent ?? 0,
             PricingType = product.PricingType,
             QuantityText = "1",
         });
 
+        RecalculateCart();
+    }
+
+    /// <summary>Names the product and the level, because "price unavailable" tells a cashier
+    /// nothing they can act on.</summary>
+    private static string UnavailableMessage(string productName, PriceLevel level) =>
+        $"{level.ToDisplayText()} price is not configured for {productName}.";
+
+    /// <summary>
+    /// Switches the bill to <paramref name="level"/> and re-prices every line through the resolver.
+    ///
+    /// <para>Separate from the <see cref="SelectedPriceLevel"/> setter because re-resolving is
+    /// asynchronous — binding a ComboBox straight to an async re-price would leave the selector and
+    /// the cart briefly disagreeing, and would re-enter on every restore during a tab switch.</para>
+    ///
+    /// <para>Lines that cannot be priced at the new level are FLAGGED, not silently left at the old
+    /// level's price and not quietly given another level's. They keep their previous amount so the
+    /// cashier can see what changed, and payment stays blocked until every flag clears.</para>
+    ///
+    /// <para>Re-resolving also discards a manual override on the affected line: the override was a
+    /// deviation from a price that no longer applies, so carrying the number across would silently
+    /// turn an approved retail price into an unapproved wholesale one.</para>
+    /// </summary>
+    public async Task ApplyPriceLevelAsync(PriceLevel level)
+    {
+        SelectedPriceLevel = level;
+        if (ActiveBill is { } bill)
+        {
+            bill.PriceLevel = level;
+        }
+
+        var unavailable = new List<string>();
+
+        foreach (var line in CartLines)
+        {
+            var resolution = await priceResolver.ResolveAsync(line.ProductId, new PricingContext(level));
+            if (!resolution.IsResolved)
+            {
+                line.PriceIssue = UnavailableMessage(line.ProductName, level);
+                unavailable.Add(line.ProductName);
+                continue;
+            }
+
+            line.PriceIssue = null;
+            line.OriginalUnitPrice = resolution.UnitPrice.Value;
+            line.UnitPriceText = resolution.UnitPrice.Value.ToString("0.##");
+        }
+
+        ErrorMessage = unavailable.Count == 0
+            ? null
+            : $"{level.ToDisplayText()} price is not configured for {string.Join(", ", unavailable)}.";
+
+        OnPropertyChanged(nameof(HasUnresolvedLines));
         RecalculateCart();
     }
 
@@ -691,11 +778,13 @@ public sealed partial class PosShellViewModel(
             var product = item.Product;
 
             // Resumed lines re-resolve too: a bill held yesterday must bill at today's shelf price,
-            // which is what happened before when this read the live projection column.
-            var resolution = await priceResolver.ResolveAsync(product.Id, PricingContext.Retail);
+            // which is what happened before when this read the live projection column. Held bills
+            // carry no price level of their own, so they resume at the bill's current level, which
+            // ClearCart has just reset to Retail.
+            var resolution = await priceResolver.ResolveAsync(product.Id, new PricingContext(SelectedPriceLevel));
             if (!resolution.IsResolved)
             {
-                ErrorMessage = $"'{product.Name}' has no active retail price and cannot be sold.";
+                ErrorMessage = UnavailableMessage(product.Name, SelectedPriceLevel);
                 continue;
             }
 
@@ -737,11 +826,18 @@ public sealed partial class PosShellViewModel(
         DiscountAuthorizedByUserId = null;
         PriceOverrideAuthorizedByUserId = null;
 
+        // Back to Retail for the next customer. A wholesale bill is a deliberate choice per bill,
+        // so it must not persist past the sale it was chosen for and quietly discount the next one.
+        SelectedPriceLevel = PriceLevel.Retail;
+
         if (ActiveBill is { } bill)
         {
             bill.Note = string.Empty;
+            bill.PriceLevel = PriceLevel.Retail;
             OnPropertyChanged(nameof(ActiveBillNote));
         }
+
+        OnPropertyChanged(nameof(HasUnresolvedLines));
 
         RecalculateCart();
         UpdateActiveBillSummary();

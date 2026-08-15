@@ -15,10 +15,29 @@ public sealed partial class CartLineViewModel : ObservableObject
     public required string Unit { get; init; }
     public required bool SupportsDecimalQuantity { get; init; }
 
-    /// <summary>The product's actual selling price, captured when the line was added — the
-    /// baseline <see cref="UnitPriceText"/> is compared against to detect an override. Never
-    /// mutated by editing the price; that only ever changes <see cref="UnitPriceText"/>.</summary>
-    public required decimal OriginalUnitPrice { get; init; }
+    /// <summary>The product's actual selling price at the bill's current price level, resolved when
+    /// the line was added — the baseline <see cref="UnitPriceText"/> is compared against to detect
+    /// an override. Never mutated by editing the price; that only ever changes
+    /// <see cref="UnitPriceText"/>.
+    ///
+    /// <para>Settable since Phase 15B-3 for exactly one reason: switching the bill between Retail
+    /// and Wholesale re-resolves every line, which changes what "the product's price" means for
+    /// this bill. Nothing else may write it.</para></summary>
+    public required decimal OriginalUnitPrice { get; set; }
+
+    /// <summary>
+    /// True when the bill's current price level has no configured price for this product — set by
+    /// a level switch that could not resolve this line (Phase 15B-3).
+    ///
+    /// <para>The line keeps showing its previous amount rather than silently becoming another
+    /// level's price, and the bill cannot be paid while any line is in this state. Clearing it
+    /// means switching back to a level the product does have, or removing the line.</para>
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPriceIssue))]
+    private string? _priceIssue;
+
+    public bool HasPriceIssue => !string.IsNullOrEmpty(PriceIssue);
 
     /// <summary>The product's MRP at the moment this line was added — used for the "You Saved"
     /// figure and shown directly in its own cart column. 0 for a product with no MRP set, which

@@ -340,6 +340,8 @@ public sealed partial class PaymentViewModel : ObservableObject
                 CashierUserId = _owner.CashierUserId,
                 DiscountAuthorizedByUserId = _owner.DiscountAuthorizedByUserId,
                 PriceOverrideAuthorizedByUserId = _owner.PriceOverrideAuthorizedByUserId,
+                // The LEVEL, not the amounts - SaleService re-resolves each line from it.
+                PriceLevel = _owner.SelectedPriceLevel,
                 Payments = PaymentLines.Select(p => new SalePaymentInput
                 {
                     Method = p.Method,

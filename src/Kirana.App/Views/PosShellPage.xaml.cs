@@ -338,6 +338,25 @@ public sealed partial class PosShellPage : Page
         await ViewModel.AddOrIncrementAsync(product);
     }
 
+    private async void OnRetailLevelClick(object sender, RoutedEventArgs e) =>
+        await ApplyPriceLevelAsync(PriceLevel.Retail);
+
+    private async void OnWholesaleLevelClick(object sender, RoutedEventArgs e) =>
+        await ApplyPriceLevelAsync(PriceLevel.Wholesale);
+
+    /// <summary>
+    /// Re-prices the cart at the chosen level. The toggles are bound one-way to the ViewModel, so
+    /// they always end up reflecting the level that was actually applied — including when clicking
+    /// the already-selected one, which would otherwise leave a toggle visually unchecked.
+    /// </summary>
+    private async Task ApplyPriceLevelAsync(PriceLevel level)
+    {
+        await ViewModel.ApplyPriceLevelAsync(level);
+
+        RetailToggle.IsChecked = !ViewModel.IsWholesaleSelected;
+        WholesaleToggle.IsChecked = ViewModel.IsWholesaleSelected;
+    }
+
     private async void OnCustomerClick(object sender, RoutedEventArgs e) => await OpenCustomerPickerAsync();
 
     private async Task OpenCustomerPickerAsync()
@@ -541,6 +560,17 @@ public sealed partial class PosShellPage : Page
     {
         if (ViewModel.CartLines.Count == 0)
         {
+            return;
+        }
+
+        // A bill labelled Wholesale must not reach payment while one of its lines is still priced
+        // at something else. SaleService would refuse it anyway, but stopping here names the
+        // product while the cashier can still fix it, rather than failing at the payment screen.
+        if (ViewModel.HasUnresolvedLines)
+        {
+            ViewModel.ErrorMessage = string.Join(
+                " ",
+                ViewModel.CartLines.Where(l => l.HasPriceIssue).Select(l => l.PriceIssue));
             return;
         }
 

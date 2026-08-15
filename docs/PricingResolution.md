@@ -75,6 +75,94 @@ a diverged projection can no longer cause ordinary sales to start demanding mana
 later retail change moves tomorrow's sales, not yesterday's, and returns continue to work off the
 original sale's figures.
 
+## POS price-level selection (Phase 15B-3)
+
+A bill can now be sold at **Retail** or **Wholesale**. The till shows a compact two-toggle selector
+next to the search box; everything else about billing is unchanged.
+
+### Default is Retail, always
+
+A new bill, a new tab, and the bill that follows a completed sale all start at Retail. Wholesale is
+a deliberate per-bill choice and never persists past the bill it was chosen for — a cashier who
+serves a wholesale customer cannot accidentally discount the next walk-in.
+
+### Where the level lives
+
+On the active bill. `PosShellViewModel.SelectedPriceLevel` is the live value, snapshotted into
+`BillSessionViewModel.PriceLevel` when tabs switch — the same place and mechanism the customer, bill
+discount and manager authorizations already use. One authoritative copy; the per-tab entries are
+storage, not a second source of truth.
+
+Switching tabs **restores** a tab's level without re-pricing it. A bill's lines already hold the
+prices they were resolved at, and re-pricing on tab switch would change amounts a cashier had
+already quoted just because they glanced at another bill.
+
+### Switching re-prices the cart
+
+Choosing a level re-resolves **every** line through `IProductPriceResolver` at that level. Nothing
+reads `Product.WholesalePrice` directly.
+
+Switching also **discards a manual override** on the affected line: the override was a deviation
+from a price that no longer applies, so carrying the number across would silently turn an approved
+retail price into an unapproved wholesale one.
+
+### A product with no price at the chosen level
+
+The line is **flagged**, not silently repriced and not left quietly at the old level. It keeps
+showing its previous amount so the change is visible, the error names the product
+("Wholesale price is not configured for Amul Butter 500g."), and **payment is blocked** until every
+flag clears — by switching back to a level the product has, or removing the line.
+
+A mixed cart therefore refuses as a whole rather than billing some lines at wholesale and one at
+retail. An invoice headed "Wholesale" must not contain a line that isn't.
+
+### Products added after switching
+
+A product scanned onto a wholesale bill joins it at wholesale. It does not arrive at retail and wait
+to be re-priced.
+
+### The server still decides
+
+`CompleteSaleRequest` carries the **level**, never the amounts. `SaleService` re-resolves every line
+from that level at the trust boundary, exactly as it did for retail in 15B-2 — so choosing
+"Wholesale" cannot become a way for a client to name its own price. A product that cannot be priced
+at the requested level fails the sale, with nothing written.
+
+### Override is still a separate mechanism
+
+`PricingChangeSellingPrice` and the existing override flow are untouched. The baseline the override
+is measured against is the **resolved price at the bill's level**, so on a wholesale bill an
+override up to the retail price is still an override and still needs authorization. Selecting a
+cheaper level does not move the bar for what a manager must approve.
+
+### History
+
+`SaleItem.UnitPriceSnapshot` holds the resolved level price actually charged and is never rewritten.
+A later wholesale price change moves tomorrow's wholesale bills, not yesterday's, and returns
+continue to work off the original sale's figures.
+
+### Not persisted: which level a sale used
+
+`Sale`/`SaleItem` deliberately gained **no new column**. `UnitPriceSnapshot` records what was
+charged, no existing report asks "was this sold at wholesale?", and no requirement for that has been
+stated — so no migration was created.
+
+This is a real limitation worth knowing: after a price change you cannot reliably tell a historical
+wholesale sale from a retail one by comparing snapshots.
+
+> **Backlog:** consider `Sale.PriceLevel` persistence if historical Retail vs Wholesale reporting
+> becomes a requirement. The smallest change is a single `PriceLevel` column on **`Sale`** (the level
+> is bill-wide, not per-line), defaulted and backfilled to `Retail` for existing rows. Deliberately
+> not implemented now — it is a schema change that should be driven by a stated reporting need
+> rather than added speculatively.
+
+### The payment guard exists at both layers
+
+The UI blocks payment while any line is unresolved, naming the product early. Independently,
+`SaleService` re-resolves **every** line at the submitted level and refuses the request if any one
+fails — so a client that skipped the UI could not submit an unresolved bill either. The UI guard is
+for the cashier; the service guard is the one that actually protects the money.
+
 ### Query cost
 
 One resolver call per **distinct product** per sale, made before any write — a cart with the same

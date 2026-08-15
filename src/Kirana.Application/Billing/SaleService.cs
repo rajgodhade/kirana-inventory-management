@@ -91,21 +91,27 @@ public sealed class SaleService(
         //
         // Resolved once per DISTINCT product rather than per line, and before any write, so a cart
         // with the same item on several lines costs one query and a failure leaves nothing behind.
-        var retailPrices = new Dictionary<int, decimal>(productIds.Count);
+        //
+        // Phase 15B-3: at the level the bill is being sold at, not always Retail. The client sends
+        // the LEVEL, never the amount - so choosing "Wholesale" cannot become a way to name your
+        // own price.
+        var pricingContext = new PricingContext(request.PriceLevel);
+        var resolvedPrices = new Dictionary<int, decimal>(productIds.Count);
         foreach (var productId in productIds)
         {
-            var resolution = await priceResolver.ResolveAsync(
-                productId, PricingContext.Retail, cancellationToken);
+            var resolution = await priceResolver.ResolveAsync(productId, pricingContext, cancellationToken);
 
             if (!resolution.IsResolved)
             {
-                // No silent fallback - not to wholesale, not to the projection column, not to MRP,
-                // not to zero. A product we cannot price is a product we must not sell.
+                // No silent fallback - not to another level, not to the projection column, not to
+                // MRP, not to zero. A product we cannot price at the requested level is a product
+                // this bill must not sell.
                 throw new InvalidOperationException(
-                    $"'{products[productId].Name}' has no active retail price and cannot be sold.");
+                    $"'{products[productId].Name}' has no active " +
+                    $"{request.PriceLevel.ToDisplayText().ToLowerInvariant()} price and cannot be sold.");
             }
 
-            retailPrices[productId] = resolution.UnitPrice.Value;
+            resolvedPrices[productId] = resolution.UnitPrice.Value;
         }
 
         // Store-level opt-out (Settings → Billing Authorization, Owner-only): a single-operator
@@ -124,7 +130,7 @@ public sealed class SaleService(
         }
 
         var hasPriceOverride = request.Lines.Any(l =>
-            l.UnitPriceOverride is { } overridePrice && overridePrice != retailPrices[l.ProductId]);
+            l.UnitPriceOverride is { } overridePrice && overridePrice != resolvedPrices[l.ProductId]);
 
         if (hasPriceOverride && (appSettings?.RequirePinForPriceOverride ?? true))
         {
@@ -142,10 +148,10 @@ public sealed class SaleService(
                 {
                     ProductId = line.ProductId,
                     Quantity = line.Quantity,
-                    UnitPrice = line.UnitPriceOverride ?? retailPrices[line.ProductId],
+                    UnitPrice = line.UnitPriceOverride ?? resolvedPrices[line.ProductId],
                 }).ToList(),
                 BillAmount = request.Lines.Sum(line =>
-                    line.Quantity * (line.UnitPriceOverride ?? retailPrices[line.ProductId])),
+                    line.Quantity * (line.UnitPriceOverride ?? resolvedPrices[line.ProductId])),
                 CustomerId = request.CustomerId,
                 AtUtc = DateTime.UtcNow,
             }, cancellationToken)).ToDictionary(x => x.ProductId);
@@ -157,7 +163,7 @@ public sealed class SaleService(
             {
                 ProductId = line.ProductId,
                 Quantity = line.Quantity,
-                UnitPrice = line.UnitPriceOverride ?? retailPrices[line.ProductId],
+                UnitPrice = line.UnitPriceOverride ?? resolvedPrices[line.ProductId],
                 PricingType = product.PricingType,
                 GstRatePercent = product.GstRatePercent ?? 0,
                 DiscountPercent = line.DiscountPercent,
