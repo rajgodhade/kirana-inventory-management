@@ -163,6 +163,61 @@ The UI blocks payment while any line is unresolved, naming the product early. In
 fails — so a client that skipped the UI could not submit an unresolved bill either. The UI guard is
 for the cashier; the service guard is the one that actually protects the money.
 
+## Customer default price level (Phase 15B-4)
+
+A customer can carry an optional `DefaultPriceLevel`, which decides what level their bills **open**
+at. It is a default, not a lock, and never a pricing authority.
+
+### NULL means "no preference"
+
+| `Customer.DefaultPriceLevel` | Bill opens at | Meaning |
+| --- | --- | --- |
+| `NULL` | Retail | Nobody has classified this customer |
+| `Retail` | Retail | Someone decided this is a retail customer |
+| `Wholesale` | Wholesale | Someone decided this is a wholesale customer |
+
+`NULL` and an explicit `Retail` produce the same opening level but are stored differently, because
+they are different facts. The migration therefore **does not backfill** existing customers to
+`Retail` — that would fabricate a decision nobody made and be indistinguishable from a real one
+afterwards.
+
+### Applied only while the bill is empty
+
+The rule lives in `BillPriceLevelPolicy` (Application layer, pure and testable — deliberately not in
+the POS ViewModel, where a rule about money could not be tested by this solution):
+
+- **Empty bill** → selecting a customer applies their default, and the selector visibly follows.
+- **Populated bill** → the bill keeps its level. Changing the customer says so
+  ("*X is a wholesale customer. This bill stays at Retail — switch it above if you want to change.*")
+  and changes nothing.
+
+That asymmetry is the point: once lines exist the cashier has quoted those amounts to someone, and
+silently re-pricing them because the customer field changed would move a price the customer has
+already been told. Removing a customer follows the same rule — an empty bill returns to Retail, a
+populated one keeps its level.
+
+The 15B-3 selector remains authoritative: an explicit choice is never undone by a customer
+preference.
+
+### Not a sale authority
+
+`SaleService` prices from `CompleteSaleRequest.PriceLevel` and **never reads the customer record**.
+A wholesale-default customer on a bill submitted as Retail is charged Retail, and vice versa — so a
+customer preference cannot become a way to obtain cheaper prices. Missing-level behaviour is
+unchanged: a wholesale-default customer still cannot buy a product that has no wholesale price.
+
+Changing a customer's default is inert with respect to everything already recorded: historical
+sales, snapshots, product prices, stock and payments are untouched. It is audited through the
+existing `CustomerUpdated` entry, which now names the level it moved from and to; re-saving the same
+value claims no change, and merely selecting a customer at the till writes nothing at all.
+
+### Still no historical price-level persistence
+
+Unchanged from 15B-3: `Sale`/`SaleItem` record what was charged, not which level was used.
+`Customer.DefaultPriceLevel` is a **current preference**, not a record of how past bills were
+priced — a customer switched from Wholesale to Retail today says nothing about last month's
+invoices. The backlog note above still stands.
+
 ### Query cost
 
 One resolver call per **distinct product** per sale, made before any write — a cart with the same

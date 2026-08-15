@@ -524,6 +524,56 @@ public sealed partial class PosShellViewModel(
         $"{level.ToDisplayText()} price is not configured for {productName}.";
 
     /// <summary>
+    /// Attaches a customer to the bill and applies their default price level (Phase 15B-4).
+    ///
+    /// <para><b>Only while the cart is empty.</b> A customer's default is a starting point, not a
+    /// re-pricing instruction: once lines exist the cashier has quoted those amounts, and silently
+    /// moving them because the customer field changed would change a price the customer has already
+    /// been told. In that case the bill keeps its level and the mismatch is stated rather than
+    /// acted on, leaving the decision with the operator via the selector.</para>
+    ///
+    /// <para>A null customer (walk-in) is the same rule: an empty bill returns to Retail, a
+    /// populated one keeps whatever it was set to.</para>
+    /// </summary>
+    public async Task ApplyCustomerAsync(Customer? customer)
+    {
+        SelectedCustomer = customer;
+
+        var cartIsEmpty = CartLines.Count == 0;
+
+        // The rule itself lives in BillPriceLevelPolicy so it can be tested and fault-injected;
+        // this method only applies whatever it decides.
+        var target = BillPriceLevelPolicy.WhenCustomerChanges(
+            SelectedPriceLevel, customer?.DefaultPriceLevel, cartIsEmpty);
+
+        if (target != SelectedPriceLevel)
+        {
+            await ApplyPriceLevelAsync(target);
+        }
+
+        var preference = customer?.DefaultPriceLevel;
+
+        ErrorMessage = preference switch
+        {
+            // Nothing to say: no customer, or no stated preference.
+            null => null,
+
+            // Empty bill that moved to match the customer - confirm it, because the selector
+            // changing on its own would otherwise look like a glitch.
+            _ when cartIsEmpty && target != PriceLevel.Retail =>
+                $"{target.ToDisplayText()} pricing selected for {customer!.Name}.",
+            _ when cartIsEmpty => null,
+
+            // Populated bill whose level does NOT match the customer: say so, change nothing.
+            _ when preference != SelectedPriceLevel =>
+                $"{customer!.Name} is a {preference.Value.ToDisplayText().ToLowerInvariant()} customer. " +
+                $"This bill stays at {SelectedPriceLevel.ToDisplayText()} — switch it above if you want to change.",
+
+            _ => null,
+        };
+    }
+
+    /// <summary>
     /// Switches the bill to <paramref name="level"/> and re-prices every line through the resolver.
     ///
     /// <para>Separate from the <see cref="SelectedPriceLevel"/> setter because re-resolving is

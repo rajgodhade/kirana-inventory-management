@@ -30,6 +30,13 @@
             <TextBox Header="Address" Text="{x:Bind ViewModel.Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      AcceptsReturn="True" TextWrapping="Wrap" Height="70" />
             <TextBox Header="GSTIN (optional)" Text="{x:Bind ViewModel.Gstin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <!-- Which price level this customer's bills open at (Phase 15B-3/4). A default the
+                 cashier can still change per bill, not a lock - hence the plain wording. -->
+            <ComboBox Header="Default price level" HorizontalAlignment="Stretch"
+                      ItemsSource="{x:Bind ViewModel.PriceLevelOptions}"
+                      SelectedItem="{x:Bind ViewModel.SelectedPriceLevelOption, Mode=TwoWay}"
+                      AutomationProperties.Name="Default price level" />
             <TextBox Header="Notes" Text="{x:Bind ViewModel.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      AcceptsReturn="True" TextWrapping="Wrap" Height="70" />
 

@@ -366,7 +366,9 @@ public sealed partial class PosShellPage : Page
 
         if (dialog.Confirmed)
         {
-            ViewModel.SelectedCustomer = dialog.SelectedCustomer;
+            // Goes through the ViewModel rather than assigning the property, so the customer's
+            // default price level is applied under the empty-cart rule (Phase 15B-4).
+            await ViewModel.ApplyCustomerAsync(dialog.SelectedCustomer);
             await ViewModel.RefreshPromotionsAsync();
         }
 

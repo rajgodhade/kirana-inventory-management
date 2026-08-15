@@ -35,6 +35,19 @@ public sealed partial class CustomerEditViewModel : ObservableObject
     [ObservableProperty]
     private string _notes = string.Empty;
 
+    /// <summary>
+    /// The customer's POS default, presented as three plain choices rather than a nullable enum.
+    /// "No preference" maps to null - the customer has simply never been classified, which is not
+    /// the same as someone deciding they are a retail customer, even though both open at Retail.
+    /// </summary>
+    public IReadOnlyList<string> PriceLevelOptions { get; } =
+        [NoPreferenceOption, "Retail", "Wholesale"];
+
+    [ObservableProperty]
+    private string _selectedPriceLevelOption = NoPreferenceOption;
+
+    private const string NoPreferenceOption = "No preference (Retail)";
+
     [ObservableProperty]
     private string? _errorMessage;
 
@@ -51,8 +64,22 @@ public sealed partial class CustomerEditViewModel : ObservableObject
             Address = existingCustomer.Address ?? string.Empty;
             Gstin = existingCustomer.Gstin ?? string.Empty;
             Notes = existingCustomer.Notes ?? string.Empty;
+            SelectedPriceLevelOption = existingCustomer.DefaultPriceLevel switch
+            {
+                PriceLevel.Retail => "Retail",
+                PriceLevel.Wholesale => "Wholesale",
+                _ => NoPreferenceOption,
+            };
         }
     }
+
+    /// <summary>Maps the selected option back to the nullable enum the service stores.</summary>
+    private PriceLevel? ChosenPriceLevel => SelectedPriceLevelOption switch
+    {
+        "Retail" => PriceLevel.Retail,
+        "Wholesale" => PriceLevel.Wholesale,
+        _ => null,
+    };
 
     [RelayCommand]
     private async Task SaveAsync()
@@ -70,6 +97,7 @@ public sealed partial class CustomerEditViewModel : ObservableObject
                     Address = Address,
                     Gstin = Gstin,
                     Notes = Notes,
+                    DefaultPriceLevel = ChosenPriceLevel,
                     PerformedByUserId = _owner.CurrentUserId,
                 });
             }
@@ -82,6 +110,7 @@ public sealed partial class CustomerEditViewModel : ObservableObject
                     Address = Address,
                     Gstin = Gstin,
                     Notes = Notes,
+                    DefaultPriceLevel = ChosenPriceLevel,
                     PerformedByUserId = _owner.CurrentUserId,
                 });
             }

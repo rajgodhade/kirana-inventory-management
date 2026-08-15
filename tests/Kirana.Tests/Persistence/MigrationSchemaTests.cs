@@ -825,6 +825,146 @@ public sealed class MigrationSchemaTests : IDisposable
         return names;
     }
 
+    // ---- Phase 15B-4 customer default price level ----
+
+    /// <summary>The migration immediately before the customer column, so existing customer rows can
+    /// be inserted the way the old schema stored them and then migrated forward.</summary>
+    private const string PreCustomerPriceLevelMigration = "20260814141847_Phase15APricingFoundation";
+
+    private async Task SeedPreCustomerPriceLevelAsync(KiranaDbContext context, params string[] names)
+    {
+        var migrator = context.Database.GetService<IMigrator>();
+        await migrator.MigrateAsync(PreCustomerPriceLevelMigration);
+
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        for (var i = 0; i < names.Length; i++)
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO Customers (CustomerCode, Name, Phone, CreditBalance, IsActive, CreatedAtUtc)
+                VALUES ($code, $name, $phone, $balance, 1, CURRENT_TIMESTAMP);
+                """;
+            command.Parameters.Add(new SqliteParameter("$code", $"CUST-{i + 1:D6}"));
+            command.Parameters.Add(new SqliteParameter("$name", names[i]));
+            command.Parameters.Add(new SqliteParameter("$phone", $"90000000{i:D2}"));
+            command.Parameters.Add(new SqliteParameter("$balance", 125.50m * (i + 1)));
+            await command.ExecuteNonQueryAsync();
+        }
+    }
+
+    [Fact]
+    public async Task CustomersTable_GainsTheNullableDefaultPriceLevelColumn()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        Assert.Contains("DefaultPriceLevel", await ColumnNamesAsync(context, "Customers"));
+
+        var connection = context.Database.GetDbConnection();
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText =
+            "SELECT \"notnull\" FROM pragma_table_info('Customers') WHERE name='DefaultPriceLevel'";
+        Assert.Equal(0L, Convert.ToInt64(await cmd.ExecuteScalarAsync()));   // nullable
+    }
+
+    /// <summary>
+    /// The point of the whole migration: existing customers must come through as NULL, meaning "no
+    /// preference". Backfilling them to 'Retail' would invent a classification nobody made and
+    /// would be indistinguishable from a real one afterwards.
+    /// </summary>
+    [Fact]
+    public async Task ExistingCustomers_GetNoPreference_RatherThanADefaultedRetail()
+    {
+        await using var context = CreateContext();
+        await SeedPreCustomerPriceLevelAsync(context, "Old Customer A", "Old Customer B");
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(2, await ScalarAsync(context, "SELECT COUNT(*) FROM Customers"));
+        Assert.Equal(2, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM Customers WHERE DefaultPriceLevel IS NULL"));
+        Assert.Equal(0, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM Customers WHERE DefaultPriceLevel IS NOT NULL"));
+    }
+
+    /// <summary>Everything else about an existing customer survives — this is an added column, not
+    /// a table rebuild that could drop or reorder data.</summary>
+    [Fact]
+    public async Task ExistingCustomerData_IsUnchangedByTheMigration()
+    {
+        await using var context = CreateContext();
+        await SeedPreCustomerPriceLevelAsync(context, "Preserved Customer");
+
+        var before = await CustomerFingerprintAsync(context);
+        await context.Database.MigrateAsync();
+        var after = await CustomerFingerprintAsync(context);
+
+        Assert.Equal(before, after);
+    }
+
+    private static async Task<List<string>> CustomerFingerprintAsync(KiranaDbContext context)
+    {
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            "SELECT Id, CustomerCode, Name, Phone, CreditBalance, IsActive FROM Customers ORDER BY Id";
+        var rows = new List<string>();
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var parts = new List<string>();
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                parts.Add(reader.IsDBNull(i) ? "NULL" : reader.GetValue(i).ToString()!);
+            }
+
+            rows.Add(string.Join("|", parts));
+        }
+
+        return rows;
+    }
+
+    /// <summary>The pricing tables this phase must not touch.</summary>
+    [Fact]
+    public async Task TheCustomerMigration_LeavesProductPricesAndSalesUntouched()
+    {
+        await using var context = CreateContext();
+        await SeedPreCustomerPriceLevelAsync(context, "Customer With History");
+
+        var connection = context.Database.GetDbConnection();
+        await using (var seed = connection.CreateCommand())
+        {
+            seed.CommandText = """
+                INSERT INTO Products
+                    (ProductCode, Name, Unit, PurchasePrice, Mrp, SellingPrice, WholesalePrice,
+                     MinimumStock, ReorderQuantity, TracksBatches, IsActive, CreatedAtUtc,
+                     PricingType, GstRatePercent, ReplenishmentEnabled)
+                VALUES ('PRD-000001', 'Priced', 'Piece', 10, 30, 25, 20, 0, 0, 0, 1,
+                        CURRENT_TIMESTAMP, 'Inclusive', 5, 0);
+                INSERT INTO ProductPrices (ProductId, Level, Price, IsActive, CreatedAtUtc)
+                VALUES (1, 'Retail', 25, 1, CURRENT_TIMESTAMP),
+                       (1, 'Wholesale', 20, 1, CURRENT_TIMESTAMP);
+                """;
+            await seed.ExecuteNonQueryAsync();
+        }
+
+        var pricesBefore = await ScalarAsync(context, "SELECT COUNT(*) FROM ProductPrices");
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(pricesBefore, await ScalarAsync(context, "SELECT COUNT(*) FROM ProductPrices"));
+        Assert.Equal(0, await ScalarAsync(context, """
+            SELECT COUNT(*) FROM Products p
+            JOIN ProductPrices pr ON pr.ProductId = p.Id AND pr.Level='Retail' AND pr.IsActive=1
+            WHERE pr.Price <> p.SellingPrice
+            """));
+        Assert.Equal(0, await ScalarAsync(context, "SELECT COUNT(*) FROM Sales"));
+    }
+
     public void Dispose()
     {
         SqliteConnection.ClearAllPools();
