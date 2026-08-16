@@ -576,7 +576,8 @@ public sealed partial class PosShellPage : Page
             return;
         }
 
-        var paymentViewModel = new PaymentViewModel(ViewModel, App.Services.GetRequiredService<ISaleService>());
+        var paymentViewModel = new PaymentViewModel(
+            ViewModel, App.Services.GetRequiredService<ISaleService>(), _cashRegisterService);
         var dialog = new PaymentDialog(paymentViewModel).Themed(XamlRoot);
         await ShowModalAsync(dialog);
 

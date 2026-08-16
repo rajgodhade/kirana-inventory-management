@@ -1,5 +1,6 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.CashRegisters;
 using Kirana.Domain.Barcodes;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -142,6 +143,11 @@ public sealed class SalesReturnService(
         {
             throw new ArgumentException("A return must have at least one line.", nameof(request));
         }
+
+        // Cash handed back to a customer leaves the drawer (Phase 16A-2). StoreCredit and None move
+        // no physical money, so they are unaffected and a refund can still be processed with the
+        // register closed.
+        await CashImpactPolicy.EnsureRegisterAvailableForAsync(db, request.RefundMethod, cancellationToken);
 
         var sale = await db.Sales
             .Include(s => s.Customer)

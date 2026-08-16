@@ -1,5 +1,6 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.CashRegisters;
 using Kirana.Application.Products;
 using Kirana.Application.Promotions;
 using Kirana.Domain.Entities;
@@ -39,6 +40,13 @@ public sealed class SaleService(
         {
             throw new ArgumentException("At least one payment is required.", nameof(request));
         }
+
+        // Cash needs somewhere to go (Phase 16A-2). Checked here, before anything is read or
+        // written, so a rejected bill leaves no Sale, SaleItem, Payment, stock movement or audit
+        // row behind. The POS checks this too, but that is a courtesy to the cashier — this is the
+        // boundary a hand-built request cannot get past.
+        await CashImpactPolicy.EnsureRegisterAvailableForAsync(
+            db, request.Payments.Select(p => p.Method), cancellationToken);
 
         var productIds = request.Lines.Select(l => l.ProductId).Distinct().ToList();
         var products = await db.Products

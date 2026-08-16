@@ -42,6 +42,12 @@ public sealed class ReceiptHardwareGuardTests : IDisposable
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = 5 });
         await _fixture.Context.SaveChangesAsync();
+
+        // Phase 16A-2: this test sells for cash to prove a printer fault cannot undo a committed
+        // sale, so the shop has to be set up and the register open for the sale to happen at all.
+        var owner = await _fixture.SeedOwnerAsync();
+        await _fixture.SeedOpenRegisterAsync(owner.Id);
+
         var sales = new SaleService(
             _fixture.Context,
             new EfSequenceGenerator(_fixture.Context),

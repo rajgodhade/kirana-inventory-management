@@ -1,6 +1,8 @@
 # Cash Register, Cashier Shift, and Day Closing
 
-Phase 12 adds one physical cash-register session per store without changing Billing or making an open register a prerequisite for a sale. Transactional amounts remain owned by their existing modules and the register report reads those authoritative records.
+One physical cash-register session per store. Transactional amounts remain owned by their existing modules and the register report reads those authoritative records rather than copying them.
+
+Phase 12 deliberately made the register observe-only: an open register was never a prerequisite for a sale. Phase 16A-2 changed that for **cash** specifically — see [Cash transactions require an open register](#cash-transactions-require-an-open-register-phase-16a-2). Non-cash billing is still completely independent of the register.
 
 ## Lifecycle
 
@@ -61,9 +63,50 @@ Non-cash expenses inside a closed window remain freely editable: they never touc
 
 The `CashExpenses` column defaults to `0` and **no historical session is recalculated**. Sessions closed before this feature existed report `0`, which means "the cash-expense concept was not part of this snapshot" — not "no cash was spent". Backfilling would retro-subtract expenses from `ExpectedCash` and so change a `Variance` that a human already counted and signed off, which is precisely what a Z report must never do.
 
-### Known limitation
+This gap — a cash expense belonging to no session — is closed by the policy below.
 
-A cash expense recorded while **no register is open** belongs to no session and is therefore included in no reconciliation — the same gap that already exists for cash sales made while the register is closed. Nothing silently absorbs it into the next session, because that session's opening cash was counted without it. Closing this gap requires deciding whether cash-impacting transactions should *require* an open register, which is **deferred to Phase 16A-2**.
+## Cash transactions require an open register (Phase 16A-2)
+
+Money cannot move in or out of a drawer that does not exist. Since 16A-2, a transaction that moves **physical cash** is refused unless a register is open; a transaction that does not is unaffected.
+
+| Transaction | Register required? |
+| --- | --- |
+| Cash sale | **yes** |
+| Split payment containing **any** cash tender | **yes** |
+| Cash refund on a sales return | **yes** |
+| Cash udhaar repayment | **yes** |
+| Cash supplier payment (including the up-front payment on a purchase) | **yes** |
+| Cash expense | **yes** |
+| Manual Cash In / Cash Out | **yes** (unchanged — always did) |
+| UPI / Card / Udhaar sale | no |
+| UPI + Card split | no |
+| Store-credit or `None` refund | no |
+| Non-cash repayment, supplier payment or expense | no |
+| Purchase recorded entirely on credit | no |
+
+This reverses the Phase 12 statement above that an open register is never a prerequisite for a sale. That was true when the register only observed; now that it reconciles, an unreconcilable cash sale is worse than a refused one.
+
+### One definition, enforced at the trust boundary
+
+`CashImpactPolicy` is the only place that decides what "cash-impacting" means. The rule is **any tender is cash**, not "the tender is cash" — split payments are supported, so a Cash + UPI bill still opens the drawer. Refunds answer through a separate `RefundMethod` enum, which the policy overloads deliberately: the two enums are easy to confuse, and a refund path reaching for `PaymentMethod` would not compile.
+
+Enforcement lives in the **services** — `SaleService`, `SalesReturnService`, `CustomerCreditService`, `PurchaseService`, `ExpenseService` — before any financial mutation. The POS checks the same policy first, but that is a convenience: it produces the message a moment sooner and saves a round trip. **A request built by hand, or a client with the check patched out, is refused exactly the same way.** UI validation is never the thing standing between a cash sale and an unreconciled drawer.
+
+The check reads the register with `AsNoTracking()`, so a register closed on another screen is seen immediately rather than through a stale identity map.
+
+### What it does not do
+
+- **No queueing.** A refused transaction is refused, not held for the next session.
+- **No automatic register creation or reopening.** Opening cash is a physical count by a human; a machine-created session would fabricate that number.
+- **No assignment to a future session.** That session's opening cash was counted without this money in the drawer.
+- **No historical rewrite.** The policy governs new transactions only. Existing sessions, Z reports and transactions are untouched, and nothing was backfilled.
+- **No new permission.** A user allowed to sell is still refused a cash sale with no open register; permissions and the register policy are independent gates and neither bypasses the other.
+
+### Failure behaviour
+
+The refusal happens before anything is written, so nothing partial survives: no Sale, SaleItem, Payment, stock movement, inventory change or audit row for a rejected cash sale, and likewise for the other four paths. In the POS the cart and every payment line stay exactly as they were — the cashier opens the register and returns to the same bill.
+
+The message is always: *"No cash register is open. Open the register before processing cash transactions."*
 
 ## X and Z reports
 

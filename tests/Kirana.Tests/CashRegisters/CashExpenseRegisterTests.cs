@@ -166,8 +166,11 @@ public sealed class CashExpenseRegisterTests : IDisposable
     [Fact]
     public async Task ExpenseRecordedBeforeTheRegisterOpened_IsOutsideTheSession()
     {
-        var expense = await CreateExpenseAsync(500m, PaymentMethod.Cash);
-        await SetCreatedAtAsync(expense.Id, DateTime.UtcNow.AddHours(-3));
+        // Seeded directly, not through ExpenseService: from Phase 16A-2 the service refuses to
+        // create a cash expense while no register is open. The window rule this test covers still
+        // has to hold for rows that reach the table another way — data written before 16A-2, or a
+        // restored backup — so the calculation is exercised rather than the guard.
+        await SeedCashExpenseOutsideAnySessionAsync(500m, DateTime.UtcNow.AddHours(-3));
         await _register.OpenAsync(new(10_000m, _ownerId));
 
         var report = await _register.GetCurrentReportAsync(_ownerId);
@@ -182,7 +185,7 @@ public sealed class CashExpenseRegisterTests : IDisposable
         var closed = await _register.CloseAsync(new(10_000m, _ownerId));
         Assert.Equal(0m, closed.CashExpenses);
 
-        await CreateExpenseAsync(500m, PaymentMethod.Cash);
+        await SeedCashExpenseOutsideAnySessionAsync(500m, DateTime.UtcNow);
 
         // The frozen snapshot must not move now that a later expense exists.
         var reread = await _register.GetZReportAsync(closed.SessionId, _ownerId);
@@ -406,12 +409,13 @@ public sealed class CashExpenseRegisterTests : IDisposable
     [Fact]
     public async Task AnExpenseRecordedBetweenSessions_StaysEditable()
     {
-        // Nothing reconciled it, so nothing is protected by refusing the edit. (That it is
-        // unreconciled at all is the known limitation deferred to Phase 16A-2.)
+        // Nothing reconciled it, so the closed-session guard has nothing to protect and the edit is
+        // allowed. Phase 16A-2 stops NEW such expenses being created, but rows that predate it (or
+        // arrive by restore) still exist, so this seeds one directly and proves it stays editable.
         await _register.OpenAsync(new(10_000m, _ownerId));
         await _register.CloseAsync(new(10_000m, _ownerId));
 
-        var orphan = await CreateExpenseAsync(500m, PaymentMethod.Cash);
+        var orphan = await SeedCashExpenseOutsideAnySessionAsync(500m, DateTime.UtcNow);
         await UpdateAsync(orphan, 750m, PaymentMethod.Cash);
 
         var reloaded = await _fixture.Context.Expenses.AsNoTracking().SingleAsync(e => e.Id == orphan.Id);
@@ -545,6 +549,35 @@ public sealed class CashExpenseRegisterTests : IDisposable
             PaymentMethod = method,
             PerformedByUserId = _ownerId,
         });
+
+    /// <summary>
+    /// Writes a cash expense straight to the table with a chosen creation stamp, bypassing
+    /// <c>ExpenseService</c>.
+    ///
+    /// <para>Needed from Phase 16A-2 onwards: the service now refuses to create a cash expense while
+    /// no register is open, so a row "outside any session" can no longer be produced through it.
+    /// Such rows still exist in the wild — written before 16A-2, or restored from a backup — and the
+    /// window arithmetic must keep excluding them, which is what these tests check.</para>
+    /// </summary>
+    private async Task<Expense> SeedCashExpenseOutsideAnySessionAsync(decimal amount, DateTime createdAtUtc)
+    {
+        var category = await CategoryAsync();
+        var expense = new Expense
+        {
+            ExpenseNumber = $"EXP-SEED-{Guid.NewGuid():N}"[..16],
+            ExpenseDateUtc = createdAtUtc,
+            ExpenseCategoryId = category.Id,
+            CategoryNameSnapshot = category.Name,
+            Amount = amount,
+            PaymentMethod = PaymentMethod.Cash,
+            CreatedByUserId = _ownerId,
+            CreatedAtUtc = createdAtUtc,
+        };
+        _fixture.Context.Expenses.Add(expense);
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
+        return expense;
+    }
 
     /// <summary>Rewrites the immutable creation stamp so a test can place an expense outside the
     /// session window. Only a test may do this — no production path assigns CreatedAtUtc.</summary>

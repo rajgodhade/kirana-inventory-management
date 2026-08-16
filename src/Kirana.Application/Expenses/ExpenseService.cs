@@ -1,5 +1,6 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.CashRegisters;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,12 @@ public sealed class ExpenseService(
         {
             throw new ArgumentException("Expense amount must be greater than zero.", nameof(request));
         }
+
+        // Paying an expense in cash empties the drawer (Phase 16A-2). Phase 16A-1 made such an
+        // expense reduce expected cash; without an open session there is nothing for it to reduce,
+        // so it would go unreconciled. Checked before the row is created, and before the sequence
+        // number is consumed.
+        await CashImpactPolicy.EnsureRegisterAvailableForAsync(db, request.PaymentMethod, cancellationToken);
 
         var category = await db.ExpenseCategories.FirstOrDefaultAsync(c => c.Id == request.ExpenseCategoryId, cancellationToken)
             ?? throw new InvalidOperationException("Expense category not found.");

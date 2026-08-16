@@ -27,6 +27,9 @@ public class CustomerDefaultPriceLevelTests : IDisposable
     {
         _ownerId = _fixture.SeedOwnerAsync().GetAwaiter().GetResult().Id;
 
+        // Phase 16A-2: cash transactions require an open register. These tests use cash as
+        // fixture setup for something else, so the shop is simply open for business.
+        _fixture.SeedOpenRegisterAsync().GetAwaiter().GetResult();
         var sequence = new EfSequenceGenerator(_fixture.Context);
         var audit = new EfAuditLogger(_fixture.Context);
         var permissions = new Kirana.Application.Authentication.PermissionEnforcer(_fixture.Context);
