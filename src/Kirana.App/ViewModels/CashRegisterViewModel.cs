@@ -28,6 +28,7 @@ public sealed partial class CashRegisterViewModel(
     [ObservableProperty] private decimal _cashIn;
     [ObservableProperty] private decimal _cashOut;
     [ObservableProperty] private decimal _supplierCashPayments;
+    [ObservableProperty] private decimal _cashExpenses;
     [ObservableProperty] private decimal _expectedCash;
 
     public ObservableCollection<CashRegisterHistoryRowViewModel> History { get; } = [];
@@ -43,6 +44,7 @@ public sealed partial class CashRegisterViewModel(
     public string CashInText => Currency(CashIn);
     public string CashOutText => Currency(CashOut);
     public string SupplierCashPaymentsText => Currency(SupplierCashPayments);
+    public string CashExpensesText => Currency(CashExpenses);
     public string ExpectedCashText => Currency(ExpectedCash);
 
     public async Task LoadAsync()
@@ -67,7 +69,7 @@ public sealed partial class CashRegisterViewModel(
             }
             else
             {
-                CashSales = CashRefunds = CashCreditRepayments = CashIn = CashOut = SupplierCashPayments = 0m;
+                CashSales = CashRefunds = CashCreditRepayments = CashIn = CashOut = SupplierCashPayments = CashExpenses = 0m;
             }
 
             History.Clear();
@@ -127,6 +129,7 @@ public sealed partial class CashRegisterViewModel(
         OpeningCash = report.OpeningCash; CashSales = report.CashSales; CashRefunds = report.CashRefunds;
         CashCreditRepayments = report.CashCreditRepayments; CashIn = report.CashIn;
         CashOut = report.CashOut; SupplierCashPayments = report.SupplierCashPayments;
+        CashExpenses = report.CashExpenses;
         ExpectedCash = report.ExpectedCash;
     }
 
@@ -138,6 +141,7 @@ public sealed partial class CashRegisterViewModel(
     partial void OnCashInChanged(decimal value) => OnPropertyChanged(nameof(CashInText));
     partial void OnCashOutChanged(decimal value) => OnPropertyChanged(nameof(CashOutText));
     partial void OnSupplierCashPaymentsChanged(decimal value) => OnPropertyChanged(nameof(SupplierCashPaymentsText));
+    partial void OnCashExpensesChanged(decimal value) => OnPropertyChanged(nameof(CashExpensesText));
     partial void OnExpectedCashChanged(decimal value) => OnPropertyChanged(nameof(ExpectedCashText));
 
     public static string Currency(decimal value)

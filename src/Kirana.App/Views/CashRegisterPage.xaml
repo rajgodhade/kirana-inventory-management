@@ -64,17 +64,25 @@
                         </Grid>
                     </Border>
 
-                    <Grid ColumnSpacing="12">
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelBlueBrush}"><StackPanel><TextBlock Text="OPENING CASH" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.OpeningCashText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
-                        <Border Grid.Column="1" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelGreenBrush}"><StackPanel><TextBlock Text="CASH SALES" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashSalesText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
-                        <Border Grid.Column="2" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelRoseBrush}"><StackPanel><TextBlock Text="CASH REFUNDS" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashRefundsText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
-                        <Border Grid.Column="3" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelVioletBrush}"><StackPanel><TextBlock Text="UDHAAR REPAYMENTS" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashRepaymentsText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
-                        <Border Grid.Column="4" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelGreenBrush}"><StackPanel><TextBlock Text="CASH IN" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashInText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
-                        <Border Grid.Column="5" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}"><StackPanel><TextBlock Text="SUPPLIER PAYMENTS" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.SupplierCashPaymentsText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
-                        <Border Grid.Column="6" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}"><StackPanel><TextBlock Text="CASH OUT" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashOutText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                    <!-- Two rows of four rather than one row of eight. Adding the eighth card to a
+                         single row squeezed each card until KpiValueTextStyle ellipsised its own
+                         value ("₹10,00…") — the element still measured and reported a rect, so only
+                         a screenshot showed it. Four per row restores full-width amounts, and the
+                         split is meaningful: money that came in on top, money that went out below. -->
+                    <Grid ColumnSpacing="12" RowSpacing="12">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelBlueBrush}"><StackPanel><TextBlock Text="OPENING CASH" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.OpeningCashText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelGreenBrush}"><StackPanel><TextBlock Text="CASH SALES" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashSalesText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelVioletBrush}"><StackPanel><TextBlock Text="UDHAAR REPAYMENTS" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashRepaymentsText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelGreenBrush}"><StackPanel><TextBlock Text="CASH IN" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashInText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+
+                        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelRoseBrush}"><StackPanel><TextBlock Text="CASH REFUNDS" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashRefundsText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}"><StackPanel><TextBlock Text="SUPPLIER PAYMENTS" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.SupplierCashPaymentsText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}"><StackPanel><TextBlock Text="CASH EXPENSES" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashExpensesText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
+                        <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource KpiCardStyle}" Background="{ThemeResource PastelAmberBrush}"><StackPanel><TextBlock Text="CASH OUT" Style="{StaticResource KpiLabelTextStyle}" /><TextBlock Text="{x:Bind ViewModel.CashOutText, Mode=OneWay}" Style="{StaticResource KpiValueTextStyle}" /></StackPanel></Border>
                     </Grid>
 
                     <Border Style="{StaticResource CardBorderStyle}">

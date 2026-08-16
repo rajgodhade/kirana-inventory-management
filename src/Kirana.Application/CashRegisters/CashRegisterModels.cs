@@ -37,6 +37,12 @@ public sealed class CashRegisterReport
     public decimal CashIn { get; init; }
     public decimal CashOut { get; init; }
     public decimal SupplierCashPayments { get; init; }
+
+    /// <summary>Cash spent on store expenses in this session (Phase 16A-1). Live for an open
+    /// session, frozen from the snapshot once closed. Sessions closed before the concept existed
+    /// report 0.</summary>
+    public decimal CashExpenses { get; init; }
+
     public decimal ExpectedCash { get; init; }
     public decimal? ActualCash { get; init; }
     public decimal? Variance { get; init; }
@@ -45,14 +51,16 @@ public sealed class CashRegisterReport
 
 /// <summary>
 /// What a drawer movement line in a register report represents. Wider than the persisted
-/// <see cref="CashMovementType"/>: supplier payments are not stored as CashMovement rows, they are
-/// derived from SupplierPayments, so this is a reporting concept rather than a storage one.
+/// <see cref="CashMovementType"/>: supplier payments and cash expenses are not stored as
+/// CashMovement rows, they are derived from SupplierPayments and Expenses, so this is a reporting
+/// concept rather than a storage one.
 /// </summary>
 public enum CashRegisterMovementKind
 {
     CashIn,
     CashOut,
     SupplierPayment,
+    Expense,
 }
 
 public sealed record CashMovementRow(

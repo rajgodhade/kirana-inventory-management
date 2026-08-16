@@ -1075,6 +1075,174 @@ public sealed class MigrationSchemaTests : IDisposable
         Assert.Equal(0, await ScalarAsync(context, "SELECT COUNT(*) FROM Payments"));
     }
 
+    // ---------- Phase 16A-1: CashExpenses snapshot column ----------
+
+    private const string PreCashExpensesMigration = "20260815163520_AddSalePriceLevel";
+
+    /// <summary>Inserts register sessions the way the pre-16A-1 schema stored them — no CashExpenses
+    /// column — including one CLOSED session carrying a counted variance, which is precisely what a
+    /// backfill would corrupt.</summary>
+    private async Task SeedPreCashExpensesAsync(KiranaDbContext context)
+    {
+        var migrator = context.Database.GetService<IMigrator>();
+        await migrator.MigrateAsync(PreCashExpensesMigration);
+
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using (var seed = connection.CreateCommand())
+        {
+            seed.CommandText = """
+                INSERT INTO Stores
+                    (Name, OwnerName, InvoicePrefix, FinancialYearStartMonth, IsGstEnabled,
+                     DefaultInvoiceFormat, SetupCompleted, CreatedAtUtc)
+                VALUES ('Historic Store', 'Historic Owner', 'INV', 4, 0, 'Thermal80mm', 1, CURRENT_TIMESTAMP);
+
+                INSERT INTO Roles (Name, IsSystemRole, CreatedAtUtc)
+                VALUES ('Owner', 1, CURRENT_TIMESTAMP);
+
+                INSERT INTO Users
+                    (Username, FullName, PasswordHash, IsActive, RoleId, FailedLoginAttempts, CreatedAtUtc)
+                VALUES ('historic', 'Historic Owner', 'x', 1, 1, 0, CURRENT_TIMESTAMP);
+
+                INSERT INTO ExpenseCategories (Name, IsActive, IsSystemDefault, CreatedAtUtc)
+                VALUES ('Historic Rent', 1, 0, CURRENT_TIMESTAMP);
+
+                -- A cash expense that predates the feature. It must NOT be retro-applied to the
+                -- closed session below.
+                INSERT INTO Expenses
+                    (ExpenseNumber, ExpenseDateUtc, ExpenseCategoryId, CategoryNameSnapshot, Amount,
+                     PaymentMethod, CreatedAtUtc)
+                VALUES ('EXP-000001', CURRENT_TIMESTAMP, 1, 'Historic Rent', 400, 'Cash', CURRENT_TIMESTAMP);
+
+                -- Closed session: counted 950 against an expected 1000, i.e. a signed-off 50 short.
+                INSERT INTO CashRegisterSessions
+                    (StoreId, RegisterName, BusinessDate, Status, OpenedByUserId, OpenedAtUtc, OpeningCash,
+                     ClosedByUserId, ClosedAtUtc, TotalSales, BillCount, CashSales, UpiSales, CardSales,
+                     CustomerCreditSales, TotalReturns, CashRefunds, CashCreditRepayments, CashIn, CashOut,
+                     SupplierCashPayments, ExpectedCash, ActualCash, Variance, CreatedAtUtc)
+                VALUES (1, 'Main Register', CURRENT_TIMESTAMP, 'Closed', 1, CURRENT_TIMESTAMP, 1000,
+                        1, CURRENT_TIMESTAMP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 1000, 950, -50, CURRENT_TIMESTAMP);
+
+                -- Open session, to prove the column defaults cleanly for both states.
+                INSERT INTO CashRegisterSessions
+                    (StoreId, RegisterName, BusinessDate, Status, OpenedByUserId, OpenedAtUtc, OpeningCash,
+                     TotalSales, BillCount, CashSales, UpiSales, CardSales, CustomerCreditSales,
+                     TotalReturns, CashRefunds, CashCreditRepayments, CashIn, CashOut,
+                     SupplierCashPayments, ExpectedCash, CreatedAtUtc)
+                VALUES (1, 'Main Register', CURRENT_TIMESTAMP, 'Open', 1, CURRENT_TIMESTAMP, 500,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP);
+                """;
+            await seed.ExecuteNonQueryAsync();
+        }
+    }
+
+    [Fact]
+    public async Task CashRegisterSessions_GainsANonNullCashExpensesColumn()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        Assert.Contains("CashExpenses", await ColumnNamesAsync(context, "CashRegisterSessions"));
+
+        var connection = context.Database.GetDbConnection();
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT \"notnull\" FROM pragma_table_info('CashRegisterSessions') WHERE name='CashExpenses'";
+        Assert.Equal(1L, Convert.ToInt64(await cmd.ExecuteScalarAsync()));   // NOT NULL
+    }
+
+    /// <summary>
+    /// The no-backfill policy. Historical sessions get 0 — meaning "the cash-expense concept was not
+    /// part of this snapshot" — even though a cash expense exists in the same window. Retro-applying
+    /// it would rewrite a variance a human already counted and signed off.
+    /// </summary>
+    [Fact]
+    public async Task ExistingSessions_GetZeroCashExpenses_AndAreNotBackfilledFromTheExpensesTable()
+    {
+        await using var context = CreateContext();
+        await SeedPreCashExpensesAsync(context);
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(2, await ScalarAsync(context, "SELECT COUNT(*) FROM CashRegisterSessions"));
+        Assert.Equal(2, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM CashRegisterSessions WHERE CAST(CashExpenses AS REAL) = 0"));
+        // The 400 cash expense sitting in the same window was deliberately NOT applied.
+        Assert.Equal(0, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM CashRegisterSessions WHERE CAST(CashExpenses AS REAL) <> 0"));
+        Assert.Equal(1, await ScalarAsync(context, "SELECT COUNT(*) FROM Expenses"));
+    }
+
+    /// <summary>The signed-off money on a closed session must survive the migration bit for bit.</summary>
+    [Fact]
+    public async Task TheCashExpensesMigration_LeavesClosedSessionMoneyUnchanged()
+    {
+        await using var context = CreateContext();
+        await SeedPreCashExpensesAsync(context);
+
+        var sessionsBefore = await RegisterFingerprintAsync(context);
+        var expensesBefore = await ScalarAsync(context, "SELECT COUNT(*) FROM Expenses");
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(sessionsBefore, await RegisterFingerprintAsync(context));
+        Assert.Equal(expensesBefore, await ScalarAsync(context, "SELECT COUNT(*) FROM Expenses"));
+        Assert.Equal(1, await ScalarAsync(context,
+            "SELECT COUNT(*) FROM CashRegisterSessions WHERE CAST(ExpectedCash AS REAL)=1000 AND CAST(ActualCash AS REAL)=950 AND CAST(Variance AS REAL)=-50"));
+        Assert.Equal(0, await ScalarAsync(context, "SELECT COUNT(*) FROM CashMovements"));
+    }
+
+    [Fact]
+    public async Task TheCashExpensesMigration_LeavesIntegrityAndForeignKeysClean()
+    {
+        await using var context = CreateContext();
+        await SeedPreCashExpensesAsync(context);
+
+        await context.Database.MigrateAsync();
+
+        var connection = context.Database.GetDbConnection();
+        await using (var integrity = connection.CreateCommand())
+        {
+            integrity.CommandText = "PRAGMA integrity_check";
+            Assert.Equal("ok", (await integrity.ExecuteScalarAsync())?.ToString());
+        }
+
+        await using var foreignKeys = connection.CreateCommand();
+        foreignKeys.CommandText = "PRAGMA foreign_key_check";
+        await using var reader = await foreignKeys.ExecuteReaderAsync();
+        Assert.False(await reader.ReadAsync());
+    }
+
+    /// <summary>The reconciled money on every session, described without the new column so the
+    /// comparison is meaningful either side of the migration.</summary>
+    private static async Task<List<string>> RegisterFingerprintAsync(KiranaDbContext context)
+    {
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT Id, Status, OpeningCash, ExpectedCash, ActualCash, Variance, ClosedAtUtc,
+                   CashSales, CashIn, CashOut, SupplierCashPayments
+            FROM CashRegisterSessions ORDER BY Id
+            """;
+        var rows = new List<string>();
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var parts = new List<string>();
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                parts.Add(reader.IsDBNull(i) ? "NULL" : reader.GetValue(i).ToString()!);
+            }
+
+            rows.Add(string.Join("|", parts));
+        }
+
+        return rows;
+    }
+
     /// <summary>Invoice numbers, dates and money, described independently of the new column so the
     /// comparison is meaningful either side of the migration.</summary>
     private static async Task<List<string>> SaleFingerprintAsync(KiranaDbContext context)

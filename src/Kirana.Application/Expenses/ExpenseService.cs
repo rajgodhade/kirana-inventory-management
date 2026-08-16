@@ -73,6 +73,11 @@ public sealed class ExpenseService(
         var category = await db.ExpenseCategories.FirstOrDefaultAsync(c => c.Id == request.ExpenseCategoryId, cancellationToken)
             ?? throw new InvalidOperationException("Expense category not found.");
 
+        // Blocked when EITHER the stored or the requested method is Cash: editing a cash expense
+        // would change a reconciled drawer, and flipping a non-cash expense TO cash would inject
+        // money into a session whose Z report is already frozen.
+        await EnsureNotInClosedRegisterAsync(expense, request.PaymentMethod, cancellationToken);
+
         var previous = $"₹{expense.Amount:0.00} ({expense.CategoryNameSnapshot})";
 
         expense.ExpenseCategoryId = category.Id;
@@ -101,6 +106,8 @@ public sealed class ExpenseService(
 
         var expense = await db.Expenses.FirstOrDefaultAsync(e => e.Id == expenseId, cancellationToken)
             ?? throw new InvalidOperationException("Expense not found.");
+
+        await EnsureNotInClosedRegisterAsync(expense, expense.PaymentMethod, cancellationToken);
 
         var description = $"{expense.ExpenseNumber} — ₹{expense.Amount:0.00} ({expense.CategoryNameSnapshot})";
 
@@ -159,6 +166,47 @@ public sealed class ExpenseService(
             Count = byCategory.Sum(c => c.Count),
             ByCategory = byCategory.OrderByDescending(c => c.TotalAmount).ToList(),
         };
+    }
+
+    /// <summary>
+    /// Refuses to change an expense whose cash already sits inside a CLOSED register session
+    /// (Phase 16A-1).
+    ///
+    /// <para>A closed session's Z report is an immutable record of what a human physically counted.
+    /// Cash expenses feed <c>ExpectedCash</c>, so editing the amount, flipping the payment method,
+    /// or deleting the row would silently disagree with a variance that has already been signed
+    /// off. Rather than let history drift, the edit is refused.</para>
+    ///
+    /// <para>Membership uses <see cref="Entity.CreatedAtUtc"/> for the same reason the register
+    /// calculation does — <c>ExpenseDateUtc</c> is a user-editable accounting date, so keying on it
+    /// would let someone edit their way out of this check.</para>
+    ///
+    /// <para>Non-cash expenses in a closed window stay freely editable: they never touched the
+    /// drawer, so nothing about the session's reconciliation depends on them. Only a change that
+    /// involves cash on either side is blocked.</para>
+    /// </summary>
+    private async Task EnsureNotInClosedRegisterAsync(
+        Expense expense, PaymentMethod requestedMethod, CancellationToken cancellationToken)
+    {
+        if (expense.PaymentMethod != PaymentMethod.Cash && requestedMethod != PaymentMethod.Cash)
+        {
+            return;
+        }
+
+        var closedSession = await db.CashRegisterSessions.AsNoTracking()
+            .Where(s => s.Status == CashRegisterStatus.Closed
+                && s.ClosedAtUtc != null
+                && expense.CreatedAtUtc >= s.OpenedAtUtc
+                && expense.CreatedAtUtc <= s.ClosedAtUtc)
+            .OrderByDescending(s => s.OpenedAtUtc)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (closedSession is not null)
+        {
+            throw new InvalidOperationException(
+                $"This cash expense belongs to a closed register ({closedSession.RegisterName}, "
+                + $"{closedSession.BusinessDate:dd MMM yyyy}) and cannot be modified.");
+        }
     }
 
     private static IQueryable<Expense> ApplyFilters(IQueryable<Expense> expenses, ExpenseSearchQuery query)

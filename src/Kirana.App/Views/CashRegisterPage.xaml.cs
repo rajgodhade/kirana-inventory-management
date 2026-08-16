@@ -248,6 +248,7 @@ public sealed partial class CashRegisterPage : Page
         AddReportLine(drawer, "Cash In", Money(x.CashIn), valueBrush: x.CashIn == 0m ? null : Brush("SuccessBrush"));
         AddReportLine(drawer, "Cash Refunds", SignedOutflow(x.CashRefunds), valueBrush: x.CashRefunds == 0m ? null : Brush("DangerBrush"));
         AddReportLine(drawer, "Supplier Payments", SignedOutflow(x.SupplierCashPayments), valueBrush: x.SupplierCashPayments == 0m ? null : Brush("WarningBrush"));
+        AddReportLine(drawer, "Cash Expenses", SignedOutflow(x.CashExpenses), valueBrush: x.CashExpenses == 0m ? null : Brush("WarningBrush"));
         AddReportLine(drawer, "Cash Out", SignedOutflow(x.CashOut), valueBrush: x.CashOut == 0m ? null : Brush("WarningBrush"));
         drawer.Children.Add(new Border { Height = 1, Margin = new Thickness(0, 4, 0, 2), Background = Brush("SurfaceBorderBrush"), Opacity = 0.55 });
         AddReportLine(drawer, "EXPECTED CASH", Money(x.ExpectedCash), strong: true, valueBrush: Brush("AccentFillColorDefaultBrush"), large: true);
@@ -363,6 +364,7 @@ public sealed partial class CashRegisterPage : Page
     {
         CashRegisterMovementKind.CashIn => "Cash In",
         CashRegisterMovementKind.SupplierPayment => "Supplier Payment",
+        CashRegisterMovementKind.Expense => "Expense",
         _ => "Cash Out",
     };
 
@@ -441,6 +443,7 @@ public sealed partial class CashRegisterPage : Page
             new[] { "Cash in", Money(x.CashIn) },
             new[] { "Cash refunds", SignedOutflow(x.CashRefunds) },
             new[] { "Supplier payments", SignedOutflow(x.SupplierCashPayments) },
+            new[] { "Cash expenses", SignedOutflow(x.CashExpenses) },
             new[] { "Cash out", SignedOutflow(x.CashOut) },
             new[] { "Expected cash", Money(x.ExpectedCash) },
             new[] { "Counted cash", x.ActualCash is null ? "—" : CashRegisterViewModel.Currency(x.ActualCash.Value) },

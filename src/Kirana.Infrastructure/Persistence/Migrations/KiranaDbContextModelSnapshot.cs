@@ -333,6 +333,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal>("CashExpenses")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("CashIn")
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
