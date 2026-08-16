@@ -38,7 +38,12 @@
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Visible"
                       HorizontalContentAlignment="Center">
-            <Border Background="#FF252525" Padding="12" CornerRadius="4">
+            <!-- The "desk" the paper sits on. Themed rather than a hardcoded dark grey: the receipt
+                 itself is always white with black ink (see InvoiceElementRenderer.ApplyPaperPalette),
+                 so this only needs to be a surface the sheet reads as separate from — and a fixed
+                 dark slab looked like a bug next to the light theme's chrome. -->
+            <Border Background="{ThemeResource SurfaceAltBrush}" Padding="12" CornerRadius="4"
+                    BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="1">
                 <ContentControl Content="{x:Bind ViewModel.PreviewElement, Mode=OneWay}"
                                 HorizontalContentAlignment="Center" />
             </Border>

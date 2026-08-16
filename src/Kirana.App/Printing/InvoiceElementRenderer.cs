@@ -17,7 +17,12 @@ namespace Kirana.App.Printing;
 public static class InvoiceElementRenderer
 {
     /// <summary>The full, unpaginated document — used for the on-screen preview inside a
-    /// ScrollViewer, where physical page breaks don't matter.</summary>
+    /// ScrollViewer, where physical page breaks don't matter.
+    ///
+    /// <para>Renders on the same white paper with the same black ink as <see cref="BuildPageElement"/>,
+    /// because a preview that does not match the printout is not a preview. This used to return the
+    /// bare panel, so the receipt inherited the app's theme foreground and sat on the dialog's
+    /// backdrop instead of on paper — unreadable in one theme and misleading in the other.</para></summary>
     public static FrameworkElement BuildFullDocumentElement(InvoiceDocument document, InvoiceFormat format, double widthDip)
     {
         var isCompact = format != InvoiceFormat.A4;
@@ -44,7 +49,13 @@ public static class InvoiceElementRenderer
             });
         }
 
-        return stack;
+        ApplyPaperPalette(stack);
+        return new Border
+        {
+            Width = widthDip,
+            Background = new SolidColorBrush(Colors.White),
+            Child = stack,
+        };
     }
 
     /// <summary>One printable page: the header/customer block only on the first page, the
