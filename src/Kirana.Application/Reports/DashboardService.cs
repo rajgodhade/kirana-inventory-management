@@ -375,14 +375,25 @@ public sealed class DashboardService(
             .Select(r => new { r.ReturnDateUtc, r.TotalReturnAmount })
             .ToListAsync(cancellationToken);
 
+        // Historical cost basis (Phase 17A-Fix), matching ProfitReportService exactly: the cost
+        // SNAPSHOTTED on each line at sale time, never the product's current purchase price. This
+        // query used to read i.Product.PurchasePrice — current master data — so repricing a product
+        // silently redrew past months on this very chart, the same defect 17A fixed in the Profit
+        // report. Lines with no snapshot (every sale predating 17A) are EXCLUDED, not zeroed; a
+        // trend chart has no room for the KnownCostLineCount/UnknownCostLineCount disclosure the
+        // Profit screen shows, so affected months simply understate cost rather than either
+        // fabricating one or blocking the chart — the same trade-off already accepted wherever this
+        // chart quietly omits any other unrecorded figure.
         var soldCost = await db.SaleItems.AsNoTracking()
-            .Where(i => i.Sale.Status == SaleStatus.Completed && i.Sale.SaleDateUtc >= startUtc)
-            .Select(i => new { i.Sale.SaleDateUtc, Cost = i.Quantity * i.Product.PurchasePrice })
+            .Where(i => i.Sale.Status == SaleStatus.Completed && i.Sale.SaleDateUtc >= startUtc && i.UnitCostSnapshot != null)
+            .Select(i => new { i.Sale.SaleDateUtc, Cost = i.Quantity * i.UnitCostSnapshot!.Value })
             .ToListAsync(cancellationToken);
 
+        // Returned quantities reverse the ORIGINATING line's snapshot — reached through SaleItem,
+        // exactly as ProfitReportService does — never SalesReturnItem.Product.PurchasePrice.
         var returnedCost = await db.SalesReturnItems.AsNoTracking()
-            .Where(i => i.SalesReturn.ReturnDateUtc >= startUtc)
-            .Select(i => new { i.SalesReturn.ReturnDateUtc, Cost = i.Quantity * i.Product.PurchasePrice })
+            .Where(i => i.SalesReturn.ReturnDateUtc >= startUtc && i.SaleItem.UnitCostSnapshot != null)
+            .Select(i => new { i.SalesReturn.ReturnDateUtc, Cost = i.Quantity * i.SaleItem.UnitCostSnapshot!.Value })
             .ToListAsync(cancellationToken);
 
         ChartPoint BucketFor(int monthIndex)

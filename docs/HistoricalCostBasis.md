@@ -54,6 +54,14 @@ While `UnknownCostLineCount > 0`, those lines contribute revenue but no cost, so
 
 > The Dashboard's KPI tiles still read "EST. GROSS PROFIT" / "EST. NET PROFIT". They share this service and inherit the fix, but a tile has nowhere to show the unknown-cost disclosure — so the hedge stays there deliberately.
 
+## The Dashboard trend chart (Phase 17A-Fix)
+
+The Phase 17B review found that `DashboardService.BuildGrossProfitTrendAsync` — the Gross Profit Trend chart on the Dashboard — held an **independent second copy** of the exact defect this phase fixed in the Profit report. Its sold- and returned-cost queries both read `Product.PurchasePrice`, so repricing a product silently redrew past months on that chart even though the Profit report itself was already correct for the same period.
+
+Phase 17A-Fix corrected both queries to the same basis: `SaleItem.UnitCostSnapshot`, sold and returned, null-excluded rather than zeroed — identical to `ProfitReportService`.
+
+**No disclosure banner was added to the chart.** `ChartPoint` is a generic two-field model (`Label`, `Value`) shared by every chart on the Dashboard, and giving one chart a disclosure surface the others don't have would be a larger UI change than this fix warranted. A month containing unknown-cost lines simply understates cost on the chart rather than fabricating one — the same trade-off already implicit wherever this chart omits any other unrecorded figure.
+
 ## The invariant
 
 ```
@@ -70,16 +78,17 @@ This is the whole point of the phase. `HistoricalCostBasisTests.HistoricalCogs_D
 
 This is deliberate for 17A: it keeps a return on exactly the same historical basis as the sale it reverses, without introducing a second cost record that could diverge from it. A return against an unknown-cost sale contributes no cost credit at all, rather than a phantom one at today's price.
 
-**Phase 17B** should decide whether a return needs its own snapshot. It would only matter if returns can ever be processed against something other than an original sale line; while every return points at a `SaleItem`, the navigation is sufficient and a second column would be duplication.
+**Phase 17B decided this — no code required.** `SalesReturnItem.SaleItemId` is a non-nullable, `Restrict`-protected foreign key: a return cannot exist without an originating `SaleItem`, that `SaleItem` cannot be deleted, and the relationship cannot be bypassed. A second cost column on `SalesReturnItem` would therefore duplicate data that is already unconditionally reachable, with no benefit and a real risk of the two figures drifting apart. `SaleItem.UnitCostSnapshot` remains the sole historical cost source for both sales and returns.
 
 ## Known limitations
 
 1. **Historical sales have no cost.** Permanent and intentional; surfaced rather than hidden.
 2. **One costing basis.** Purchase-price-at-sale-time only. A shop buying the same item at different prices sees the cost prevailing when it sold, not what that particular unit cost.
 3. **Batch cost is ignored** even where `ProductBatch.PurchasePrice` exists, because the POS does not select batches at sale time.
-4. **Inventory valuation still uses current cost** (`DashboardService`). That is correct — valuing stock you *hold* at what it would cost *now* is a different question from what sold goods cost — and is not affected by this phase.
+4. **Inventory valuation still uses current cost**, correctly — `DashboardService.GetSummaryAsync`'s stock-value KPI and `InventoryReportService`'s valuation both multiply quantity *on hand* by the *current* purchase price, because valuing stock you hold today is inherently a current-cost question, not a historical one. Untouched by 17A or 17A-Fix.
+5. **`ProductReportService.EstimatedProfit`** (the Top Sellers / Product Sales report, gated by `ReportsViewProfit`) still computes cost as `quantity sold × the product's current purchase price` — the same defect class as the Dashboard trend chart, discovered during the Phase 17A-Fix write-path audit and **deliberately left unfixed**, out of that task's explicitly scoped boundary. It needs the same correction described above. See the Phase 17A-Fix session report for the exact location.
 
 ## Later phases
 
-- **17B** — return cost handling, if the navigation-based approach proves insufficient.
 - **17C** — weighted-average / FIFO / batch costing, as an explicit product decision.
+- A follow-up to correct `ProductReportService.EstimatedProfit` the same way the Dashboard trend was corrected (limitation 5 above).
