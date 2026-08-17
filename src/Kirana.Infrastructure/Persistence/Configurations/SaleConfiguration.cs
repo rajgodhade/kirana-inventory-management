@@ -62,6 +62,12 @@ public sealed class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
 
         builder.Property(i => i.Quantity).HasPrecision(18, 3);
         builder.Property(i => i.UnitPriceSnapshot).HasPrecision(18, 2);
+
+        // Money precision like every other amount here, but deliberately NULLABLE: null means "cost
+        // unknown for this line" (every sale predating Phase 17A), which is a different fact from a
+        // cost of zero and must stay distinguishable in the database.
+        builder.Property(i => i.UnitCostSnapshot).HasPrecision(18, 2);
+
         builder.Property(i => i.DiscountPercent).HasPrecision(5, 2);
         builder.Property(i => i.DiscountAmount).HasPrecision(18, 2);
         builder.Property(i => i.PromotionDiscountAmount).HasPrecision(18, 2);

@@ -1075,6 +1075,94 @@ public sealed class MigrationSchemaTests : IDisposable
         Assert.Equal(0, await ScalarAsync(context, "SELECT COUNT(*) FROM Payments"));
     }
 
+    // ---------- Phase 17A: SaleItem.UnitCostSnapshot ----------
+
+    private const string PreUnitCostMigration = "20260816120000_AddCashExpensesToRegister";
+
+    [Fact]
+    public async Task SaleItems_GainANullableUnitCostSnapshotColumn()
+    {
+        await using var context = CreateContext();
+        await context.Database.MigrateAsync();
+
+        Assert.Contains("UnitCostSnapshot", await ColumnNamesAsync(context, "SaleItems"));
+
+        var connection = context.Database.GetDbConnection();
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT \"notnull\", dflt_value FROM pragma_table_info('SaleItems') WHERE name='UnitCostSnapshot'";
+        await using var reader = await cmd.ExecuteReaderAsync();
+        Assert.True(await reader.ReadAsync());
+        Assert.Equal(0L, Convert.ToInt64(reader.GetValue(0)));   // NULLABLE — null means "cost unknown"
+        Assert.True(reader.IsDBNull(1));                          // and NO default, so nothing reads as free
+    }
+
+    /// <summary>
+    /// The no-backfill policy. Historical sale lines keep a NULL cost, even though the product they
+    /// point at has a current purchase price sitting right there. Writing that price in would
+    /// fabricate a cost basis for a sale made long before it, and once stored it would be
+    /// indistinguishable from a genuinely captured cost.
+    /// </summary>
+    [Fact]
+    public async Task ExistingSaleItems_KeepANullCost_AndAreNotBackfilledFromTheProduct()
+    {
+        await using var context = CreateContext();
+        await SeedPreSalePriceLevelAsync(context, ("INV-0001", 100m), ("INV-0002", 250m));
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(2, await ScalarAsync(context, "SELECT COUNT(*) FROM SaleItems"));
+        Assert.Equal(2, await ScalarAsync(context, "SELECT COUNT(*) FROM SaleItems WHERE UnitCostSnapshot IS NULL"));
+        Assert.Equal(0, await ScalarAsync(context, "SELECT COUNT(*) FROM SaleItems WHERE UnitCostSnapshot IS NOT NULL"));
+        // Explicitly not zero either — zero would report those lines at 100% margin.
+        Assert.Equal(0, await ScalarAsync(context, "SELECT COUNT(*) FROM SaleItems WHERE CAST(UnitCostSnapshot AS REAL) = 0"));
+        // The product's cost was available and deliberately not used.
+        Assert.Equal(1, await ScalarAsync(context, "SELECT COUNT(*) FROM Products WHERE CAST(PurchasePrice AS REAL) = 10"));
+    }
+
+    [Fact]
+    public async Task TheUnitCostMigration_LeavesEverySaleAmountUnchanged()
+    {
+        await using var context = CreateContext();
+        await SeedPreSalePriceLevelAsync(context, ("INV-0001", 100m), ("INV-0002", 250m));
+
+        var salesBefore = await SaleFingerprintAsync(context);
+        var itemsBefore = await SaleItemFingerprintAsync(context);
+
+        await context.Database.MigrateAsync();
+
+        Assert.Equal(salesBefore, await SaleFingerprintAsync(context));
+        Assert.Equal(itemsBefore, await SaleItemFingerprintAsync(context));
+    }
+
+    /// <summary>Line money described without the new column, so the comparison means something on
+    /// both sides of the migration.</summary>
+    private static async Task<List<string>> SaleItemFingerprintAsync(KiranaDbContext context)
+    {
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT Id, SaleId, ProductId, Quantity, UnitPriceSnapshot, MrpSnapshot,
+                   DiscountAmount, TaxableAmount, GstAmount, LineTotal
+            FROM SaleItems ORDER BY Id
+            """;
+        var rows = new List<string>();
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var parts = new List<string>();
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                parts.Add(reader.IsDBNull(i) ? "NULL" : reader.GetValue(i).ToString()!);
+            }
+
+            rows.Add(string.Join("|", parts));
+        }
+
+        return rows;
+    }
+
     // ---------- Phase 16A-1: CashExpenses snapshot column ----------
 
     private const string PreCashExpensesMigration = "20260815163520_AddSalePriceLevel";

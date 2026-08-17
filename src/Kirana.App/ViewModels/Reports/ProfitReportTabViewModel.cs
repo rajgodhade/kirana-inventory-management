@@ -26,6 +26,15 @@ public sealed partial class ProfitReportTabViewModel(IProfitReportService profit
     [ObservableProperty] private string _expensesText = "₹0.00";
     [ObservableProperty] private string _netProfitText = "₹0.00";
 
+    /// <summary>Explains which cost basis produced the figures above (Phase 17A). Two different
+    /// sentences, because a period with unrecorded costs is reporting something materially weaker
+    /// than one without — and the operator has no way to tell them apart from the amounts alone.</summary>
+    [ObservableProperty] private string _costBasisText = string.Empty;
+
+    /// <summary>True while some line in the period has no recorded cost. Drives the warning
+    /// styling, so a partial basis cannot look like a complete one.</summary>
+    [ObservableProperty] private bool _hasUnknownCosts;
+
     private int? CurrentUserId => session.CurrentUser?.Id;
     private ProfitSummary? _lastSummary;
 
@@ -48,6 +57,15 @@ public sealed partial class ProfitReportTabViewModel(IProfitReportService profit
             GrossProfitText = Fmt(s.GrossProfit);
             ExpensesText = Fmt(s.Expenses);
             NetProfitText = Fmt(s.NetProfit);
+
+            HasUnknownCosts = !s.HasCompleteCostBasis;
+            CostBasisText = s.HasCompleteCostBasis
+                ? "Cost basis: the cost recorded on each sale at the time it was sold. Changing a product's "
+                  + "purchase price today does not change these figures."
+                : $"Cost basis: the cost recorded on each sale at the time it was sold. "
+                  + $"{s.UnknownCostLineCount} of {s.KnownCostLineCount + s.UnknownCostLineCount} sold lines "
+                  + $"pre-date cost recording and are counted at NO cost — so the profit shown is an upper "
+                  + $"bound, not the real figure.";
         }
         catch (Exception ex)
         {

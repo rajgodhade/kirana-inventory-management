@@ -269,6 +269,15 @@ public sealed class SaleService(
                 Quantity = lineResult.Line.Quantity,
                 UnitPriceSnapshot = lineResult.Line.UnitPrice,
                 MrpSnapshot = product.Mrp,
+
+                // What this unit cost us, captured beside what we sold it for (Phase 17A). Taken
+                // from the product entity already loaded for this sale, so it is the cost as of
+                // this moment and is written in the same SaveChanges as the Sale itself — a
+                // separate later read could observe a cost the sale was never priced against.
+                //
+                // Product.PurchasePrice is the right source here: the POS never consults
+                // ProductBatch, so this is the only cost the till actually knows at sale time.
+                UnitCostSnapshot = product.PurchasePrice,
                 DiscountPercent = lineResult.Line.DiscountPercent,
                 DiscountAmount = lineResult.DiscountAmount,
                 PromotionDiscountAmount = lineResult.PromotionDiscountAmount,

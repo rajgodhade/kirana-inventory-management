@@ -84,8 +84,13 @@ public class ProfitReportServiceTests : IDisposable
         Assert.Equal(500m, summary.Revenue);
     }
 
+    /// <summary>Renamed in Phase 17A. This used to be called
+    /// <c>CostOfGoodsSold_UsesCurrentPurchasePriceTimesQuantitySold</c>, which described the defect
+    /// rather than the requirement: because it never changed the cost after selling, it passed both
+    /// before and after the fix and could never have caught the bug. The stability it was silently
+    /// assuming is now asserted explicitly in <c>HistoricalCostBasisTests</c>.</summary>
     [Fact]
-    public async Task CostOfGoodsSold_UsesCurrentPurchasePriceTimesQuantitySold()
+    public async Task CostOfGoodsSold_IsQuantitySoldTimesTheCostRecordedAtSaleTime()
     {
         var product = await SeedProductAsync(purchasePrice: 60, sellingPrice: 100);
         await SellAsync(product, 5);

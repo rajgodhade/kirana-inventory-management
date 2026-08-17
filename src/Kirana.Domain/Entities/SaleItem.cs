@@ -33,6 +33,32 @@ public class SaleItem : Entity
     /// else here: a later change to the product's MRP must never alter what a past invoice's
     /// "You Saved" figure was computed from.</summary>
     public decimal MrpSnapshot { get; set; }
+
+    /// <summary>
+    /// What this unit COST the shop at the moment it was sold (Phase 17A) — the counterpart to
+    /// <see cref="UnitPriceSnapshot"/>, which records what it was sold FOR.
+    ///
+    /// <para>Profit reporting previously multiplied quantity by the product's <em>current</em>
+    /// purchase price, so raising a product's cost today retroactively changed last month's
+    /// reported profit. Snapshotting the cost here makes historical profit a fact rather than a
+    /// figure that moves whenever master data does.</para>
+    ///
+    /// <para><b>Nullable, and null is meaningful.</b> It means "the cost of this line is not
+    /// known" — the state of every sale recorded before this column existed. It emphatically does
+    /// NOT mean zero: treating it as zero would report those lines at 100% margin, which is a
+    /// worse answer than admitting the cost is unknown. Reports must exclude such lines from cost
+    /// and disclose how many they excluded, never silently fold them in.
+    ///
+    /// Deliberately not backfilled: the shop's purchase price today is not evidence of what it
+    /// paid a year ago, and inventing that number would look exactly like a real cost basis.</para>
+    ///
+    /// <para>Costing basis is the product's purchase price at sale time. The POS never consults
+    /// <c>ProductBatch.PurchasePrice</c>, so <c>Product.PurchasePrice</c> is the authoritative
+    /// cost the till actually knows. Weighted-average, FIFO and batch costing are a later
+    /// decision (Phase 17C), not something to guess at here.</para>
+    /// </summary>
+    public decimal? UnitCostSnapshot { get; set; }
+
     public decimal DiscountPercent { get; set; }
     public decimal DiscountAmount { get; set; }
     public decimal PromotionDiscountAmount { get; set; }
