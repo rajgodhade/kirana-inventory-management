@@ -213,21 +213,35 @@ public sealed class ProductReportService(IKiranaDbContext db, IPermissionEnforce
             items = items.Where(i => i.Product.BrandId == brandId);
         }
 
+        // Historical cost basis (Phase 17A-Fix-2), matching ProfitReportService and the Dashboard
+        // trend: cost comes from the SNAPSHOT captured on each line at sale time, never the
+        // product's current purchase price. This grouping used to include i.Product.PurchasePrice
+        // in the key and multiply it by total quantity once — current master data, read at report
+        // time — so repricing a product silently changed "Estimated Profit" for sales made before
+        // the reprice. UnitCostSnapshot is NOT constant per product the way PurchasePrice was
+        // (different lines can carry different, or no, snapshot), so cost is summed per line
+        // inside the group rather than multiplied once outside it.
+        //
+        // Lines with no snapshot are EXCLUDED from cost, not zeroed — the same rule as everywhere
+        // else this policy applies. QuantitySold and Revenue are unaffected: only the cost side of
+        // an unknown-cost line is missing, exactly as it already may be for other reasons (a
+        // product filter, a date boundary). ProductSalesRow has no per-row disclosure field, and
+        // its "Est. Profit" label already carries that hedge, so none was added here.
         var grouped = await items
-            .GroupBy(i => new { i.ProductId, i.Product.Name, i.Product.ProductCode, i.Product.PurchasePrice })
+            .GroupBy(i => new { i.ProductId, i.Product.Name, i.Product.ProductCode })
             .Select(g => new
             {
                 g.Key.ProductId,
                 g.Key.Name,
                 g.Key.ProductCode,
-                g.Key.PurchasePrice,
                 Quantity = g.Sum(x => x.Quantity),
                 Revenue = g.Sum(x => x.LineTotal),
+                Cost = g.Where(x => x.UnitCostSnapshot != null).Sum(x => x.Quantity * x.UnitCostSnapshot!.Value),
             })
             .ToListAsync(cancellationToken);
 
         return grouped
-            .Select(g => new SoldAggregate(g.ProductId, g.Name, g.ProductCode, g.Quantity, g.Revenue, g.Quantity * g.PurchasePrice))
+            .Select(g => new SoldAggregate(g.ProductId, g.Name, g.ProductCode, g.Quantity, g.Revenue, g.Cost))
             .ToList();
     }
 }

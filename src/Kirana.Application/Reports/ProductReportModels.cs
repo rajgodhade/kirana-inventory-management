@@ -8,8 +8,12 @@ public sealed class ProductSalesRow
     public decimal QuantitySold { get; init; }
     public decimal Revenue { get; init; }
 
-    /// <summary>Null unless the caller holds <see cref="Domain.Entities.PermissionKeys.ReportsViewProfit"/> —
-    /// an estimate from the product's current purchase price, same caveat as <see cref="ProfitSummary"/>.</summary>
+    /// <summary>Null unless the caller holds <see cref="Domain.Entities.PermissionKeys.ReportsViewProfit"/>.
+    /// Cost comes from <see cref="Domain.Entities.SaleItem.UnitCostSnapshot"/> — the cost recorded
+    /// on each line at sale time (Phase 17A-Fix-2), never the product's current purchase price.
+    /// Sale lines predating that snapshot contribute revenue but no cost, so this remains an
+    /// estimate exactly where <see cref="ProfitSummary"/> is: an upper bound, not a guarantee,
+    /// whenever a product's history includes such a line.</summary>
     public decimal? EstimatedProfit { get; init; }
 }
 

@@ -62,6 +62,18 @@ Phase 17A-Fix corrected both queries to the same basis: `SaleItem.UnitCostSnapsh
 
 **No disclosure banner was added to the chart.** `ChartPoint` is a generic two-field model (`Label`, `Value`) shared by every chart on the Dashboard, and giving one chart a disclosure surface the others don't have would be a larger UI change than this fix warranted. A month containing unknown-cost lines simply understates cost on the chart rather than fabricating one — the same trade-off already implicit wherever this chart omits any other unrecorded figure.
 
+## The Product Sales report (Phase 17A-Fix-2)
+
+`ProductReportService.EstimatedProfit` — the Top Sellers / Product Sales report, gated by `ReportsViewProfit` — was the **third** independent copy of the same defect, flagged as a known limitation in Phase 17A-Fix and left unfixed there. Its shared aggregation, `BuildSoldAggregatesAsync`, grouped sale lines by `{ ProductId, Name, ProductCode, Product.PurchasePrice }` and multiplied total quantity by that single current-price group key — so, like the Dashboard trend before it, a reprice silently rewrote a past period's "Estimated Profit," and this report could disagree with the Profit report and the Dashboard for the exact same period.
+
+Phase 17A-Fix-2 corrected it to the same basis as everywhere else: cost is now summed **per line** inside the grouping, `g.Where(x => x.UnitCostSnapshot != null).Sum(x => x.Quantity * x.UnitCostSnapshot!.Value)`, rather than multiplied once outside it — because unlike `PurchasePrice`, `UnitCostSnapshot` is not constant across a product's lines. Unknown-cost lines are excluded from cost, never zeroed or substituted with current price; `QuantitySold` and `Revenue` are unaffected.
+
+**No disclosure field was added.** `ProductSalesRow` has no per-row "how many lines had unknown cost" field, and its existing "Est. Profit" label already carries that hedge — adding a disclosure surface here would have been unrelated UI complexity outside this fix's scope.
+
+**Returns remain out of scope**, matching the pre-existing contract: `BuildSoldAggregatesAsync` has never queried `SalesReturnItems`, so Estimated Profit here has never netted off returns. This phase did not change that.
+
+With this fix, all three systems — Profit Report, Dashboard Gross Profit Trend, and Product Sales / Top Sellers — now share one cost basis and agree on the same historical period.
+
 ## The invariant
 
 ```
@@ -86,9 +98,6 @@ This is deliberate for 17A: it keeps a return on exactly the same historical bas
 2. **One costing basis.** Purchase-price-at-sale-time only. A shop buying the same item at different prices sees the cost prevailing when it sold, not what that particular unit cost.
 3. **Batch cost is ignored** even where `ProductBatch.PurchasePrice` exists, because the POS does not select batches at sale time.
 4. **Inventory valuation still uses current cost**, correctly — `DashboardService.GetSummaryAsync`'s stock-value KPI and `InventoryReportService`'s valuation both multiply quantity *on hand* by the *current* purchase price, because valuing stock you hold today is inherently a current-cost question, not a historical one. Untouched by 17A or 17A-Fix.
-5. **`ProductReportService.EstimatedProfit`** (the Top Sellers / Product Sales report, gated by `ReportsViewProfit`) still computes cost as `quantity sold × the product's current purchase price` — the same defect class as the Dashboard trend chart, discovered during the Phase 17A-Fix write-path audit and **deliberately left unfixed**, out of that task's explicitly scoped boundary. It needs the same correction described above. See the Phase 17A-Fix session report for the exact location.
-
 ## Later phases
 
 - **17C** — weighted-average / FIFO / batch costing, as an explicit product decision.
-- A follow-up to correct `ProductReportService.EstimatedProfit` the same way the Dashboard trend was corrected (limitation 5 above).
