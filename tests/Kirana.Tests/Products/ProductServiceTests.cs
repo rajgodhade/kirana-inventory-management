@@ -22,7 +22,8 @@ public class ProductServiceTests : IDisposable
         var auditLogger = new EfAuditLogger(_fixture.Context);
         var permissionEnforcer = new PermissionEnforcer(_fixture.Context);
         var barcodeService = new BarcodeService(_fixture.Context, sequenceGenerator, auditLogger, permissionEnforcer);
-        _sut = new ProductService(_fixture.Context, sequenceGenerator, auditLogger, barcodeService, permissionEnforcer);
+        var pricingService = new ProductPricingService(_fixture.Context, auditLogger, permissionEnforcer);
+        _sut = new ProductService(_fixture.Context, sequenceGenerator, auditLogger, barcodeService, permissionEnforcer, pricingService);
     }
 
     private CreateProductRequest ValidRequest(string name = "Tata Salt 1kg", string? sku = "TATA-SALT-1KG", string? barcode = "8901030826501") => new()
@@ -277,10 +278,16 @@ public class ProductServiceTests : IDisposable
         Assert.Equal(25, updated.SellingPrice);
     }
 
+    /// <summary>
+    /// Phase 15A split the audit: selling levels now raise a per-level <c>PriceChanged</c>, while
+    /// <c>PriceModification</c> narrowed to cost/MRP. A selling-price change must therefore produce
+    /// exactly ONE event, not the same change recorded twice under two names.
+    /// </summary>
     [Fact]
-    public async Task UpdateAsync_LogsPriceModification_WhenPriceChanges()
+    public async Task UpdateAsync_LogsRetailPriceChanged_WhenSellingPriceChanges()
     {
         var product = await _sut.CreateAsync(ValidRequest());
+        var previous = product.SellingPrice;
 
         await _sut.UpdateAsync(product.Id, new UpdateProductRequest
         {
@@ -289,11 +296,42 @@ public class ProductServiceTests : IDisposable
             Unit = product.Unit,
             PurchasePrice = product.PurchasePrice,
             Mrp = product.Mrp,
-            SellingPrice = product.SellingPrice + 5,
+            SellingPrice = previous + 5,
+            PerformedByUserId = _ownerId,
+        });
+
+        var audit = Assert.Single(await _fixture.Context.AuditLogs
+            .Where(a => a.Action == "PriceChanged").ToListAsync());
+        Assert.Equal(previous.ToString("0.00"), audit.PreviousValue);
+        Assert.Equal((previous + 5).ToString("0.00"), audit.NewValue);
+        Assert.Contains("Retail", audit.Reason!);
+        Assert.Equal(_ownerId, audit.UserId);
+
+        // Cost and MRP did not move, so the cost-side event must not fire at all.
+        Assert.False(await _fixture.Context.AuditLogs.AnyAsync(a => a.Action == "PriceModification"));
+    }
+
+    /// <summary>The other half of the split: cost/MRP changes keep their own event, so narrowing
+    /// PriceModification did not silently drop audit coverage for them.</summary>
+    [Fact]
+    public async Task UpdateAsync_LogsPriceModification_WhenCostOrMrpChanges()
+    {
+        var product = await _sut.CreateAsync(ValidRequest());
+
+        await _sut.UpdateAsync(product.Id, new UpdateProductRequest
+        {
+            Name = product.Name,
+            Sku = product.Sku,
+            Unit = product.Unit,
+            PurchasePrice = product.PurchasePrice + 3,
+            Mrp = product.Mrp + 4,
+            SellingPrice = product.SellingPrice,   // unchanged
             PerformedByUserId = _ownerId,
         });
 
         Assert.True(await _fixture.Context.AuditLogs.AnyAsync(a => a.Action == "PriceModification"));
+        // ...and the selling level did not move, so no PriceChanged.
+        Assert.False(await _fixture.Context.AuditLogs.AnyAsync(a => a.Action == "PriceChanged"));
     }
 
     [Fact]

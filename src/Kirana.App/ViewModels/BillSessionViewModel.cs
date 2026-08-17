@@ -43,6 +43,13 @@ public sealed partial class BillSessionViewModel : ObservableObject
 
     public decimal BillDiscountPercent { get; set; }
 
+    /// <summary>
+    /// Which price level this bill sells at (Phase 15B-3). Per-tab, so a wholesale bill parked on
+    /// tab 2 cannot leak its level into the retail bill on tab 1, and a brand-new tab starts at
+    /// Retail because that is this field's default.
+    /// </summary>
+    public PriceLevel PriceLevel { get; set; } = PriceLevel.Retail;
+
     public int? DiscountAuthorizedByUserId { get; set; }
 
     public int? PriceOverrideAuthorizedByUserId { get; set; }

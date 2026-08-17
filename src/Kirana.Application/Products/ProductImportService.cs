@@ -10,7 +10,8 @@ namespace Kirana.Application.Products;
 
 public sealed class ProductImportService(
     IKiranaDbContext db, ISequenceGenerator sequenceGenerator, IAuditLogger auditLogger,
-    IBarcodeService barcodeService, IPermissionEnforcer permissionEnforcer)
+    IBarcodeService barcodeService, IPermissionEnforcer permissionEnforcer,
+    IProductPricingService pricingService)
     : IProductImportService
 {
     private const string ProductSequenceKey = "Product";
@@ -439,9 +440,11 @@ public sealed class ProductImportService(
             {
                 var product = await db.Products
                     .Include(p => p.Barcodes)
+                    .Include(p => p.Prices)
                     .FirstAsync(p => p.Id == productId, cancellationToken);
                 ApplyTo(product, request, categoryId, brandId);
                 ReconcileBarcodes(product, request);
+                StagePrices(product, request);
                 product.UpdatedAtUtc = DateTime.UtcNow;
                 updated++;
                 continue;
@@ -451,6 +454,7 @@ public sealed class ProductImportService(
             ApplyTo(newProduct, request, categoryId, brandId);
             ReconcileBarcodes(newProduct, request);
             db.Products.Add(newProduct);
+            StagePrices(newProduct, request);
             db.Inventories.Add(new Inventory { Product = newProduct, QuantityOnHand = request.OpeningStock });
 
             if (request.OpeningStock != 0)
@@ -602,6 +606,26 @@ public sealed class ProductImportService(
         }
     }
 
+    /// <summary>
+    /// Routes an imported row's selling prices through the pricing service, so an import writes the
+    /// ProductPrice rows and the projection columns by the same implementation product creation
+    /// uses — rather than being a second, weaker pricing path.
+    ///
+    /// <para>Stages only, never saves: the whole import shares one SaveChangesAsync, so a rejected
+    /// row must not have already committed its prices. Mirrors ReconcileBarcodes.</para>
+    /// </summary>
+    private void StagePrices(Product product, CreateProductRequest request)
+    {
+        pricingService.StagePrice(product, PriceLevel.Retail, request.SellingPrice);
+
+        // Only when the column was present and parsed: import is additive, so an omitted wholesale
+        // column must not silently withdraw a price the product already has.
+        if (request.WholesalePrice is { } wholesale)
+        {
+            pricingService.StagePrice(product, PriceLevel.Wholesale, wholesale);
+        }
+    }
+
     private static void ApplyTo(Product product, CreateProductRequest request, int? categoryId, int? brandId)
     {
         product.Name = request.Name;
@@ -617,8 +641,8 @@ public sealed class ProductImportService(
         product.UnitDisplayText = request.UnitDisplayText;
         product.PurchasePrice = request.PurchasePrice;
         product.Mrp = request.Mrp;
-        product.SellingPrice = request.SellingPrice;
-        product.WholesalePrice = request.WholesalePrice;
+        // Selling prices are a child collection now, so they can't be assigned here — this method
+        // is static and synchronous by design. See StagePrices, called from CommitAsync.
         product.DefaultDiscountPercent = request.DefaultDiscountPercent;
         product.GstRatePercent = request.GstRatePercent;
         product.HsnCode = request.HsnCode;

@@ -24,6 +24,7 @@ public sealed class CashRegisterSessionConfiguration : IEntityTypeConfiguration<
             nameof(CashRegisterSession.TotalReturns), nameof(CashRegisterSession.CashRefunds),
             nameof(CashRegisterSession.CashCreditRepayments), nameof(CashRegisterSession.CashIn),
             nameof(CashRegisterSession.CashOut), nameof(CashRegisterSession.SupplierCashPayments),
+            nameof(CashRegisterSession.CashExpenses),
             nameof(CashRegisterSession.ExpectedCash),
             nameof(CashRegisterSession.ActualCash), nameof(CashRegisterSession.Variance),
         }) builder.Property(property).HasPrecision(18, 2);

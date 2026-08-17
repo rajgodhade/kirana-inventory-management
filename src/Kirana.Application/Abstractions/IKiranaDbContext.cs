@@ -26,6 +26,7 @@ public interface IKiranaDbContext
     DbSet<StockMovement> StockMovements { get; }
     DbSet<ProductBatch> ProductBatches { get; }
     DbSet<ProductBarcode> ProductBarcodes { get; }
+    DbSet<ProductPrice> ProductPrices { get; }
     DbSet<SequenceCounter> SequenceCounters { get; }
 
     DbSet<Customer> Customers { get; }

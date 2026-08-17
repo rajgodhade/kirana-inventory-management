@@ -22,4 +22,20 @@ public class Customer : Entity
     public string? Notes { get; set; }
     public decimal CreditBalance { get; set; }
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// The price level this customer's bills should OPEN at (Phase 15B-4).
+    ///
+    /// <para><c>null</c> means "no preference" — the till behaves exactly as it always has and
+    /// starts at Retail. That is deliberately distinct from an explicit
+    /// <see cref="PriceLevel.Retail"/>, which records that someone decided this customer is a
+    /// retail customer; both produce the same opening level today, but only one of them is a
+    /// stated decision.</para>
+    ///
+    /// <para>A DEFAULT, not a lock, and never a pricing authority: it seeds the bill's level when a
+    /// bill is still empty, after which the POS selector — and ultimately
+    /// <c>CompleteSaleRequest.PriceLevel</c> — decides what is actually charged. Nothing in sale
+    /// resolution ever reads this field.</para>
+    /// </summary>
+    public PriceLevel? DefaultPriceLevel { get; set; }
 }

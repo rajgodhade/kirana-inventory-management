@@ -13,6 +13,10 @@ public sealed class ReportFilter
     public int? BrandId { get; init; }
     public Domain.Entities.PaymentMethod? PaymentMethod { get; init; }
     public int? UserId { get; init; }
+
+    /// <summary>Narrows to bills sold at one price level (Phase 15B-5). Reads the level RECORDED on
+    /// the sale — never today's product prices.</summary>
+    public PriceLevel? PriceLevel { get; init; }
 }
 
 public sealed class SalesReportSummary
@@ -29,6 +33,17 @@ public sealed class SalesReportSummary
     public int BillCount { get; init; }
     public decimal AverageBillValue { get; init; }
     public decimal ItemsSold { get; init; }
+
+    // ---- Price level split (Phase 15B-5) ----
+    //
+    // Summed from the level RECORDED on each sale, never reconstructed from current prices. Both
+    // figures are gross (they sum GrandTotal), so RetailSales + WholesaleSales == GrossSales for
+    // any filter that does not itself narrow by level.
+
+    public decimal RetailSales { get; init; }
+    public decimal WholesaleSales { get; init; }
+    public int RetailBillCount { get; init; }
+    public int WholesaleBillCount { get; init; }
 
     public IReadOnlyList<PaymentMethodAmount> PaymentMethodBreakdown { get; init; } = [];
 }

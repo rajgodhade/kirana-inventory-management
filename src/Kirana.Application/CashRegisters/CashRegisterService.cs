@@ -165,6 +165,7 @@ public sealed class CashRegisterService(
         session.CashIn = report.CashIn;
         session.CashOut = report.CashOut;
         session.SupplierCashPayments = report.SupplierCashPayments;
+        session.CashExpenses = report.CashExpenses;
         session.ExpectedCash = report.ExpectedCash;
         session.ActualCash = Money(request.ActualCash);
         session.Variance = Money(session.ActualCash.Value - session.ExpectedCash);
@@ -247,6 +248,7 @@ public sealed class CashRegisterService(
                 x.Amount, x.Reason, x.PerformedByUser.FullName, x.OccurredAtUtc))
             .ToListAsync(cancellationToken);
         movementRows.AddRange(await SupplierCashPaymentRowsAsync(session, asOfUtc, cancellationToken));
+        movementRows.AddRange(await CashExpenseRowsAsync(session, asOfUtc, cancellationToken));
 
         return new CashRegisterReport
         {
@@ -257,6 +259,7 @@ public sealed class CashRegisterService(
             CashSales = drawer.CashSales, UpiSales = upiSales, CardSales = cardSales, CustomerCreditSales = creditSales,
             TotalReturns = totalReturns, CashRefunds = drawer.CashRefunds, CashCreditRepayments = drawer.CashCreditRepayments,
             CashIn = drawer.CashIn, CashOut = drawer.CashOut, SupplierCashPayments = drawer.SupplierCashPayments,
+            CashExpenses = drawer.CashExpenses,
             ExpectedCash = drawer.ExpectedCash,
             ActualCash = countedCash is null ? null : Money(countedCash.Value),
             Variance = countedCash is null ? null : Money(countedCash.Value - drawer.ExpectedCash),
@@ -280,6 +283,8 @@ public sealed class CashRegisterService(
         var movements = db.CashMovements.AsNoTracking()
             .Where(x => x.RegisterSessionId == session.Id && x.OccurredAtUtc <= asOfUtc);
 
+        var expenses = CashExpenseQuery(session, asOfUtc);
+
         var cashSales = await SumPaymentsAsync(payments, PaymentMethod.Cash, cancellationToken);
         var cashRefunds = Money(await returns.Where(x => x.RefundMethod == RefundMethod.Cash)
             .SumAsync(x => (decimal?)x.RefundAmount, cancellationToken) ?? 0m);
@@ -292,12 +297,49 @@ public sealed class CashRegisterService(
             .SumAsync(x => (decimal?)x.Amount, cancellationToken) ?? 0m);
         var supplierCashPayments = Money(await SupplierCashPaymentQuery(session, asOfUtc)
             .SumAsync(x => (decimal?)x.Amount, cancellationToken) ?? 0m);
+        var cashExpenses = Money(await expenses
+            .SumAsync(x => (decimal?)x.Amount, cancellationToken) ?? 0m);
         var expected = Money(session.OpeningCash + cashSales + cashCreditRepayments + cashIn
-            - cashRefunds - cashOut - supplierCashPayments);
+            - cashRefunds - cashOut - supplierCashPayments - cashExpenses);
 
         return new CashDrawerFigures(
-            cashSales, cashRefunds, cashCreditRepayments, cashIn, cashOut, supplierCashPayments, expected);
+            cashSales, cashRefunds, cashCreditRepayments, cashIn, cashOut, supplierCashPayments,
+            cashExpenses, expected);
     }
+
+    /// <summary>
+    /// Cash spent on store expenses inside the session window. Derived from the Expenses table
+    /// rather than mirrored into a CashMovement row — the same treatment cash sales, cash refunds,
+    /// udhaar repayments and supplier cash payments already get, so the expense itself stays the
+    /// single financial record with nothing to double-count or leave orphaned.
+    ///
+    /// <para><b>Membership uses <c>CreatedAtUtc</c>, not <c>ExpenseDateUtc</c>.</b> Unlike a supplier
+    /// payment — whose date is always the moment it was recorded — an expense carries a
+    /// user-editable ACCOUNTING date that may legitimately be backdated to last week. The cash,
+    /// however, left the drawer when the record was made. Keying on the accounting date would let an
+    /// operator move money in and out of a register session just by editing a date field.</para>
+    ///
+    /// <para>Only <see cref="PaymentMethod.Cash"/> moves physical money; UPI/Card/CustomerCredit
+    /// expenses are real expenses but never touch the drawer.</para>
+    /// </summary>
+    private IQueryable<Expense> CashExpenseQuery(CashRegisterSession session, DateTime asOfUtc) =>
+        db.Expenses.AsNoTracking().Where(x =>
+            x.PaymentMethod == PaymentMethod.Cash
+            && x.CreatedAtUtc >= session.OpenedAtUtc
+            && x.CreatedAtUtc <= asOfUtc);
+
+    private async Task<List<CashMovementRow>> CashExpenseRowsAsync(
+        CashRegisterSession session, DateTime asOfUtc, CancellationToken cancellationToken) =>
+        await CashExpenseQuery(session, asOfUtc)
+            .OrderBy(x => x.CreatedAtUtc)
+            .Select(x => new CashMovementRow(
+                x.Id,
+                CashRegisterMovementKind.Expense,
+                x.Amount,
+                x.CategoryNameSnapshot + " (" + x.ExpenseNumber + ")",
+                x.CreatedByUser != null ? x.CreatedByUser.FullName : "System",
+                x.CreatedAtUtc))
+            .ToListAsync(cancellationToken);
 
     /// <summary>
     /// Cash paid to suppliers inside the session window. Derived from the SupplierPayments table
@@ -328,7 +370,7 @@ public sealed class CashRegisterService(
 
     private readonly record struct CashDrawerFigures(
         decimal CashSales, decimal CashRefunds, decimal CashCreditRepayments, decimal CashIn, decimal CashOut,
-        decimal SupplierCashPayments, decimal ExpectedCash);
+        decimal SupplierCashPayments, decimal CashExpenses, decimal ExpectedCash);
 
     private async Task<CashRegisterReport> BuildClosedReportAsync(int sessionId, CancellationToken cancellationToken)
     {
@@ -340,8 +382,11 @@ public sealed class CashRegisterService(
         if (x.Status != CashRegisterStatus.Closed) throw new InvalidOperationException("A Z Report is available only after the register is closed.");
 
         // Figures come from the frozen snapshot, but the movement *lines* are still listed from
-        // their source tables. That is safe for a closed session: its window is fixed, so both
-        // CashMovements and supplier payments inside it can no longer change.
+        // their source tables. That is safe for a closed session: its window is fixed, so
+        // CashMovements, supplier payments and cash expenses inside it can no longer change —
+        // CashMovements and SupplierPayments are append-only, and ExpenseService refuses to edit or
+        // delete a cash-affecting expense that falls inside a closed session precisely so this
+        // listing can never drift from the frozen figure above it.
         var movementRows = x.Movements
             .Select(m => new CashMovementRow(
                 m.Id,
@@ -349,6 +394,7 @@ public sealed class CashRegisterService(
                 m.Amount, m.Reason, m.PerformedByUser.FullName, m.OccurredAtUtc))
             .ToList();
         movementRows.AddRange(await SupplierCashPaymentRowsAsync(x, x.ClosedAtUtc ?? DateTime.UtcNow, cancellationToken));
+        movementRows.AddRange(await CashExpenseRowsAsync(x, x.ClosedAtUtc ?? DateTime.UtcNow, cancellationToken));
 
         return new CashRegisterReport
         {
@@ -359,6 +405,7 @@ public sealed class CashRegisterService(
             CardSales = x.CardSales, CustomerCreditSales = x.CustomerCreditSales, TotalReturns = x.TotalReturns,
             CashRefunds = x.CashRefunds, CashCreditRepayments = x.CashCreditRepayments, CashIn = x.CashIn,
             CashOut = x.CashOut, SupplierCashPayments = x.SupplierCashPayments,
+            CashExpenses = x.CashExpenses,
             ExpectedCash = x.ExpectedCash, ActualCash = x.ActualCash, Variance = x.Variance,
             Movements = [.. movementRows.OrderBy(m => m.OccurredAtUtc)],
         };

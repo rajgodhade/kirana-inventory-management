@@ -10,7 +10,7 @@ namespace Kirana.Application.Products;
 
 public sealed class ProductService(
     IKiranaDbContext db, ISequenceGenerator sequenceGenerator, IAuditLogger auditLogger, IBarcodeService barcodeService,
-    IPermissionEnforcer permissionEnforcer)
+    IPermissionEnforcer permissionEnforcer, IProductPricingService pricingService)
     : IProductService
 {
     private const string ProductSequenceKey = "Product";
@@ -23,7 +23,7 @@ public sealed class ProductService(
         EnsurePricingType(request.PricingType);
 
         await ValidateAsync(request.Name, request.CategoryId, request.BrandId, request.PurchasePrice, request.Mrp,
-            request.SellingPrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
+            request.SellingPrice, request.WholesalePrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
             request.ReplenishmentEnabled, request.PreferredSupplierId,
             request.Sku, request.Barcodes, request.Unit, request.PurchasePackUnit, request.PurchasePackSize,
             excludingProductId: null, cancellationToken);
@@ -44,8 +44,9 @@ public sealed class ProductService(
             UnitDisplayText = Normalize(request.UnitDisplayText),
             PurchasePrice = request.PurchasePrice,
             Mrp = request.Mrp,
-            SellingPrice = request.SellingPrice,
-            WholesalePrice = request.WholesalePrice,
+            // SellingPrice/WholesalePrice are NOT set here (Phase 15A): they are projections of the
+            // ProductPrice rows, staged below through the pricing service so both stores are always
+            // written together by one implementation.
             DefaultDiscountPercent = request.DefaultDiscountPercent,
             GstRatePercent = request.GstRatePercent,
             HsnCode = request.HsnCode,
@@ -59,6 +60,18 @@ public sealed class ProductService(
         };
 
         db.Products.Add(product);
+
+        // Selling prices go through the pricing service so the ProductPrice rows and the projection
+        // columns are written by one implementation. Staged (not saved) so they land in the same
+        // single SaveChanges as the product itself — a product is never persisted without its
+        // retail price, and a rejected price creates no product at all.
+        pricingService.StagePrice(product, PriceLevel.Retail, request.SellingPrice);
+        if (request.WholesalePrice is { } wholesale)
+        {
+            // Only when configured: a null wholesale means the level does not apply, which is not
+            // the same as zero, so no row is created for it.
+            pricingService.StagePrice(product, PriceLevel.Wholesale, wholesale);
+        }
 
         // Staged with the Product navigation rather than a ProductId — the identity value doesn't
         // exist until SaveChanges, same as the Inventory/StockMovement rows below. They all commit
@@ -108,7 +121,11 @@ public sealed class ProductService(
         await permissionEnforcer.EnsureHasPermissionAsync(request.PerformedByUserId, PermissionKeys.ProductsEdit, cancellationToken);
         EnsurePricingType(request.PricingType);
 
-        var product = await db.Products.FirstOrDefaultAsync(p => p.Id == productId, cancellationToken)
+        // Prices included: they are staged below through the pricing service, which needs the
+        // product's existing levels to tell a real change from a no-op.
+        var product = await db.Products
+            .Include(p => p.Prices)
+            .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken)
             ?? throw new InvalidOperationException("Product not found.");
 
         var replenishmentEnabled = request.UpdateReplenishmentConfiguration
@@ -119,15 +136,17 @@ public sealed class ProductService(
             : product.PreferredSupplierId;
 
         await ValidateAsync(request.Name, request.CategoryId, request.BrandId, request.PurchasePrice, request.Mrp,
-            request.SellingPrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
+            request.SellingPrice, request.WholesalePrice, request.GstRatePercent, request.MinimumStock, request.ReorderQuantity,
             replenishmentEnabled, preferredSupplierId,
             request.Sku, barcodes: [], request.Unit, request.PurchasePackUnit, request.PurchasePackSize,
             excludingProductId: productId, cancellationToken);
 
-        var previousPricingSummary = $"Purchase={product.PurchasePrice}, Mrp={product.Mrp}, Selling={product.SellingPrice}";
-        var pricingChanged = product.PurchasePrice != request.PurchasePrice
-            || product.Mrp != request.Mrp
-            || product.SellingPrice != request.SellingPrice;
+        // PriceModification now covers COST and MRP only. Selling levels (Retail/Wholesale) get
+        // their own per-level PriceChanged event from the pricing service, so a selling-price change
+        // is no longer recorded twice under two different names.
+        var previousCostSummary = $"Purchase={product.PurchasePrice}, Mrp={product.Mrp}";
+        var costOrMrpChanged = product.PurchasePrice != request.PurchasePrice
+            || product.Mrp != request.Mrp;
 
         product.Name = request.Name.Trim();
         product.Sku = Normalize(request.Sku);
@@ -141,8 +160,24 @@ public sealed class ProductService(
         product.UnitDisplayText = Normalize(request.UnitDisplayText);
         product.PurchasePrice = request.PurchasePrice;
         product.Mrp = request.Mrp;
-        product.SellingPrice = request.SellingPrice;
-        product.WholesalePrice = request.WholesalePrice;
+
+        // Selling prices via the pricing service, which updates the ProductPrice rows and the
+        // projection columns together and tells us exactly what changed. Staged, not saved, so it
+        // commits in the same SaveChanges as the rest of this update — the two stores can never end
+        // up out of step. A null wholesale withdraws the level rather than writing zero.
+        var priceChanges = new List<PriceChange>();
+        foreach (var staged in new[]
+        {
+            pricingService.StagePrice(product, PriceLevel.Retail, request.SellingPrice),
+            pricingService.StagePrice(product, PriceLevel.Wholesale, request.WholesalePrice),
+        })
+        {
+            if (staged is not null)
+            {
+                priceChanges.Add(staged);
+            }
+        }
+
         product.DefaultDiscountPercent = request.DefaultDiscountPercent;
         product.GstRatePercent = request.GstRatePercent;
         product.HsnCode = request.HsnCode;
@@ -163,13 +198,19 @@ public sealed class ProductService(
             request.PerformedByUserId, "ProductUpdated", nameof(Product), product.Id.ToString(),
             cancellationToken: cancellationToken);
 
-        if (pricingChanged)
+        if (costOrMrpChanged)
         {
             await auditLogger.RecordAsync(
                 request.PerformedByUserId, "PriceModification", nameof(Product), product.Id.ToString(),
-                previousValue: previousPricingSummary,
-                newValue: $"Purchase={product.PurchasePrice}, Mrp={product.Mrp}, Selling={product.SellingPrice}",
+                previousValue: previousCostSummary,
+                newValue: $"Purchase={product.PurchasePrice}, Mrp={product.Mrp}",
                 cancellationToken: cancellationToken);
+        }
+
+        // One entry per selling level that actually moved — never for a re-save of the same number.
+        foreach (var change in priceChanges)
+        {
+            await pricingService.RecordPriceChangeAsync(product, change, request.PerformedByUserId, cancellationToken);
         }
 
         return product;
@@ -291,7 +332,7 @@ public sealed class ProductService(
 
     private async Task ValidateAsync(
         string name, int? categoryId, int? brandId, decimal purchasePrice, decimal mrp, decimal sellingPrice,
-        decimal? gstRatePercent, decimal minimumStock, decimal reorderQuantity,
+        decimal? wholesalePrice, decimal? gstRatePercent, decimal minimumStock, decimal reorderQuantity,
         bool replenishmentEnabled, int? preferredSupplierId, string? sku,
         IReadOnlyList<string> barcodes,
         UnitOfMeasure unit, UnitOfMeasure? purchasePackUnit, decimal? purchasePackSize,
@@ -303,6 +344,14 @@ public sealed class ProductService(
         }
 
         if (purchasePrice < 0 || mrp < 0 || sellingPrice < 0)
+        {
+            throw new ArgumentException("Prices cannot be negative.");
+        }
+
+        // Wholesale was never validated before Phase 15A — a negative wholesale price was silently
+        // accepted and persisted. Checked here, before anything is created, so a rejected price
+        // leaves no product, no ProductPrice row and no audit entry behind.
+        if (wholesalePrice is { } wholesale && wholesale < 0)
         {
             throw new ArgumentException("Prices cannot be negative.");
         }

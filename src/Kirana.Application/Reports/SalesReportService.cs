@@ -32,6 +32,16 @@ public sealed class SalesReportService(
             .Where(r => r.ReturnDateUtc >= range.StartUtc && r.ReturnDateUtc < range.EndUtc)
             .SumAsync(r => (decimal?)r.TotalReturnAmount, cancellationToken) ?? 0m;
 
+        // One grouped query rather than two filtered sums, so the split cannot drift from the
+        // gross figure above and costs a single round trip.
+        var byLevel = await sales
+            .GroupBy(s => s.PriceLevel)
+            .Select(g => new { Level = g.Key, Total = g.Sum(x => x.GrandTotal), Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        var retail = byLevel.FirstOrDefault(x => x.Level == PriceLevel.Retail);
+        var wholesale = byLevel.FirstOrDefault(x => x.Level == PriceLevel.Wholesale);
+
         var payments = await FilterPayments(BasePaymentsQuery(range), filter)
             .GroupBy(p => p.Method)
             .Select(g => new { Method = g.Key, Total = g.Sum(x => x.Amount), Count = g.Count() })
@@ -50,6 +60,10 @@ public sealed class SalesReportService(
             BillCount = billCount,
             AverageBillValue = billCount == 0 ? 0m : Math.Round(grossSales / billCount, 2),
             ItemsSold = itemsSold,
+            RetailSales = retail?.Total ?? 0m,
+            WholesaleSales = wholesale?.Total ?? 0m,
+            RetailBillCount = retail?.Count ?? 0,
+            WholesaleBillCount = wholesale?.Count ?? 0,
             PaymentMethodBreakdown = payments
                 .Select(p => new PaymentMethodAmount { Method = ReportFormatting.FormatPaymentMethod(p.Method), Amount = p.Total, Count = p.Count })
                 .OrderByDescending(p => p.Amount)
@@ -132,6 +146,13 @@ public sealed class SalesReportService(
         if (filter.PaymentMethod is { } method)
         {
             sales = sales.Where(s => s.Payments.Any(p => p.Method == method));
+        }
+
+        // The level stored ON the sale. Reconstructing it from today's ProductPrice would
+        // reclassify old bills every time a price moved.
+        if (filter.PriceLevel is { } priceLevel)
+        {
+            sales = sales.Where(s => s.PriceLevel == priceLevel);
         }
 
         if (filter.ProductId is { } productId)

@@ -69,6 +69,10 @@ public sealed partial class InvoiceDetailsPage : Page
         AddSummary("Customer", sale.Customer?.Name ?? "Walk-in Customer");
         AddSummary("Cashier", sale.CashierUser?.FullName ?? "System");
         AddSummary("Status", sale.Status.ToString());
+
+        // The level this bill was SOLD at, read from the sale itself. Deliberately not derived from
+        // today's product prices, which would relabel old invoices whenever a price moved.
+        AddSummary("Price Level", sale.PriceLevel.ToDisplayText());
         AddSummary("Customer mobile", sale.Customer?.Phone ?? "-");
 
         foreach (var item in sale.Items)

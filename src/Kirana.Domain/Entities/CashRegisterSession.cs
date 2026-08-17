@@ -52,6 +52,22 @@ public sealed class CashRegisterSession : Entity
     /// </summary>
     public decimal SupplierCashPayments { get; set; }
 
+    /// <summary>
+    /// Physical cash spent on store expenses during this session (Phase 16A-1). Derived from
+    /// Expenses paid with <see cref="PaymentMethod.Cash"/>, never mirrored into a CashMovement —
+    /// the expense row is the single financial record, exactly as for
+    /// <see cref="SupplierCashPayments"/>.
+    ///
+    /// <para>Session membership uses <c>Expense.CreatedAtUtc</c>, not <c>ExpenseDateUtc</c>:
+    /// the latter is a user-editable ACCOUNTING date that may be backdated to last week, while
+    /// the former is when the record — and therefore the cash — actually left the drawer.</para>
+    ///
+    /// <para>Sessions closed before this column existed hold 0. That is not "no cash was spent";
+    /// it means the concept was not part of the snapshot then, and their frozen ExpectedCash /
+    /// Variance are deliberately left as the human who counted the drawer signed them off.</para>
+    /// </summary>
+    public decimal CashExpenses { get; set; }
+
     public decimal ExpectedCash { get; set; }
     public decimal? ActualCash { get; set; }
     public decimal? Variance { get; set; }

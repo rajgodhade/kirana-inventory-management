@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Kirana.Application.Billing;
+using Kirana.Application.CashRegisters;
 using Kirana.Application.Printing;
 using Kirana.Domain.Entities;
 
@@ -24,6 +25,7 @@ public sealed partial class PaymentViewModel : ObservableObject
 
     private readonly PosShellViewModel _owner;
     private readonly ISaleService _saleService;
+    private readonly ICashRegisterService? _cashRegisterService;
 
     public decimal GrandTotal { get; }
     public bool CanUseCustomerCredit => _owner.SelectedCustomer is not null;
@@ -115,10 +117,11 @@ public sealed partial class PaymentViewModel : ObservableObject
 
     private bool _isRebalancing;
 
-    public PaymentViewModel(PosShellViewModel owner, ISaleService saleService)
+    public PaymentViewModel(PosShellViewModel owner, ISaleService saleService, ICashRegisterService? cashRegisterService = null)
     {
         _owner = owner;
         _saleService = saleService;
+        _cashRegisterService = cashRegisterService;
         GrandTotal = owner.GrandTotal;
 
         // Cash tendered is deliberately left blank rather than defaulted to the bill total: a
@@ -323,6 +326,23 @@ public sealed partial class PaymentViewModel : ObservableObject
             return;
         }
 
+        // Phase 16A-2: tell the cashier before they hit the server. This asks the SAME policy
+        // SaleService will ask, rather than re-stating the rule — a second definition of
+        // "cash-impacting" is exactly how the two would drift apart. SaleService still enforces it
+        // independently; this only saves a round trip and produces the message sooner.
+        if (_cashRegisterService is not null
+            && CashImpactPolicy.RequiresOpenRegister(PaymentLines.Select(p => p.Method)))
+        {
+            var status = await _cashRegisterService.GetStatusAsync();
+            if (!status.IsOpen)
+            {
+                // The cart and every payment line stay exactly as they are: the cashier can open the
+                // register from the dashboard and come straight back to this bill.
+                ErrorMessage = CashImpactPolicy.NoOpenRegisterMessage;
+                return;
+            }
+        }
+
         if (PaymentLines.Any(p => p.Method == PaymentMethod.CustomerCredit) && _owner.SelectedCustomer is null)
         {
             ErrorMessage = "Select a customer to use Customer Credit / Udhaar.";
@@ -340,6 +360,8 @@ public sealed partial class PaymentViewModel : ObservableObject
                 CashierUserId = _owner.CashierUserId,
                 DiscountAuthorizedByUserId = _owner.DiscountAuthorizedByUserId,
                 PriceOverrideAuthorizedByUserId = _owner.PriceOverrideAuthorizedByUserId,
+                // The LEVEL, not the amounts - SaleService re-resolves each line from it.
+                PriceLevel = _owner.SelectedPriceLevel,
                 Payments = PaymentLines.Select(p => new SalePaymentInput
                 {
                     Method = p.Method,

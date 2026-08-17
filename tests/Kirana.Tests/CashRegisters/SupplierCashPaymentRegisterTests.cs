@@ -199,7 +199,21 @@ public sealed class SupplierCashPaymentRegisterTests : IDisposable
     public async Task PaymentsBeforeTheRegisterOpened_AreOutsideTheSessionWindow()
     {
         var supplier = await SeedSupplierWithOutstandingAsync(5_000m);
-        await PayAsync(supplier.Id, 3_000m, PaymentMethod.Cash);
+
+        // Written straight to the table: from Phase 16A-2 PurchaseService refuses a cash supplier
+        // payment while no register is open, so this state can no longer be produced through it.
+        // The window arithmetic must still exclude such rows — data predating 16A-2, or restored
+        // from a backup — which is what this test covers.
+        _fixture.Context.SupplierPayments.Add(new SupplierPayment
+        {
+            SupplierId = supplier.Id,
+            Amount = 3_000m,
+            Method = PaymentMethod.Cash,
+            PaymentDateUtc = DateTime.UtcNow.AddHours(-2),
+            RecordedByUserId = _ownerId,
+        });
+        await _fixture.Context.SaveChangesAsync();
+        _fixture.Context.ChangeTracker.Clear();
 
         await _register.OpenAsync(new(15_000m, _ownerId));
 

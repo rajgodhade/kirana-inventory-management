@@ -26,8 +26,22 @@ public class InvoicePrintServiceTests : IDisposable
         _sut = new InvoicePrintService(_fixture.Context, _saleService, new InvoiceDocumentBuilder(), _auditLogger, _permissionEnforcer);
     }
 
-    private async Task SeedStoreAsync() =>
-        await AddAndSaveAsync(new Store { Name = "Test Store", OwnerName = "Owner", SetupCompleted = true });
+    /// <summary>Sets the shop up and opens the register. Phase 16A-2 made the cash sales these print
+    /// tests use as fixture data require an open register, and a register needs both a Store and a
+    /// User — which is exactly what owner seeding produces (and it names the store "Test Store", as
+    /// this class always did). Idempotent, because some tests seed the owner themselves.</summary>
+    private async Task SeedStoreAsync()
+    {
+        if (!await _fixture.Context.Stores.AnyAsync())
+        {
+            await _fixture.SeedOwnerAsync();
+        }
+
+        if (!await _fixture.Context.CashRegisterSessions.AnyAsync(s => s.Status == CashRegisterStatus.Open))
+        {
+            await _fixture.SeedOpenRegisterAsync();
+        }
+    }
 
     private async Task<Product> SeedProductAsync(string name = "Tata Salt 1kg", decimal price = 25, decimal stock = 100)
     {
@@ -40,7 +54,7 @@ public class InvoicePrintServiceTests : IDisposable
             Mrp = price + 5,
             SellingPrice = price,
             IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = stock });
         await _fixture.Context.SaveChangesAsync();
@@ -85,8 +99,16 @@ public class InvoicePrintServiceTests : IDisposable
     [Fact]
     public async Task GetInvoiceDocumentAsync_Throws_WhenStoreNotConfigured()
     {
+        // Sold on UPI, not cash. From Phase 16A-2 a cash sale needs an open register, and a register
+        // needs a Store — so "a completed sale with no store configured" is only reachable through a
+        // non-cash tender. The behaviour under test (building an invoice without a store) is
+        // unchanged; only the tender used to reach that state is.
         var product = await SeedProductAsync(price: 10);
-        var sale = await CompleteCashSaleAsync(product.Id, 1, 10);
+        var sale = await _saleService.CompleteSaleAsync(new CompleteSaleRequest
+        {
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Upi, Amount = 10 }],
+        });
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.GetInvoiceDocumentAsync(sale.Id));
     }
@@ -146,6 +168,7 @@ public class InvoicePrintServiceTests : IDisposable
     public async Task LogPrintAsync_WritesInvoiceReprinted_ForReprint()
     {
         var owner = await _fixture.SeedOwnerAsync();
+        await _fixture.SeedOpenRegisterAsync(owner.Id);   // Phase 16A-2: cash sale needs a register.
         var product = await SeedProductAsync(price: 10);
         var sale = await CompleteCashSaleAsync(product.Id, 1, 10);
 
@@ -159,6 +182,7 @@ public class InvoicePrintServiceTests : IDisposable
     public async Task LogPrintAsync_Throws_WhenReprintingWithoutPermission()
     {
         await _fixture.SeedOwnerAsync();
+        await _fixture.SeedOpenRegisterAsync();   // Phase 16A-2: cash sale needs a register.
         var cashier = await _fixture.SeedCashierAsync();
         var product = await SeedProductAsync(price: 10);
         var sale = await CompleteCashSaleAsync(product.Id, 1, 10);

@@ -1,5 +1,7 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.CashRegisters;
+using Kirana.Application.Products;
 using Kirana.Application.Promotions;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +11,19 @@ namespace Kirana.Application.Billing;
 
 public sealed class SaleService(
     IKiranaDbContext db, ISequenceGenerator sequenceGenerator, IAuditLogger auditLogger, IPermissionEnforcer permissionEnforcer,
-    IPromotionEngine? promotionEngine = null, IGstCalculationService? gstCalculationService = null)
+    IPromotionEngine? promotionEngine = null, IGstCalculationService? gstCalculationService = null,
+    IProductPriceResolver? priceResolver = null)
     : ISaleService
 {
+    /// <summary>
+    /// Phase 15B-2 selling-price source. Optional in the signature — the same convention the
+    /// promotion engine and GST calculator were added under — but unlike those, omitting it does
+    /// NOT disable the behaviour: it falls back to a real resolver over this same context, never to
+    /// <c>Product.SellingPrice</c>. There is deliberately no way to construct a SaleService that
+    /// prices from the projection column.
+    /// </summary>
+    private readonly IProductPriceResolver priceResolver = priceResolver ?? new ProductPriceResolver(db);
+
     /// <summary>Item/bill discounts at or below this don't need manager authorization (PRD §10).</summary>
     public const decimal MaxUnauthorizedDiscountPercent = 10m;
 
@@ -28,6 +40,13 @@ public sealed class SaleService(
         {
             throw new ArgumentException("At least one payment is required.", nameof(request));
         }
+
+        // Cash needs somewhere to go (Phase 16A-2). Checked here, before anything is read or
+        // written, so a rejected bill leaves no Sale, SaleItem, Payment, stock movement or audit
+        // row behind. The POS checks this too, but that is a courtesy to the cashier — this is the
+        // boundary a hand-built request cannot get past.
+        await CashImpactPolicy.EnsureRegisterAvailableForAsync(
+            db, request.Payments.Select(p => p.Method), cancellationToken);
 
         var productIds = request.Lines.Select(l => l.ProductId).Distinct().ToList();
         var products = await db.Products
@@ -70,6 +89,39 @@ public sealed class SaleService(
             }
         }
 
+        // Phase 15B-2: the selling price comes from the pricing resolver, not Product.SellingPrice.
+        //
+        // Resolved HERE, on the server side of the till, because this method is the trust boundary:
+        // a client can put any number in UnitPriceOverride, and the override check below decides
+        // whether that number needed authorization by comparing it against the real price. If that
+        // comparison used a client-supplied figure the check would be meaningless, so the price is
+        // re-established from the authoritative store regardless of what the UI displayed.
+        //
+        // Resolved once per DISTINCT product rather than per line, and before any write, so a cart
+        // with the same item on several lines costs one query and a failure leaves nothing behind.
+        //
+        // Phase 15B-3: at the level the bill is being sold at, not always Retail. The client sends
+        // the LEVEL, never the amount - so choosing "Wholesale" cannot become a way to name your
+        // own price.
+        var pricingContext = new PricingContext(request.PriceLevel);
+        var resolvedPrices = new Dictionary<int, decimal>(productIds.Count);
+        foreach (var productId in productIds)
+        {
+            var resolution = await priceResolver.ResolveAsync(productId, pricingContext, cancellationToken);
+
+            if (!resolution.IsResolved)
+            {
+                // No silent fallback - not to another level, not to the projection column, not to
+                // MRP, not to zero. A product we cannot price at the requested level is a product
+                // this bill must not sell.
+                throw new InvalidOperationException(
+                    $"'{products[productId].Name}' has no active " +
+                    $"{request.PriceLevel.ToDisplayText().ToLowerInvariant()} price and cannot be sold.");
+            }
+
+            resolvedPrices[productId] = resolution.UnitPrice.Value;
+        }
+
         // Store-level opt-out (Settings → Billing Authorization, Owner-only): a single-operator
         // store can turn this requirement off so the Owner isn't asked to authorize their own
         // action. Read fresh from AppSettings rather than trusting anything client-supplied, so the
@@ -86,7 +138,7 @@ public sealed class SaleService(
         }
 
         var hasPriceOverride = request.Lines.Any(l =>
-            l.UnitPriceOverride is { } overridePrice && overridePrice != products[l.ProductId].SellingPrice);
+            l.UnitPriceOverride is { } overridePrice && overridePrice != resolvedPrices[l.ProductId]);
 
         if (hasPriceOverride && (appSettings?.RequirePinForPriceOverride ?? true))
         {
@@ -104,10 +156,10 @@ public sealed class SaleService(
                 {
                     ProductId = line.ProductId,
                     Quantity = line.Quantity,
-                    UnitPrice = line.UnitPriceOverride ?? products[line.ProductId].SellingPrice,
+                    UnitPrice = line.UnitPriceOverride ?? resolvedPrices[line.ProductId],
                 }).ToList(),
                 BillAmount = request.Lines.Sum(line =>
-                    line.Quantity * (line.UnitPriceOverride ?? products[line.ProductId].SellingPrice)),
+                    line.Quantity * (line.UnitPriceOverride ?? resolvedPrices[line.ProductId])),
                 CustomerId = request.CustomerId,
                 AtUtc = DateTime.UtcNow,
             }, cancellationToken)).ToDictionary(x => x.ProductId);
@@ -119,7 +171,7 @@ public sealed class SaleService(
             {
                 ProductId = line.ProductId,
                 Quantity = line.Quantity,
-                UnitPrice = line.UnitPriceOverride ?? product.SellingPrice,
+                UnitPrice = line.UnitPriceOverride ?? resolvedPrices[line.ProductId],
                 PricingType = product.PricingType,
                 GstRatePercent = product.GstRatePercent ?? 0,
                 DiscountPercent = line.DiscountPercent,
@@ -190,6 +242,12 @@ public sealed class SaleService(
             RoundOffAmount = totals.RoundOffAmount,
             GrandTotal = totals.GrandTotal,
             Status = SaleStatus.Completed,
+
+            // The level this bill was sold at, recorded from the SAME request field the prices were
+            // resolved from - so the stored context can never disagree with the amounts charged.
+            // Deliberately not read from the customer: a customer's preference is a current default,
+            // not a record of how this bill was priced.
+            PriceLevel = request.PriceLevel,
             DiscountAuthorizedByUserId = maxDiscountRequested > MaxUnauthorizedDiscountPercent ? request.DiscountAuthorizedByUserId : null,
             PriceOverrideAuthorizedByUserId = hasPriceOverride ? request.PriceOverrideAuthorizedByUserId : null,
         };
@@ -211,6 +269,15 @@ public sealed class SaleService(
                 Quantity = lineResult.Line.Quantity,
                 UnitPriceSnapshot = lineResult.Line.UnitPrice,
                 MrpSnapshot = product.Mrp,
+
+                // What this unit cost us, captured beside what we sold it for (Phase 17A). Taken
+                // from the product entity already loaded for this sale, so it is the cost as of
+                // this moment and is written in the same SaveChanges as the Sale itself — a
+                // separate later read could observe a cost the sale was never priced against.
+                //
+                // Product.PurchasePrice is the right source here: the POS never consults
+                // ProductBatch, so this is the only cost the till actually knows at sale time.
+                UnitCostSnapshot = product.PurchasePrice,
                 DiscountPercent = lineResult.Line.DiscountPercent,
                 DiscountAmount = lineResult.DiscountAmount,
                 PromotionDiscountAmount = lineResult.PromotionDiscountAmount,

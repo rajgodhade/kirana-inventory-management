@@ -14,6 +14,10 @@ public sealed class SaleConfiguration : IEntityTypeConfiguration<Sale>
 
         builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(20);
 
+        // Same enum-name convention as Status and Customer.DefaultPriceLevel. Non-nullable: every
+        // completed sale was sold at some level, so "unknown" is not a state this column may hold.
+        builder.Property(s => s.PriceLevel).HasConversion<string>().HasMaxLength(20).IsRequired();
+
         builder.Property(s => s.SubTotal).HasPrecision(18, 2);
         builder.Property(s => s.ItemDiscountTotal).HasPrecision(18, 2);
         builder.Property(s => s.PromotionDiscountTotal).HasPrecision(18, 2);
@@ -58,6 +62,12 @@ public sealed class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
 
         builder.Property(i => i.Quantity).HasPrecision(18, 3);
         builder.Property(i => i.UnitPriceSnapshot).HasPrecision(18, 2);
+
+        // Money precision like every other amount here, but deliberately NULLABLE: null means "cost
+        // unknown for this line" (every sale predating Phase 17A), which is a different fact from a
+        // cost of zero and must stay distinguishable in the database.
+        builder.Property(i => i.UnitCostSnapshot).HasPrecision(18, 2);
+
         builder.Property(i => i.DiscountPercent).HasPrecision(5, 2);
         builder.Property(i => i.DiscountAmount).HasPrecision(18, 2);
         builder.Property(i => i.PromotionDiscountAmount).HasPrecision(18, 2);

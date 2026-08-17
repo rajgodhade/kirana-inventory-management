@@ -27,6 +27,9 @@ public class CustomerReceiptServiceTests : IDisposable
     {
         _ownerId = _fixture.SeedOwnerAsync().GetAwaiter().GetResult().Id;
 
+        // Phase 16A-2: cash transactions require an open register. These tests use cash as
+        // fixture setup for something else, so the shop is simply open for business.
+        _fixture.SeedOpenRegisterAsync().GetAwaiter().GetResult();
         var seq = new EfSequenceGenerator(_fixture.Context);
         var audit = new EfAuditLogger(_fixture.Context);
         var enforcer = new PermissionEnforcer(_fixture.Context);
@@ -48,7 +51,7 @@ public class CustomerReceiptServiceTests : IDisposable
         {
             ProductCode = $"PRD-{Guid.NewGuid():N}"[..12], Name = "Receipt Product",
             Unit = UnitOfMeasure.Piece, PurchasePrice = 60, Mrp = 110, SellingPrice = 100, IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = 100 });
         await _fixture.Context.SaveChangesAsync();

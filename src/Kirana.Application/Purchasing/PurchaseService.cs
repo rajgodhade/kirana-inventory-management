@@ -1,5 +1,6 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.CashRegisters;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,14 @@ public sealed class PurchaseService(
         if (request.Lines.Count == 0)
         {
             throw new ArgumentException("A purchase must have at least one line.", nameof(request));
+        }
+
+        // A purchase can settle part of its bill on the spot, and cash paid to a supplier leaves the
+        // drawer (Phase 16A-2). Only that initial payment is gated — a purchase recorded entirely on
+        // credit moves no physical money and is unaffected.
+        if (request.AmountPaid > 0 && request.PaymentMethod is { } initialMethod)
+        {
+            await CashImpactPolicy.EnsureRegisterAvailableForAsync(db, initialMethod, cancellationToken);
         }
 
         var supplier = await db.Suppliers.FirstOrDefaultAsync(s => s.Id == request.SupplierId, cancellationToken)
@@ -322,6 +331,9 @@ public sealed class PurchaseService(
         {
             throw new ArgumentException("Payment amount must be positive.", nameof(request));
         }
+
+        // Paying a supplier in cash empties the drawer (Phase 16A-2), so it needs an open register.
+        await CashImpactPolicy.EnsureRegisterAvailableForAsync(db, request.Method, cancellationToken);
 
         var supplier = await db.Suppliers.FirstOrDefaultAsync(s => s.Id == request.SupplierId, cancellationToken)
             ?? throw new InvalidOperationException("Supplier not found.");

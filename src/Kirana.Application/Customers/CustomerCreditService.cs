@@ -1,5 +1,6 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
+using Kirana.Application.CashRegisters;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,10 @@ public sealed class CustomerCreditService(
         {
             throw new ArgumentException("Repayment amount must be positive.", nameof(request));
         }
+
+        // Udhaar settled in cash puts money in the drawer, so it needs a register to put it in
+        // (Phase 16A-2). Checked before any ledger or balance is touched.
+        await CashImpactPolicy.EnsureRegisterAvailableForAsync(db, request.Method, cancellationToken);
 
         var customer = await db.Customers.FirstOrDefaultAsync(c => c.Id == request.CustomerId, cancellationToken)
             ?? throw new InvalidOperationException("Customer not found.");

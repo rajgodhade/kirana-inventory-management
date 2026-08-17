@@ -12,6 +12,7 @@
                     <ColumnDefinition Width="180" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="180" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -19,24 +20,29 @@
 
                 <ComboBox Grid.Column="0" ItemsSource="{x:Bind ViewModel.DateFilter.PresetNames}"
                           SelectedItem="{x:Bind ViewModel.DateFilter.SelectedPresetName, Mode=TwoWay}"
-                          HorizontalAlignment="Stretch" SelectionChanged="OnDateFilterChanged" />
+                          HorizontalAlignment="Stretch" SelectionChanged="OnFilterChanged" />
 
                 <CalendarDatePicker Grid.Column="1" Header="From" Date="{x:Bind ViewModel.DateFilter.CustomFrom, Mode=TwoWay}"
                                     Visibility="{x:Bind ViewModel.DateFilter.IsCustomSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                    DateChanged="OnDateFilterChanged" />
+                                    DateChanged="OnFilterChanged" />
 
                 <CalendarDatePicker Grid.Column="2" Header="To" Date="{x:Bind ViewModel.DateFilter.CustomTo, Mode=TwoWay}"
                                     Visibility="{x:Bind ViewModel.DateFilter.IsCustomSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                    DateChanged="OnDateFilterChanged" />
+                                    DateChanged="OnFilterChanged" />
 
-                <Button Grid.Column="4" Click="OnRefreshClick" VerticalAlignment="Bottom">
+                <ComboBox Grid.Column="3" Header="Price level" AutomationProperties.Name="Price level filter"
+                          ItemsSource="{x:Bind ViewModel.PriceLevelFilterNames}"
+                          SelectedItem="{x:Bind ViewModel.SelectedPriceLevelFilterName, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch" SelectionChanged="OnFilterChanged" />
+
+                <Button Grid.Column="5" Click="OnRefreshClick" VerticalAlignment="Bottom">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE72C;" FontSize="14" />
                         <TextBlock Text="Refresh" />
                     </StackPanel>
                 </Button>
 
-                <Button Grid.Column="5" VerticalAlignment="Bottom">
+                <Button Grid.Column="6" VerticalAlignment="Bottom">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE74E;" FontSize="14" />
                         <TextBlock Text="Export" />
@@ -132,6 +138,23 @@
                     <StackPanel Spacing="4">
                         <TextBlock Text="Average Bill Value" Style="{StaticResource MetricLabelTextStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.AverageBillValueText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Phase 15B-5. These sum the level RECORDED on each bill, so they never move when a
+                     product is repriced. Gross, like Gross Sales above, so the two add up to it. -->
+                <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Retail Sales" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.RetailSalesText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock Text="{x:Bind ViewModel.RetailBillCountText, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Wholesale Sales" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.WholesaleSalesText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
+                        <TextBlock Text="{x:Bind ViewModel.WholesaleBillCountText, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" />
                     </StackPanel>
                 </Border>
             </Grid>

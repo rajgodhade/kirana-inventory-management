@@ -78,6 +78,7 @@
               BorderBrush="{ThemeResource SurfaceBorderBrush}" BorderThickness="0,0,0,1" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -85,19 +86,23 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Width="32" Height="32" CornerRadius="{StaticResource RadiusMedium}"
+            <!-- Leads the header: product identity, a divider, then this shell's store badge and
+                 name — one continuous "VyaparOS | store" lockup. -->
+            <controls:HeaderBranding Grid.Column="0" Margin="0,0,4,0" />
+
+            <Border Grid.Column="1" Width="32" Height="32" CornerRadius="{StaticResource RadiusMedium}"
                     Background="{ThemeResource BrandPrimaryBrush}" VerticalAlignment="Center">
                 <TextBlock Text="K" FontSize="17" FontWeight="Bold" Foreground="White"
                            HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
 
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0">
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="0">
                 <TextBlock Text="{x:Bind ViewModel.StoreName, Mode=OneWay}" FontSize="14" FontWeight="SemiBold"
                            Foreground="{ThemeResource TextPrimaryBrush}" />
                 <TextBlock Text="Billing" Style="{StaticResource CaptionTextStyle}" />
             </StackPanel>
 
-            <Border x:Name="RegisterStatusBadge" Grid.Column="2" Padding="10,5" CornerRadius="12"
+            <Border x:Name="RegisterStatusBadge" Grid.Column="3" Padding="10,5" CornerRadius="12"
                     Background="{ThemeResource SurfaceAltBrush}" VerticalAlignment="Center"
                     ToolTipService.ToolTip="Cash register status">
                 <StackPanel Orientation="Horizontal" Spacing="6">
@@ -106,30 +111,25 @@
                 </StackPanel>
             </Border>
 
-            <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,8,0">
+            <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,8,0">
                 <TextBlock x:Name="CurrentDayDateText" Style="{StaticResource SecondaryTextStyle}"
                            HorizontalAlignment="Right" />
                 <TextBlock x:Name="CurrentTimeText" Style="{StaticResource CaptionTextStyle}"
                            HorizontalAlignment="Right" />
             </StackPanel>
 
-            <Button Grid.Column="4" Click="OnThemeToggleClick" VerticalAlignment="Center"
+            <Button Grid.Column="5" Click="OnThemeToggleClick" VerticalAlignment="Center"
                     AutomationProperties.Name="Toggle light and dark theme">
                 <FontIcon x:Name="ThemeIcon" Glyph="&#xE706;" FontSize="15" />
             </Button>
 
-            <Button Grid.Column="5" Click="OnDashboardClick" VerticalAlignment="Center"
+            <Button Grid.Column="6" Click="OnDashboardClick" VerticalAlignment="Center"
                     AutomationProperties.Name="Open management dashboard">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE72E;" FontSize="14" />
                     <TextBlock Text="Dashboard" />
                 </StackPanel>
             </Button>
-
-            <!-- Spans every column so it centers against the header's full width, not just
-                 whatever space is left between the store-info block and the toolbar buttons —
-                 the left/right controls' widths can never pull this off-center. -->
-            <controls:HeaderBranding Grid.Column="0" Grid.ColumnSpan="6" />
         </Grid>
 
         <!-- Billing tabs: several customers can be part-way through a bill at once. -->
@@ -168,6 +168,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="ScanSearchBox" Grid.Column="0" FontSize="17" Padding="14,11"
@@ -202,9 +203,31 @@
                 </Border>
             </Popup>
 
+            <!-- Price level (Phase 15B-3). Two toggles rather than a bound ComboBox: switching
+                 re-prices the whole cart asynchronously, and a TwoWay-bound selection would also
+                 fire when a tab switch RESTORES a level, re-running the re-price for no reason.
+                 Click handlers mean only a deliberate operator choice ever re-prices. -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="0" VerticalAlignment="Center"
+                        AutomationProperties.Name="Price level">
+                <ToggleButton x:Name="RetailToggle" Click="OnRetailLevelClick" MinWidth="88" Padding="12,9"
+                              CornerRadius="6,0,0,6"
+                              IsChecked="{x:Bind ViewModel.IsWholesaleSelected, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}"
+                              ToolTipService.ToolTip="Sell this bill at retail prices"
+                              AutomationProperties.Name="Retail price level">
+                    <TextBlock Text="Retail" FontWeight="SemiBold" />
+                </ToggleButton>
+                <ToggleButton x:Name="WholesaleToggle" Click="OnWholesaleLevelClick" MinWidth="98" Padding="12,9"
+                              CornerRadius="0,6,6,0" Margin="-1,0,0,0"
+                              IsChecked="{x:Bind ViewModel.IsWholesaleSelected, Mode=OneWay}"
+                              ToolTipService.ToolTip="Sell this bill at wholesale prices"
+                              AutomationProperties.Name="Wholesale price level">
+                    <TextBlock Text="Wholesale" FontWeight="SemiBold" />
+                </ToggleButton>
+            </StackPanel>
+
             <!-- The button's content is icon + bound text, which leaves it without an accessible
                  name; set one explicitly so screen readers announce it. -->
-            <Button Grid.Column="1" Click="OnCustomerClick" Padding="14,9"
+            <Button Grid.Column="2" Click="OnCustomerClick" Padding="14,9"
                     CornerRadius="{StaticResource RadiusMedium}"
                     AutomationProperties.Name="Select Customer (F4)">
                 <StackPanel Orientation="Horizontal" Spacing="10">

@@ -28,6 +28,7 @@ public sealed class CustomerService(IKiranaDbContext db, ISequenceGenerator sequ
             Address = Normalize(request.Address),
             Gstin = Normalize(request.Gstin),
             Notes = Normalize(request.Notes),
+            DefaultPriceLevel = request.DefaultPriceLevel,
             IsActive = true,
         };
 
@@ -53,11 +54,24 @@ public sealed class CustomerService(IKiranaDbContext db, ISequenceGenerator sequ
         customer.Address = Normalize(request.Address);
         customer.Gstin = Normalize(request.Gstin);
         customer.Notes = Normalize(request.Notes);
+
+        // Captured before the assignment so the audit can say what the preference actually moved
+        // from — the existing entry only records identity, which would leave a pricing-relevant
+        // change invisible in the trail.
+        var previousPriceLevel = customer.DefaultPriceLevel;
+        customer.DefaultPriceLevel = request.DefaultPriceLevel;
+
         customer.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
         await auditLogger.RecordAsync(request.PerformedByUserId, "CustomerUpdated", nameof(Customer), customer.Id.ToString(),
-            newValue: $"{customer.CustomerCode} - {customer.Name}", cancellationToken: cancellationToken);
+            previousValue: previousPriceLevel == request.DefaultPriceLevel
+                ? null
+                : $"Default price level: {Describe(previousPriceLevel)}",
+            newValue: previousPriceLevel == request.DefaultPriceLevel
+                ? $"{customer.CustomerCode} - {customer.Name}"
+                : $"{customer.CustomerCode} - {customer.Name}; default price level: {Describe(customer.DefaultPriceLevel)}",
+            cancellationToken: cancellationToken);
 
         return customer;
     }
@@ -160,4 +174,8 @@ public sealed class CustomerService(IKiranaDbContext db, ISequenceGenerator sequ
     }
 
     private static string? Normalize(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    /// <summary>Renders the optional preference for the audit trail. "No preference" is a real,
+    /// distinct state and reads better than an empty value.</summary>
+    private static string Describe(PriceLevel? level) => level?.ToDisplayText() ?? "No preference";
 }

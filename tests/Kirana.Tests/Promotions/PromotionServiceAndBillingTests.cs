@@ -41,7 +41,7 @@ public sealed class PromotionServiceAndBillingTests : IDisposable
     [Fact]
     public async Task SaleService_AutomaticallyAppliesPromotionAndSnapshotsIt()
     {
-        var product = await Product(); await DirectPromotion(product, 10);
+        await Owner(); var product = await Product(); await DirectPromotion(product, 10);
         var saleService = new SaleService(_fixture.Context, new EfSequenceGenerator(_fixture.Context), _audit, _permissions, new PromotionEngine(_fixture.Context));
         var sale = await saleService.CompleteSaleAsync(new CompleteSaleRequest
         {
@@ -57,7 +57,7 @@ public sealed class PromotionServiceAndBillingTests : IDisposable
     [Fact]
     public async Task SaleService_IncrementsUsageOncePerSale()
     {
-        var product = await Product(); var promotion = await DirectPromotion(product, 10);
+        await Owner(); var product = await Product(); var promotion = await DirectPromotion(product, 10);
         var saleService = new SaleService(_fixture.Context, new EfSequenceGenerator(_fixture.Context), _audit, _permissions, new PromotionEngine(_fixture.Context));
         await saleService.CompleteSaleAsync(new CompleteSaleRequest { Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1 }], Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 90, AmountTendered = 90 }] });
         Assert.Equal(1, (await _fixture.Context.Promotions.FindAsync(promotion.Id))!.CurrentUsage);
@@ -66,7 +66,7 @@ public sealed class PromotionServiceAndBillingTests : IDisposable
     [Fact]
     public async Task PromotionPricingFailure_DoesNotPartiallyCommitSaleUsageOrStock()
     {
-        var product = await Product(); var promotion = await DirectPromotion(product, 10);
+        await Owner(); var product = await Product(); var promotion = await DirectPromotion(product, 10);
         var saleService = new SaleService(_fixture.Context, new EfSequenceGenerator(_fixture.Context), _audit, _permissions, new PromotionEngine(_fixture.Context));
         await Assert.ThrowsAsync<InvalidOperationException>(() => saleService.CompleteSaleAsync(new CompleteSaleRequest
         {
@@ -90,7 +90,7 @@ public sealed class PromotionServiceAndBillingTests : IDisposable
     [Fact]
     public async Task Receipt_ContainsPromotionAndSavings()
     {
-        var product = await Product(); await DirectPromotion(product, 10);
+        await Owner(); var product = await Product(); await DirectPromotion(product, 10);
         var saleService = new SaleService(_fixture.Context, new EfSequenceGenerator(_fixture.Context), _audit, _permissions, new PromotionEngine(_fixture.Context));
         var sale = await saleService.CompleteSaleAsync(new CompleteSaleRequest { Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1 }], Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 90, AmountTendered = 90 }] });
         var document = new InvoiceDocumentBuilder().Build(sale, new Store { Name = "Test" });
@@ -125,12 +125,15 @@ public sealed class PromotionServiceAndBillingTests : IDisposable
     {
         if (_owner is not null) return _owner;
         await new FirstTimeSetupService(_fixture.Context, new BCryptPasswordHasher()).CompleteSetupAsync(new CompleteSetupRequest { StoreName = "Test", OwnerName = "Owner", AdminUsername = "admin", AdminFullName = "Owner", AdminPassword = "S3cure!Pass" });
-        _owner = await _fixture.Context.Users.Include(x => x.Role).SingleAsync(); return _owner;
+        _owner = await _fixture.Context.Users.Include(x => x.Role).SingleAsync();
+        // Phase 16A-2: the billing half of these tests completes cash sales, which needs a register.
+        await _fixture.SeedOpenRegisterAsync(_owner.Id);
+        return _owner;
     }
 
     private async Task<Product> Product()
     {
-        var p = new Product { ProductCode = "PRD-TEST", Name = "Milk", SellingPrice = 100, Mrp = 110, PurchasePrice = 80, IsActive = true };
+        var p = new Product { ProductCode = "PRD-TEST", Name = "Milk", SellingPrice = 100, Mrp = 110, PurchasePrice = 80, IsActive = true }.WithRetailPrice();
         _fixture.Context.Products.Add(p); _fixture.Context.Inventories.Add(new Inventory { Product = p, QuantityOnHand = 20 }); await _fixture.Context.SaveChangesAsync(); return p;
     }
 

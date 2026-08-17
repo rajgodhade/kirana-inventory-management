@@ -1,3 +1,5 @@
+using Kirana.Domain.Entities;
+
 namespace Kirana.Application.Billing;
 
 public sealed class CompleteSaleRequest
@@ -20,4 +22,16 @@ public sealed class CompleteSaleRequest
     /// selling price — <see cref="SaleService"/> re-verifies the user actually holds that
     /// permission.</summary>
     public int? PriceOverrideAuthorizedByUserId { get; init; }
+
+    /// <summary>
+    /// Which price level this bill is being sold at (Phase 15B-3). Defaults to
+    /// <see cref="Domain.Entities.PriceLevel.Retail"/>, so every existing caller — and every bill
+    /// that never touches the selector — behaves exactly as it did before.
+    ///
+    /// <para>This is the level <see cref="SaleService"/> resolves each line at; it is NOT a price.
+    /// The client cannot state what a product costs, only which level it is buying at, and the
+    /// server establishes the amount from <c>ProductPrice</c>. A product that does not configure
+    /// the requested level fails the sale rather than falling back to another level.</para>
+    /// </summary>
+    public PriceLevel PriceLevel { get; init; } = PriceLevel.Retail;
 }

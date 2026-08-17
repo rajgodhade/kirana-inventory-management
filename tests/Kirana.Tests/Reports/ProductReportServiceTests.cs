@@ -19,6 +19,9 @@ public class ProductReportServiceTests : IDisposable
     {
         _ownerId = _fixture.SeedOwnerAsync().GetAwaiter().GetResult().Id;
 
+        // Phase 16A-2: cash transactions require an open register. These tests use cash as
+        // fixture setup for something else, so the shop is simply open for business.
+        _fixture.SeedOpenRegisterAsync().GetAwaiter().GetResult();
         var seq = new EfSequenceGenerator(_fixture.Context);
         var audit = new EfAuditLogger(_fixture.Context);
         var enforcer = new PermissionEnforcer(_fixture.Context);
@@ -41,7 +44,7 @@ public class ProductReportServiceTests : IDisposable
             CategoryId = categoryId,
             BrandId = brandId,
             IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = stock });
         await _fixture.Context.SaveChangesAsync();

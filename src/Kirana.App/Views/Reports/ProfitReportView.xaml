@@ -53,7 +53,15 @@
             <InfoBar IsOpen="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
                      Severity="Error" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
 
-            <TextBlock Text="Estimated: cost of goods sold uses the product's current purchase price, since sale records do not snapshot historical cost."
+            <!-- Phase 17A: COGS now comes from the cost snapshotted on each sale line, so this text
+                 states the real basis instead of the old "current purchase price" caveat. It turns
+                 into a warning when the period contains lines recorded before cost capture — those
+                 contribute revenue but no cost, which inflates profit if left unsaid. -->
+            <InfoBar IsOpen="{x:Bind ViewModel.HasUnknownCosts, Mode=OneWay}" Severity="Warning"
+                     IsClosable="False" Message="{x:Bind ViewModel.CostBasisText, Mode=OneWay}" />
+
+            <TextBlock Text="{x:Bind ViewModel.CostBasisText, Mode=OneWay}"
+                       Visibility="{x:Bind ViewModel.HasUnknownCosts, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                        Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" />
 
             <Grid ColumnSpacing="12" RowSpacing="12">
@@ -86,13 +94,13 @@
 
                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Est. Cost of Goods Sold" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="Cost of Goods Sold" Style="{StaticResource MetricLabelTextStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.CogsText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Est. Gross Profit" Style="{StaticResource MetricLabelTextStyle}" />
+                        <TextBlock Text="Gross Profit" Style="{StaticResource MetricLabelTextStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.GrossProfitText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="20"
                                    Foreground="{ThemeResource SuccessBrush}" />
                     </StackPanel>
@@ -108,7 +116,7 @@
 
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Est. Net Profit" Style="{StaticResource MetricLabelTextStyle}" />
+                    <TextBlock Text="Net Profit" Style="{StaticResource MetricLabelTextStyle}" />
                     <TextBlock Text="{x:Bind ViewModel.NetProfitText, Mode=OneWay}" Style="{StaticResource MetricTextStyle}" FontSize="28"
                                Foreground="{ThemeResource SuccessBrush}" />
                 </StackPanel>

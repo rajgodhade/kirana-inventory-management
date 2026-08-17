@@ -22,7 +22,15 @@ public class SaleServiceTests : IDisposable
         _sequenceGenerator = new EfSequenceGenerator(_fixture.Context);
         _auditLogger = new EfAuditLogger(_fixture.Context);
         _sut = new SaleService(_fixture.Context, _sequenceGenerator, _auditLogger, new PermissionEnforcer(_fixture.Context));
+
+        // Phase 16A-2: a cash sale requires an open register, and a register requires a configured
+        // store. These tests are about pricing, tax, discounts and stock, so the shop is simply set
+        // up and open for business.
+        _authorizedUser = _fixture.SeedOwnerAsync().GetAwaiter().GetResult();
+        _fixture.SeedOpenRegisterAsync(_authorizedUser.Id).GetAwaiter().GetResult();
     }
+
+    private readonly User _authorizedUser;
 
     private async Task<Product> SeedProductAsync(
         string name = "Tata Salt 1kg", decimal price = 25, decimal stock = 100,
@@ -39,33 +47,25 @@ public class SaleServiceTests : IDisposable
             GstRatePercent = gstRate,
             IsTaxInclusive = isTaxInclusive,
             IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = stock });
         await _fixture.Context.SaveChangesAsync();
         return product;
     }
 
+    /// <summary>Updates the store the constructor already set up, rather than adding a second one —
+    /// a duplicate Store row makes <c>Stores.SingleAsync()</c> throw elsewhere in the app.</summary>
     private async Task EnableStoreGstAsync(bool enabled = true)
     {
-        _fixture.Context.Stores.Add(new Store { Name = "Test Store", OwnerName = "Owner", IsGstEnabled = enabled, SetupCompleted = true });
+        var store = await _fixture.Context.Stores.FirstAsync();
+        store.IsGstEnabled = enabled;
         await _fixture.Context.SaveChangesAsync();
     }
 
-    private async Task<User> SeedAuthorizedUserAsync()
-    {
-        var setup = new FirstTimeSetupService(_fixture.Context, _hasher);
-        await setup.CompleteSetupAsync(new CompleteSetupRequest
-        {
-            StoreName = "Sharma Kirana Store",
-            OwnerName = "Ramesh Sharma",
-            AdminUsername = "admin",
-            AdminFullName = "Ramesh Sharma",
-            AdminPassword = "S3cure!Pass",
-        });
-
-        return await _fixture.Context.Users.Include(u => u.Role).SingleAsync();
-    }
+    /// <summary>The owner seeded in the constructor. First-time setup already ran there (a register
+    /// needs a store), so running it again would throw "Setup has already been completed."</summary>
+    private Task<User> SeedAuthorizedUserAsync() => Task.FromResult(_authorizedUser);
 
     private static CompleteSaleRequest CashRequest(int productId, decimal quantity, decimal amount) => new()
     {
@@ -516,13 +516,20 @@ public class SaleServiceTests : IDisposable
         Assert.Null(sale.PriceOverrideAuthorizedByUserId);
     }
 
+    /// <summary>Updates the settings row rather than adding a second one. First-time setup — which
+    /// the constructor now runs, because an open register needs a configured store — already creates
+    /// an AppSettings row, and <c>SaleService</c> reads the FIRST one it finds.</summary>
     private async Task SetRequirePinAsync(bool priceOverride, bool largeDiscount)
     {
-        _fixture.Context.AppSettings.Add(new AppSettings
+        var settings = await _fixture.Context.AppSettings.FirstOrDefaultAsync();
+        if (settings is null)
         {
-            RequirePinForPriceOverride = priceOverride,
-            RequirePinForLargeDiscount = largeDiscount,
-        });
+            settings = new AppSettings();
+            _fixture.Context.AppSettings.Add(settings);
+        }
+
+        settings.RequirePinForPriceOverride = priceOverride;
+        settings.RequirePinForLargeDiscount = largeDiscount;
         await _fixture.Context.SaveChangesAsync();
     }
 

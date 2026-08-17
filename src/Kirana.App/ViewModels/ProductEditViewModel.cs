@@ -100,9 +100,13 @@ public sealed partial class ProductEditViewModel : ObservableObject
     [ObservableProperty]
     private string _mrpText = "0";
 
+    /// <summary>Bound to the "Retail price" box. Backs Product.SellingPrice, which the pricing
+    /// service keeps in step with PriceLevel.Retail.</summary>
     [ObservableProperty]
     private string _sellingPriceText = "0";
 
+    /// <summary>Bound to the "Wholesale price" box, and nullable on purpose: an empty box round-trips
+    /// as null ("not configured"), which the pricing service treats differently from an explicit 0.</summary>
     [ObservableProperty]
     private string? _wholesalePriceText;
 
@@ -506,7 +510,7 @@ public sealed partial class ProductEditViewModel : ObservableObject
             !TryParseDecimal(MrpText, out var mrp) ||
             !TryParseDecimal(SellingPriceText, out var sellingPrice))
         {
-            ErrorMessage = "Purchase price, MRP, and selling price must be valid numbers.";
+            ErrorMessage = "Purchase price, MRP, and retail price must be valid numbers.";
             return;
         }
 

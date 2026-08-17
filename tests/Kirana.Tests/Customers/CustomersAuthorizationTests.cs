@@ -30,6 +30,9 @@ public class CustomersAuthorizationTests : IDisposable
     {
         _ownerId = _fixture.SeedOwnerAsync().GetAwaiter().GetResult().Id;
 
+        // Phase 16A-2: cash transactions require an open register. These tests use cash as
+        // fixture setup for something else, so the shop is simply open for business.
+        _fixture.SeedOpenRegisterAsync().GetAwaiter().GetResult();
         var seq = new EfSequenceGenerator(_fixture.Context);
         var audit = new EfAuditLogger(_fixture.Context);
         var enforcer = new PermissionEnforcer(_fixture.Context);
@@ -52,7 +55,7 @@ public class CustomersAuthorizationTests : IDisposable
         {
             ProductCode = "PRD-CGATE1", Name = "Gated Product", Unit = UnitOfMeasure.Piece,
             PurchasePrice = 50, Mrp = 70, SellingPrice = 100, IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = 100 });
         await _fixture.Context.SaveChangesAsync();

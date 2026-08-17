@@ -333,6 +333,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal>("CashExpenses")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("CashIn")
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
@@ -568,6 +572,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Property<string>("CustomerCode")
                         .IsRequired()
                         .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DefaultPriceLevel")
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Gstin")
@@ -1400,6 +1408,45 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductBatches");
+                });
+
+            modelBuilder.Entity("Kirana.Domain.Entities.ProductPrice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Level")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductId", "Level")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ProductPrices_ProductId_Level_Active")
+                        .HasFilter("\"IsActive\" = 1");
+
+                    b.ToTable("ProductPrices");
                 });
 
             modelBuilder.Entity("Kirana.Domain.Entities.Promotion", b =>
@@ -2285,6 +2332,11 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PriceLevel")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("PriceOverrideAuthorizedByUserId")
                         .HasColumnType("INTEGER");
 
@@ -2405,6 +2457,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("TaxableAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("UnitCostSnapshot")
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
@@ -3431,6 +3487,17 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Kirana.Domain.Entities.ProductPrice", b =>
+                {
+                    b.HasOne("Kirana.Domain.Entities.Product", "Product")
+                        .WithMany("Prices")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Kirana.Domain.Entities.Promotion", b =>
                 {
                     b.HasOne("Kirana.Domain.Entities.User", "CreatedByUser")
@@ -3958,6 +4025,8 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Navigation("Batches");
 
                     b.Navigation("Inventory");
+
+                    b.Navigation("Prices");
 
                     b.Navigation("PromotionTargets");
 

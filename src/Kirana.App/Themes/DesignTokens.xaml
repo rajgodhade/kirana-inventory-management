@@ -66,6 +66,21 @@
             <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="#0F766E" />
             <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#0F766E" />
 
+            <!-- A checked ToggleButton is the one accent surface WinUI does NOT route through the
+                 keys above — it has its own family, which otherwise resolves to the user's Windows
+                 accent and shows up (e.g. magenta) against the app's teal. Same colour-only
+                 treatment as the accent button, so the POS price-level selector reads as selected
+                 in the app's own palette. -->
+            <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="#0F766E" />
+            <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="#116B64" />
+            <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="#0D5B55" />
+            <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="#F0FFFD" />
+            <SolidColorBrush x:Key="ToggleButtonBorderBrushChecked" Color="#0F766E" />
+            <SolidColorBrush x:Key="ToggleButtonBorderBrushCheckedPointerOver" Color="#116B64" />
+            <SolidColorBrush x:Key="ToggleButtonBorderBrushCheckedPressed" Color="#0D5B55" />
+
             <!-- ===================== PASTEL DASHBOARD PALETTE =====================
                  Tinted card fills for KPI tiles and chart series. Each pastel has a matching
                  "On" foreground picked for AA contrast against its own fill, so a KPI's value
@@ -142,6 +157,18 @@
             <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#2DD4BF" />
             <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="#1F8C80" />
             <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#2DD4BF" />
+
+            <!-- Checked ToggleButton, dark mode: light teal fill with dark text, matching the
+                 accent button's contrast direction (see the Light dictionary for why these exist). -->
+            <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="#2DD4BF" />
+            <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="#3FDCC9" />
+            <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="#25B5A3" />
+            <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="#08201E" />
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="#08201E" />
+            <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="#08201E" />
+            <SolidColorBrush x:Key="ToggleButtonBorderBrushChecked" Color="#2DD4BF" />
+            <SolidColorBrush x:Key="ToggleButtonBorderBrushCheckedPointerOver" Color="#3FDCC9" />
+            <SolidColorBrush x:Key="ToggleButtonBorderBrushCheckedPressed" Color="#25B5A3" />
 
             <!-- Dark-mode pastels are deep tints, not pale ones: a literal pastel fill would glare
                  against a #14181D page and wash out the value sitting on it. Same six hues at low

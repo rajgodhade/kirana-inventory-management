@@ -33,6 +33,9 @@ public class CustomerCreditServiceTests : IDisposable
         _saleService = new SaleService(_fixture.Context, seq, audit, enforcer);
 
         _ownerId = _fixture.SeedOwnerAsync().GetAwaiter().GetResult().Id;
+        // Phase 16A-2: cash transactions require an open register. These tests use cash as
+        // fixture setup for something else, so the shop is simply open for business.
+        _fixture.SeedOpenRegisterAsync().GetAwaiter().GetResult();
     }
 
     // ---------- helpers ----------
@@ -51,7 +54,7 @@ public class CustomerCreditServiceTests : IDisposable
             Mrp = price + 5,
             SellingPrice = price,
             IsActive = true,
-        };
+        }.WithRetailPrice();
         _fixture.Context.Products.Add(product);
         _fixture.Context.Inventories.Add(new Inventory { Product = product, QuantityOnHand = stock });
         await _fixture.Context.SaveChangesAsync();

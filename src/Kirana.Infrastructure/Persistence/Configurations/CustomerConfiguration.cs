@@ -22,5 +22,10 @@ public sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.Property(c => c.Address).HasMaxLength(500);
         builder.Property(c => c.Notes).HasMaxLength(1000);
         builder.Property(c => c.CreditBalance).HasPrecision(18, 2);
+
+        // Stored as the enum member name at 20 chars, the same convention every other enum in this
+        // schema uses (PriceLevel on ProductPrice, MovementType, Symbology). Nullable, because "no
+        // preference" is a real state and must not be written as a defaulted Retail row.
+        builder.Property(c => c.DefaultPriceLevel).HasConversion<string>().HasMaxLength(20);
     }
 }

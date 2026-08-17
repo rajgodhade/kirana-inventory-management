@@ -61,6 +61,7 @@ public sealed partial class PosShellPage : Page
             services.GetRequiredService<ICustomerService>(),
             services.GetRequiredService<IPromotionEngine>(),
             services.GetRequiredService<IGstCalculationService>(),
+            services.GetRequiredService<IProductPriceResolver>(),
             services.GetRequiredService<IKiranaDbContext>(),
             services.GetRequiredService<ManagementSession>());
 
@@ -319,7 +320,7 @@ public sealed partial class PosShellPage : Page
         _suggestionDebounce.Start();
     }
 
-    private void OnSuggestionItemClick(object sender, ItemClickEventArgs e)
+    private async void OnSuggestionItemClick(object sender, ItemClickEventArgs e)
     {
         if (e.ClickedItem is not Product product)
         {
@@ -328,10 +329,32 @@ public sealed partial class PosShellPage : Page
 
         _suggestionDebounce.Stop();
         ViewModel.ClearSuggestions();
-        ViewModel.AddOrIncrement(product);
 
+        // Clear and refocus the box BEFORE awaiting the price lookup, so the operator can keep
+        // scanning without waiting on a round trip.
         ScanSearchBox.Text = string.Empty;
         ScanSearchBox.Focus(FocusState.Programmatic);
+
+        await ViewModel.AddOrIncrementAsync(product);
+    }
+
+    private async void OnRetailLevelClick(object sender, RoutedEventArgs e) =>
+        await ApplyPriceLevelAsync(PriceLevel.Retail);
+
+    private async void OnWholesaleLevelClick(object sender, RoutedEventArgs e) =>
+        await ApplyPriceLevelAsync(PriceLevel.Wholesale);
+
+    /// <summary>
+    /// Re-prices the cart at the chosen level. The toggles are bound one-way to the ViewModel, so
+    /// they always end up reflecting the level that was actually applied — including when clicking
+    /// the already-selected one, which would otherwise leave a toggle visually unchecked.
+    /// </summary>
+    private async Task ApplyPriceLevelAsync(PriceLevel level)
+    {
+        await ViewModel.ApplyPriceLevelAsync(level);
+
+        RetailToggle.IsChecked = !ViewModel.IsWholesaleSelected;
+        WholesaleToggle.IsChecked = ViewModel.IsWholesaleSelected;
     }
 
     private async void OnCustomerClick(object sender, RoutedEventArgs e) => await OpenCustomerPickerAsync();
@@ -343,7 +366,9 @@ public sealed partial class PosShellPage : Page
 
         if (dialog.Confirmed)
         {
-            ViewModel.SelectedCustomer = dialog.SelectedCustomer;
+            // Goes through the ViewModel rather than assigning the property, so the customer's
+            // default price level is applied under the empty-cart rule (Phase 15B-4).
+            await ViewModel.ApplyCustomerAsync(dialog.SelectedCustomer);
             await ViewModel.RefreshPromotionsAsync();
         }
 
@@ -540,7 +565,19 @@ public sealed partial class PosShellPage : Page
             return;
         }
 
-        var paymentViewModel = new PaymentViewModel(ViewModel, App.Services.GetRequiredService<ISaleService>());
+        // A bill labelled Wholesale must not reach payment while one of its lines is still priced
+        // at something else. SaleService would refuse it anyway, but stopping here names the
+        // product while the cashier can still fix it, rather than failing at the payment screen.
+        if (ViewModel.HasUnresolvedLines)
+        {
+            ViewModel.ErrorMessage = string.Join(
+                " ",
+                ViewModel.CartLines.Where(l => l.HasPriceIssue).Select(l => l.PriceIssue));
+            return;
+        }
+
+        var paymentViewModel = new PaymentViewModel(
+            ViewModel, App.Services.GetRequiredService<ISaleService>(), _cashRegisterService);
         var dialog = new PaymentDialog(paymentViewModel).Themed(XamlRoot);
         await ShowModalAsync(dialog);
 
