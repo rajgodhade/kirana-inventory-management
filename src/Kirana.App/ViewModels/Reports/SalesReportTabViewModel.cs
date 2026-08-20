@@ -181,19 +181,19 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
         var rows = new List<IReadOnlyList<string>>();
         foreach (var r in g.SalesByRate)
         {
-            rows.Add(["Sales", r.GstTreatment, $"{r.RatePercent}%", Fmt(r.TaxableAmount), Fmt(r.Cgst), Fmt(r.Sgst), Fmt(r.Igst), Fmt(r.TaxAmount), r.InvoiceCount.ToString()]);
+            rows.Add(["Sales", r.GstTreatment, $"{r.RatePercent}%", Fmt(r.TaxableAmount), Fmt(r.Cgst), Fmt(r.Sgst), Fmt(r.Igst), Fmt(r.UnresolvedGst), Fmt(r.TaxAmount), r.InvoiceCount.ToString()]);
         }
 
         foreach (var r in g.PurchasesByRate)
         {
-            rows.Add(["Purchases", r.GstTreatment, $"{r.RatePercent}%", Fmt(r.TaxableAmount), Fmt(r.Cgst), Fmt(r.Sgst), Fmt(r.Igst), Fmt(r.TaxAmount), r.InvoiceCount.ToString()]);
+            rows.Add(["Purchases", r.GstTreatment, $"{r.RatePercent}%", Fmt(r.TaxableAmount), Fmt(r.Cgst), Fmt(r.Sgst), Fmt(r.Igst), Fmt(r.UnresolvedGst), Fmt(r.TaxAmount), r.InvoiceCount.ToString()]);
         }
 
         return new ReportExportData
         {
             Title = "GST Report",
-            Subtitle = $"{DateFilter.Resolve().Label} — CGST/SGST assume intra-state; see report notes",
-            Columns = ["Type", "GST Treatment", "Rate", "Taxable", "CGST", "SGST", "IGST", "Total Tax", "Invoice Count"],
+            Subtitle = $"{DateFilter.Resolve().Label} — jurisdiction uses immutable transaction StateCode snapshots",
+            Columns = ["Type", "GST Treatment", "Rate", "Taxable", "CGST", "SGST", "IGST", "Unresolved GST", "Total Tax", "Invoice Count"],
             Rows = rows,
         };
     }

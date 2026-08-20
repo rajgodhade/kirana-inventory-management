@@ -51,6 +51,7 @@ public static class DependencyInjection
         services.AddScoped<ICashRegisterService, CashRegisterService>();
         services.AddSingleton<IGstCalculationService, GstCalculationService>();
         services.AddSingleton<IPurchaseGstCalculationService, PurchaseGstCalculationService>();
+        services.AddSingleton<IGstJurisdictionResolver, GstJurisdictionResolver>();
         services.AddScoped<IStoreTaxIdentityService, StoreTaxIdentityService>();
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IInvoiceService, InvoiceService>();

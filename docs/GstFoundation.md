@@ -116,3 +116,50 @@ current-master backfill, or other historical guessing is performed.
 This phase does not add CGST, SGST, IGST, CESS, place-of-supply logic, B2B/B2C classification,
 reverse charge, GST return filing, new GST arithmetic, or any monetary recalculation. Those remain
 future phases and must consume the stored transaction identity rather than mutable masters.
+
+## Phase 18A-3 — GST Tax Jurisdiction Resolution
+
+Phase 18A-3 introduces one deterministic Application-layer jurisdiction resolver. It is a pure,
+read-only service: it has no database dependency, performs no writes, and does not alter GST
+rates, taxable values, stored tax, totals, posting, payments, stock, or return behavior.
+
+### Authoritative evidence and decision matrix
+
+`StateCode` values already frozen by Phase 18A-2 are the only jurisdiction authority. The resolver
+never derives a state from GSTIN prefixes, state display names, free-text addresses, registration
+types, or current store/customer/supplier masters.
+
+- Sale seller: `Sale.StoreStateCodeSnapshot`
+- Sale buyer: `Sale.CustomerStateCodeSnapshot`
+- Purchase seller: `Purchase.SupplierStateCodeSnapshot`
+- Purchase buyer: `Purchase.StoreStateCodeSnapshot`
+
+If both codes are supported by `IndianGstStateCatalog`, equal codes resolve to `IntraState` and
+different codes resolve to `InterState`. Missing or invalid evidence resolves to `Unresolved` with
+a specific reason. A null `GstIdentitySnapshotCapturedAtUtc` always means `LegacyTransaction` and
+prevents any fallback. A walk-in sale has no customer state evidence and therefore remains
+unresolved. GST registration classification remains separate from jurisdiction.
+
+### Historical safety and returns
+
+Resolution happens from the transaction snapshot each time it is read. Later master edits or
+deletions cannot change the answer, and no read path backfills or repairs historical records.
+Sales and purchase returns continue to reference their originating `Sale` or `Purchase`; callers
+resolve that origin and no return-specific identity snapshot is created. Multiple returns against
+one origin therefore share the same immutable jurisdiction evidence.
+
+### Existing GST report integration
+
+The existing GST report now uses `IGstJurisdictionResolver` for each stored sale and purchase.
+Intra-state tax is shown as CGST plus SGST, inter-state tax as IGST, and transactions without
+sufficient historical evidence in an explicit Unresolved GST column. The report continues to
+aggregate the already-stored GST amounts through `IGstCalculationService`; it never recalculates
+historical GST or reads current master state. This replaces the former blanket intra-state
+assumption without creating a new reporting module.
+
+### Persistence and scope
+
+No migration or new column is required because Phase 18A-2 already persists all authoritative
+inputs. Phase 18A-3 adds no tax-component persistence and no snapshot update path. Place-of-supply
+exceptions, reverse charge, CESS, GST return filing, B2B/B2C classification, and new GST arithmetic
+remain outside this phase.
