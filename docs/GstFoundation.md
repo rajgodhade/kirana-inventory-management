@@ -71,3 +71,48 @@ This phase does not implement CGST/SGST/IGST resolution, place of supply, GST/IT
 reverse charge, CESS, B2B/B2C classification, invoice redesign, or tax-component migration. A
 future jurisdiction phase may consume normalized `StateCode`; it must continue to use stored
 historical transaction snapshots and the existing GST calculation services.
+
+## Historical GST Identity Snapshots
+
+Phase 18A-2 freezes the legal/GST identity that was known when a sale is completed or a purchase
+is finalized. This is an identity-only change: stored taxable values, GST amounts, totals, payment
+amounts, stock, and all calculation services are unchanged.
+
+### Captured identity
+
+Every new completed sale stores a capture timestamp plus the store trade/legal name, GSTIN,
+normalized state code and display name, registration type, invoice address components, and contact
+number. When the sale has a customer, it also stores the customer's name, phone, GSTIN, state,
+registration type, and address. A walk-in sale stores no invented customer identity.
+
+Every new finalized purchase stores the same buying-store identity and the supplier's name, stable
+supplier code, GSTIN, state, registration type, and address. `HistoricalGstIdentitySnapshotFactory`
+is the single copy policy used by both transaction services. Capture occurs before the transaction's
+existing `SaveChanges` call, so the financial record and its identity snapshot commit atomically.
+
+### Immutable reads
+
+There is no snapshot edit service or update path. Invoice detail, invoice print/reprint, invoice
+search/export/recent views, purchase detail/print/list/export, and return views prefer the snapshot
+whenever `GstIdentitySnapshotCapturedAtUtc` is present. Editing or deleting mutable master details
+therefore cannot rewrite a completed document's identity. Current logo and invoice footer remain
+presentation settings rather than GST/legal identity.
+
+Sales and purchase returns keep their existing relationship to the originating `Sale` or
+`Purchase`; they do not duplicate or recompute identity. Return views and sales-return receipts use
+the origin's frozen identity.
+
+### Legacy policy
+
+All new migration columns are nullable and the migration performs no data update. Existing sales
+and purchases retain NULL snapshot fields because the application cannot know their historical
+identity. A NULL capture timestamp identifies such a legacy document. Legacy documents remain
+readable through the pre-existing current-master fallback, but that fallback is explicitly not
+historical evidence and cannot guarantee identity immutability. No GSTIN-to-state inference,
+current-master backfill, or other historical guessing is performed.
+
+### Outside Phase 18A-2
+
+This phase does not add CGST, SGST, IGST, CESS, place-of-supply logic, B2B/B2C classification,
+reverse charge, GST return filing, new GST arithmetic, or any monetary recalculation. Those remain
+future phases and must consume the stored transaction identity rather than mutable masters.

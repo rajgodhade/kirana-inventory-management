@@ -62,6 +62,8 @@ public sealed class InvoiceService(IKiranaDbContext db, IPermissionEnforcer perm
             var like = $"%{text}%";
             sales = sales.Where(s => s.InvoiceNumber == text
                 || EF.Functions.Like(s.InvoiceNumber, like)
+                || (s.CustomerNameSnapshot != null && EF.Functions.Like(s.CustomerNameSnapshot, like))
+                || (s.CustomerPhoneSnapshot != null && EF.Functions.Like(s.CustomerPhoneSnapshot, like))
                 || (s.Customer != null && (EF.Functions.Like(s.Customer.Name, like)
                     || (s.Customer.Phone != null && EF.Functions.Like(s.Customer.Phone, like)))));
         }
@@ -79,9 +81,11 @@ public sealed class InvoiceService(IKiranaDbContext db, IPermissionEnforcer perm
         {
             SaleId = s.Id,
             InvoiceNumber = s.InvoiceNumber,
-            CustomerName = s.Customer?.Name ?? "Walk-in Customer",
+            CustomerName = s.GstIdentitySnapshotCapturedAtUtc != null
+                ? s.CustomerNameSnapshot ?? "Walk-in Customer"
+                : s.Customer?.Name ?? "Walk-in Customer",
             CustomerId = s.CustomerId,
-            CustomerPhone = s.Customer?.Phone,
+            CustomerPhone = s.GstIdentitySnapshotCapturedAtUtc != null ? s.CustomerPhoneSnapshot : s.Customer?.Phone,
             CashierName = s.CashierUser?.FullName ?? "System",
             CashierUserId = s.CashierUserId,
             SaleDateUtc = s.SaleDateUtc,

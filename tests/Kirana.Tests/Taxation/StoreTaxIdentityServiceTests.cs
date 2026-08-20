@@ -52,6 +52,41 @@ public sealed class StoreTaxIdentityServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task Update_does_not_rewrite_persisted_historical_sale_store_snapshot()
+    {
+        var store = await _fixture.Context.Stores.SingleAsync();
+        store.LegalName = "Original Legal Name";
+        store.Gstin = "27AAPFU0939F1ZV";
+        store.StateCode = "27";
+        store.GstRegistrationType = GstRegistrationType.Regular;
+        var sale = new Sale { InvoiceNumber = "INV-SNAPSHOT-STORE" };
+        HistoricalGstIdentitySnapshotFactory.Capture(
+            sale,
+            store,
+            customer: null,
+            new DateTime(2026, 8, 20, 10, 0, 0, DateTimeKind.Utc));
+        _fixture.Context.Sales.Add(sale);
+        await _fixture.Context.SaveChangesAsync();
+
+        await _service.UpdateAsync(new UpdateStoreTaxIdentityRequest
+        {
+            TradeName = "Changed Trade Name",
+            LegalName = "Changed Legal Name",
+            Gstin = "29AAACB2894G1ZJ",
+            StateCode = "29",
+            RegistrationType = GstRegistrationType.Composition,
+            PerformedByUserId = _ownerId,
+        });
+
+        var persisted = await _fixture.Context.Sales.AsNoTracking().SingleAsync(s => s.Id == sale.Id);
+        Assert.Equal("Old Trade Name", persisted.StoreTradeNameSnapshot);
+        Assert.Equal("Original Legal Name", persisted.StoreLegalNameSnapshot);
+        Assert.Equal("27AAPFU0939F1ZV", persisted.StoreGstinSnapshot);
+        Assert.Equal("27", persisted.StoreStateCodeSnapshot);
+        Assert.Equal(GstRegistrationType.Regular, persisted.StoreGstRegistrationTypeSnapshot);
+    }
+
+    [Fact]
     public async Task Update_rejects_gstin_state_mismatch_without_mutating_store()
     {
         await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(new UpdateStoreTaxIdentityRequest

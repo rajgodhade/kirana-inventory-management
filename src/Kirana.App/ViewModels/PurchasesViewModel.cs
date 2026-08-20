@@ -255,7 +255,9 @@ public sealed partial class PurchasesViewModel(
         Id = purchase.Id,
         SupplierId = purchase.SupplierId,
         PurchaseNumber = purchase.PurchaseNumber,
-        SupplierName = purchase.Supplier.Name,
+        SupplierName = purchase.GstIdentitySnapshotCapturedAtUtc is not null
+            ? purchase.SupplierNameSnapshot ?? "Supplier"
+            : purchase.Supplier.Name,
         DateText = purchase.PurchaseDateUtc.ToLocalTime().ToString("dd-MMM-yyyy"),
         PurchaseDateUtc = purchase.PurchaseDateUtc,
         GrandTotal = purchase.GrandTotal,

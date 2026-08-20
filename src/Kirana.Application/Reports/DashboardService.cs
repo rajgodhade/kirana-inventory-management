@@ -138,7 +138,9 @@ public sealed class DashboardService(
                 SaleId = s.Id,
                 InvoiceNumber = s.InvoiceNumber,
                 SaleDateUtc = s.SaleDateUtc,
-                CustomerName = s.Customer != null ? s.Customer.Name : null,
+                CustomerName = s.GstIdentitySnapshotCapturedAtUtc != null
+                    ? s.CustomerNameSnapshot
+                    : s.Customer != null ? s.Customer.Name : null,
                 GrandTotal = s.GrandTotal,
             })
             .ToListAsync(cancellationToken);
@@ -157,7 +159,9 @@ public sealed class DashboardService(
                 PurchaseId = p.Id,
                 PurchaseNumber = p.PurchaseNumber,
                 PurchaseDateUtc = p.PurchaseDateUtc,
-                SupplierName = p.Supplier.Name,
+                SupplierName = p.GstIdentitySnapshotCapturedAtUtc != null
+                    ? p.SupplierNameSnapshot ?? "Supplier"
+                    : p.Supplier.Name,
                 GrandTotal = p.GrandTotal,
             })
             .ToListAsync(cancellationToken);

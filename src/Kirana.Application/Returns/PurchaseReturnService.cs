@@ -83,8 +83,12 @@ public sealed class PurchaseReturnService(
             SupplierInvoiceNumber = purchase.SupplierInvoiceNumber,
             PurchaseDateUtc = purchase.PurchaseDateUtc,
             SupplierId = purchase.SupplierId,
-            SupplierName = purchase.Supplier.Name,
-            SupplierCode = purchase.Supplier.SupplierCode,
+            SupplierName = purchase.GstIdentitySnapshotCapturedAtUtc is not null
+                ? purchase.SupplierNameSnapshot ?? "Supplier"
+                : purchase.Supplier.Name,
+            SupplierCode = purchase.GstIdentitySnapshotCapturedAtUtc is not null
+                ? purchase.SupplierCodeSnapshot ?? string.Empty
+                : purchase.Supplier.SupplierCode,
             GrandTotal = purchase.GrandTotal,
             Lines = purchase.Items.Select(i => new ReturnablePurchaseLine
             {
@@ -292,6 +296,7 @@ public sealed class PurchaseReturnService(
 
         IQueryable<PurchaseReturn> returns = db.PurchaseReturns.AsNoTracking()
             .Include(r => r.Supplier)
+            .Include(r => r.Purchase)
             .Include(r => r.Items);
 
         var text = query.SearchText?.Trim();
@@ -301,6 +306,7 @@ public sealed class PurchaseReturnService(
             returns = returns.Where(r =>
                 EF.Functions.Like(r.ReturnNumber, like)
                 || EF.Functions.Like(r.PurchaseNumberSnapshot, like)
+                || (r.Purchase.SupplierNameSnapshot != null && EF.Functions.Like(r.Purchase.SupplierNameSnapshot, like))
                 || EF.Functions.Like(r.Supplier.Name, like));
         }
 

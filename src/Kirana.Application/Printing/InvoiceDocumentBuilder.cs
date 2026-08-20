@@ -7,6 +7,7 @@ public sealed class InvoiceDocumentBuilder(IGstCalculationService? gstCalculatio
 {
     public InvoiceDocument Build(Sale sale, Store store)
     {
+        var hasSnapshot = sale.GstIdentitySnapshotCapturedAtUtc is not null;
         var lines = sale.Items.Select(item => new InvoiceLine
         {
             ProductName = item.ProductNameSnapshot,
@@ -75,19 +76,28 @@ public sealed class InvoiceDocumentBuilder(IGstCalculationService? gstCalculatio
         return new InvoiceDocument
         {
             SaleId = sale.Id,
-            StoreName = store.Name,
-            StoreAddress = BuildStoreAddress(store),
-            StoreContactNumber = store.ContactNumber,
-            StoreGstin = store.Gstin,
+            StoreName = hasSnapshot ? sale.StoreTradeNameSnapshot ?? string.Empty : store.Name,
+            StoreLegalName = hasSnapshot ? sale.StoreLegalNameSnapshot : store.LegalName,
+            StoreAddress = hasSnapshot ? BuildStoreAddress(sale) : BuildStoreAddress(store),
+            StoreContactNumber = hasSnapshot ? sale.StoreContactNumberSnapshot : store.ContactNumber,
+            StoreGstin = hasSnapshot ? sale.StoreGstinSnapshot : store.Gstin,
+            StoreStateCode = hasSnapshot ? sale.StoreStateCodeSnapshot : store.StateCode,
+            StoreStateName = hasSnapshot ? sale.StoreStateNameSnapshot : store.State,
+            StoreGstRegistrationType = (hasSnapshot ? sale.StoreGstRegistrationTypeSnapshot : store.GstRegistrationType)?.ToString(),
             StoreLogoPath = store.LogoPath,
             FooterText = store.InvoiceFooterText,
 
             InvoiceNumber = sale.InvoiceNumber,
             SaleDateUtc = sale.SaleDateUtc,
             CashierName = sale.CashierUser?.FullName,
-            CustomerName = sale.Customer?.Name,
-            CustomerPhone = sale.Customer?.Phone,
-            CustomerGstin = sale.Customer?.Gstin,
+            CustomerName = hasSnapshot ? sale.CustomerNameSnapshot : sale.Customer?.Name,
+            CustomerPhone = hasSnapshot ? sale.CustomerPhoneSnapshot : sale.Customer?.Phone,
+            CustomerGstin = hasSnapshot ? sale.CustomerGstinSnapshot : sale.Customer?.Gstin,
+            CustomerAddress = hasSnapshot ? sale.CustomerAddressSnapshot : sale.Customer?.Address,
+            CustomerStateCode = hasSnapshot ? sale.CustomerStateCodeSnapshot : sale.Customer?.StateCode,
+            CustomerStateName = hasSnapshot ? sale.CustomerStateNameSnapshot : null,
+            CustomerGstRegistrationType = (hasSnapshot ? sale.CustomerGstRegistrationTypeSnapshot : sale.Customer?.GstRegistrationType)?.ToString(),
+            HasHistoricalIdentitySnapshot = hasSnapshot,
 
             Lines = lines,
             Payments = payments,
@@ -109,6 +119,14 @@ public sealed class InvoiceDocumentBuilder(IGstCalculationService? gstCalculatio
     private static string? BuildStoreAddress(Store store)
     {
         var parts = new[] { store.Address, store.City, store.State, store.PinCode }
+            .Where(p => !string.IsNullOrWhiteSpace(p));
+        var combined = string.Join(", ", parts);
+        return combined.Length == 0 ? null : combined;
+    }
+
+    private static string? BuildStoreAddress(Sale sale)
+    {
+        var parts = new[] { sale.StoreAddressSnapshot, sale.StoreCitySnapshot, sale.StoreStateNameSnapshot, sale.StorePinCodeSnapshot }
             .Where(p => !string.IsNullOrWhiteSpace(p));
         var combined = string.Join(", ", parts);
         return combined.Length == 0 ? null : combined;

@@ -1,4 +1,6 @@
 using Kirana.Application.Customers;
+using Kirana.Application.Taxation;
+using Kirana.Domain.Entities;
 using Kirana.Infrastructure.Persistence;
 using Kirana.Tests.TestSupport;
 using Kirana.Domain.Taxation;
@@ -157,6 +159,40 @@ public class CustomerServiceTests : IDisposable
         var audit = await _fixture.Context.AuditLogs.SingleAsync(a => a.Action == "CustomerGstIdentityUpdated");
         Assert.Contains("Not specified", audit.PreviousValue ?? string.Empty);
         Assert.Contains("Composition", audit.NewValue ?? string.Empty);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_DoesNotRewritePersistedHistoricalSaleIdentitySnapshot()
+    {
+        var customer = await _sut.CreateAsync(new CreateCustomerRequest
+        {
+            Name = "Original Customer",
+            Gstin = "27AAPFU0939F1ZV",
+            StateCode = "27",
+            GstRegistrationType = GstRegistrationType.Regular,
+        });
+        var sale = new Sale { InvoiceNumber = "INV-SNAPSHOT-CUSTOMER", Customer = customer };
+        HistoricalGstIdentitySnapshotFactory.Capture(
+            sale,
+            new Store { Name = "Snapshot Store", StateCode = "27" },
+            customer,
+            new DateTime(2026, 8, 20, 10, 0, 0, DateTimeKind.Utc));
+        _fixture.Context.Sales.Add(sale);
+        await _fixture.Context.SaveChangesAsync();
+
+        await _sut.UpdateAsync(customer.Id, new UpdateCustomerRequest
+        {
+            Name = "Changed Customer",
+            Gstin = "29AAACB2894G1ZJ",
+            StateCode = "29",
+            GstRegistrationType = GstRegistrationType.Composition,
+        });
+
+        var persisted = await _fixture.Context.Sales.AsNoTracking().SingleAsync(s => s.Id == sale.Id);
+        Assert.Equal("Original Customer", persisted.CustomerNameSnapshot);
+        Assert.Equal("27AAPFU0939F1ZV", persisted.CustomerGstinSnapshot);
+        Assert.Equal("27", persisted.CustomerStateCodeSnapshot);
+        Assert.Equal(GstRegistrationType.Regular, persisted.CustomerGstRegistrationTypeSnapshot);
     }
 
     [Fact]

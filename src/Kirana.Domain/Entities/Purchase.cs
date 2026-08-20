@@ -1,4 +1,5 @@
 using Kirana.Domain.Common;
+using Kirana.Domain.Taxation;
 
 namespace Kirana.Domain.Entities;
 
@@ -20,6 +21,30 @@ public class Purchase : Entity
 
     public int SupplierId { get; set; }
     public Supplier Supplier { get; set; } = null!;
+
+    /// <summary>
+    /// GST/legal identity captured atomically when this purchase was finalized. Null means this
+    /// is a legacy purchase for which no historical identity evidence exists.
+    /// </summary>
+    public DateTime? GstIdentitySnapshotCapturedAtUtc { get; set; }
+    public string? StoreTradeNameSnapshot { get; set; }
+    public string? StoreLegalNameSnapshot { get; set; }
+    public string? StoreGstinSnapshot { get; set; }
+    public string? StoreStateCodeSnapshot { get; set; }
+    public string? StoreStateNameSnapshot { get; set; }
+    public GstRegistrationType? StoreGstRegistrationTypeSnapshot { get; set; }
+    public string? StoreAddressSnapshot { get; set; }
+    public string? StoreCitySnapshot { get; set; }
+    public string? StorePinCodeSnapshot { get; set; }
+    public string? StoreContactNumberSnapshot { get; set; }
+
+    public string? SupplierNameSnapshot { get; set; }
+    public string? SupplierCodeSnapshot { get; set; }
+    public string? SupplierGstinSnapshot { get; set; }
+    public string? SupplierStateCodeSnapshot { get; set; }
+    public string? SupplierStateNameSnapshot { get; set; }
+    public GstRegistrationType? SupplierGstRegistrationTypeSnapshot { get; set; }
+    public string? SupplierAddressSnapshot { get; set; }
 
     public int? CreatedByUserId { get; set; }
     public User? CreatedByUser { get; set; }

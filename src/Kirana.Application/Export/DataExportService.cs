@@ -255,7 +255,9 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
             {
                 s.InvoiceNumber,
                 s.SaleDateUtc,
-                CustomerName = s.Customer != null ? s.Customer.Name : null,
+                CustomerName = s.GstIdentitySnapshotCapturedAtUtc != null
+                    ? s.CustomerNameSnapshot
+                    : s.Customer != null ? s.Customer.Name : null,
                 CashierName = s.CashierUser != null ? s.CashierUser.FullName : null,
                 ItemCount = s.Items.Count,
                 s.SubTotal,
@@ -314,7 +316,9 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
             {
                 p.PurchaseNumber,
                 p.PurchaseDateUtc,
-                SupplierName = p.Supplier.Name,
+                SupplierName = p.GstIdentitySnapshotCapturedAtUtc != null
+                    ? p.SupplierNameSnapshot
+                    : p.Supplier.Name,
                 p.SupplierInvoiceNumber,
                 ItemCount = p.Items.Count,
                 p.SubTotal,
@@ -339,7 +343,7 @@ public sealed class DataExportService(IKiranaDbContext db, IPermissionEnforcer p
             ],
             Rows = rows.Select(p => (IReadOnlyList<string>)
             [
-                p.PurchaseNumber, LocalTimestamp(p.PurchaseDateUtc), p.SupplierName,
+                p.PurchaseNumber, LocalTimestamp(p.PurchaseDateUtc), p.SupplierName ?? "Supplier",
                 p.SupplierInvoiceNumber ?? string.Empty, p.ItemCount.ToString(CultureInfo.InvariantCulture),
                 Number(p.SubTotal), Number(p.DiscountTotal), Number(p.TaxTotal), Number(p.GrandTotal),
                 Number(p.AmountPaid), Number(p.OutstandingAmount), p.Status.ToString(),

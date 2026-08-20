@@ -1,4 +1,5 @@
 using Kirana.Domain.Common;
+using Kirana.Domain.Taxation;
 
 namespace Kirana.Domain.Entities;
 
@@ -15,6 +16,31 @@ public class Sale : Entity
 
     public int? CustomerId { get; set; }
     public Customer? Customer { get; set; }
+
+    /// <summary>
+    /// GST/legal identity captured atomically when this sale was completed. A null capture time
+    /// identifies a legacy sale created before Phase 18A-2; its identity must never be guessed or
+    /// backfilled from today's master records.
+    /// </summary>
+    public DateTime? GstIdentitySnapshotCapturedAtUtc { get; set; }
+    public string? StoreTradeNameSnapshot { get; set; }
+    public string? StoreLegalNameSnapshot { get; set; }
+    public string? StoreGstinSnapshot { get; set; }
+    public string? StoreStateCodeSnapshot { get; set; }
+    public string? StoreStateNameSnapshot { get; set; }
+    public GstRegistrationType? StoreGstRegistrationTypeSnapshot { get; set; }
+    public string? StoreAddressSnapshot { get; set; }
+    public string? StoreCitySnapshot { get; set; }
+    public string? StorePinCodeSnapshot { get; set; }
+    public string? StoreContactNumberSnapshot { get; set; }
+
+    public string? CustomerNameSnapshot { get; set; }
+    public string? CustomerPhoneSnapshot { get; set; }
+    public string? CustomerGstinSnapshot { get; set; }
+    public string? CustomerStateCodeSnapshot { get; set; }
+    public string? CustomerStateNameSnapshot { get; set; }
+    public GstRegistrationType? CustomerGstRegistrationTypeSnapshot { get; set; }
+    public string? CustomerAddressSnapshot { get; set; }
 
     public int? CashierUserId { get; set; }
     public User? CashierUser { get; set; }

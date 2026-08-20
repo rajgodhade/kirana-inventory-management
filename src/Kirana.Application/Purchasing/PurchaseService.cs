@@ -1,6 +1,7 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
 using Kirana.Application.CashRegisters;
+using Kirana.Application.Taxation;
 using Kirana.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,7 @@ public sealed class PurchaseService(
 
         var supplier = await db.Suppliers.FirstOrDefaultAsync(s => s.Id == request.SupplierId, cancellationToken)
             ?? throw new InvalidOperationException("Supplier not found.");
+        var store = await db.Stores.FirstOrDefaultAsync(cancellationToken);
 
         if (!supplier.IsActive)
         {
@@ -195,6 +197,8 @@ public sealed class PurchaseService(
             GoodsReceipt = sourceReceipt,
             PurchaseOrderId = sourceReceipt?.PurchaseOrderId,
         };
+
+        HistoricalGstIdentitySnapshotFactory.Capture(purchase, store, supplier, DateTime.UtcNow);
 
         foreach (var lineResult in totals.Lines)
         {
@@ -401,6 +405,7 @@ public sealed class PurchaseService(
             purchases = purchases.Where(p =>
                 EF.Functions.Like(p.PurchaseNumber, likeText) ||
                 (p.SupplierInvoiceNumber != null && EF.Functions.Like(p.SupplierInvoiceNumber, likeText)) ||
+                (p.SupplierNameSnapshot != null && EF.Functions.Like(p.SupplierNameSnapshot, likeText)) ||
                 EF.Functions.Like(p.Supplier.Name, likeText));
         }
 

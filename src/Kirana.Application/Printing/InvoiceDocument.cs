@@ -22,9 +22,13 @@ public sealed class InvoiceDocument
 
     // Store header
     public string StoreName { get; init; } = string.Empty;
+    public string? StoreLegalName { get; init; }
     public string? StoreAddress { get; init; }
     public string? StoreContactNumber { get; init; }
     public string? StoreGstin { get; init; }
+    public string? StoreStateCode { get; init; }
+    public string? StoreStateName { get; init; }
+    public string? StoreGstRegistrationType { get; init; }
     public string? StoreLogoPath { get; init; }
     public string? FooterText { get; init; }
 
@@ -35,6 +39,11 @@ public sealed class InvoiceDocument
     public string? CustomerName { get; init; }
     public string? CustomerPhone { get; init; }
     public string? CustomerGstin { get; init; }
+    public string? CustomerAddress { get; init; }
+    public string? CustomerStateCode { get; init; }
+    public string? CustomerStateName { get; init; }
+    public string? CustomerGstRegistrationType { get; init; }
+    public bool HasHistoricalIdentitySnapshot { get; init; }
 
     public IReadOnlyList<InvoiceLine> Lines { get; init; } = [];
     public IReadOnlyList<InvoicePaymentLine> Payments { get; init; } = [];
