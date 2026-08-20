@@ -4,6 +4,7 @@ using Kirana.Domain.Entities;
 using Kirana.Infrastructure.Persistence;
 using Kirana.Tests.TestSupport;
 using Microsoft.EntityFrameworkCore;
+using Kirana.Domain.Taxation;
 
 namespace Kirana.Tests.Purchasing;
 
@@ -27,7 +28,7 @@ public class SupplierServiceTests : IDisposable
     {
         Name = name,
         Phone = phone,
-        Gstin = "27ABCDE1234F1Z5",
+        Gstin = "27AAPFU0939F1ZV",
         ContactPerson = "Ramesh",
         Email = "ramesh@sharma.example",
         Address = "MG Road",
@@ -51,6 +52,36 @@ public class SupplierServiceTests : IDisposable
 
         Assert.True(supplier.IsActive);
         Assert.Equal(0m, supplier.OutstandingBalance);
+    }
+
+    [Fact]
+    public async Task CreateAsync_PersistsGstIdentity()
+    {
+        var supplier = await _sut.CreateAsync(new CreateSupplierRequest
+        {
+            Name = "Registered Supplier",
+            Gstin = "27AAPFU0939F1ZV",
+            StateCode = "27",
+            GstRegistrationType = GstRegistrationType.Regular,
+            PerformedByUserId = _ownerId,
+        });
+
+        Assert.Equal("27", supplier.StateCode);
+        Assert.Equal(GstRegistrationType.Regular, supplier.GstRegistrationType);
+    }
+
+    [Fact]
+    public async Task CreateAsync_RejectsGstinStateMismatch()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateAsync(new CreateSupplierRequest
+        {
+            Name = "Wrong State",
+            Gstin = "27AAPFU0939F1ZV",
+            StateCode = "29",
+            GstRegistrationType = GstRegistrationType.Regular,
+            PerformedByUserId = _ownerId,
+        }));
+        Assert.Empty(await _fixture.Context.Suppliers.ToListAsync());
     }
 
     [Fact]
@@ -101,6 +132,29 @@ public class SupplierServiceTests : IDisposable
 
         Assert.Equal("Renamed Distributors", updated.Name);
         Assert.Equal("9999999999", updated.Phone);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ChangesGstIdentityAndCreatesDistinctAudit()
+    {
+        var supplier = await _sut.CreateAsync(new CreateSupplierRequest
+        {
+            Name = "Tax Supplier", PerformedByUserId = _ownerId,
+        });
+
+        var updated = await _sut.UpdateAsync(supplier.Id, new UpdateSupplierRequest
+        {
+            Name = supplier.Name,
+            Gstin = "27AAPFU0939F1ZV",
+            StateCode = "27",
+            GstRegistrationType = GstRegistrationType.Composition,
+            PerformedByUserId = _ownerId,
+        });
+
+        Assert.Equal(GstRegistrationType.Composition, updated.GstRegistrationType);
+        var audit = await _fixture.Context.AuditLogs.SingleAsync(a => a.Action == "SupplierGstIdentityUpdated");
+        Assert.Contains("Not specified", audit.PreviousValue ?? string.Empty);
+        Assert.Contains("Composition", audit.NewValue ?? string.Empty);
     }
 
     [Fact]

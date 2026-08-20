@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Kirana.Application.Customers;
 using Kirana.Domain.Entities;
+using Kirana.Domain.Taxation;
 
 namespace Kirana.App.ViewModels;
 
@@ -31,6 +32,20 @@ public sealed partial class CustomerEditViewModel : ObservableObject
 
     [ObservableProperty]
     private string _gstin = string.Empty;
+
+    public IReadOnlyList<IndianGstState> StateOptions { get; } = IndianGstStateCatalog.All;
+
+    [ObservableProperty]
+    private IndianGstState? _selectedState;
+
+    public IReadOnlyList<GstRegistrationType> RegistrationTypeOptions { get; } =
+        Enum.GetValues<GstRegistrationType>();
+
+    [ObservableProperty]
+    private GstRegistrationType? _selectedRegistrationType;
+
+    public string GstinFeedback => BuildGstinFeedback(Gstin, SelectedState?.Code);
+    public bool HasGstinFeedback => GstinFeedback.Length > 0;
 
     [ObservableProperty]
     private string _notes = string.Empty;
@@ -63,6 +78,8 @@ public sealed partial class CustomerEditViewModel : ObservableObject
             Phone = existingCustomer.Phone ?? string.Empty;
             Address = existingCustomer.Address ?? string.Empty;
             Gstin = existingCustomer.Gstin ?? string.Empty;
+            SelectedState = IndianGstStateCatalog.FindByCode(existingCustomer.StateCode);
+            SelectedRegistrationType = existingCustomer.GstRegistrationType;
             Notes = existingCustomer.Notes ?? string.Empty;
             SelectedPriceLevelOption = existingCustomer.DefaultPriceLevel switch
             {
@@ -71,6 +88,18 @@ public sealed partial class CustomerEditViewModel : ObservableObject
                 _ => NoPreferenceOption,
             };
         }
+    }
+
+    partial void OnGstinChanged(string value)
+    {
+        OnPropertyChanged(nameof(GstinFeedback));
+        OnPropertyChanged(nameof(HasGstinFeedback));
+    }
+
+    partial void OnSelectedStateChanged(IndianGstState? value)
+    {
+        OnPropertyChanged(nameof(GstinFeedback));
+        OnPropertyChanged(nameof(HasGstinFeedback));
     }
 
     /// <summary>Maps the selected option back to the nullable enum the service stores.</summary>
@@ -96,6 +125,8 @@ public sealed partial class CustomerEditViewModel : ObservableObject
                     Phone = Phone,
                     Address = Address,
                     Gstin = Gstin,
+                    StateCode = SelectedState?.Code,
+                    GstRegistrationType = SelectedRegistrationType,
                     Notes = Notes,
                     DefaultPriceLevel = ChosenPriceLevel,
                     PerformedByUserId = _owner.CurrentUserId,
@@ -109,6 +140,8 @@ public sealed partial class CustomerEditViewModel : ObservableObject
                     Phone = Phone,
                     Address = Address,
                     Gstin = Gstin,
+                    StateCode = SelectedState?.Code,
+                    GstRegistrationType = SelectedRegistrationType,
                     Notes = Notes,
                     DefaultPriceLevel = ChosenPriceLevel,
                     PerformedByUserId = _owner.CurrentUserId,
@@ -119,5 +152,16 @@ public sealed partial class CustomerEditViewModel : ObservableObject
         {
             ErrorMessage = ex.Message;
         }
+    }
+
+    private static string BuildGstinFeedback(string gstin, string? stateCode)
+    {
+        var result = GstinValidator.ValidateIdentity(gstin, stateCode);
+        return result.Gstin.Status switch
+        {
+            GstinValidationStatus.Missing => string.Empty,
+            _ when !result.IsValid => result.ErrorMessage ?? "GSTIN is invalid.",
+            _ => $"Valid GSTIN for {IndianGstStateCatalog.FindByCode(result.Gstin.StateCode)?.Name}.",
+        };
     }
 }

@@ -1,4 +1,5 @@
 using Kirana.Domain.Common;
+using Kirana.Domain.Taxation;
 
 namespace Kirana.Domain.Entities;
 
@@ -19,6 +20,8 @@ public class Customer : Entity
     public string? Phone { get; set; }
     public string? Address { get; set; }
     public string? Gstin { get; set; }
+    public string? StateCode { get; set; }
+    public GstRegistrationType? GstRegistrationType { get; set; }
     public string? Notes { get; set; }
     public decimal CreditBalance { get; set; }
     public bool IsActive { get; set; } = true;

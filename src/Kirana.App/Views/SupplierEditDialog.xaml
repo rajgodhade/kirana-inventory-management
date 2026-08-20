@@ -23,7 +23,17 @@
     <ScrollViewer MaxHeight="480">
         <StackPanel Spacing="10" MinWidth="380">
             <TextBox Header="Business / Name" Text="{x:Bind ViewModel.Name, Mode=TwoWay}" />
-            <TextBox Header="GSTIN" Text="{x:Bind ViewModel.Gstin, Mode=TwoWay}" />
+            <TextBox Header="GSTIN" Text="{x:Bind ViewModel.Gstin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="{x:Bind ViewModel.GstinFeedback, Mode=OneWay}" TextWrapping="Wrap"
+                       Style="{StaticResource PageSubtitleTextStyle}"
+                       Visibility="{x:Bind ViewModel.HasGstinFeedback, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+            <ComboBox Header="State / Union territory" ItemsSource="{x:Bind ViewModel.StateOptions}"
+                      DisplayMemberPath="DisplayName" SelectedItem="{x:Bind ViewModel.SelectedState, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch" />
+            <ComboBox Header="GST registration type" ItemsSource="{x:Bind ViewModel.RegistrationTypeOptions}"
+                      SelectedItem="{x:Bind ViewModel.SelectedRegistrationType, Mode=TwoWay}"
+                      PlaceholderText="Select registration type"
+                      HorizontalAlignment="Stretch" />
             <TextBox Header="Contact Person" Text="{x:Bind ViewModel.ContactPerson, Mode=TwoWay}" />
             <TextBox Header="Phone" Text="{x:Bind ViewModel.Phone, Mode=TwoWay}" />
             <TextBox Header="Email" Text="{x:Bind ViewModel.Email, Mode=TwoWay}" />

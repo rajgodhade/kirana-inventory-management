@@ -13,11 +13,18 @@
             <TextBlock Text="Store name *" />
             <TextBox Text="{x:Bind ViewModel.StoreName, Mode=TwoWay}" />
 
+            <TextBox Header="Legal name" Text="{x:Bind ViewModel.LegalName, Mode=TwoWay}" />
+
             <TextBlock Text="Owner name *" />
             <TextBox Text="{x:Bind ViewModel.OwnerName, Mode=TwoWay}" />
 
             <TextBlock Text="GSTIN (optional)" />
-            <TextBox Text="{x:Bind ViewModel.Gstin, Mode=TwoWay}" />
+            <TextBox Text="{x:Bind ViewModel.Gstin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="{x:Bind ViewModel.GstinFeedback, Mode=OneWay}" TextWrapping="Wrap" Opacity="0.7"
+                       Visibility="{x:Bind ViewModel.HasGstinFeedback, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+            <ComboBox Header="GST registration type" ItemsSource="{x:Bind ViewModel.RegistrationTypeOptions}"
+                      SelectedItem="{x:Bind ViewModel.SelectedRegistrationType, Mode=TwoWay}"
+                      PlaceholderText="Select registration type" />
 
             <TextBlock Text="Address" />
             <TextBox Text="{x:Bind ViewModel.Address, Mode=TwoWay}" />
@@ -29,7 +36,8 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" Header="City" Text="{x:Bind ViewModel.City, Mode=TwoWay}" />
-                <TextBox Grid.Column="1" Header="State" Text="{x:Bind ViewModel.State, Mode=TwoWay}" />
+                <ComboBox Grid.Column="1" Header="State" ItemsSource="{x:Bind ViewModel.StateOptions}"
+                          DisplayMemberPath="DisplayName" SelectedItem="{x:Bind ViewModel.SelectedState, Mode=TwoWay}" />
                 <TextBox Grid.Column="2" Header="PIN code" Text="{x:Bind ViewModel.PinCode, Mode=TwoWay}" />
             </Grid>
 

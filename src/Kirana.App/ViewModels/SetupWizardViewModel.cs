@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Kirana.Application.Setup;
+using Kirana.Domain.Taxation;
 
 namespace Kirana.App.ViewModels;
 
@@ -11,6 +12,9 @@ public sealed partial class SetupWizardViewModel(IFirstTimeSetupService setupSer
 {
     [ObservableProperty]
     private string _storeName = string.Empty;
+
+    [ObservableProperty]
+    private string _legalName = string.Empty;
 
     [ObservableProperty]
     private string _ownerName = string.Empty;
@@ -24,8 +28,19 @@ public sealed partial class SetupWizardViewModel(IFirstTimeSetupService setupSer
     [ObservableProperty]
     private string? _city;
 
+    public IReadOnlyList<IndianGstState> StateOptions { get; } = IndianGstStateCatalog.All;
+
     [ObservableProperty]
-    private string? _state;
+    private IndianGstState? _selectedState;
+
+    public IReadOnlyList<GstRegistrationType> RegistrationTypeOptions { get; } =
+        Enum.GetValues<GstRegistrationType>();
+
+    [ObservableProperty]
+    private GstRegistrationType? _selectedRegistrationType;
+
+    public string GstinFeedback => BuildGstinFeedback(Gstin, SelectedState?.Code);
+    public bool HasGstinFeedback => GstinFeedback.Length > 0;
 
     [ObservableProperty]
     private string? _pinCode;
@@ -62,6 +77,18 @@ public sealed partial class SetupWizardViewModel(IFirstTimeSetupService setupSer
 
     public event EventHandler? SetupCompleted;
 
+    partial void OnGstinChanged(string? value)
+    {
+        OnPropertyChanged(nameof(GstinFeedback));
+        OnPropertyChanged(nameof(HasGstinFeedback));
+    }
+
+    partial void OnSelectedStateChanged(IndianGstState? value)
+    {
+        OnPropertyChanged(nameof(GstinFeedback));
+        OnPropertyChanged(nameof(HasGstinFeedback));
+    }
+
     [RelayCommand]
     private async Task CompleteSetupAsync()
     {
@@ -85,11 +112,14 @@ public sealed partial class SetupWizardViewModel(IFirstTimeSetupService setupSer
             await setupService.CompleteSetupAsync(new CompleteSetupRequest
             {
                 StoreName = StoreName,
+                LegalName = LegalName,
                 OwnerName = OwnerName,
                 Gstin = Gstin,
                 Address = Address,
                 City = City,
-                State = State,
+                State = SelectedState?.Name,
+                StateCode = SelectedState?.Code,
+                GstRegistrationType = SelectedRegistrationType,
                 PinCode = PinCode,
                 ContactNumber = ContactNumber,
                 Email = Email,
@@ -111,5 +141,16 @@ public sealed partial class SetupWizardViewModel(IFirstTimeSetupService setupSer
         {
             IsSubmitting = false;
         }
+    }
+
+    private static string BuildGstinFeedback(string? gstin, string? stateCode)
+    {
+        var result = GstinValidator.ValidateIdentity(gstin, stateCode);
+        return result.Gstin.Status switch
+        {
+            GstinValidationStatus.Missing => string.Empty,
+            _ when !result.IsValid => result.ErrorMessage ?? "GSTIN is invalid.",
+            _ => $"Valid GSTIN for {IndianGstStateCatalog.FindByCode(result.Gstin.StateCode)?.Name}.",
+        };
     }
 }

@@ -1,3 +1,5 @@
+using Kirana.Domain.Taxation;
+
 namespace Kirana.Application.Setup;
 
 /// <summary>
@@ -7,11 +9,14 @@ namespace Kirana.Application.Setup;
 public sealed class CompleteSetupRequest
 {
     public required string StoreName { get; init; }
+    public string? LegalName { get; init; }
     public required string OwnerName { get; init; }
     public string? Gstin { get; init; }
     public string? Address { get; init; }
     public string? City { get; init; }
     public string? State { get; init; }
+    public string? StateCode { get; init; }
+    public GstRegistrationType? GstRegistrationType { get; init; }
     public string? PinCode { get; init; }
     public string? ContactNumber { get; init; }
     public string? AlternateContactNumber { get; init; }

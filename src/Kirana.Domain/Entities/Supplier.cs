@@ -1,4 +1,5 @@
 using Kirana.Domain.Common;
+using Kirana.Domain.Taxation;
 
 namespace Kirana.Domain.Entities;
 
@@ -14,6 +15,8 @@ public class Supplier : Entity
     public string SupplierCode { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string? Gstin { get; set; }
+    public string? StateCode { get; set; }
+    public GstRegistrationType? GstRegistrationType { get; set; }
     public string? ContactPerson { get; set; }
     public string? Phone { get; set; }
     public string? Email { get; set; }
