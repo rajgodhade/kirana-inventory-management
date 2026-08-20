@@ -163,3 +163,58 @@ No migration or new column is required because Phase 18A-2 already persists all 
 inputs. Phase 18A-3 adds no tax-component persistence and no snapshot update path. Place-of-supply
 exceptions, reverse charge, CESS, GST return filing, B2B/B2C classification, and new GST arithmetic
 remain outside this phase.
+
+## Phase 18A-4 — B2B/B2C GST Classification
+
+Phase 18A-4 adds a centralized, deterministic classification foundation without changing GST
+arithmetic, stored monetary values, posting, stock, payment, invoice, report-total, or export
+behavior. `IGstTransactionClassifier` classifies historical party identity and
+`IGstTaxContextResolver` composes that independent result with the Phase 18A-3 jurisdiction
+resolver. Neither service depends on the database, UI, or mutable master data.
+
+### Classification policy
+
+- **B2B** means the completed sale snapshot records an authoritative `Regular` or `Composition`
+  registration type and a GSTIN that passes the shared `GstinValidator`, including its match to
+  the historical customer state when that state is present.
+- **B2C** means the completed sale snapshot records `Unregistered`, or the new-format sale is
+  structurally an explicit walk-in sale (`CustomerId` is null and the historical capture marker is
+  present).
+- **Unresolved** means historical evidence is insufficient or invalid. This includes a missing
+  registration type, a missing/invalid registered-party GSTIN, or a legacy transaction without a
+  Phase 18A-2 capture marker.
+
+`RegistrationType` is the classification authority. A GSTIN is supporting identity evidence for
+registered parties; it never creates B2B status by itself. A name, phone, address, state, or words
+that look like a business name are not classification evidence. `StateCode` remains solely the
+Phase 18A-3 jurisdiction authority and the classifier does not compare states or derive a state
+from a GSTIN.
+
+### Historical, walk-in, purchase, and return policy
+
+Classification reads only immutable Phase 18A-2 transaction snapshots. Later edits to customer,
+supplier, or store registration, GSTIN, state, legal name, or other master data cannot change a
+completed transaction. Legacy transactions with no capture marker remain `Unresolved`; there is no
+current-master fallback, backfill, or guessing.
+
+A captured sale with no `CustomerId` is the existing explicit walk-in representation and resolves
+to B2C. A legacy row with the same null customer reference remains unresolved because it lacks the
+capture marker that distinguishes reviewed historical evidence.
+
+Purchase terminology remains supplier-specific rather than calling suppliers B2C. Purchases
+resolve to `RegisteredSupplier`, `UnregisteredSupplier`, or `Unresolved`, using the same historical
+registration and GSTIN evidence policy. Sales returns and purchase returns delegate to their
+originating transaction; no duplicate classification fields or return snapshots are introduced.
+
+### Reporting, persistence, and scope
+
+The existing GST report continues to aggregate stored GST values and expose the Phase 18A-3
+jurisdiction split. Phase 18A-4 does not add B2B/B2C report columns or exports because no current
+calculation, UI, or export consumer requires them. Unresolved classification is therefore not
+silently presented as B2B or B2C. The resolver is available for a later explicitly scoped reporting
+phase.
+
+No migration is required: all authoritative classification inputs are already stored in the
+Phase 18A-2 snapshots. This phase does not implement ITC, reverse charge, CESS, GST filing,
+e-invoicing, e-way bills, HSN classification, new GST rates, place-of-supply exceptions,
+composition-specific tax rules, or any new GST arithmetic.
