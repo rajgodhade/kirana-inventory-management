@@ -13,6 +13,7 @@ public sealed class SaleConfiguration : IEntityTypeConfiguration<Sale>
         builder.HasIndex(s => s.SaleDateUtc);
 
         builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(20);
+        ConfigureIdentitySnapshots(builder);
 
         // Same enum-name convention as Status and Customer.DefaultPriceLevel. Non-nullable: every
         // completed sale was sold at some level, so "unknown" is not a state this column may hold.
@@ -47,6 +48,27 @@ public sealed class SaleConfiguration : IEntityTypeConfiguration<Sale>
             .WithMany()
             .HasForeignKey(s => s.PriceOverrideAuthorizedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
+    }
+
+    private static void ConfigureIdentitySnapshots(EntityTypeBuilder<Sale> builder)
+    {
+        builder.Property(s => s.StoreTradeNameSnapshot).HasMaxLength(200);
+        builder.Property(s => s.StoreLegalNameSnapshot).HasMaxLength(200);
+        builder.Property(s => s.StoreGstinSnapshot).HasMaxLength(15);
+        builder.Property(s => s.StoreStateCodeSnapshot).HasMaxLength(2);
+        builder.Property(s => s.StoreStateNameSnapshot).HasMaxLength(100);
+        builder.Property(s => s.StoreGstRegistrationTypeSnapshot).HasConversion<string>().HasMaxLength(20);
+        builder.Property(s => s.StoreAddressSnapshot).HasMaxLength(500);
+        builder.Property(s => s.StoreCitySnapshot).HasMaxLength(100);
+        builder.Property(s => s.StorePinCodeSnapshot).HasMaxLength(10);
+        builder.Property(s => s.StoreContactNumberSnapshot).HasMaxLength(20);
+        builder.Property(s => s.CustomerNameSnapshot).HasMaxLength(200);
+        builder.Property(s => s.CustomerPhoneSnapshot).HasMaxLength(20);
+        builder.Property(s => s.CustomerGstinSnapshot).HasMaxLength(15);
+        builder.Property(s => s.CustomerStateCodeSnapshot).HasMaxLength(2);
+        builder.Property(s => s.CustomerStateNameSnapshot).HasMaxLength(100);
+        builder.Property(s => s.CustomerGstRegistrationTypeSnapshot).HasConversion<string>().HasMaxLength(20);
+        builder.Property(s => s.CustomerAddressSnapshot).HasMaxLength(500);
     }
 }
 

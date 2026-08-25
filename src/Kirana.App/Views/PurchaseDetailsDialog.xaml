@@ -55,6 +55,19 @@
                             <Run Text="{x:Bind ViewModel.SupplierCodeParenthesized}" Foreground="{ThemeResource TextTertiaryBrush}" FontWeight="Normal" />
                         </TextBlock>
                         <TextBlock Text="{x:Bind ViewModel.DateText}" Style="{StaticResource SecondaryTextStyle}" />
+                        <TextBlock Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap"
+                                   Visibility="{x:Bind ViewModel.HasSupplierGstIdentity, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Run Text="GSTIN: " /><Run Text="{x:Bind ViewModel.SupplierGstin, FallbackValue=—}" />
+                            <Run Text="  ·  State: " /><Run Text="{x:Bind ViewModel.SupplierState, FallbackValue=—}" />
+                            <Run Text="  ·  Registration: " /><Run Text="{x:Bind ViewModel.SupplierRegistrationType, FallbackValue=—}" />
+                        </TextBlock>
+                        <TextBlock Text="{x:Bind ViewModel.SupplierAddress}" Style="{StaticResource CaptionTextStyle}"
+                                   TextWrapping="Wrap"
+                                   Visibility="{x:Bind ViewModel.HasSupplierGstIdentity, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <TextBlock Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap"
+                                   Visibility="{x:Bind ViewModel.HasStoreIdentity, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Run Text="Buying store: " /><Run Text="{x:Bind ViewModel.StoreIdentity}" />
+                        </TextBlock>
                         <TextBlock Style="{StaticResource CaptionTextStyle}"
                                    Visibility="{x:Bind ViewModel.HasSupplierInvoiceNumber, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Run Text="Supplier Invoice #: " /><Run Text="{x:Bind ViewModel.SupplierInvoiceNumber}" />

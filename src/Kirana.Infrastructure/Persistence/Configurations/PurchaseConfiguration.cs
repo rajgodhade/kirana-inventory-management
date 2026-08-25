@@ -19,6 +19,7 @@ public sealed class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
         builder.Property(p => p.PaymentMethod).HasConversion<string>().HasMaxLength(20);
         builder.Property(p => p.Notes).HasMaxLength(1000);
+        ConfigureIdentitySnapshots(builder);
 
         builder.Property(p => p.SubTotal).HasPrecision(18, 2);
         builder.Property(p => p.DiscountTotal).HasPrecision(18, 2);
@@ -45,6 +46,27 @@ public sealed class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
             .WithMany()
             .HasForeignKey(p => p.PurchaseOrderId)
             .OnDelete(DeleteBehavior.Restrict);
+    }
+
+    private static void ConfigureIdentitySnapshots(EntityTypeBuilder<Purchase> builder)
+    {
+        builder.Property(p => p.StoreTradeNameSnapshot).HasMaxLength(200);
+        builder.Property(p => p.StoreLegalNameSnapshot).HasMaxLength(200);
+        builder.Property(p => p.StoreGstinSnapshot).HasMaxLength(15);
+        builder.Property(p => p.StoreStateCodeSnapshot).HasMaxLength(2);
+        builder.Property(p => p.StoreStateNameSnapshot).HasMaxLength(100);
+        builder.Property(p => p.StoreGstRegistrationTypeSnapshot).HasConversion<string>().HasMaxLength(20);
+        builder.Property(p => p.StoreAddressSnapshot).HasMaxLength(500);
+        builder.Property(p => p.StoreCitySnapshot).HasMaxLength(100);
+        builder.Property(p => p.StorePinCodeSnapshot).HasMaxLength(10);
+        builder.Property(p => p.StoreContactNumberSnapshot).HasMaxLength(20);
+        builder.Property(p => p.SupplierNameSnapshot).HasMaxLength(200);
+        builder.Property(p => p.SupplierCodeSnapshot).HasMaxLength(30);
+        builder.Property(p => p.SupplierGstinSnapshot).HasMaxLength(15);
+        builder.Property(p => p.SupplierStateCodeSnapshot).HasMaxLength(2);
+        builder.Property(p => p.SupplierStateNameSnapshot).HasMaxLength(100);
+        builder.Property(p => p.SupplierGstRegistrationTypeSnapshot).HasConversion<string>().HasMaxLength(20);
+        builder.Property(p => p.SupplierAddressSnapshot).HasMaxLength(500);
     }
 }
 

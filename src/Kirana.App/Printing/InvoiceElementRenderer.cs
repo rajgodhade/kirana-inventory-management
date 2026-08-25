@@ -154,6 +154,12 @@ public static class InvoiceElementRenderer
             panel.Children.Add(new TextBlock { Text = document.StoreAddress, FontSize = isCompact ? 10 : 12, TextAlignment = TextAlignment.Center, TextWrapping = TextWrapping.Wrap });
         }
 
+        if (!string.IsNullOrWhiteSpace(document.StoreLegalName)
+            && !string.Equals(document.StoreLegalName, document.StoreName, StringComparison.OrdinalIgnoreCase))
+        {
+            panel.Children.Add(new TextBlock { Text = $"Legal name: {document.StoreLegalName}", FontSize = isCompact ? 9 : 11, TextAlignment = TextAlignment.Center, TextWrapping = TextWrapping.Wrap });
+        }
+
         var contactLine = string.Join("   ", new[]
         {
             document.StoreContactNumber is { } phone ? $"Ph: {phone}" : null,
@@ -194,6 +200,18 @@ public static class InvoiceElementRenderer
             if (!string.IsNullOrWhiteSpace(document.CustomerGstin))
             {
                 panel.Children.Add(BuildKeyValueRow("Customer GSTIN", document.CustomerGstin, isCompact));
+            }
+
+            if (!string.IsNullOrWhiteSpace(document.CustomerAddress))
+            {
+                panel.Children.Add(BuildKeyValueRow("Customer Address", document.CustomerAddress, isCompact));
+            }
+
+            var customerState = string.Join(" - ", new[] { document.CustomerStateCode, document.CustomerStateName }
+                .Where(value => !string.IsNullOrWhiteSpace(value)));
+            if (customerState.Length > 0)
+            {
+                panel.Children.Add(BuildKeyValueRow("Customer State", customerState, isCompact));
             }
         }
 

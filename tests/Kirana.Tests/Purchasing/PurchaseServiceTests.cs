@@ -1,6 +1,7 @@
 using Kirana.Application.Authentication;
 using Kirana.Application.Purchasing;
 using Kirana.Domain.Entities;
+using Kirana.Domain.Taxation;
 using Kirana.Infrastructure.Persistence;
 using Kirana.Tests.TestSupport;
 using Microsoft.EntityFrameworkCore;
@@ -76,6 +77,35 @@ public class PurchaseServiceTests : IDisposable
         Assert.Equal(500m, purchase.GrandTotal);
         Assert.Single(purchase.Items);
         Assert.Equal(PurchaseStatus.Completed, purchase.Status);
+    }
+
+    [Fact]
+    public async Task FinalizePurchaseAsync_CapturesCompletionTimeStoreAndSupplierGstIdentityAtomically()
+    {
+        var supplier = await SeedSupplierAsync("Completion Supplier");
+        supplier.Gstin = "27CCCCC0000C1Z5";
+        supplier.StateCode = "27";
+        supplier.GstRegistrationType = GstRegistrationType.Regular;
+        supplier.Address = "Completion Supplier Address";
+        var store = await _fixture.Context.Stores.SingleAsync();
+        store.Name = "Completion Store";
+        store.Gstin = "27ABCDE1234F1Z5";
+        store.StateCode = "27";
+        store.GstRegistrationType = GstRegistrationType.Regular;
+        var product = await SeedProductAsync(price: 50);
+        await _fixture.Context.SaveChangesAsync();
+
+        var completed = await _sut.FinalizePurchaseAsync(
+            BasicRequest(supplier.Id, product.Id, 2, 50, _ownerId));
+
+        _fixture.Context.ChangeTracker.Clear();
+        var persisted = await _fixture.Context.Purchases.SingleAsync(purchase => purchase.Id == completed.Id);
+        Assert.NotNull(persisted.GstIdentitySnapshotCapturedAtUtc);
+        Assert.Equal("Completion Store", persisted.StoreTradeNameSnapshot);
+        Assert.Equal("27ABCDE1234F1Z5", persisted.StoreGstinSnapshot);
+        Assert.Equal("Completion Supplier", persisted.SupplierNameSnapshot);
+        Assert.Equal("27CCCCC0000C1Z5", persisted.SupplierGstinSnapshot);
+        Assert.Equal("Maharashtra", persisted.SupplierStateNameSnapshot);
     }
 
     [Fact]

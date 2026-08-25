@@ -1,5 +1,6 @@
 using Kirana.Application.Abstractions;
 using Kirana.Domain.Entities;
+using Kirana.Domain.Taxation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kirana.Application.Customers;
@@ -16,6 +17,7 @@ public sealed class CustomerService(IKiranaDbContext db, ISequenceGenerator sequ
         var name = RequireName(request.Name);
         var phone = Normalize(request.Phone);
         await EnsurePhoneAvailableAsync(phone, excludingCustomerId: null, cancellationToken);
+        GstinValidator.EnsureValidForWrite(request.Gstin, request.StateCode);
 
         var customerCode = await sequenceGenerator.NextAsync(
             CustomerSequenceKey, CustomerCodePrefix, CustomerCodePadding, cancellationToken);
@@ -27,6 +29,8 @@ public sealed class CustomerService(IKiranaDbContext db, ISequenceGenerator sequ
             Phone = phone,
             Address = Normalize(request.Address),
             Gstin = Normalize(request.Gstin),
+            StateCode = Normalize(request.StateCode),
+            GstRegistrationType = request.GstRegistrationType,
             Notes = Normalize(request.Notes),
             DefaultPriceLevel = request.DefaultPriceLevel,
             IsActive = true,
@@ -48,11 +52,16 @@ public sealed class CustomerService(IKiranaDbContext db, ISequenceGenerator sequ
 
         var phone = Normalize(request.Phone);
         await EnsurePhoneAvailableAsync(phone, customerId, cancellationToken);
+        GstinValidator.EnsureValidForWrite(request.Gstin, request.StateCode);
+
+        var previousGstIdentity = DescribeGstIdentity(customer.Gstin, customer.StateCode, customer.GstRegistrationType);
 
         customer.Name = RequireName(request.Name);
         customer.Phone = phone;
         customer.Address = Normalize(request.Address);
         customer.Gstin = Normalize(request.Gstin);
+        customer.StateCode = Normalize(request.StateCode);
+        customer.GstRegistrationType = request.GstRegistrationType;
         customer.Notes = Normalize(request.Notes);
 
         // Captured before the assignment so the audit can say what the preference actually moved
@@ -72,6 +81,13 @@ public sealed class CustomerService(IKiranaDbContext db, ISequenceGenerator sequ
                 ? $"{customer.CustomerCode} - {customer.Name}"
                 : $"{customer.CustomerCode} - {customer.Name}; default price level: {Describe(customer.DefaultPriceLevel)}",
             cancellationToken: cancellationToken);
+
+        var newGstIdentity = DescribeGstIdentity(customer.Gstin, customer.StateCode, customer.GstRegistrationType);
+        if (!string.Equals(previousGstIdentity, newGstIdentity, StringComparison.Ordinal))
+        {
+            await auditLogger.RecordAsync(request.PerformedByUserId, "CustomerGstIdentityUpdated", nameof(Customer),
+                customer.Id.ToString(), previousGstIdentity, newGstIdentity, cancellationToken: cancellationToken);
+        }
 
         return customer;
     }
@@ -178,4 +194,7 @@ public sealed class CustomerService(IKiranaDbContext db, ISequenceGenerator sequ
     /// <summary>Renders the optional preference for the audit trail. "No preference" is a real,
     /// distinct state and reads better than an empty value.</summary>
     private static string Describe(PriceLevel? level) => level?.ToDisplayText() ?? "No preference";
+
+    private static string DescribeGstIdentity(string? gstin, string? stateCode, GstRegistrationType? registrationType) =>
+        $"GSTIN: {gstin ?? "Not set"}; state code: {stateCode ?? "Not set"}; registration: {registrationType?.ToString() ?? "Not specified"}";
 }

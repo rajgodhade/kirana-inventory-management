@@ -1,5 +1,6 @@
 using Kirana.Application.Abstractions;
 using Kirana.Domain.Entities;
+using Kirana.Domain.Taxation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kirana.Application.Setup;
@@ -19,6 +20,9 @@ public sealed class FirstTimeSetupService(IKiranaDbContext db, IPasswordHasher p
         {
             throw new InvalidOperationException("Setup has already been completed.");
         }
+
+        GstinValidator.EnsureValidForWrite(request.Gstin, request.StateCode);
+        var state = IndianGstStateCatalog.FindByCode(request.StateCode);
 
         var ownerRole = new Role { Name = "Owner", IsSystemRole = true };
         var managerRole = new Role { Name = "Manager", IsSystemRole = true };
@@ -51,11 +55,14 @@ public sealed class FirstTimeSetupService(IKiranaDbContext db, IPasswordHasher p
         db.Stores.Add(new Store
         {
             Name = request.StoreName,
+            LegalName = Normalize(request.LegalName),
             OwnerName = request.OwnerName,
             Gstin = request.Gstin,
             Address = request.Address,
             City = request.City,
-            State = request.State,
+            State = state?.Name ?? request.State,
+            StateCode = state?.Code,
+            GstRegistrationType = request.GstRegistrationType,
             PinCode = request.PinCode,
             ContactNumber = request.ContactNumber,
             AlternateContactNumber = request.AlternateContactNumber,
@@ -72,6 +79,8 @@ public sealed class FirstTimeSetupService(IKiranaDbContext db, IPasswordHasher p
 
         await db.SaveChangesAsync(cancellationToken);
     }
+
+    private static string? Normalize(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static void AttachPermissions(Role role, IReadOnlyList<string> keys, IReadOnlyDictionary<string, Permission> byKey)
     {

@@ -18,7 +18,9 @@ public sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.Property(c => c.Phone).HasMaxLength(20);
         builder.HasIndex(c => c.Phone).IsUnique().HasFilter("\"Phone\" IS NOT NULL");
 
-        builder.Property(c => c.Gstin).HasMaxLength(20);
+        builder.Property(c => c.Gstin).HasMaxLength(15);
+        builder.Property(c => c.StateCode).HasMaxLength(2);
+        builder.Property(c => c.GstRegistrationType).HasConversion<string>().HasMaxLength(20);
         builder.Property(c => c.Address).HasMaxLength(500);
         builder.Property(c => c.Notes).HasMaxLength(1000);
         builder.Property(c => c.CreditBalance).HasPrecision(18, 2);

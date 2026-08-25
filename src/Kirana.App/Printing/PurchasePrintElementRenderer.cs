@@ -25,7 +25,23 @@ public static class PurchasePrintElementRenderer
             FontWeight = FontWeights.Bold,
         });
 
-        AddKeyValue(stack, "Supplier", $"{purchase.Supplier.Name} ({purchase.Supplier.SupplierCode})");
+        var supplierName = purchase.GstIdentitySnapshotCapturedAtUtc is not null
+            ? purchase.SupplierNameSnapshot ?? "Supplier"
+            : purchase.Supplier.Name;
+        var supplierCode = purchase.GstIdentitySnapshotCapturedAtUtc is not null
+            ? purchase.SupplierCodeSnapshot
+            : purchase.Supplier.SupplierCode;
+        AddKeyValue(stack, "Supplier", string.IsNullOrWhiteSpace(supplierCode) ? supplierName : $"{supplierName} ({supplierCode})");
+        if (purchase.GstIdentitySnapshotCapturedAtUtc is not null)
+        {
+            if (!string.IsNullOrWhiteSpace(purchase.SupplierGstinSnapshot))
+                AddKeyValue(stack, "Supplier GSTIN", purchase.SupplierGstinSnapshot);
+            if (!string.IsNullOrWhiteSpace(purchase.SupplierAddressSnapshot))
+                AddKeyValue(stack, "Supplier Address", purchase.SupplierAddressSnapshot);
+            var state = string.Join(" - ", new[] { purchase.SupplierStateCodeSnapshot, purchase.SupplierStateNameSnapshot }
+                .Where(value => !string.IsNullOrWhiteSpace(value)));
+            if (state.Length > 0) AddKeyValue(stack, "Supplier State", state);
+        }
         AddKeyValue(stack, "Date", purchase.PurchaseDateUtc.ToLocalTime().ToString("dd-MMM-yyyy hh:mm tt"));
 
         if (!string.IsNullOrWhiteSpace(purchase.SupplierInvoiceNumber))

@@ -7,7 +7,11 @@ using Kirana.Application.Taxation;
 namespace Kirana.Application.Reports;
 
 public sealed class SalesReportService(
-    IKiranaDbContext db, IPermissionEnforcer permissionEnforcer, IGstCalculationService? gstCalculationService = null) : ISalesReportService
+    IKiranaDbContext db,
+    IPermissionEnforcer permissionEnforcer,
+    IGstCalculationService? gstCalculationService = null,
+    IGstTaxContextResolver? gstTaxContextResolver = null,
+    IGstTaxCalculator? gstTaxCalculator = null) : ISalesReportService
 {
     public async Task<SalesReportSummary> GetSummaryAsync(
         ReportDateRange range, ReportFilter? filter, int? performedByUserId, CancellationToken cancellationToken = default)
@@ -76,32 +80,36 @@ public sealed class SalesReportService(
     {
         await permissionEnforcer.EnsureHasPermissionAsync(performedByUserId, PermissionKeys.ReportsView, cancellationToken);
 
-        var salesSnapshots = await db.SaleItems.AsNoTracking()
+        var saleItems = await db.SaleItems.AsNoTracking()
+            .Include(i => i.Sale)
             .Where(i => i.Sale.Status == SaleStatus.Completed && i.Sale.SaleDateUtc >= range.StartUtc && i.Sale.SaleDateUtc < range.EndUtc)
-            .Select(i => new GstSnapshotLine { TransactionId = i.SaleId, RatePercent = i.GstRatePercentSnapshot, TaxableAmount = i.TaxableAmount, GstAmount = i.GstAmount, PricingType = i.IsTaxInclusiveSnapshot ? PricingType.Inclusive : PricingType.Exclusive })
             .ToListAsync(cancellationToken);
 
-        var purchaseSnapshots = await db.PurchaseItems.AsNoTracking()
+        var purchaseItems = await db.PurchaseItems.AsNoTracking()
+            .Include(i => i.Purchase)
             .Where(i => i.Purchase.PurchaseDateUtc >= range.StartUtc && i.Purchase.PurchaseDateUtc < range.EndUtc)
-            .Select(i => new GstSnapshotLine { TransactionId = i.PurchaseId, RatePercent = i.GstRatePercentSnapshot, TaxableAmount = i.TaxableAmount, GstAmount = i.GstAmount, PricingType = i.IsTaxInclusiveSnapshot ? PricingType.Inclusive : PricingType.Exclusive })
             .ToListAsync(cancellationToken);
-
-        static GstRateBreakdown ToBreakdown(GstSlabSummary slab) => new()
-        {
-            RatePercent = slab.RatePercent,
-            TaxableAmount = slab.TaxableAmount,
-            TaxAmount = slab.GstAmount,
-            InvoiceCount = slab.InvoiceCount,
-            PricingType = slab.PricingType,
-            // Split evenly assuming intra-state — see the GstReport class doc for why.
-            Cgst = Math.Round(slab.GstAmount / 2m, 2),
-            Sgst = slab.GstAmount - Math.Round(slab.GstAmount / 2m, 2),
-            Igst = 0m,
-        };
 
         var calculator = gstCalculationService ?? GstCalculationService.Shared;
-        var salesBreakdown = calculator.SummarizeStored(salesSnapshots).Select(ToBreakdown).ToList();
-        var purchaseBreakdown = calculator.SummarizeStored(purchaseSnapshots).Select(ToBreakdown).ToList();
+        var contextResolver = gstTaxContextResolver ?? GstTaxContextResolver.Shared;
+        var taxCalculator = gstTaxCalculator ?? GstTaxCalculator.Shared;
+
+        // Phase 18A-5: one explicit tax context per transaction. Classification (Phase 18A-4) and
+        // jurisdiction (Phase 18A-3) both come from the historical snapshots through the shared
+        // resolvers, and the component split itself is delegated to IGstTaxCalculator. Stored GST
+        // amounts stay authoritative; they are only ever split, never recomputed.
+        var saleLines = saleItems
+            .Select(i => new ResolvedGstSnapshotLine(ToSnapshot(i), contextResolver.ResolveSale(i.Sale)))
+            .ToList();
+        var purchaseLines = purchaseItems
+            .Select(i => new ResolvedPurchaseGstSnapshotLine(ToSnapshot(i), contextResolver.ResolvePurchase(i.Purchase)))
+            .ToList();
+        var salesBreakdown = BuildJurisdictionBreakdown(
+            saleLines.Select(line => (line.Snapshot, line.Context.JurisdictionResolution)).ToList(),
+            calculator, taxCalculator);
+        var purchaseBreakdown = BuildJurisdictionBreakdown(
+            purchaseLines.Select(line => (line.Snapshot, line.Context.JurisdictionResolution)).ToList(),
+            calculator, taxCalculator);
 
         return new GstReport
         {
@@ -109,11 +117,100 @@ public sealed class SalesReportService(
             SalesTaxableAmount = salesBreakdown.Sum(b => b.TaxableAmount),
             SalesGstCollected = salesBreakdown.Sum(b => b.TaxAmount),
             SalesByRate = salesBreakdown,
+            SalesB2bGst = SumSaleClassGst(saleLines, GstTransactionClass.B2B),
+            SalesB2cGst = SumSaleClassGst(saleLines, GstTransactionClass.B2C),
+            SalesUnresolvedIdentityGst = SumSaleClassGst(saleLines, GstTransactionClass.Unresolved),
             PurchaseTaxableAmount = purchaseBreakdown.Sum(b => b.TaxableAmount),
             PurchaseGstPaid = purchaseBreakdown.Sum(b => b.TaxAmount),
             PurchasesByRate = purchaseBreakdown,
+            PurchaseRegisteredSupplierGst = SumPurchaseClassGst(purchaseLines, GstPurchasePartyClass.RegisteredSupplier),
+            PurchaseUnregisteredSupplierGst = SumPurchaseClassGst(purchaseLines, GstPurchasePartyClass.UnregisteredSupplier),
+            PurchaseUnresolvedSupplierGst = SumPurchaseClassGst(purchaseLines, GstPurchasePartyClass.Unresolved),
         };
     }
+
+    private static decimal SumSaleClassGst(IReadOnlyList<ResolvedGstSnapshotLine> lines, GstTransactionClass classification) =>
+        lines.Where(line => line.Context.Classification == classification).Sum(line => line.Snapshot.GstAmount);
+
+    private static decimal SumPurchaseClassGst(IReadOnlyList<ResolvedPurchaseGstSnapshotLine> lines, GstPurchasePartyClass classification) =>
+        lines.Where(line => line.Context.SupplierClassification == classification).Sum(line => line.Snapshot.GstAmount);
+
+    private static IReadOnlyList<GstRateBreakdown> BuildJurisdictionBreakdown(
+        IReadOnlyList<(GstSnapshotLine Snapshot, GstJurisdictionResolution Jurisdiction)> lines,
+        IGstCalculationService calculator,
+        IGstTaxCalculator taxCalculator)
+    {
+        var jurisdictionSlabs = lines
+            .GroupBy(line => line.Jurisdiction.Jurisdiction)
+            .SelectMany(group =>
+            {
+                // Every line in a group shares the same resolved jurisdiction; the representative
+                // resolution carries it into the centralized split. The split depends only on the
+                // jurisdiction outcome, never on which transaction was picked.
+                var representative = group.First().Jurisdiction;
+                return calculator.SummarizeStored(group.Select(line => line.Snapshot).ToList())
+                    .Select(slab => ToJurisdictionBreakdown(slab, representative, taxCalculator));
+            });
+
+        return jurisdictionSlabs
+            .GroupBy(row => new { row.RatePercent, row.PricingType })
+            .Select(group => new GstRateBreakdown
+            {
+                RatePercent = group.Key.RatePercent,
+                PricingType = group.Key.PricingType,
+                TaxableAmount = group.Sum(row => row.TaxableAmount),
+                TaxAmount = group.Sum(row => row.TaxAmount),
+                Cgst = group.Sum(row => row.Cgst),
+                Sgst = group.Sum(row => row.Sgst),
+                Igst = group.Sum(row => row.Igst),
+                UnresolvedGst = group.Sum(row => row.UnresolvedGst),
+                InvoiceCount = group.Sum(row => row.InvoiceCount),
+            })
+            .OrderBy(row => row.RatePercent)
+            .ThenBy(row => row.PricingType)
+            .ToList();
+    }
+
+    private static GstRateBreakdown ToJurisdictionBreakdown(
+        GstSlabSummary slab, GstJurisdictionResolution jurisdiction, IGstTaxCalculator taxCalculator)
+    {
+        // Stored amounts stay authoritative; IGstTaxCalculator only allocates the components.
+        var split = taxCalculator.SplitStored(jurisdiction, slab.TaxableAmount, slab.GstAmount);
+        return new GstRateBreakdown
+        {
+            RatePercent = slab.RatePercent,
+            TaxableAmount = slab.TaxableAmount,
+            TaxAmount = slab.GstAmount,
+            InvoiceCount = slab.InvoiceCount,
+            PricingType = slab.PricingType,
+            Cgst = split.Cgst,
+            Sgst = split.Sgst,
+            Igst = split.Igst,
+            UnresolvedGst = split.IsResolved ? 0m : slab.GstAmount,
+        };
+    }
+
+    private static GstSnapshotLine ToSnapshot(SaleItem item) => new()
+    {
+        TransactionId = item.SaleId,
+        RatePercent = item.GstRatePercentSnapshot,
+        TaxableAmount = item.TaxableAmount,
+        GstAmount = item.GstAmount,
+        PricingType = item.IsTaxInclusiveSnapshot ? PricingType.Inclusive : PricingType.Exclusive,
+    };
+
+    private static GstSnapshotLine ToSnapshot(PurchaseItem item) => new()
+    {
+        TransactionId = item.PurchaseId,
+        RatePercent = item.GstRatePercentSnapshot,
+        TaxableAmount = item.TaxableAmount,
+        GstAmount = item.GstAmount,
+        PricingType = item.IsTaxInclusiveSnapshot ? PricingType.Inclusive : PricingType.Exclusive,
+    };
+
+    private sealed record ResolvedGstSnapshotLine(GstSnapshotLine Snapshot, GstTaxContext Context);
+
+    private sealed record ResolvedPurchaseGstSnapshotLine(GstSnapshotLine Snapshot, GstPurchaseTaxContext Context);
 
     // ------------------------------------------------------------ shared filtered queries
 

@@ -32,6 +32,9 @@
   <ItemGroup>
     <Compile Include="..\..\src\Kirana.App\ViewModels\PurchaseOrderViewModels.cs" Link="Linked\PurchaseOrderViewModels.cs" />
     <Compile Include="..\..\src\Kirana.App\ViewModels\SearchSuggestionItem.cs" Link="Linked\SearchSuggestionItem.cs" />
+    <Compile Include="..\..\src\Kirana.App\ViewModels\PurchaseDetailsViewModel.cs" Link="Linked\PurchaseDetailsViewModel.cs" />
+    <Compile Include="..\..\src\Kirana.App\ViewModels\PurchaseDetailsLineViewModel.cs" Link="Linked\PurchaseDetailsLineViewModel.cs" />
+    <Compile Include="..\..\src\Kirana.App\ViewModels\PurchaseRowViewModel.cs" Link="Linked\PurchaseRowViewModel.cs" />
   </ItemGroup>
 
   <ItemGroup>

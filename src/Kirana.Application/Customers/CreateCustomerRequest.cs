@@ -1,4 +1,5 @@
 using Kirana.Domain.Entities;
+using Kirana.Domain.Taxation;
 
 namespace Kirana.Application.Customers;
 
@@ -9,6 +10,8 @@ public sealed class CreateCustomerRequest
     public string? Phone { get; init; }
     public string? Address { get; init; }
     public string? Gstin { get; init; }
+    public string? StateCode { get; init; }
+    public GstRegistrationType? GstRegistrationType { get; init; }
     public string? Notes { get; init; }
 
     /// <summary>Optional POS default (Phase 15B-4). Null = no preference; bills open at Retail.</summary>

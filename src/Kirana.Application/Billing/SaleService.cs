@@ -252,6 +252,10 @@ public sealed class SaleService(
             PriceOverrideAuthorizedByUserId = hasPriceOverride ? request.PriceOverrideAuthorizedByUserId : null,
         };
 
+        // Legal/GST identity is historical evidence, just like the line price and tax snapshots.
+        // Capture it on the aggregate before the same transactional SaveChanges.
+        HistoricalGstIdentitySnapshotFactory.Capture(sale, store, customer, DateTime.UtcNow);
+
         foreach (var lineResult in totals.Lines)
         {
             var product = products[lineResult.Line.ProductId];

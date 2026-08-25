@@ -1,3 +1,5 @@
+using Kirana.Domain.Taxation;
+
 namespace Kirana.Application.Purchasing;
 
 /// <summary>Input for editing an existing supplier. Outstanding balance is never editable here —
@@ -6,6 +8,8 @@ public sealed class UpdateSupplierRequest
 {
     public required string Name { get; init; }
     public string? Gstin { get; init; }
+    public string? StateCode { get; init; }
+    public GstRegistrationType? GstRegistrationType { get; init; }
     public string? ContactPerson { get; init; }
     public string? Phone { get; init; }
     public string? Email { get; init; }

@@ -1,6 +1,9 @@
 using Kirana.Application.Customers;
+using Kirana.Application.Taxation;
+using Kirana.Domain.Entities;
 using Kirana.Infrastructure.Persistence;
 using Kirana.Tests.TestSupport;
+using Kirana.Domain.Taxation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kirana.Tests.Customers;
@@ -67,6 +70,34 @@ public class CustomerServiceTests : IDisposable
         Assert.Equal(2, (await _sut.SearchAsync(new CustomerSearchQuery())).Count);
     }
 
+    [Fact]
+    public async Task CreateAsync_PersistsGstIdentity()
+    {
+        var customer = await _sut.CreateAsync(new CreateCustomerRequest
+        {
+            Name = "Registered Customer",
+            Gstin = "27AAPFU0939F1ZV",
+            StateCode = "27",
+            GstRegistrationType = GstRegistrationType.Regular,
+        });
+
+        Assert.Equal("27", customer.StateCode);
+        Assert.Equal(GstRegistrationType.Regular, customer.GstRegistrationType);
+    }
+
+    [Fact]
+    public async Task CreateAsync_RejectsGstinStateMismatch()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.CreateAsync(new CreateCustomerRequest
+        {
+            Name = "Wrong State",
+            Gstin = "27AAPFU0939F1ZV",
+            StateCode = "29",
+            GstRegistrationType = GstRegistrationType.Regular,
+        }));
+        Assert.Empty(await _fixture.Context.Customers.ToListAsync());
+    }
+
     // ---------- Customer ID generation ----------
 
     [Fact]
@@ -104,12 +135,64 @@ public class CustomerServiceTests : IDisposable
         var updated = await _sut.UpdateAsync(customer.Id, new UpdateCustomerRequest
         {
             Name = "New Name", Phone = "9000000002", Address = "New Address",
-            Gstin = "27AAAAA0000A1Z5", Notes = "Updated note",
+            Gstin = "27AAPFU0939F1ZV", Notes = "Updated note",
         });
 
         Assert.Equal("New Name", updated.Name);
         Assert.Equal("9000000002", updated.Phone);
         Assert.Equal("Updated note", updated.Notes);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ChangesGstIdentityAndCreatesDistinctAudit()
+    {
+        var customer = await CreateAsync("Tax Customer");
+        var updated = await _sut.UpdateAsync(customer.Id, new UpdateCustomerRequest
+        {
+            Name = customer.Name,
+            Gstin = "27AAPFU0939F1ZV",
+            StateCode = "27",
+            GstRegistrationType = GstRegistrationType.Composition,
+        });
+
+        Assert.Equal(GstRegistrationType.Composition, updated.GstRegistrationType);
+        var audit = await _fixture.Context.AuditLogs.SingleAsync(a => a.Action == "CustomerGstIdentityUpdated");
+        Assert.Contains("Not specified", audit.PreviousValue ?? string.Empty);
+        Assert.Contains("Composition", audit.NewValue ?? string.Empty);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_DoesNotRewritePersistedHistoricalSaleIdentitySnapshot()
+    {
+        var customer = await _sut.CreateAsync(new CreateCustomerRequest
+        {
+            Name = "Original Customer",
+            Gstin = "27AAPFU0939F1ZV",
+            StateCode = "27",
+            GstRegistrationType = GstRegistrationType.Regular,
+        });
+        var sale = new Sale { InvoiceNumber = "INV-SNAPSHOT-CUSTOMER", Customer = customer };
+        HistoricalGstIdentitySnapshotFactory.Capture(
+            sale,
+            new Store { Name = "Snapshot Store", StateCode = "27" },
+            customer,
+            new DateTime(2026, 8, 20, 10, 0, 0, DateTimeKind.Utc));
+        _fixture.Context.Sales.Add(sale);
+        await _fixture.Context.SaveChangesAsync();
+
+        await _sut.UpdateAsync(customer.Id, new UpdateCustomerRequest
+        {
+            Name = "Changed Customer",
+            Gstin = "29AAACB2894G1ZJ",
+            StateCode = "29",
+            GstRegistrationType = GstRegistrationType.Composition,
+        });
+
+        var persisted = await _fixture.Context.Sales.AsNoTracking().SingleAsync(s => s.Id == sale.Id);
+        Assert.Equal("Original Customer", persisted.CustomerNameSnapshot);
+        Assert.Equal("27AAPFU0939F1ZV", persisted.CustomerGstinSnapshot);
+        Assert.Equal("27", persisted.CustomerStateCodeSnapshot);
+        Assert.Equal(GstRegistrationType.Regular, persisted.CustomerGstRegistrationTypeSnapshot);
     }
 
     [Fact]

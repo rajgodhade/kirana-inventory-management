@@ -104,7 +104,7 @@ public sealed class SalesReturnService(
             InvoiceNumber = sale.InvoiceNumber,
             SaleDateUtc = sale.SaleDateUtc,
             CustomerId = sale.CustomerId,
-            CustomerName = sale.Customer?.Name,
+            CustomerName = sale.GstIdentitySnapshotCapturedAtUtc is not null ? sale.CustomerNameSnapshot : sale.Customer?.Name,
             CustomerCode = sale.Customer?.CustomerCode,
             GrandTotal = sale.GrandTotal,
             Lines = sale.Items.Select(i => new ReturnableLine
@@ -410,6 +410,7 @@ public sealed class SalesReturnService(
 
         IQueryable<SalesReturn> returns = db.SalesReturns.AsNoTracking()
             .Include(r => r.Customer)
+            .Include(r => r.Sale)
             .Include(r => r.Items);
 
         var text = query.SearchText?.Trim();
@@ -419,6 +420,7 @@ public sealed class SalesReturnService(
             returns = returns.Where(r =>
                 EF.Functions.Like(r.ReturnNumber, like)
                 || EF.Functions.Like(r.InvoiceNumberSnapshot, like)
+                || (r.Sale.CustomerNameSnapshot != null && EF.Functions.Like(r.Sale.CustomerNameSnapshot, like))
                 || (r.Customer != null && EF.Functions.Like(r.Customer.Name, like)));
         }
 

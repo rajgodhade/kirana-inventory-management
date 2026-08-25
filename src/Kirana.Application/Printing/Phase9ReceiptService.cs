@@ -42,17 +42,27 @@ public sealed class ReturnReceiptService(
         return new ReturnReceiptDocument
         {
             SalesReturnId = salesReturn.Id,
-            StoreName = store.Name,
-            StoreAddress = BuildStoreAddress(store),
-            StoreContactNumber = store.ContactNumber,
+            StoreName = salesReturn.Sale.GstIdentitySnapshotCapturedAtUtc is not null
+                ? salesReturn.Sale.StoreTradeNameSnapshot ?? string.Empty
+                : store.Name,
+            StoreAddress = salesReturn.Sale.GstIdentitySnapshotCapturedAtUtc is not null
+                ? BuildStoreAddress(salesReturn.Sale)
+                : BuildStoreAddress(store),
+            StoreContactNumber = salesReturn.Sale.GstIdentitySnapshotCapturedAtUtc is not null
+                ? salesReturn.Sale.StoreContactNumberSnapshot
+                : store.ContactNumber,
             FooterText = store.InvoiceFooterText,
             ReturnNumber = salesReturn.ReturnNumber,
             InvoiceNumber = salesReturn.InvoiceNumberSnapshot,
             ReturnDateUtc = salesReturn.ReturnDateUtc,
             ProcessedByName = processedBy,
-            CustomerName = salesReturn.Customer?.Name,
+            CustomerName = salesReturn.Sale.GstIdentitySnapshotCapturedAtUtc is not null
+                ? salesReturn.Sale.CustomerNameSnapshot
+                : salesReturn.Customer?.Name,
             CustomerCode = salesReturn.Customer?.CustomerCode,
-            CustomerPhone = salesReturn.Customer?.Phone,
+            CustomerPhone = salesReturn.Sale.GstIdentitySnapshotCapturedAtUtc is not null
+                ? salesReturn.Sale.CustomerPhoneSnapshot
+                : salesReturn.Customer?.Phone,
             TotalReturnAmount = salesReturn.TotalReturnAmount,
             RefundAmount = salesReturn.RefundAmount,
             RefundMethod = salesReturn.RefundMethod.ToString(),
@@ -70,6 +80,19 @@ public sealed class ReturnReceiptService(
                 Disposition = i.Disposition == ReturnDisposition.Damaged ? "Damaged" : "Returned to stock",
             }).ToList(),
         };
+    }
+
+    private static string? BuildStoreAddress(Sale sale)
+    {
+        var parts = new[]
+        {
+            sale.StoreAddressSnapshot,
+            sale.StoreCitySnapshot,
+            sale.StoreStateNameSnapshot,
+            sale.StorePinCodeSnapshot,
+        }.Where(value => !string.IsNullOrWhiteSpace(value));
+        var result = string.Join(", ", parts);
+        return result.Length == 0 ? null : result;
     }
 
     public async Task<ExpenseReceiptDocument> GetExpenseReceiptAsync(

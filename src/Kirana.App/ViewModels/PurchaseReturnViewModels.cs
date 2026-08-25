@@ -54,7 +54,9 @@ public sealed partial class PurchaseReturnsViewModel(IPurchaseReturnService retu
                     Id = r.Id,
                     ReturnNumber = r.ReturnNumber,
                     PurchaseNumber = r.PurchaseNumberSnapshot,
-                    SupplierName = r.Supplier.Name,
+                    SupplierName = r.Purchase.GstIdentitySnapshotCapturedAtUtc is not null
+                        ? r.Purchase.SupplierNameSnapshot ?? "Supplier"
+                        : r.Supplier.Name,
                     DateText = r.ReturnDateUtc.ToLocalTime().ToString("dd-MMM-yyyy hh:mm tt"),
                     TotalText = SalesReturnsViewModel.FormatCurrency(r.TotalReturnAmount),
                     ItemCount = r.Items.Count,

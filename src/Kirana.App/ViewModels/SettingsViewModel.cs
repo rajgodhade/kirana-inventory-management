@@ -3,7 +3,9 @@ using CommunityToolkit.Mvvm.Input;
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
 using Kirana.Application.CloudBackup;
+using Kirana.Application.Taxation;
 using Kirana.Domain.Entities;
+using Kirana.Domain.Taxation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kirana.App.ViewModels;
@@ -13,9 +15,37 @@ namespace Kirana.App.ViewModels;
 /// updated in-memory immediately on save so the auto-lock monitor picks up the new value without
 /// needing a restart, while the underlying <c>AppSettings</c> row persists it across launches.</summary>
 public sealed partial class SettingsViewModel(
-    IKiranaDbContext db, IAppPaths appPaths, ManagementSession session, ICloudBackupService cloudBackupService) : ObservableObject
+    IKiranaDbContext db, IAppPaths appPaths, ManagementSession session, ICloudBackupService cloudBackupService,
+    IStoreTaxIdentityService storeTaxIdentityService) : ObservableObject
 {
     public bool CanChangeSettings => session.HasPermission(PermissionKeys.SettingsChange);
+
+    public IReadOnlyList<IndianGstState> StateOptions { get; } = IndianGstStateCatalog.All;
+    public IReadOnlyList<GstRegistrationType> RegistrationTypeOptions { get; } =
+        Enum.GetValues<GstRegistrationType>();
+
+    [ObservableProperty] private string _storeTradeName = string.Empty;
+    [ObservableProperty] private string _storeLegalName = string.Empty;
+    [ObservableProperty] private string _storeGstin = string.Empty;
+    [ObservableProperty] private IndianGstState? _selectedStoreState;
+    [ObservableProperty] private GstRegistrationType? _selectedStoreRegistrationType;
+    [ObservableProperty] private string? _storeTaxIdentityErrorMessage;
+    [ObservableProperty] private string? _storeTaxIdentityStatusMessage;
+
+    public string StoreGstinFeedback => BuildGstinFeedback(StoreGstin, SelectedStoreState?.Code);
+    public bool HasStoreGstinFeedback => StoreGstinFeedback.Length > 0;
+
+    partial void OnStoreGstinChanged(string value)
+    {
+        OnPropertyChanged(nameof(StoreGstinFeedback));
+        OnPropertyChanged(nameof(HasStoreGstinFeedback));
+    }
+
+    partial void OnSelectedStoreStateChanged(IndianGstState? value)
+    {
+        OnPropertyChanged(nameof(StoreGstinFeedback));
+        OnPropertyChanged(nameof(HasStoreGstinFeedback));
+    }
 
     public IReadOnlyList<string> DurationOptions { get; } = ["5 minutes", "10 minutes", "15 minutes", "30 minutes", "Custom"];
 
@@ -281,6 +311,16 @@ public sealed partial class SettingsViewModel(
 
     public async Task InitializeAsync()
     {
+        var storeIdentity = await storeTaxIdentityService.GetAsync();
+        if (storeIdentity is not null)
+        {
+            StoreTradeName = storeIdentity.TradeName;
+            StoreLegalName = storeIdentity.LegalName ?? string.Empty;
+            StoreGstin = storeIdentity.Gstin ?? string.Empty;
+            SelectedStoreState = IndianGstStateCatalog.FindByCode(storeIdentity.StateCode);
+            SelectedStoreRegistrationType = storeIdentity.RegistrationType;
+        }
+
         var settings = await db.AppSettings.FirstOrDefaultAsync();
         var currentMinutes = settings?.AutoLockMinutes ?? session.AutoLockMinutes;
 
@@ -308,6 +348,41 @@ public sealed partial class SettingsViewModel(
         DefaultExportFormat = settings?.DefaultExportFormat ?? "Csv";
         await RefreshCloudAsync();
         _isLoadingBackupSettings = false;
+    }
+
+    [RelayCommand]
+    private async Task SaveStoreTaxIdentityAsync()
+    {
+        StoreTaxIdentityErrorMessage = null;
+        StoreTaxIdentityStatusMessage = null;
+        try
+        {
+            await storeTaxIdentityService.UpdateAsync(new UpdateStoreTaxIdentityRequest
+            {
+                TradeName = StoreTradeName,
+                LegalName = StoreLegalName,
+                Gstin = StoreGstin,
+                StateCode = SelectedStoreState?.Code,
+                RegistrationType = SelectedStoreRegistrationType,
+                PerformedByUserId = session.CurrentUser?.Id,
+            });
+            StoreTaxIdentityStatusMessage = "Store GST identity saved.";
+        }
+        catch (Exception ex)
+        {
+            StoreTaxIdentityErrorMessage = ex.Message;
+        }
+    }
+
+    private static string BuildGstinFeedback(string? gstin, string? stateCode)
+    {
+        var result = GstinValidator.ValidateIdentity(gstin, stateCode);
+        return result.Gstin.Status switch
+        {
+            GstinValidationStatus.Missing => string.Empty,
+            _ when !result.IsValid => result.ErrorMessage ?? "GSTIN is invalid.",
+            _ => $"Valid GSTIN for {IndianGstStateCatalog.FindByCode(result.Gstin.StateCode)?.Name}.",
+        };
     }
 
     /// <summary>Shown when no explicit folder is configured, so the operator can see where backups

@@ -23,6 +23,37 @@
 
                 <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
                     <StackPanel Spacing="10">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Store GST identity" Style="{StaticResource SectionTitleTextStyle}" />
+                            <TextBlock Text="Authoritative tax identity used for future GST workflows. Historical invoices are not changed."
+                                       Style="{StaticResource PageSubtitleTextStyle}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <TextBox Header="Trade name *" Text="{x:Bind ViewModel.StoreTradeName, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                        <TextBox Header="Legal name" Text="{x:Bind ViewModel.StoreLegalName, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                        <TextBox Header="GSTIN (optional)" Text="{x:Bind ViewModel.StoreGstin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                        <TextBlock Text="{x:Bind ViewModel.StoreGstinFeedback, Mode=OneWay}" TextWrapping="Wrap"
+                                   Style="{StaticResource PageSubtitleTextStyle}"
+                                   Visibility="{x:Bind ViewModel.HasStoreGstinFeedback, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <ComboBox Header="State / Union territory" ItemsSource="{x:Bind ViewModel.StateOptions}"
+                                  DisplayMemberPath="DisplayName" SelectedItem="{x:Bind ViewModel.SelectedStoreState, Mode=TwoWay}"
+                                  IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                        <ComboBox Header="GST registration type" ItemsSource="{x:Bind ViewModel.RegistrationTypeOptions}"
+                                  SelectedItem="{x:Bind ViewModel.SelectedStoreRegistrationType, Mode=TwoWay}"
+                                  PlaceholderText="Select registration type"
+                                  IsEnabled="{x:Bind ViewModel.CanChangeSettings}" />
+                        <Button Content="Save GST identity" Style="{StaticResource AccentButtonStyle}"
+                                Command="{x:Bind ViewModel.SaveStoreTaxIdentityCommand}"
+                                IsEnabled="{x:Bind ViewModel.CanChangeSettings}" HorizontalAlignment="Left" />
+                        <InfoBar IsOpen="{x:Bind ViewModel.StoreTaxIdentityErrorMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                                 Severity="Error" Message="{x:Bind ViewModel.StoreTaxIdentityErrorMessage, Mode=OneWay}" />
+                        <InfoBar IsOpen="{x:Bind ViewModel.StoreTaxIdentityStatusMessage, Mode=OneWay, Converter={StaticResource StringToBoolConverter}}"
+                                 Severity="Success" Message="{x:Bind ViewModel.StoreTaxIdentityStatusMessage, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorderStyle}" Padding="{StaticResource CardPaddingLarge}">
+                    <StackPanel Spacing="10">
                         <TextBlock Text="Device Status" Style="{StaticResource SectionTitleTextStyle}" />
                         <controls:DeviceStatusWidget Title="Receipt printer" Glyph="&#xE749;"
                             Detail="{x:Bind DeviceStatus.PrinterDetail, Mode=OneWay}"

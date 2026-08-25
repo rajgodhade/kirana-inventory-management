@@ -3,6 +3,7 @@ using Kirana.Domain.Entities;
 using Kirana.Infrastructure.Security;
 using Kirana.Tests.TestSupport;
 using Microsoft.EntityFrameworkCore;
+using Kirana.Domain.Taxation;
 
 namespace Kirana.Tests.Setup;
 
@@ -38,6 +39,47 @@ public class FirstTimeSetupServiceTests : IDisposable
         await _sut.CompleteSetupAsync(ValidRequest());
 
         Assert.True(await _sut.IsSetupCompletedAsync());
+    }
+
+    [Fact]
+    public async Task CompleteSetupAsync_PersistsStoreGstIdentity()
+    {
+        await _sut.CompleteSetupAsync(new CompleteSetupRequest
+        {
+            StoreName = "Hitu Kirana",
+            LegalName = "Hitu Kirana Private Limited",
+            OwnerName = "Owner",
+            Gstin = "27AAPFU0939F1ZV",
+            StateCode = "27",
+            GstRegistrationType = GstRegistrationType.Regular,
+            AdminUsername = "admin",
+            AdminFullName = "Owner",
+            AdminPassword = "S3cure!Pass",
+        });
+
+        var store = await _fixture.Context.Stores.SingleAsync();
+        Assert.Equal("27", store.StateCode);
+        Assert.Equal("Maharashtra", store.State);
+        Assert.Equal(GstRegistrationType.Regular, store.GstRegistrationType);
+    }
+
+    [Fact]
+    public async Task CompleteSetupAsync_RejectsGstinStateMismatchBeforeWritingAnything()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.CompleteSetupAsync(new CompleteSetupRequest
+        {
+            StoreName = "Hitu Kirana",
+            OwnerName = "Owner",
+            Gstin = "27AAPFU0939F1ZV",
+            StateCode = "29",
+            GstRegistrationType = GstRegistrationType.Regular,
+            AdminUsername = "admin",
+            AdminFullName = "Owner",
+            AdminPassword = "S3cure!Pass",
+        }));
+
+        Assert.Empty(await _fixture.Context.Stores.ToListAsync());
+        Assert.Empty(await _fixture.Context.Users.ToListAsync());
     }
 
     [Fact]

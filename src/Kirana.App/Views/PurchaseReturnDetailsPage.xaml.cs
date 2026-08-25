@@ -33,7 +33,13 @@ public sealed partial class PurchaseReturnDetailsPage : Page
             SubtitleText.Text = $"Against {purchaseReturn.PurchaseNumberSnapshot} · {purchaseReturn.ReturnDateUtc.ToLocalTime():dd-MMM-yyyy hh:mm tt}";
             TotalText.Text = "₹" + purchaseReturn.TotalReturnAmount.ToString(
                 "N2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"));
-            SupplierText.Text = $"{purchaseReturn.Supplier.Name} · {purchaseReturn.Supplier.SupplierCode}";
+            var supplierName = purchaseReturn.Purchase.GstIdentitySnapshotCapturedAtUtc is not null
+                ? purchaseReturn.Purchase.SupplierNameSnapshot ?? "Supplier"
+                : purchaseReturn.Supplier.Name;
+            var supplierCode = purchaseReturn.Purchase.GstIdentitySnapshotCapturedAtUtc is not null
+                ? purchaseReturn.Purchase.SupplierCodeSnapshot ?? string.Empty
+                : purchaseReturn.Supplier.SupplierCode;
+            SupplierText.Text = string.IsNullOrWhiteSpace(supplierCode) ? supplierName : $"{supplierName} · {supplierCode}";
             ReasonText.Text = string.IsNullOrWhiteSpace(purchaseReturn.Reason) ? string.Empty : $"Reason: {purchaseReturn.Reason}";
             LinesList.ItemsSource = purchaseReturn.Items.ToList();
         }

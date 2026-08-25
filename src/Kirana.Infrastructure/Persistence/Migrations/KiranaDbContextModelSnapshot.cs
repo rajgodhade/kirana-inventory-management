@@ -578,8 +578,12 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Gstin")
+                    b.Property<string>("GstRegistrationType")
                         .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Gstin")
+                        .HasMaxLength(15)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
@@ -596,6 +600,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StateCode")
+                        .HasMaxLength(2)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
@@ -1737,6 +1745,9 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("GstIdentitySnapshotCapturedAtUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
@@ -1769,8 +1780,64 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("StoreAddressSnapshot")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreCitySnapshot")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreContactNumberSnapshot")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreGstRegistrationTypeSnapshot")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreGstinSnapshot")
+                        .HasMaxLength(15)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreLegalNameSnapshot")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StorePinCodeSnapshot")
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreStateCodeSnapshot")
+                        .HasMaxLength(2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreStateNameSnapshot")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreTradeNameSnapshot")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("SubTotal")
                         .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SupplierAddressSnapshot")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SupplierCodeSnapshot")
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SupplierGstRegistrationTypeSnapshot")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SupplierGstinSnapshot")
+                        .HasMaxLength(15)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("SupplierId")
@@ -1778,6 +1845,18 @@ namespace Kirana.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("SupplierInvoiceNumber")
                         .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SupplierNameSnapshot")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SupplierStateCodeSnapshot")
+                        .HasMaxLength(2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SupplierStateNameSnapshot")
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("TaxTotal")
@@ -2313,14 +2392,45 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CustomerAddressSnapshot")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CustomerGstRegistrationTypeSnapshot")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CustomerGstinSnapshot")
+                        .HasMaxLength(15)
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("CustomerId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("CustomerNameSnapshot")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CustomerPhoneSnapshot")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CustomerStateCodeSnapshot")
+                        .HasMaxLength(2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CustomerStateNameSnapshot")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("DiscountAuthorizedByUserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("GrandTotal")
                         .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("GstIdentitySnapshotCapturedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("InvoiceNumber")
@@ -2354,6 +2464,46 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreAddressSnapshot")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreCitySnapshot")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreContactNumberSnapshot")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreGstRegistrationTypeSnapshot")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreGstinSnapshot")
+                        .HasMaxLength(15)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreLegalNameSnapshot")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StorePinCodeSnapshot")
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreStateCodeSnapshot")
+                        .HasMaxLength(2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreStateNameSnapshot")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoreTradeNameSnapshot")
+                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("SubTotal")
@@ -2947,7 +3097,12 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                     b.Property<int>("FinancialYearStartMonth")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("GstRegistrationType")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Gstin")
+                        .HasMaxLength(15)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("InvoiceFooterText")
@@ -2961,6 +3116,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("IsGstEnabled")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("LegalName")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("LogoPath")
                         .HasColumnType("TEXT");
@@ -2982,6 +3141,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("State")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StateCode")
+                        .HasMaxLength(2)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
@@ -3013,8 +3176,12 @@ namespace Kirana.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Gstin")
+                    b.Property<string>("GstRegistrationType")
                         .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Gstin")
+                        .HasMaxLength(15)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
@@ -3031,6 +3198,10 @@ namespace Kirana.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StateCode")
+                        .HasMaxLength(2)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SupplierCode")

@@ -1,6 +1,7 @@
 using Kirana.Application.Abstractions;
 using Kirana.Application.Authentication;
 using Kirana.Domain.Entities;
+using Kirana.Domain.Taxation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kirana.Application.Purchasing;
@@ -18,6 +19,7 @@ public sealed class SupplierService(
         await permissionEnforcer.EnsureHasPermissionAsync(request.PerformedByUserId, PermissionKeys.PurchasesManage, cancellationToken);
 
         var name = RequireName(request.Name);
+        GstinValidator.EnsureValidForWrite(request.Gstin, request.StateCode);
 
         var supplierCode = await sequenceGenerator.NextAsync(SupplierSequenceKey, SupplierCodePrefix, SupplierCodePadding, cancellationToken);
 
@@ -26,6 +28,8 @@ public sealed class SupplierService(
             SupplierCode = supplierCode,
             Name = name,
             Gstin = Normalize(request.Gstin),
+            StateCode = Normalize(request.StateCode),
+            GstRegistrationType = request.GstRegistrationType,
             ContactPerson = Normalize(request.ContactPerson),
             Phone = Normalize(request.Phone),
             Email = Normalize(request.Email),
@@ -48,8 +52,13 @@ public sealed class SupplierService(
         var supplier = await db.Suppliers.FirstOrDefaultAsync(s => s.Id == supplierId, cancellationToken)
             ?? throw new InvalidOperationException("Supplier not found.");
 
+        GstinValidator.EnsureValidForWrite(request.Gstin, request.StateCode);
+        var previousGstIdentity = DescribeGstIdentity(supplier.Gstin, supplier.StateCode, supplier.GstRegistrationType);
+
         supplier.Name = RequireName(request.Name);
         supplier.Gstin = Normalize(request.Gstin);
+        supplier.StateCode = Normalize(request.StateCode);
+        supplier.GstRegistrationType = request.GstRegistrationType;
         supplier.ContactPerson = Normalize(request.ContactPerson);
         supplier.Phone = Normalize(request.Phone);
         supplier.Email = Normalize(request.Email);
@@ -59,6 +68,13 @@ public sealed class SupplierService(
 
         await auditLogger.RecordAsync(request.PerformedByUserId, "SupplierUpdated", nameof(Supplier), supplier.Id.ToString(),
             cancellationToken: cancellationToken);
+
+        var newGstIdentity = DescribeGstIdentity(supplier.Gstin, supplier.StateCode, supplier.GstRegistrationType);
+        if (!string.Equals(previousGstIdentity, newGstIdentity, StringComparison.Ordinal))
+        {
+            await auditLogger.RecordAsync(request.PerformedByUserId, "SupplierGstIdentityUpdated", nameof(Supplier),
+                supplier.Id.ToString(), previousGstIdentity, newGstIdentity, cancellationToken: cancellationToken);
+        }
 
         return supplier;
     }
@@ -229,4 +245,7 @@ public sealed class SupplierService(
     }
 
     private static string? Normalize(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static string DescribeGstIdentity(string? gstin, string? stateCode, GstRegistrationType? registrationType) =>
+        $"GSTIN: {gstin ?? "Not set"}; state code: {stateCode ?? "Not set"}; registration: {registrationType?.ToString() ?? "Not specified"}";
 }

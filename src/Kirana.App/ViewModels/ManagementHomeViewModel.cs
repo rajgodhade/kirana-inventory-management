@@ -276,7 +276,9 @@ public sealed partial class ManagementHomeViewModel(
             RecentActivity.Add(new RecentActivityRowViewModel
             {
                 Title = sale.InvoiceNumber,
-                Customer = sale.Customer?.Name ?? "Walk-in customer",
+                Customer = sale.GstIdentitySnapshotCapturedAtUtc is not null
+                    ? sale.CustomerNameSnapshot ?? "Walk-in customer"
+                    : sale.Customer?.Name ?? "Walk-in customer",
                 Subtitle = sale.SaleDateUtc.ToLocalTime().ToString("dd MMM, hh:mm tt"),
                 PaymentMethod = methods.Count == 0 ? "Payment not recorded" : string.Join(" + ", methods),
                 Status = sale.Status.ToString(),

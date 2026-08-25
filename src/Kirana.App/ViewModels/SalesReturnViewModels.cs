@@ -57,7 +57,9 @@ public sealed partial class SalesReturnsViewModel(ISalesReturnService returnServ
                     ReturnNumber = r.ReturnNumber,
                     InvoiceNumber = r.InvoiceNumberSnapshot,
                     DateText = r.ReturnDateUtc.ToLocalTime().ToString("dd-MMM-yyyy hh:mm tt"),
-                    CustomerName = r.Customer?.Name ?? "Walk-in",
+                    CustomerName = r.Sale.GstIdentitySnapshotCapturedAtUtc is not null
+                        ? r.Sale.CustomerNameSnapshot ?? "Walk-in"
+                        : r.Customer?.Name ?? "Walk-in",
                     TotalText = FormatCurrency(r.TotalReturnAmount),
                     RefundText = FormatCurrency(r.RefundAmount),
                     RefundMethod = r.RefundMethod == RefundMethod.None ? "No refund" : r.RefundMethod.ToString(),

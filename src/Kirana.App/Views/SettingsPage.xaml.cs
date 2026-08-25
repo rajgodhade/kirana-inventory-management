@@ -29,7 +29,8 @@ public sealed partial class SettingsPage : Page
             services.GetRequiredService<IKiranaDbContext>(),
             services.GetRequiredService<IAppPaths>(),
             services.GetRequiredService<ManagementSession>(),
-            services.GetRequiredService<ICloudBackupService>());
+            services.GetRequiredService<ICloudBackupService>(),
+            services.GetRequiredService<Kirana.Application.Taxation.IStoreTaxIdentityService>());
         DeviceStatus = new DeviceStatusViewModel(
             services.GetRequiredService<IHardwareMonitor>(),
             services.GetRequiredService<IHardwareSettingsService>());

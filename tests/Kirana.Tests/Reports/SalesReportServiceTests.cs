@@ -38,6 +38,7 @@ public class SalesReportServiceTests : IDisposable
         // row order).
         var store = _fixture.Context.Stores.Single();
         store.IsGstEnabled = true;
+        store.StateCode = "27";
         _fixture.Context.SaveChangesAsync().GetAwaiter().GetResult();
     }
 
@@ -63,7 +64,12 @@ public class SalesReportServiceTests : IDisposable
         return product;
     }
 
-    private Task<Sale> SellAsync(Product product, decimal quantity, PaymentMethod method = PaymentMethod.Cash, decimal? discountPercent = null)
+    private Task<Sale> SellAsync(
+        Product product,
+        decimal quantity,
+        PaymentMethod method = PaymentMethod.Cash,
+        decimal? discountPercent = null,
+        int? customerId = null)
     {
         // A GST-exclusive line's grand total is qty*price, less any discount, plus tax on top —
         // tender enough to cover exactly that so SaleService's payment-matches-total check passes.
@@ -74,7 +80,21 @@ public class SalesReportServiceTests : IDisposable
             Lines = [new SaleLineInput { ProductId = product.Id, Quantity = quantity, DiscountPercent = discountPercent ?? 0 }],
             Payments = [new SalePaymentInput { Method = method, Amount = Math.Round(amount, 0), AmountTendered = method == PaymentMethod.Cash ? Math.Round(amount, 0) : null }],
             CashierUserId = _ownerId,
+            CustomerId = customerId,
         });
+    }
+
+    private async Task<Customer> SeedCustomerAsync(string stateCode)
+    {
+        var customer = new Customer
+        {
+            CustomerCode = $"CUST-{Guid.NewGuid():N}"[..12],
+            Name = "GST Test Customer",
+            StateCode = stateCode,
+        };
+        _fixture.Context.Customers.Add(customer);
+        await _fixture.Context.SaveChangesAsync();
+        return customer;
     }
 
     private static ReportDateRange TodayRange() => ReportDateRange.Resolve(ReportDatePreset.Today);
@@ -184,7 +204,8 @@ public class SalesReportServiceTests : IDisposable
     public async Task Gst_SplitsEvenlyIntoCgstAndSgst_WithZeroIgst()
     {
         var product = await SeedProductAsync(sellingPrice: 100, gstRate: 18);
-        await SellAsync(product, 1);
+        var customer = await SeedCustomerAsync("27");
+        await SellAsync(product, 1, customerId: customer.Id);
 
         var gst = await _sut.GetGstReportAsync(TodayRange(), _ownerId);
 
@@ -192,6 +213,36 @@ public class SalesReportServiceTests : IDisposable
         Assert.Equal(bucket.Cgst + bucket.Sgst, bucket.TaxAmount);
         Assert.Equal(bucket.Cgst, bucket.Sgst);
         Assert.Equal(0m, bucket.Igst);
+        Assert.Equal(0m, bucket.UnresolvedGst);
+    }
+
+    [Fact]
+    public async Task Gst_InterStateSale_UsesIgstOnly()
+    {
+        var product = await SeedProductAsync(sellingPrice: 100, gstRate: 18);
+        var customer = await SeedCustomerAsync("29");
+        await SellAsync(product, 1, customerId: customer.Id);
+
+        var bucket = Assert.Single((await _sut.GetGstReportAsync(TodayRange(), _ownerId)).SalesByRate);
+
+        Assert.Equal(0m, bucket.Cgst);
+        Assert.Equal(0m, bucket.Sgst);
+        Assert.Equal(bucket.TaxAmount, bucket.Igst);
+        Assert.Equal(0m, bucket.UnresolvedGst);
+    }
+
+    [Fact]
+    public async Task Gst_WalkInSale_RemainsExplicitlyUnresolved()
+    {
+        var product = await SeedProductAsync(sellingPrice: 100, gstRate: 18);
+        await SellAsync(product, 1);
+
+        var bucket = Assert.Single((await _sut.GetGstReportAsync(TodayRange(), _ownerId)).SalesByRate);
+
+        Assert.Equal(0m, bucket.Cgst);
+        Assert.Equal(0m, bucket.Sgst);
+        Assert.Equal(0m, bucket.Igst);
+        Assert.Equal(bucket.TaxAmount, bucket.UnresolvedGst);
     }
 
     [Fact]

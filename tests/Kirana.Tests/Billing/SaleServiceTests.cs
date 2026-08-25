@@ -2,6 +2,7 @@ using Kirana.Application.Authentication;
 using Kirana.Application.Billing;
 using Kirana.Application.Setup;
 using Kirana.Domain.Entities;
+using Kirana.Domain.Taxation;
 using Kirana.Infrastructure.Persistence;
 using Kirana.Infrastructure.Security;
 using Kirana.Tests.TestSupport;
@@ -84,6 +85,50 @@ public class SaleServiceTests : IDisposable
         Assert.Equal(100m, sale.GrandTotal);
         Assert.Single(sale.Items);
         Assert.Equal(SaleStatus.Completed, sale.Status);
+    }
+
+    [Fact]
+    public async Task CompleteSaleAsync_CapturesCompletionTimeStoreAndCustomerGstIdentityAtomically()
+    {
+        var product = await SeedProductAsync(price: 50);
+        var store = await _fixture.Context.Stores.SingleAsync();
+        store.Name = "Completion Store";
+        store.LegalName = "Completion Store Legal";
+        store.Gstin = "27ABCDE1234F1Z5";
+        store.StateCode = "27";
+        store.GstRegistrationType = GstRegistrationType.Regular;
+        store.Address = "Completion Store Address";
+        var customer = new Customer
+        {
+            CustomerCode = "CUST-SNAPSHOT",
+            Name = "Completion Customer",
+            Phone = "9876543210",
+            Gstin = "27AAAAA0000A1Z5",
+            StateCode = "27",
+            GstRegistrationType = GstRegistrationType.Composition,
+            Address = "Completion Customer Address",
+            IsActive = true,
+        };
+        _fixture.Context.Customers.Add(customer);
+        await _fixture.Context.SaveChangesAsync();
+
+        var request = new CompleteSaleRequest
+        {
+            CustomerId = customer.Id,
+            Lines = [new SaleLineInput { ProductId = product.Id, Quantity = 1 }],
+            Payments = [new SalePaymentInput { Method = PaymentMethod.Cash, Amount = 50, AmountTendered = 50 }],
+        };
+        var completed = await _sut.CompleteSaleAsync(request);
+
+        _fixture.Context.ChangeTracker.Clear();
+        var persisted = await _fixture.Context.Sales.SingleAsync(sale => sale.Id == completed.Id);
+        Assert.NotNull(persisted.GstIdentitySnapshotCapturedAtUtc);
+        Assert.Equal("Completion Store", persisted.StoreTradeNameSnapshot);
+        Assert.Equal("Completion Store Legal", persisted.StoreLegalNameSnapshot);
+        Assert.Equal("27ABCDE1234F1Z5", persisted.StoreGstinSnapshot);
+        Assert.Equal("Completion Customer", persisted.CustomerNameSnapshot);
+        Assert.Equal("27AAAAA0000A1Z5", persisted.CustomerGstinSnapshot);
+        Assert.Equal("Maharashtra", persisted.CustomerStateNameSnapshot);
     }
 
     [Fact]

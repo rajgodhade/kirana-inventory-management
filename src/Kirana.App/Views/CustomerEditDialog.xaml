@@ -30,6 +30,16 @@
             <TextBox Header="Address" Text="{x:Bind ViewModel.Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      AcceptsReturn="True" TextWrapping="Wrap" Height="70" />
             <TextBox Header="GSTIN (optional)" Text="{x:Bind ViewModel.Gstin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="{x:Bind ViewModel.GstinFeedback, Mode=OneWay}" TextWrapping="Wrap"
+                       Style="{StaticResource PageSubtitleTextStyle}"
+                       Visibility="{x:Bind ViewModel.HasGstinFeedback, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+            <ComboBox Header="State / Union territory" ItemsSource="{x:Bind ViewModel.StateOptions}"
+                      DisplayMemberPath="DisplayName" SelectedItem="{x:Bind ViewModel.SelectedState, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch" />
+            <ComboBox Header="GST registration type" ItemsSource="{x:Bind ViewModel.RegistrationTypeOptions}"
+                      SelectedItem="{x:Bind ViewModel.SelectedRegistrationType, Mode=TwoWay}"
+                      PlaceholderText="Select registration type"
+                      HorizontalAlignment="Stretch" />
 
             <!-- Which price level this customer's bills open at (Phase 15B-3/4). A default the
                  cashier can still change per bill, not a lock - hence the plain wording. -->

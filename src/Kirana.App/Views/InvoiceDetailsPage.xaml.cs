@@ -66,14 +66,22 @@ public sealed partial class InvoiceDetailsPage : Page
 
         SubtitleText.Text = $"{sale.InvoiceNumber} - {sale.SaleDateUtc.ToLocalTime():dd MMM yyyy, hh:mm tt}";
         AddSummary("Invoice Number", sale.InvoiceNumber);
-        AddSummary("Customer", sale.Customer?.Name ?? "Walk-in Customer");
+        var hasIdentitySnapshot = sale.GstIdentitySnapshotCapturedAtUtc is not null;
+        AddSummary("Customer", hasIdentitySnapshot ? sale.CustomerNameSnapshot ?? "Walk-in Customer" : sale.Customer?.Name ?? "Walk-in Customer");
         AddSummary("Cashier", sale.CashierUser?.FullName ?? "System");
         AddSummary("Status", sale.Status.ToString());
 
         // The level this bill was SOLD at, read from the sale itself. Deliberately not derived from
         // today's product prices, which would relabel old invoices whenever a price moved.
         AddSummary("Price Level", sale.PriceLevel.ToDisplayText());
-        AddSummary("Customer mobile", sale.Customer?.Phone ?? "-");
+        AddSummary("Customer mobile", hasIdentitySnapshot ? sale.CustomerPhoneSnapshot ?? "-" : sale.Customer?.Phone ?? "-");
+        if (hasIdentitySnapshot)
+        {
+            AddSummary("Store GSTIN", sale.StoreGstinSnapshot ?? "-");
+            AddSummary("Store state", FormatState(sale.StoreStateCodeSnapshot, sale.StoreStateNameSnapshot));
+            AddSummary("Customer GSTIN", sale.CustomerGstinSnapshot ?? "-");
+            AddSummary("Customer state", FormatState(sale.CustomerStateCodeSnapshot, sale.CustomerStateNameSnapshot));
+        }
 
         foreach (var item in sale.Items)
         {
@@ -253,6 +261,12 @@ public sealed partial class InvoiceDetailsPage : Page
     }
 
     private static string Money(decimal amount) => $"{Currency}{amount:0.00}";
+    private static string FormatState(string? code, string? name)
+    {
+        var parts = new[] { code, name }.Where(value => !string.IsNullOrWhiteSpace(value));
+        var result = string.Join(" · ", parts);
+        return result.Length == 0 ? "-" : result;
+    }
     private void AddTimeline(string text) => TimelinePanel.Children.Add(new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap });
     private void ShowError(string message) { ErrorBar.Message = message; ErrorBar.IsOpen = true; }
 }
