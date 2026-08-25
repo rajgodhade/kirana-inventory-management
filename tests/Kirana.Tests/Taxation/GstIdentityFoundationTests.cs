@@ -76,6 +76,21 @@ public sealed class GstIdentityFoundationTests
         Assert.Equal(GstinValidationStatus.StructurallyInvalid, GstinValidator.Validate(gstin).Status);
 
     [Fact]
+    public void Checksum_valid_gstin_with_unsupported_state_prefix_is_rejected_for_that_prefix()
+    {
+        const string gstin = "99AAPFU0939F1ZK";
+
+        Assert.Matches("^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$", gstin);
+        Assert.Equal(gstin[^1], CalculateGstinCheckCharacter(gstin[..14]));
+
+        var result = GstinValidator.Validate(gstin);
+
+        Assert.Equal(GstinValidationStatus.StructurallyInvalid, result.Status);
+        Assert.Equal("99", result.StateCode);
+        Assert.Equal("GSTIN starts with unsupported state code '99'.", result.ErrorMessage);
+    }
+
+    [Fact]
     public void Matching_gstin_and_state_is_valid()
     {
         var result = GstinValidator.ValidateIdentity("27AAPFU0939F1ZV", "27");
@@ -98,5 +113,21 @@ public sealed class GstIdentityFoundationTests
         var result = GstinValidator.ValidateIdentity(null, "27");
         Assert.True(result.IsValid);
         Assert.Equal(GstinValidationStatus.Missing, result.Gstin.Status);
+    }
+
+    private static char CalculateGstinCheckCharacter(string firstFourteenCharacters)
+    {
+        const string alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var factor = 2;
+        var sum = 0;
+
+        for (var index = firstFourteenCharacters.Length - 1; index >= 0; index--)
+        {
+            var product = factor * alphabet.IndexOf(firstFourteenCharacters[index]);
+            sum += (product / 36) + (product % 36);
+            factor = factor == 2 ? 1 : 2;
+        }
+
+        return alphabet[(36 - (sum % 36)) % 36];
     }
 }

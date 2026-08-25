@@ -46,6 +46,20 @@ public sealed class GstTransactionClassifierTests
     }
 
     [Fact]
+    public void LegacyPurchaseMarkerPreventsHistoricalClassification()
+    {
+        var purchase = CapturePurchase(Supplier(GstRegistrationType.Regular));
+        purchase.GstIdentitySnapshotCapturedAtUtc = null;
+
+        var result = Sut.ClassifyPurchase(purchase);
+
+        Assert.False(result.IsResolved);
+        Assert.Equal(GstPurchasePartyClass.Unresolved, result.Classification);
+        Assert.Equal(GstIdentityClassificationReason.LegacyTransaction, result.Reason);
+        Assert.Equal(GstHistoricalIdentitySource.None, result.HistoricalIdentitySource);
+    }
+
+    [Fact]
     public void RegisteredCustomerWithoutHistoricalGstin_IsUnresolved()
     {
         var result = Sut.ClassifySale(Sale(GstRegistrationType.Regular, gstin: null));

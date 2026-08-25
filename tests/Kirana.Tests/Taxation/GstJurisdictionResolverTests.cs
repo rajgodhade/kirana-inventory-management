@@ -86,6 +86,15 @@ public sealed class GstJurisdictionResolverTests
     }
 
     [Fact]
+    public void LegacyPurchaseMarkerPreventsJurisdictionGuessing()
+    {
+        var purchase = Purchase("27", "27");
+        purchase.GstIdentitySnapshotCapturedAtUtc = null;
+
+        AssertUnresolved(Sut.ResolvePurchase(purchase), GstJurisdictionUnresolvedReason.LegacyTransaction);
+    }
+
+    [Fact]
     public void M_GstinPrefixMismatchDoesNotOverrideStateCodeSnapshots()
     {
         var sale = Sale("27", "27");
