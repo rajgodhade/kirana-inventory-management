@@ -188,6 +188,7 @@
                 <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="10">
                         <TextBlock Text="Sales GST" Style="{StaticResource CardTitleTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.SalesClassificationText, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" />
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
@@ -245,6 +246,7 @@
                 <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}">
                     <StackPanel Spacing="10">
                         <TextBlock Text="Purchase GST" Style="{StaticResource CardTitleTextStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.PurchaseClassificationText, Mode=OneWay}" Style="{StaticResource CaptionTextStyle}" />
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />

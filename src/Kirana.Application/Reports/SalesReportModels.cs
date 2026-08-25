@@ -92,7 +92,20 @@ public sealed class GstReport
     public decimal SalesGstCollected { get; init; }
     public IReadOnlyList<GstRateBreakdown> SalesByRate { get; init; } = [];
 
+    /// <summary>Phase 18A-5: stored sales GST split by the historical party classification
+    /// (Phase 18A-4). The three amounts always sum to <see cref="SalesGstCollected"/>.</summary>
+    public decimal SalesB2bGst { get; init; }
+    public decimal SalesB2cGst { get; init; }
+    public decimal SalesUnresolvedIdentityGst { get; init; }
+
     public decimal PurchaseTaxableAmount { get; init; }
     public decimal PurchaseGstPaid { get; init; }
     public IReadOnlyList<GstRateBreakdown> PurchasesByRate { get; init; } = [];
+
+    /// <summary>Phase 18A-5: stored purchase GST split by the historical supplier classification.
+    /// Purchases keep supplier terminology rather than B2C labels. The three amounts always sum
+    /// to <see cref="PurchaseGstPaid"/>.</summary>
+    public decimal PurchaseRegisteredSupplierGst { get; init; }
+    public decimal PurchaseUnregisteredSupplierGst { get; init; }
+    public decimal PurchaseUnresolvedSupplierGst { get; init; }
 }

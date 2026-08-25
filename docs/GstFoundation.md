@@ -218,3 +218,95 @@ No migration is required: all authoritative classification inputs are already st
 Phase 18A-2 snapshots. This phase does not implement ITC, reverse charge, CESS, GST filing,
 e-invoicing, e-way bills, HSN classification, new GST rates, place-of-supply exceptions,
 composition-specific tax rules, or any new GST arithmetic.
+
+## Phase 18A-5 � GST Tax Calculation Foundation
+
+Phase 18A-5 adds the centralized GST component calculator. It does not change any stored GST
+total, the POS or purchase pricing engines, invoice behaviour, or report totals.
+
+### Calculation context and calculator
+
+`IGstTaxCalculator` / `GstTaxCalculator` (Kirana.Application.Taxation) is the single authority for
+allocating a GST amount into CGST, SGST, and IGST. It accepts an explicit, already-resolved tax
+context composed by `IGstTaxContextResolver` (classification from Phase 18A-4 plus jurisdiction
+from Phase 18A-3) and never reads the database, current master data, or UI state. It owns no
+jurisdiction or classification policy of its own.
+
+The typed result `GstTaxCalculation` carries `IsResolved`, `TaxableValue`, `GstRate`, `Cgst`,
+`Sgst`, `Igst`, `TotalGst`, `Jurisdiction`, and `UnresolvedReason`. `IsResolved` is the only way to
+tell a genuine 0%/exempt line (resolved, all components zero) apart from a calculation that could
+not be resolved (unresolved, no component amounts at all). A nullable decimal is never used for
+this distinction. Every result satisfies `Cgst + Sgst + Igst == TotalGst`.
+
+Two operations exist:
+
+- `Calculate(context, taxableValue, gstRatePercent)` derives the GST amount from the taxable value
+  and rate. Rates are validated by the existing `GstRatePolicy` slabs (0/5/12/18/28).
+- `SplitStored(context, taxableValue, totalGst)` distributes an authoritative, already-stored GST
+  amount without recomputing it. Its result reports `GstRate` as 0 because it applies no rate; the
+  authoritative rate lives in the stored snapshots.
+
+### Taxable value, rate application, and rounding
+
+Taxable value remains whatever the existing engines produce: quantity x taxable unit value after
+the existing item-percent discount, promotion discounts (capped), and bill-percent discount rules,
+or the extracted net value for inclusive-priced lines (`taxable = gross / (1 + rate/100)`). The
+calculator never re-derives discounts. GST then equals `taxable x rate / 100` under exclusive
+semantics; for inclusive lines the same formula applied to the extracted taxable value yields the
+same tax component.
+
+Rounding reuses the application's single financial policy � 2 decimals, midpoint away from zero
+(`GstCalculationService.RoundCurrency`). For intra-state splits, CGST is rounded once and SGST is
+the exact remainder, so components always sum back to the stored total with no paise drift.
+Inter-state puts the whole amount into IGST unchanged.
+
+### Jurisdiction outcomes
+
+- IntraState: seller snapshot state equals buyer snapshot state ? CGST + SGST halves.
+- InterState: different valid snapshot states ? IGST carries everything.
+- Unresolved: legacy rows without the Phase 18A-2 capture marker, missing store/customer/supplier
+  state, or invalid state codes produce the typed unresolved result with the specific
+  `GstJurisdictionUnresolvedReason`. The calculator never assumes intra-state, inter-state, zero,
+  current Store state, current Customer state, or current Supplier state, and never mutates the
+  transaction.
+
+B2B/B2C classification is context only. Phase 18A-4 classification never changes GST arithmetic:
+the same jurisdiction, taxable value, and rate always produce identical components regardless of
+whether the historical party classifies as B2B, B2C, registered supplier, unregistered supplier,
+or unresolved.
+
+### Sales, purchases, returns, discounts
+
+Sales keep using `IGstCalculationService` at POS time and purchases keep using
+`IPurchaseGstCalculationService`; their persisted line snapshots (`GstRatePercentSnapshot`,
+`TaxableAmount`, `GstAmount`) remain the authoritative stored results and are never rewritten. The
+centralized calculator consumes those stored values for splitting and reporting. Returns continue
+to prorate the originating transaction's stored line values; sales returns reuse the originating
+sale's context and purchase returns the originating purchase's context through the existing
+resolver overloads � no duplicate return snapshots were introduced.
+
+Discount semantics are unchanged: the taxable value handed to the calculator already reflects the
+existing supported discount rules, and no new discount behaviour was added.
+
+### Reporting and UI
+
+`SalesReportService.GetGstReportAsync` now resolves one explicit tax context per transaction and
+delegates all component allocation to `IGstTaxCalculator`; its previous private inline split logic
+was removed and produced byte-identical numbers. Stored GST amounts stay authoritative � the
+report aggregates them and splits them, never recalculates them. The GST report additionally
+exposes stored-GST totals by historical party classification (`SalesB2bGst`, `SalesB2cGst`,
+`SalesUnresolvedIdentityGst`, and the purchase-side registered/unregistered/unresolved trio); each
+trio sums exactly to that side's stored GST total. The reports page shows these totals as captions
+on the existing GST cards; no other UI changed.
+
+### Historical safety and migration
+
+No migration is required: Phase 18A-5 adds no columns, tables, or data writes. Tests prove that
+editing today's Store, Customer, Supplier, and Product master records cannot change a completed
+transaction's jurisdiction, classification, stored rate, or component split; that calculation and
+reporting leave monetary values, row counts, and audit counts untouched; and that legacy rows land
+in explicit unresolved report columns instead of being guessed.
+
+Still outside scope: ITC, reverse charge, CESS, e-invoicing, e-way bills, GST filing, HSN
+classification, customer-specific tax rules, new GST rates, place-of-supply exceptions,
+composition-specific arithmetic, and any filing/export format.

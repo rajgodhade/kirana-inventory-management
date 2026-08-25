@@ -52,6 +52,7 @@ public static class DependencyInjection
         services.AddSingleton<IGstCalculationService, GstCalculationService>();
         services.AddSingleton<IPurchaseGstCalculationService, PurchaseGstCalculationService>();
         services.AddSingleton<IGstJurisdictionResolver, GstJurisdictionResolver>();
+        services.AddSingleton<IGstTaxCalculator, GstTaxCalculator>();
         services.AddScoped<IStoreTaxIdentityService, StoreTaxIdentityService>();
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IInvoiceService, InvoiceService>();

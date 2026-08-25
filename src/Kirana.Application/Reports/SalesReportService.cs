@@ -10,7 +10,8 @@ public sealed class SalesReportService(
     IKiranaDbContext db,
     IPermissionEnforcer permissionEnforcer,
     IGstCalculationService? gstCalculationService = null,
-    IGstJurisdictionResolver? gstJurisdictionResolver = null) : ISalesReportService
+    IGstTaxContextResolver? gstTaxContextResolver = null,
+    IGstTaxCalculator? gstTaxCalculator = null) : ISalesReportService
 {
     public async Task<SalesReportSummary> GetSummaryAsync(
         ReportDateRange range, ReportFilter? filter, int? performedByUserId, CancellationToken cancellationToken = default)
@@ -90,13 +91,25 @@ public sealed class SalesReportService(
             .ToListAsync(cancellationToken);
 
         var calculator = gstCalculationService ?? GstCalculationService.Shared;
-        var resolver = gstJurisdictionResolver ?? GstJurisdictionResolver.Shared;
+        var contextResolver = gstTaxContextResolver ?? GstTaxContextResolver.Shared;
+        var taxCalculator = gstTaxCalculator ?? GstTaxCalculator.Shared;
+
+        // Phase 18A-5: one explicit tax context per transaction. Classification (Phase 18A-4) and
+        // jurisdiction (Phase 18A-3) both come from the historical snapshots through the shared
+        // resolvers, and the component split itself is delegated to IGstTaxCalculator. Stored GST
+        // amounts stay authoritative; they are only ever split, never recomputed.
+        var saleLines = saleItems
+            .Select(i => new ResolvedGstSnapshotLine(ToSnapshot(i), contextResolver.ResolveSale(i.Sale)))
+            .ToList();
+        var purchaseLines = purchaseItems
+            .Select(i => new ResolvedPurchaseGstSnapshotLine(ToSnapshot(i), contextResolver.ResolvePurchase(i.Purchase)))
+            .ToList();
         var salesBreakdown = BuildJurisdictionBreakdown(
-            saleItems.Select(i => new ResolvedGstSnapshotLine(ToSnapshot(i), resolver.ResolveSale(i.Sale).Jurisdiction)).ToList(),
-            calculator);
+            saleLines.Select(line => (line.Snapshot, line.Context.JurisdictionResolution)).ToList(),
+            calculator, taxCalculator);
         var purchaseBreakdown = BuildJurisdictionBreakdown(
-            purchaseItems.Select(i => new ResolvedGstSnapshotLine(ToSnapshot(i), resolver.ResolvePurchase(i.Purchase).Jurisdiction)).ToList(),
-            calculator);
+            purchaseLines.Select(line => (line.Snapshot, line.Context.JurisdictionResolution)).ToList(),
+            calculator, taxCalculator);
 
         return new GstReport
         {
@@ -104,20 +117,40 @@ public sealed class SalesReportService(
             SalesTaxableAmount = salesBreakdown.Sum(b => b.TaxableAmount),
             SalesGstCollected = salesBreakdown.Sum(b => b.TaxAmount),
             SalesByRate = salesBreakdown,
+            SalesB2bGst = SumSaleClassGst(saleLines, GstTransactionClass.B2B),
+            SalesB2cGst = SumSaleClassGst(saleLines, GstTransactionClass.B2C),
+            SalesUnresolvedIdentityGst = SumSaleClassGst(saleLines, GstTransactionClass.Unresolved),
             PurchaseTaxableAmount = purchaseBreakdown.Sum(b => b.TaxableAmount),
             PurchaseGstPaid = purchaseBreakdown.Sum(b => b.TaxAmount),
             PurchasesByRate = purchaseBreakdown,
+            PurchaseRegisteredSupplierGst = SumPurchaseClassGst(purchaseLines, GstPurchasePartyClass.RegisteredSupplier),
+            PurchaseUnregisteredSupplierGst = SumPurchaseClassGst(purchaseLines, GstPurchasePartyClass.UnregisteredSupplier),
+            PurchaseUnresolvedSupplierGst = SumPurchaseClassGst(purchaseLines, GstPurchasePartyClass.Unresolved),
         };
     }
 
+    private static decimal SumSaleClassGst(IReadOnlyList<ResolvedGstSnapshotLine> lines, GstTransactionClass classification) =>
+        lines.Where(line => line.Context.Classification == classification).Sum(line => line.Snapshot.GstAmount);
+
+    private static decimal SumPurchaseClassGst(IReadOnlyList<ResolvedPurchaseGstSnapshotLine> lines, GstPurchasePartyClass classification) =>
+        lines.Where(line => line.Context.SupplierClassification == classification).Sum(line => line.Snapshot.GstAmount);
+
     private static IReadOnlyList<GstRateBreakdown> BuildJurisdictionBreakdown(
-        IReadOnlyList<ResolvedGstSnapshotLine> lines,
-        IGstCalculationService calculator)
+        IReadOnlyList<(GstSnapshotLine Snapshot, GstJurisdictionResolution Jurisdiction)> lines,
+        IGstCalculationService calculator,
+        IGstTaxCalculator taxCalculator)
     {
         var jurisdictionSlabs = lines
-            .GroupBy(line => line.Jurisdiction)
-            .SelectMany(group => calculator.SummarizeStored(group.Select(line => line.Snapshot).ToList())
-                .Select(slab => ToJurisdictionBreakdown(slab, group.Key)));
+            .GroupBy(line => line.Jurisdiction.Jurisdiction)
+            .SelectMany(group =>
+            {
+                // Every line in a group shares the same resolved jurisdiction; the representative
+                // resolution carries it into the centralized split. The split depends only on the
+                // jurisdiction outcome, never on which transaction was picked.
+                var representative = group.First().Jurisdiction;
+                return calculator.SummarizeStored(group.Select(line => line.Snapshot).ToList())
+                    .Select(slab => ToJurisdictionBreakdown(slab, representative, taxCalculator));
+            });
 
         return jurisdictionSlabs
             .GroupBy(row => new { row.RatePercent, row.PricingType })
@@ -138,12 +171,11 @@ public sealed class SalesReportService(
             .ToList();
     }
 
-    private static GstRateBreakdown ToJurisdictionBreakdown(GstSlabSummary slab, GstJurisdiction jurisdiction)
+    private static GstRateBreakdown ToJurisdictionBreakdown(
+        GstSlabSummary slab, GstJurisdictionResolution jurisdiction, IGstTaxCalculator taxCalculator)
     {
-        var cgst = jurisdiction == GstJurisdiction.IntraState
-            ? Math.Round(slab.GstAmount / 2m, 2, MidpointRounding.AwayFromZero)
-            : 0m;
-
+        // Stored amounts stay authoritative; IGstTaxCalculator only allocates the components.
+        var split = taxCalculator.SplitStored(jurisdiction, slab.TaxableAmount, slab.GstAmount);
         return new GstRateBreakdown
         {
             RatePercent = slab.RatePercent,
@@ -151,10 +183,10 @@ public sealed class SalesReportService(
             TaxAmount = slab.GstAmount,
             InvoiceCount = slab.InvoiceCount,
             PricingType = slab.PricingType,
-            Cgst = cgst,
-            Sgst = jurisdiction == GstJurisdiction.IntraState ? slab.GstAmount - cgst : 0m,
-            Igst = jurisdiction == GstJurisdiction.InterState ? slab.GstAmount : 0m,
-            UnresolvedGst = jurisdiction == GstJurisdiction.Unresolved ? slab.GstAmount : 0m,
+            Cgst = split.Cgst,
+            Sgst = split.Sgst,
+            Igst = split.Igst,
+            UnresolvedGst = split.IsResolved ? 0m : slab.GstAmount,
         };
     }
 
@@ -176,7 +208,9 @@ public sealed class SalesReportService(
         PricingType = item.IsTaxInclusiveSnapshot ? PricingType.Inclusive : PricingType.Exclusive,
     };
 
-    private sealed record ResolvedGstSnapshotLine(GstSnapshotLine Snapshot, GstJurisdiction Jurisdiction);
+    private sealed record ResolvedGstSnapshotLine(GstSnapshotLine Snapshot, GstTaxContext Context);
+
+    private sealed record ResolvedPurchaseGstSnapshotLine(GstSnapshotLine Snapshot, GstPurchaseTaxContext Context);
 
     // ------------------------------------------------------------ shared filtered queries
 
