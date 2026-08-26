@@ -92,6 +92,9 @@ public sealed class GstTaxCalculationHistoricalSafetyTests : IDisposable
         supplier.Gstin = "29AAACB2894G1ZJ";
         store.StateCode = "29";
         product.GstRatePercent = 28m;
+        customer.GstRegistrationType = GstRegistrationType.Unregistered;
+        supplier.GstRegistrationType = GstRegistrationType.Unregistered;
+        store.GstRegistrationType = GstRegistrationType.Unregistered;
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
 

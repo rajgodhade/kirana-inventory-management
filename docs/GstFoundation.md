@@ -310,3 +310,41 @@ in explicit unresolved report columns instead of being guessed.
 Still outside scope: ITC, reverse charge, CESS, e-invoicing, e-way bills, GST filing, HSN
 classification, customer-specific tax rules, new GST rates, place-of-supply exceptions,
 composition-specific arithmetic, and any filing/export format.
+
+## Phase 18A-6 — GST Reporting Foundation
+
+Phase 18A-6 extends the Phase 18A-5 GST report into a centralized historical-safe summary without
+adding columns, migrations, or new GST arithmetic. It reuses the existing resolvers, classifier,
+tax calculator, and stored transaction snapshots; nothing is recalculated and current master
+records are never read for historical values.
+
+### What the summary answers
+
+`ISalesReportService.GetGstReportAsync` now additionally exposes, all derived strictly from stored
+`SaleItem`/`PurchaseItem` snapshots and the Phase 18A-3/4 contexts:
+
+- Taxable-value totals by jurisdiction (intra-state / inter-state / unresolved) for sales and
+  purchases.
+- Taxable-value totals by historical classification: B2B / B2C / unresolved identity for sales,
+  and registered / unregistered / unresolved supplier for purchases.
+- Distinct bill counts — overall sales bill count plus per-classification counts (a multi-rate
+  bill counts once via distinct transaction id).
+- Rate-wise taxable splits on each `GstRateBreakdown`: `B2bTaxableAmount`, `B2cTaxableAmount`,
+  `UnresolvedIdentityTaxableAmount`, summing to the bucket taxable.
+- Return reversal and net figures: `SalesReturnedTaxableValue`, `SalesReturnedGst`,
+  `NetSalesTaxableValue`, `NetSalesGst`. Reversal scales each originating line''s stored
+  taxable/GST by returned/original quantity, filtered to returns dated in the window.
+- An optional `ReportFilter?` on the sales side reusing existing filter machinery; purchase
+  reporting stays date-range only.
+
+### Behaviour preserved
+
+- Existing gross totals, rate slabs, and exported columns are unchanged and authoritative.
+- Jurisdiction, classification, component split, and legacy policy stay delegated to the existing
+  foundation; no duplicated logic.
+- Export columns appended only; existing columns not reordered.
+- Report remains strictly read-only (row-and-value fingerprints).
+
+No migration is required - this phase adds no columns, tables, or writes. Coverage gaps found
+during fault injection (historical registration-type stability plus a monetary-valued read-only
+fingerprint) were closed in the affected tests.

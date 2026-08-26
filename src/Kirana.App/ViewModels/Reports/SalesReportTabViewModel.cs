@@ -52,6 +52,9 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
     // jurisdiction components remain in the per-rate rows above.
     [ObservableProperty] private string _salesClassificationText = "";
     [ObservableProperty] private string _purchaseClassificationText = "";
+    [ObservableProperty] private string _salesJurisdictionText = "";
+    [ObservableProperty] private string _purchaseJurisdictionText = "";
+    [ObservableProperty] private string _salesNetText = "";
 
     public ObservableCollection<PaymentMethodAmount> PaymentMethods { get; } = [];
     public ObservableCollection<GstRateBreakdown> SalesGstByRate { get; } = [];
@@ -135,6 +138,9 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
         PurchaseGstText = Fmt(g.PurchaseGstPaid);
         SalesClassificationText = $"B2B {Fmt(g.SalesB2bGst)} · B2C {Fmt(g.SalesB2cGst)} · Unresolved identity {Fmt(g.SalesUnresolvedIdentityGst)}";
         PurchaseClassificationText = $"Registered supplier {Fmt(g.PurchaseRegisteredSupplierGst)} · Unregistered supplier {Fmt(g.PurchaseUnregisteredSupplierGst)} · Unresolved {Fmt(g.PurchaseUnresolvedSupplierGst)}";
+        SalesJurisdictionText = $"Intra-state {Fmt(g.SalesIntraStateTaxableValue)} · Inter-state {Fmt(g.SalesInterStateTaxableValue)} · Unresolved jurisdiction {Fmt(g.SalesUnresolvedJurisdictionTaxableValue)}";
+        PurchaseJurisdictionText = $"Intra-state {Fmt(g.PurchaseIntraStateTaxableValue)} · Inter-state {Fmt(g.PurchaseInterStateTaxableValue)} · Unresolved {Fmt(g.PurchaseUnresolvedJurisdictionTaxableValue)}";
+        SalesNetText = $"Net of returns: Taxable {Fmt(g.NetSalesTaxableValue)} · GST {Fmt(g.NetSalesGst)}";
 
         SalesGstByRate.Clear();
         foreach (var r in g.SalesByRate)
@@ -188,19 +194,19 @@ public sealed partial class SalesReportTabViewModel(ISalesReportService salesRep
         var rows = new List<IReadOnlyList<string>>();
         foreach (var r in g.SalesByRate)
         {
-            rows.Add(["Sales", r.GstTreatment, $"{r.RatePercent}%", Fmt(r.TaxableAmount), Fmt(r.Cgst), Fmt(r.Sgst), Fmt(r.Igst), Fmt(r.UnresolvedGst), Fmt(r.TaxAmount), r.InvoiceCount.ToString()]);
+            rows.Add(["Sales", r.GstTreatment, $"{r.RatePercent}%", Fmt(r.TaxableAmount), Fmt(r.Cgst), Fmt(r.Sgst), Fmt(r.Igst), Fmt(r.UnresolvedGst), Fmt(r.TaxAmount), r.InvoiceCount.ToString(), Fmt(r.B2bTaxableAmount), Fmt(r.B2cTaxableAmount), Fmt(r.UnresolvedIdentityTaxableAmount)]);
         }
 
         foreach (var r in g.PurchasesByRate)
         {
-            rows.Add(["Purchases", r.GstTreatment, $"{r.RatePercent}%", Fmt(r.TaxableAmount), Fmt(r.Cgst), Fmt(r.Sgst), Fmt(r.Igst), Fmt(r.UnresolvedGst), Fmt(r.TaxAmount), r.InvoiceCount.ToString()]);
+            rows.Add(["Purchases", r.GstTreatment, $"{r.RatePercent}%", Fmt(r.TaxableAmount), Fmt(r.Cgst), Fmt(r.Sgst), Fmt(r.Igst), Fmt(r.UnresolvedGst), Fmt(r.TaxAmount), r.InvoiceCount.ToString(), Fmt(r.B2bTaxableAmount), Fmt(r.B2cTaxableAmount), Fmt(r.UnresolvedIdentityTaxableAmount)]);
         }
 
         return new ReportExportData
         {
             Title = "GST Report",
             Subtitle = $"{DateFilter.Resolve().Label} — jurisdiction uses immutable transaction StateCode snapshots",
-            Columns = ["Type", "GST Treatment", "Rate", "Taxable", "CGST", "SGST", "IGST", "Unresolved GST", "Total Tax", "Invoice Count"],
+            Columns = ["Type", "GST Treatment", "Rate", "Taxable", "CGST", "SGST", "IGST", "Unresolved GST", "Total Tax", "Invoice Count", "B2B Taxable", "B2C Taxable", "Unresolved Taxable"],
             Rows = rows,
         };
     }
