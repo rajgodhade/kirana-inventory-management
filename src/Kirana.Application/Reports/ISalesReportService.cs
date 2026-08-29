@@ -7,5 +7,6 @@ public interface ISalesReportService
         ReportDateRange range, ReportFilter? filter, int? performedByUserId, CancellationToken cancellationToken = default);
 
     Task<GstReport> GetGstReportAsync(
-        ReportDateRange range, int? performedByUserId, CancellationToken cancellationToken = default);
+        ReportDateRange range, int? performedByUserId, CancellationToken cancellationToken = default,
+        ReportFilter? filter = null);
 }

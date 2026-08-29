@@ -76,13 +76,16 @@ public sealed class SalesReportService(
     }
 
     public async Task<GstReport> GetGstReportAsync(
-        ReportDateRange range, int? performedByUserId, CancellationToken cancellationToken = default)
+        ReportDateRange range, int? performedByUserId, CancellationToken cancellationToken = default,
+        ReportFilter? filter = null)
     {
         await permissionEnforcer.EnsureHasPermissionAsync(performedByUserId, PermissionKeys.ReportsView, cancellationToken);
 
-        var saleItems = await db.SaleItems.AsNoTracking()
+        // Phase 18A-6: the optional report filter narrows the sales side through the shared filter
+        // machinery; purchase reporting remains date-range-only in this phase.
+        var saleItems = await FilterSaleItems(db.SaleItems.AsNoTracking()
             .Include(i => i.Sale)
-            .Where(i => i.Sale.Status == SaleStatus.Completed && i.Sale.SaleDateUtc >= range.StartUtc && i.Sale.SaleDateUtc < range.EndUtc)
+            .Where(i => i.Sale.Status == SaleStatus.Completed && i.Sale.SaleDateUtc >= range.StartUtc && i.Sale.SaleDateUtc < range.EndUtc), filter)
             .ToListAsync(cancellationToken);
 
         var purchaseItems = await db.PurchaseItems.AsNoTracking()
@@ -104,12 +107,29 @@ public sealed class SalesReportService(
         var purchaseLines = purchaseItems
             .Select(i => new ResolvedPurchaseGstSnapshotLine(ToSnapshot(i), contextResolver.ResolvePurchase(i.Purchase)))
             .ToList();
+        // Phase 18A-6: return reversal scales each originating line's stored taxable/GST by the
+        // returned quantity - never today's product or tax configuration.
+        // Phase 18A-6-Fix: a return may reverse GST only when its originating sale line belongs to
+        // the SAME filtered sales population aggregated above. Eligibility is the SaleItemId set of
+        // that exact filtered set — one authoritative filter path, no duplicated predicates —
+        // combined with the existing return-date window.
+        var eligibleSaleItemIds = saleItems.Select(i => i.Id).ToHashSet();
+        var returnLines = await db.SalesReturns.AsNoTracking()
+            .Where(r => r.ReturnDateUtc >= range.StartUtc && r.ReturnDateUtc < range.EndUtc)
+            .SelectMany(r => r.Items)
+            .Select(i => new { i.SaleItemId, i.Quantity, OriginQuantity = i.SaleItem.Quantity, i.SaleItem.TaxableAmount, i.SaleItem.GstAmount })
+            .ToListAsync(cancellationToken);
+        returnLines = returnLines.Where(x => eligibleSaleItemIds.Contains(x.SaleItemId)).ToList();
+        var returnedTaxable = GstCalculationService.RoundCurrency(returnLines.Sum(x => x.TaxableAmount * x.Quantity / x.OriginQuantity));
+        var returnedGst = GstCalculationService.RoundCurrency(returnLines.Sum(x => x.GstAmount * x.Quantity / x.OriginQuantity));
+        var salesRateClassTaxable = RateClassTaxable(saleLines.Select(l => (l.Snapshot, (int)l.Context.Classification)));
+        var purchaseRateClassTaxable = RateClassTaxable(purchaseLines.Select(l => (l.Snapshot, (int)l.Context.SupplierClassification)));
         var salesBreakdown = BuildJurisdictionBreakdown(
             saleLines.Select(line => (line.Snapshot, line.Context.JurisdictionResolution)).ToList(),
-            calculator, taxCalculator);
+            calculator, taxCalculator, salesRateClassTaxable);
         var purchaseBreakdown = BuildJurisdictionBreakdown(
             purchaseLines.Select(line => (line.Snapshot, line.Context.JurisdictionResolution)).ToList(),
-            calculator, taxCalculator);
+            calculator, taxCalculator, purchaseRateClassTaxable);
 
         return new GstReport
         {
@@ -126,7 +146,62 @@ public sealed class SalesReportService(
             PurchaseRegisteredSupplierGst = SumPurchaseClassGst(purchaseLines, GstPurchasePartyClass.RegisteredSupplier),
             PurchaseUnregisteredSupplierGst = SumPurchaseClassGst(purchaseLines, GstPurchasePartyClass.UnregisteredSupplier),
             PurchaseUnresolvedSupplierGst = SumPurchaseClassGst(purchaseLines, GstPurchasePartyClass.Unresolved),
+            SalesIntraStateTaxableValue = SaleJurisdictionTaxable(saleLines, GstJurisdiction.IntraState),
+            SalesInterStateTaxableValue = SaleJurisdictionTaxable(saleLines, GstJurisdiction.InterState),
+            SalesUnresolvedJurisdictionTaxableValue = SaleJurisdictionTaxable(saleLines, GstJurisdiction.Unresolved),
+            PurchaseIntraStateTaxableValue = PurchaseJurisdictionTaxable(purchaseLines, GstJurisdiction.IntraState),
+            PurchaseInterStateTaxableValue = PurchaseJurisdictionTaxable(purchaseLines, GstJurisdiction.InterState),
+            PurchaseUnresolvedJurisdictionTaxableValue = PurchaseJurisdictionTaxable(purchaseLines, GstJurisdiction.Unresolved),
+            SalesB2bTaxableValue = SumSaleClassTaxable(saleLines, GstTransactionClass.B2B),
+            SalesB2cTaxableValue = SumSaleClassTaxable(saleLines, GstTransactionClass.B2C),
+            SalesUnresolvedIdentityTaxableValue = SumSaleClassTaxable(saleLines, GstTransactionClass.Unresolved),
+            PurchaseRegisteredSupplierTaxableValue = SumPurchaseClassTaxable(purchaseLines, GstPurchasePartyClass.RegisteredSupplier),
+            PurchaseUnregisteredSupplierTaxableValue = SumPurchaseClassTaxable(purchaseLines, GstPurchasePartyClass.UnregisteredSupplier),
+            PurchaseUnresolvedSupplierTaxableValue = SumPurchaseClassTaxable(purchaseLines, GstPurchasePartyClass.Unresolved),
+            SalesBillCount = saleLines.Select(line => line.Snapshot.TransactionId).Distinct().Count(),
+            SalesB2bBillCount = SaleBillCountByClass(saleLines, GstTransactionClass.B2B),
+            SalesB2cBillCount = SaleBillCountByClass(saleLines, GstTransactionClass.B2C),
+            SalesUnresolvedBillCount = SaleBillCountByClass(saleLines, GstTransactionClass.Unresolved),
+            PurchaseBillCount = purchaseLines.Select(line => line.Snapshot.TransactionId).Distinct().Count(),
+            SalesReturnedTaxableValue = returnedTaxable,
+            SalesReturnedGst = returnedGst,
         };
+    }
+
+    private static decimal SumSaleClassTaxable(IReadOnlyList<ResolvedGstSnapshotLine> lines, GstTransactionClass classification) =>
+        lines.Where(line => line.Context.Classification == classification).Sum(line => line.Snapshot.TaxableAmount);
+
+    private static decimal SumPurchaseClassTaxable(IReadOnlyList<ResolvedPurchaseGstSnapshotLine> lines, GstPurchasePartyClass classification) =>
+        lines.Where(line => line.Context.SupplierClassification == classification).Sum(line => line.Snapshot.TaxableAmount);
+
+    private static decimal SaleJurisdictionTaxable(IReadOnlyList<ResolvedGstSnapshotLine> lines, GstJurisdiction jurisdiction) =>
+        lines.Where(line => line.Context.Jurisdiction == jurisdiction).Sum(line => line.Snapshot.TaxableAmount);
+
+    private static decimal PurchaseJurisdictionTaxable(IReadOnlyList<ResolvedPurchaseGstSnapshotLine> lines, GstJurisdiction jurisdiction) =>
+        lines.Where(line => line.Context.Jurisdiction == jurisdiction).Sum(line => line.Snapshot.TaxableAmount);
+
+    private static int SaleBillCountByClass(IReadOnlyList<ResolvedGstSnapshotLine> lines, GstTransactionClass classification) =>
+        lines.Where(line => line.Context.Classification == classification).Select(line => line.Snapshot.TransactionId).Distinct().Count();
+
+    /// <summary>Per-rate-slab taxable split by historical party classification (0=unresolved,
+    /// 1=B2B/registered supplier, 2=B2C/unregistered supplier).</summary>
+    private static Dictionary<(decimal Rate, PricingType Pricing), (decimal B2b, decimal B2c, decimal Unresolved)> RateClassTaxable(
+        IEnumerable<(GstSnapshotLine Snapshot, int ClassKey)> lines)
+    {
+        var result = new Dictionary<(decimal, PricingType), (decimal B2b, decimal B2c, decimal Unresolved)>();
+        foreach (var (snapshot, classKey) in lines)
+        {
+            var key = (snapshot.RatePercent, snapshot.PricingType);
+            (decimal B2b, decimal B2c, decimal Unresolved) current = result.TryGetValue(key, out var found) ? found : (0m, 0m, 0m);
+            result[key] = classKey switch
+            {
+                1 => current with { B2b = current.B2b + snapshot.TaxableAmount },
+                2 => current with { B2c = current.B2c + snapshot.TaxableAmount },
+                _ => current with { Unresolved = current.Unresolved + snapshot.TaxableAmount },
+            };
+        }
+
+        return result;
     }
 
     private static decimal SumSaleClassGst(IReadOnlyList<ResolvedGstSnapshotLine> lines, GstTransactionClass classification) =>
@@ -138,7 +213,8 @@ public sealed class SalesReportService(
     private static IReadOnlyList<GstRateBreakdown> BuildJurisdictionBreakdown(
         IReadOnlyList<(GstSnapshotLine Snapshot, GstJurisdictionResolution Jurisdiction)> lines,
         IGstCalculationService calculator,
-        IGstTaxCalculator taxCalculator)
+        IGstTaxCalculator taxCalculator,
+        IReadOnlyDictionary<(decimal, PricingType), (decimal B2b, decimal B2c, decimal Unresolved)> rateClassTaxable)
     {
         var jurisdictionSlabs = lines
             .GroupBy(line => line.Jurisdiction.Jurisdiction)
@@ -165,6 +241,9 @@ public sealed class SalesReportService(
                 Igst = group.Sum(row => row.Igst),
                 UnresolvedGst = group.Sum(row => row.UnresolvedGst),
                 InvoiceCount = group.Sum(row => row.InvoiceCount),
+                B2bTaxableAmount = rateClassTaxable.GetValueOrDefault((group.Key.RatePercent, group.Key.PricingType)).B2b,
+                B2cTaxableAmount = rateClassTaxable.GetValueOrDefault((group.Key.RatePercent, group.Key.PricingType)).B2c,
+                UnresolvedIdentityTaxableAmount = rateClassTaxable.GetValueOrDefault((group.Key.RatePercent, group.Key.PricingType)).Unresolved,
             })
             .OrderBy(row => row.RatePercent)
             .ThenBy(row => row.PricingType)
@@ -305,6 +384,13 @@ public sealed class SalesReportService(
         if (filter.BrandId is { } brandId)
         {
             items = items.Where(i => i.Product.BrandId == brandId);
+        }
+
+        // Phase 18A-6-Fix: PriceLevel is recorded on the SALE, so unlike product/category/brand
+        // filters it narrows through the bill — identical semantics to FilterSales.
+        if (filter.PriceLevel is { } priceLevel)
+        {
+            items = items.Where(i => i.Sale.PriceLevel == priceLevel);
         }
 
         return items;

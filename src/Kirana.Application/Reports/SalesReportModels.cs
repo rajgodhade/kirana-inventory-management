@@ -70,6 +70,14 @@ public sealed class GstRateBreakdown
     public decimal Igst { get; init; }
     public decimal UnresolvedGst { get; init; }
     public int InvoiceCount { get; init; }
+
+    /// <summary>Phase 18A-6: stored taxable value split by historical party classification within
+    /// this rate slab. Sales use the Phase 18A-4 transaction class; purchases map
+    /// RegisteredSupplier onto the B2b slot and UnregisteredSupplier onto the B2c slot. The three
+    /// amounts always sum to <see cref="TaxableAmount"/>.</summary>
+    public decimal B2bTaxableAmount { get; init; }
+    public decimal B2cTaxableAmount { get; init; }
+    public decimal UnresolvedIdentityTaxableAmount { get; init; }
     public PricingType PricingType { get; init; } = PricingType.Inclusive;
     public string GstTreatment => PricingType == PricingType.Inclusive ? "GST Included" : "GST Added";
 }
@@ -108,4 +116,36 @@ public sealed class GstReport
     public decimal PurchaseRegisteredSupplierGst { get; init; }
     public decimal PurchaseUnregisteredSupplierGst { get; init; }
     public decimal PurchaseUnresolvedSupplierGst { get; init; }
+
+    // --- Phase 18A-6: jurisdiction taxable-value totals (stored snapshots only) ---
+    public decimal SalesIntraStateTaxableValue { get; init; }
+    public decimal SalesInterStateTaxableValue { get; init; }
+    public decimal SalesUnresolvedJurisdictionTaxableValue { get; init; }
+    public decimal PurchaseIntraStateTaxableValue { get; init; }
+    public decimal PurchaseInterStateTaxableValue { get; init; }
+    public decimal PurchaseUnresolvedJurisdictionTaxableValue { get; init; }
+
+    // --- Phase 18A-6: classification taxable-value totals (mirror the GST trios above) ---
+    public decimal SalesB2bTaxableValue { get; init; }
+    public decimal SalesB2cTaxableValue { get; init; }
+    public decimal SalesUnresolvedIdentityTaxableValue { get; init; }
+    public decimal PurchaseRegisteredSupplierTaxableValue { get; init; }
+    public decimal PurchaseUnregisteredSupplierTaxableValue { get; init; }
+    public decimal PurchaseUnresolvedSupplierTaxableValue { get; init; }
+
+    /// <summary>Phase 18A-6: distinct completed bills in the report window, overall and per
+    /// historical classification. A bill sold across several rate slabs is counted once.</summary>
+    public int SalesBillCount { get; init; }
+    public int SalesB2bBillCount { get; init; }
+    public int SalesB2cBillCount { get; init; }
+    public int SalesUnresolvedBillCount { get; init; }
+    public int PurchaseBillCount { get; init; }
+
+    /// <summary>Phase 18A-6: GST reversal for returns dated inside the report window. Reversal is
+    /// proportional to the returned quantity against each originating line's stored taxable/GST —
+    /// never today's product data. Net = gross − returned.</summary>
+    public decimal SalesReturnedTaxableValue { get; init; }
+    public decimal SalesReturnedGst { get; init; }
+    public decimal NetSalesTaxableValue => SalesTaxableAmount - SalesReturnedTaxableValue;
+    public decimal NetSalesGst => SalesGstCollected - SalesReturnedGst;
 }
