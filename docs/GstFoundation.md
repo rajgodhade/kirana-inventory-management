@@ -348,3 +348,13 @@ records are never read for historical values.
 No migration is required - this phase adds no columns, tables, or writes. Coverage gaps found
 during fault injection (historical registration-type stability plus a monetary-valued read-only
 fingerprint) were closed in the affected tests.
+
+## Phase 18A-6-Fix — filtered return reconciliation
+
+Audit fix: GST return reversal previously filtered returns only by return date, so a filtered
+report could subtract reversals belonging to sales excluded by the filter, and the GST sale-item
+path ignored PriceLevel. Both are fixed. The invariant now enforced (and tested): a
+SalesReturnItem affects a filtered GST report only when its originating SaleItem belongs to the
+same FilterSaleItems population aggregated for taxable/GST/classification/jurisdiction/rate
+buckets, combined with the existing return-date window. PriceLevel narrows GST sale items through
+the bill exactly as it does the normal sales report.

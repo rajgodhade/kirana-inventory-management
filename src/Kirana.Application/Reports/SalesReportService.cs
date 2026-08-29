@@ -109,11 +109,17 @@ public sealed class SalesReportService(
             .ToList();
         // Phase 18A-6: return reversal scales each originating line's stored taxable/GST by the
         // returned quantity - never today's product or tax configuration.
+        // Phase 18A-6-Fix: a return may reverse GST only when its originating sale line belongs to
+        // the SAME filtered sales population aggregated above. Eligibility is the SaleItemId set of
+        // that exact filtered set — one authoritative filter path, no duplicated predicates —
+        // combined with the existing return-date window.
+        var eligibleSaleItemIds = saleItems.Select(i => i.Id).ToHashSet();
         var returnLines = await db.SalesReturns.AsNoTracking()
             .Where(r => r.ReturnDateUtc >= range.StartUtc && r.ReturnDateUtc < range.EndUtc)
             .SelectMany(r => r.Items)
-            .Select(i => new { i.Quantity, OriginQuantity = i.SaleItem.Quantity, i.SaleItem.TaxableAmount, i.SaleItem.GstAmount })
+            .Select(i => new { i.SaleItemId, i.Quantity, OriginQuantity = i.SaleItem.Quantity, i.SaleItem.TaxableAmount, i.SaleItem.GstAmount })
             .ToListAsync(cancellationToken);
+        returnLines = returnLines.Where(x => eligibleSaleItemIds.Contains(x.SaleItemId)).ToList();
         var returnedTaxable = GstCalculationService.RoundCurrency(returnLines.Sum(x => x.TaxableAmount * x.Quantity / x.OriginQuantity));
         var returnedGst = GstCalculationService.RoundCurrency(returnLines.Sum(x => x.GstAmount * x.Quantity / x.OriginQuantity));
         var salesRateClassTaxable = RateClassTaxable(saleLines.Select(l => (l.Snapshot, (int)l.Context.Classification)));
@@ -378,6 +384,13 @@ public sealed class SalesReportService(
         if (filter.BrandId is { } brandId)
         {
             items = items.Where(i => i.Product.BrandId == brandId);
+        }
+
+        // Phase 18A-6-Fix: PriceLevel is recorded on the SALE, so unlike product/category/brand
+        // filters it narrows through the bill — identical semantics to FilterSales.
+        if (filter.PriceLevel is { } priceLevel)
+        {
+            items = items.Where(i => i.Sale.PriceLevel == priceLevel);
         }
 
         return items;
